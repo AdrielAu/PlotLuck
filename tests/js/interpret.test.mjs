@@ -34,6 +34,7 @@ test("required answers stop on empty or unreadable text; areas accept England, d
   assert.equal(check("location", "  "), "You must answer this question.");
   assert.equal(check("location", "Leeds"), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.");
   for (const text of ["anywhere", "England", "anywhere in England", "SE1", "se 1", "SE"]) assert.equal(check("location", text), null, text);
+  for (const text of ["the", "all", "in the"]) assert.equal(check("location", text), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.", text);
   assert.equal(check("food", ""), "You must answer this question.");
   assert.equal(check("food", "Atlantis food"), "You must answer this question.");
   assert.equal(check("food", "viet"), null);

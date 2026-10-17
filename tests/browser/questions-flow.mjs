@@ -73,6 +73,8 @@ test("six questions lead through a review card to scoped results", async (t) => 
     assert.equal(await page.locator(".draft-chip", { has: page.getByLabel("Venue type") }).locator(".mark").count(), 0);
     await page.getByLabel("Search area").fill("Leeds");
     await page.getByLabel("Search area").press("Tab");
+    assert.equal(await page.getByLabel("Search area").getAttribute("aria-invalid"), "true");
+    assert.equal(await page.locator(".draft-chip", { has: page.getByLabel("Search area") }).locator(".mark").count(), 0);
     await page.getByRole("button", { name: "Compare districts" }).click();
     assert.match(await page.getByRole("alert").innerText(), /Place names arrive soon/);
     await page.getByLabel("Search area").fill("SE");

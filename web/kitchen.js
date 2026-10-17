@@ -14,8 +14,11 @@ const PALETTE = {
 };
 const FRAME_MS = 1000 / 30;
 const FLIGHT_MS = 1100;
-// Six places on the table top, filled in this order.
-const SLOTS = [[-3, -1.4], [0, -1.4], [3, -1.4], [-3, 1.4], [0, 1.4], [3, 1.4]];
+// Places on the table top, one per question (five when the rent question is skipped), filled in order.
+const SLOTS = {
+  6: [[-3, -1.4], [0, -1.4], [3, -1.4], [-3, 1.4], [0, 1.4], [3, 1.4]],
+  5: [[-3, -1.4], [0, -1.4], [3, -1.4], [-1.5, 1.4], [1.5, 1.4]],
+};
 const TABLE_TOP = 3;
 
 // A voxel list [[x, y, z, colour]] as one instanced mesh of unit cubes.
@@ -237,13 +240,14 @@ export function startKitchen(container) {
     setMode(reduced.matches ? "still" : "running");
   }
 
-  // One dish, from its appliance to the next free place on the table.
-  function serve() {
-    if (served.length >= SLOTS.length) return;
+  // One dish, from its appliance to the next free place of a table set for `places` dishes.
+  function serve(places) {
+    const slots = SLOTS[places] ?? SLOTS[6];
+    if (served.length >= slots.length) return;
     const dish = nextDish(served, Math.random);
     if (!dish) return;
     served.push(dish);
-    const [sx, sz] = SLOTS[served.length - 1];
+    const [sx, sz] = slots[served.length - 1];
     const mesh = voxelMesh(dishVoxels(dish), 0.5);
     const to = new THREE.Vector3(sx, TABLE_TOP, sz);
     const { group, mouth } = appliances.get(dish.appliance);

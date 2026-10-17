@@ -35,7 +35,7 @@ A real food business in the source data that serves a cuisine. Cafés, takeaways
 _Avoid_: Venue, outlet, business
 
 **Restaurant profile**:
-The user's free-text description of the restaurant they want to open. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
+The user's description of the restaurant they want to open, given as answers to the questions screen and joined into one labelled text. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
 _Avoid_: Hypothetical restaurant, query, concept
 
 **Restaurant-profile interpreter (NN2)**:

@@ -56,7 +56,7 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 
 .link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--focus); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .link:hover { color: var(--green); }
-.model-line .link, .intro .link { min-height: 0; font-size: inherit; }
+.model-line .link { min-height: 0; font-size: inherit; }
 
 .shake { animation: shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 @keyframes shake {
@@ -87,6 +87,7 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 #next::after, .primary::after { background: var(--ink); }
 
 #results-screen { padding-top: 8px; }
+.results-title { font-size: 40px; }
 
 /* Wide screens keep the table in view: the column sits left, kitchen.js frames the table right. */
 @media (min-width: 1100px) {

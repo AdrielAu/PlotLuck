@@ -296,7 +296,7 @@ async function main() {
   const questions = setUpQuestions({
     bundle,
     interpreter,
-    serveDish: () => kitchen.then((k) => k?.serve()),
+    serveDish: (places) => kitchen.then((k) => k?.serve(places)),
     onCompare: compareDraft,
   });
   $("change-answers").addEventListener("click", () => { showScreen("questions"); questions.open(); });

@@ -53,7 +53,8 @@ const TRAIT_CUES = {
 // Words that carry no detail of their own, so their absence leaves nothing unused.
 const FILLER = new Set("a an and the of with some our my food foods cuisine dishes dish style place restaurant serve serving".split(" "));
 const NEGATORS = new Set("no not never without non isn isnt don dont won nothing".split(" "));
-const ENGLAND = new Set("anywhere everywhere england all of in the whole".split(" "));
+const ENGLAND = new Set(["anywhere", "everywhere", "england"]);
+const ENGLAND_FILLER = new Set("all of in the whole".split(" "));
 const NOTHING = new Set(["", "none", "nothing", "no", "nope", "n a", "nothing else"]);
 
 const norm = (text) => text.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9$]+/g, " ").trim();
@@ -87,7 +88,7 @@ export function makeInterpreter(bundle) {
   function readArea(text) {
     const ws = words(text);
     if (!ws.length) return null;
-    if (ws.every((w) => ENGLAND.has(w))) return { kind: "england", code: "", label: "England" };
+    if (ws.some((w) => ENGLAND.has(w)) && ws.every((w) => ENGLAND.has(w) || ENGLAND_FILLER.has(w))) return { kind: "england", code: "", label: "England" };
     const code = text.toUpperCase().replace(/\s+/g, "");
     if (districts.has(code)) return { kind: "district", code, label: code };
     if (areas.has(code)) return { kind: "postcode_area", code, label: `${code} postcode area` };

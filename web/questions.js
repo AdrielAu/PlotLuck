@@ -6,7 +6,7 @@ import { matchCuisines, traitLabel, valueLabel } from "./pickers.js";
 
 const $ = (id) => document.getElementById(id);
 const MAX_OPTIONS = 8;
-const MARK_LABELS = { inferred: "Inferred", default: "Default" };
+const MARK_LABELS = { inferred: "Inferred", default: "Default", unresolved: "Needs a choice" };
 
 const contains = (text, query) => text.toLowerCase().includes(query.trim().toLowerCase());
 const clauses = (text) => text.split(",").map((s) => s.trim()).filter(Boolean);
@@ -76,6 +76,8 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   const box = $("prompt");
   let index = 0;
   let draft = null;
+  // Questions that have sent their dish; answering again sends no more.
+  const served = new Set();
 
   const combobox = setUpCombobox({
     input,
@@ -164,7 +166,10 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
     const error = interpreter.check(q.key, text);
     if (error) return showError(error);
     answers[q.key] = text;
-    serveDish();
+    if (!served.has(q.key)) {
+      served.add(q.key);
+      serveDish(questions.length);
+    }
     if (index < questions.length - 1) return show(index + 1);
     draft = await interpreter.interpret({ ...answers });
     showReview();
@@ -180,7 +185,7 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   }
 
   // One editable chip: a label, its control and the draft's mark for that field.
-  function draftChip(field, label, control) {
+  function draftChip(field, label, control, valid = () => true) {
     control.id = `draft-${field}`;
     const chip = document.createElement("div");
     chip.className = "draft-chip";
@@ -189,6 +194,7 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
     text.textContent = label;
     chip.append(text, control, ...markBadge(field));
     control.addEventListener("change", () => {
+      if (!valid()) return;
       draft.marks[field] = "explicit";
       chip.querySelector(".mark")?.remove();
       $("review-error").hidden = true;
@@ -213,17 +219,18 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
     area.type = "text";
     area.autocomplete = "off";
     area.value = draft.area ? draft.area.code || draft.area.label : answers.location;
-    chips.push(draftChip("area", "Search area", area));
+    // Registered before the chip's own handler, so the mark only clears once the area reads.
     area.addEventListener("change", () => {
       draft.area = interpreter.readArea(area.value);
-      area.toggleAttribute("aria-invalid", !draft.area);
-      if (!draft.area) showReviewError(area.value.trim() ? PLACE_SOON : REQUIRED, area);
+      if (draft.area) area.removeAttribute("aria-invalid");
+      else showAreaError();
     });
+    chips.push(draftChip("area", "Search area", area, () => Boolean(draft.area)));
 
     const cuisine = select(vocabulary.cuisines.map((c) => c.cuisine), draft.profile.cuisine,
       (v) => vocabulary.cuisines.find((c) => c.cuisine === v).label, "Choose a cuisine");
-    chips.push(draftChip("cuisine", "Food", cuisine));
     cuisine.addEventListener("change", () => { draft.profile.cuisine = cuisine.value || undefined; });
+    chips.push(draftChip("cuisine", "Food", cuisine, () => Boolean(cuisine.value)));
 
     for (const t of vocabulary.traits.filter((t) => t.kind === "single_choice")) {
       const el = select(t.values, draft.profile[t.name], valueLabel);
@@ -252,6 +259,11 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
     $("review-heading").focus();
   }
 
+  function showAreaError() {
+    $("draft-area").setAttribute("aria-invalid", "true");
+    showReviewError(interpreter.check("location", $("draft-area").value) ?? PLACE_SOON, $("draft-area"));
+  }
+
   function showReviewError(message, control) {
     $("review-error").textContent = message;
     $("review-error").hidden = false;
@@ -270,7 +282,7 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   $("back").addEventListener("click", () => show(index - 1));
   $("review-back").addEventListener("click", () => show(0));
   $("review-compare").addEventListener("click", () => {
-    if (!draft.area) return showReviewError(PLACE_SOON, $("draft-area"));
+    if (!draft.area) return showAreaError();
     if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.profile.cuisine)) return showReviewError("Choose a cuisine before comparing districts.", $("draft-cuisine"));
     onCompare(structuredClone(draft));
   });
