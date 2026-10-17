@@ -338,8 +338,8 @@
   },
   {
    "cuisine": "Mediterranean",
-   "cuisine_group": "Other",
-   "label": "Mediterranean (scored as Other)"
+   "cuisine_group": "European",
+   "label": "Mediterranean (scored as European)"
   },
   {
    "cuisine": "Mexican",

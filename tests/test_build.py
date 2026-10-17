@@ -53,6 +53,30 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
     assert read_json(data / "run" / "metrics.json")["restaurants"] == 200
 
 
+def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
+    metrics = read_json(data / "run" / "metrics.json")
+
+    # Sample rows 0-4 carry one of each problem; see tripadvisor_england.csv.
+    assert metrics["excluded"] == {"rating_missing": 1, "rating_out_of_range": 1, "n_total_zero": 1}
+    assert metrics["label_fixes"] == {
+        "counts_partly_missing": 1,
+        "total_below_counts": 1,
+        "counts_missing_or_zero": 1,
+    }
+    assert metrics["labelled"] == 197
+
+
+def test_label_policy_stays_private_and_out_of_the_bundle(data, built):
+    policy = read_json(data / "label_policy.json")
+
+    assert set(policy) >= {"R0", "D0", "n_ref"}
+    for path in built.iterdir():
+        text = path.read_text(encoding="utf-8")
+        for name in ("R0", "D0", "n_ref"):
+            assert name not in text, path.name
+            assert repr(policy[name]) not in text, path.name
+
+
 def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, built):
     onspd = read_csv(data / "onspd_england.csv")
     districts = read_csv(built / "districts.csv")

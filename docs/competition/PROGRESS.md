@@ -14,7 +14,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 |---|---|---|---|
 | 0 | Repo, workflow and server setup | done | #3, #19 |
 | 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42, #65, #68, #82 |
-| 2 | Labels: review-based success | in progress | #36, #47, #69 |
+| 2 | Labels: review-based success | done | #36, #47, #69 |
 | 3 | NN1 | in progress | #62, #65 |
 | 4 | Free-text interpretation (after MVP) | not started | #35 |
 | 5 | NN1 spatial-CV evaluation | not started | |
