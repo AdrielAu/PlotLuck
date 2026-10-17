@@ -13,7 +13,7 @@ The planning index is [Plan the Plotluck MVP as a vertical slice](https://github
 
 - Scope: **England**, replacing the earlier London and UK scopes. The target is to score every English postcode district; country filtering and cross-border district handling belong to the formats decision.
 - Inputs: **cuisine and supported traits from searchable fixed lists**. A candidate trait ships only if populated on at least 50% of England restaurant rows; see [Which traits does the MVP offer?](https://github.com/AdrielAu/PlotLuck/issues/37).
-- Output: a 0–1 **score** for expected **review-based success**, covering customer satisfaction and accumulated review activity. It is not survival, profitability or a calibrated probability. The review-count policy is still under decision.
+- Output: a 0–1 **score** for expected **review-based success**, covering customer satisfaction and accumulated review activity. It is not survival, profitability or a calibrated probability. The review-count policy is settled in [ADR 0002](../adr/0002-review-based-success-label.md).
 - Display: Leaflet map with one circle per district centroid, a score threshold slider and a ranked list of districts above it. Clusters, driver chart and cultural demand gap are after the MVP.
 - Motivation: a teammate's father's restaurant closed in COVID; help small independents; widen under-represented cuisines.
 - Training unit: one row per **restaurant**, joined to its postcode-district context. NN1 scores the selected cuisine and traits in each district. Architecture and exact preprocessing are open; spatial CV remains the evaluation plan.
@@ -71,6 +71,5 @@ This text predates the England scope and review-based target; it is not the curr
 ## Open
 
 - [Fix the restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38): schemas, inputs, preprocessing, JSON layout and cross-border districts. NN1 architecture remains undecided.
-- [Choose the review count for the success label](https://github.com/AdrielAu/PlotLuck/issues/47): default-language category counts versus total reviews. Preserve training-split-only fitted references.
 - [Slice the MVP into independent implementation issues](https://github.com/AdrielAu/PlotLuck/issues/39): finalise handoffs once contracts are agreed.
 - Assign the server operator in person. Later decisions include the LLM-to-NN1 interface and post-MVP map/driver design.
