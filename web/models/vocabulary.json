@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "cuisines": [
   {
    "cuisine": "Afghani",
@@ -338,8 +338,8 @@
   },
   {
    "cuisine": "Mediterranean",
-   "cuisine_group": "Other",
-   "label": "Mediterranean (scored as Other)"
+   "cuisine_group": "European",
+   "label": "Mediterranean (scored as European)"
   },
   {
    "cuisine": "Mexican",

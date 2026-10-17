@@ -30,6 +30,8 @@ On 2026-10-17 the team fixed the data schemas for the `restaurants` table, the `
 - `commercial_rent_index`: float commercial cost proxy (median VOA rateable value per square metre for retail/food premises).
 - Additional economic or demographic columns may be appended as research settles.
 
+Amended 2026-10-17: [ADR 0005](0005-district-demographics-and-tourism-context.md) adds average age, five ethnicity shares, two Census sex shares, separate attraction/hotel counts and most-common-category summaries. Bundle version 2 declares the expanded numeric input order; summaries are not neural-network inputs.
+
 Cuisine supply per district is aggregated from `restaurants.csv` on LinuxONE and published as `district_cuisine_supply.csv` (`postcode_district`, `cuisine_group`, `restaurants`), because the browser cannot read `restaurants.csv`. [ADR 0003](0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md) allows publishing these counts and `total_restaurants`.
 
 ### 4. Model export interface: `model.json`

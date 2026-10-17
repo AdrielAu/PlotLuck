@@ -2,7 +2,7 @@
 // Pure: no DOM or Leaflet, so it runs in Node tests and in the browser.
 
 // Must match BUNDLE_VERSION in src/plotluck/build.py.
-export const BUNDLE_VERSION = 1;
+export const BUNDLE_VERSION = 2;
 
 // Load the bundle through `read(name) -> Promise<text>` (fetch in the page, fs in tests).
 export async function loadBundle(read) {

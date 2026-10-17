@@ -29,11 +29,11 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from plotluck import label, nn1
+from plotluck import context, label, nn1
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
-BUNDLE_VERSION = 1
+BUNDLE_VERSION = 2
 BUNDLE_FILES = (
     "districts.csv",
     "district_cuisine_supply.csv",
@@ -86,6 +86,8 @@ DISTRICT_COLUMNS = (
     "population",
     "deprivation_index",
     "commercial_rent_index",
+    *context.INPUTS,
+    *context.SUMMARIES,
 )
 # Register each approved public economic or demographic extension here before
 # adding it to district_table. Unknown fields must never pass through by default.
@@ -98,8 +100,9 @@ DISTRICT_INPUTS = (
     "commercial_rent_index",
     "total_restaurants",
     "same_cuisine_supply",
+    *context.INPUTS,
 )
-LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply"}
+LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply", *context.TOURISM_INPUTS}
 # VOA measuring standards the rent index divides by, in order of preference:
 # net internal area, then gross internal area where a district has no NIA.
 VOA_AREA_UNITS = ("NIA", "GIA")
@@ -135,7 +138,8 @@ def build(
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
     districts = district_table(
-        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv")
+        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv"),
+        context.demographic_table(data), _read_csv(data / "tourism_england.csv"),
     )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
@@ -313,8 +317,29 @@ def publish_bundle(out: Path, bundle: dict) -> None:
         ):
             raise ValueError("districts.csv has an invalid district code")
         for name in district_columns[1:]:
+            if name in context.SUMMARIES:
+                continue
             if row[name] != "" and not _finite_number(float(row[name])):
                 raise ValueError(f"districts.csv has an invalid {name}")
+        for name in context.DEMOGRAPHIC_INPUTS:
+            value = row[name]
+            if value != "" and not 0 <= float(value) <= (100 if name == "average_age" else 1):
+                raise ValueError(f"districts.csv has an invalid {name}")
+        for name in context.TOURISM_INPUTS:
+            if isinstance(row[name], bool) or not str(row[name]).isdigit():
+                raise ValueError(f"districts.csv has an invalid {name}")
+        for fields, labels, name in (
+            (context.ETHNICITY_INPUTS, context.ETHNICITY, "most_common_ethnicity"),
+            (context.SEX_INPUTS, context.SEX, "most_common_sex"),
+        ):
+            values = {field: float(row[field]) if row[field] != "" else "" for field in fields}
+            shares = list(values.values())
+            if any(v != "" for v in shares) and (
+                any(v == "" for v in shares) or not math.isclose(sum(shares), 1, abs_tol=1e-6)
+            ):
+                raise ValueError("districts.csv has invalid demographic shares")
+            if row[name] != context.summary(values, fields, labels):
+                raise ValueError("districts.csv has private or unexpected demographic summaries")
     district_codes = {row["postcode_district"] for row in districts}
 
     vocab = bundle["vocabulary.json"]
@@ -562,13 +587,9 @@ def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0
     def number(value):
         return float(value) if value != "" else np.nan
 
-    return [
-        number(district["population"]),
-        number(district["deprivation_index"]),
-        number(district["commercial_rent_index"]),
-        float(district["total_restaurants"] - exclude_from_total),
-        float(same_cuisine),
-    ]
+    values = {**district, "total_restaurants": district["total_restaurants"] - exclude_from_total,
+              "same_cuisine_supply": same_cuisine}
+    return [number(values.get(name, "")) for name in DISTRICT_INPUTS]
 
 
 def _restaurant_values(r: dict) -> dict:
@@ -663,7 +684,8 @@ def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> di
 
 
 def district_table(
-    postcodes: list[dict], p004: list[dict], restaurants: list[dict], voa: list[dict]
+    postcodes: list[dict], p004: list[dict], restaurants: list[dict], voa: list[dict],
+    demographics: dict[str, dict], tourism: list[dict],
 ) -> list[dict]:
     """One row per district with an English postcode that has a grid reference.
 
@@ -673,6 +695,23 @@ def district_table(
     residents = {r["district"]: int(r["residents"]) for r in p004}
     rent = rent_index(voa)
     totals = Counter(r["postcode_district"] for r in restaurants)
+    tourism_counts = Counter()
+    seen = set()
+    tourism_points, kinds = [], []
+    for point in tourism:
+        key = (point["osm_type"], point["osm_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        lat, lon = float(point["lat"]), float(point["lon"])
+        if not math.isfinite(lat) or not math.isfinite(lon) or not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            raise ValueError("Tourism point has invalid coordinates")
+        if point["tourism"] not in ("attraction", "hotel"):
+            raise ValueError("Tourism point has an unexpected kind")
+        tourism_points.append((lat, lon))
+        kinds.append(point["tourism"])
+    for district, kind in zip(_nearest_district(postcodes, tourism_points), kinds):
+        tourism_counts[district, kind] += 1
     points, ranks = {}, {}
     for p in postcodes:
         lat, lon = _float(p["lat"]), _float(p["long"])
@@ -683,6 +722,7 @@ def district_table(
     rows = []
     for code in sorted(points):
         lats, lons = zip(*points[code])
+        demographic = {name: demographics.get(code, {}).get(name, "") for name in context.DEMOGRAPHIC_INPUTS}
         rows.append({
             "postcode_district": code,
             "centroid_lat": round(statistics.fmean(lats), 6),
@@ -691,6 +731,11 @@ def district_table(
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
             "commercial_rent_index": rent.get(code, ""),
+            **demographic,
+            "attractions_count": tourism_counts[code, "attraction"],
+            "hotels_count": tourism_counts[code, "hotel"],
+            "most_common_ethnicity": context.summary(demographic, context.ETHNICITY_INPUTS, context.ETHNICITY),
+            "most_common_sex": context.summary(demographic, context.SEX_INPUTS, context.SEX),
         })
     return rows
 

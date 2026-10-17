@@ -1,0 +1,6 @@
+{
+  "synthetic": true,
+  "seed": 101,
+  "generator": "plotluck.context.write_sample",
+  "description": "Made-up Census context and tourism points; no real district demographics"
+}

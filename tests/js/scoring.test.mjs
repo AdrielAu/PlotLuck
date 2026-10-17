@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
-import { loadBundle, rankDistricts, scoreDistricts } from "../../web/scoring.js";
+import { BUNDLE_VERSION, loadBundle, rankDistricts, scoreDistricts } from "../../web/scoring.js";
 
 const ROOT = new URL("../../", import.meta.url);
 
@@ -20,12 +20,13 @@ function tinyBundle({
   population = "100",
   centroidLat = "51.5",
   supplyCount = "2",
-  version = 1,
+  version = BUNDLE_VERSION,
   districtInputs = ["population", "same_cuisine_supply"],
+  contextColumns = {},
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
   const files = {
-    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index\nAB1,${centroidLat},-0.1,3,${population},10\n`,
+    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index${Object.keys(contextColumns).map((name) => `,${name}`).join("")}\nAB1,${centroidLat},-0.1,3,${population},10${Object.values(contextColumns).map((value) => `,${value}`).join("")}\n`,
     "district_cuisine_supply.csv": `postcode_district,cuisine_group,restaurants\nAB1,Thai,${supplyCount}\n`,
     "vocabulary.json": JSON.stringify({
       version,
@@ -51,7 +52,7 @@ function tinyBundle({
 }
 
 test("a bundle version the site does not know raises", async () => {
-  await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: 2 }), /version/);
+  await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: BUNDLE_VERSION + 1 }), /version/);
 });
 
 test("invalid coordinates and supply counts are rejected while loading", async () => {
@@ -91,6 +92,19 @@ test("a missing district numeric gets the training median", async () => {
 test("any declared district input is read from its districts.csv column", async () => {
   const bundle = await tinyBundle({ weights: [0, 0, 1], districtInputs: ["deprivation_index"] });
   assert.ok(Math.abs(logit(bundle, "Thai") - 10) < 1e-9);
+});
+
+test("demographics and tourism features reach the forward pass in declared order", async () => {
+  const contextColumns = {
+    average_age: 42,
+    ethnicity_asian_share: 0.2, ethnicity_black_share: 0.1, ethnicity_mixed_share: 0.1,
+    ethnicity_white_share: 0.5, ethnicity_other_share: 0.1,
+    sex_female_share: 0.6, sex_male_share: 0.4, attractions_count: 3, hotels_count: 7,
+  };
+  for (const [name, expected] of Object.entries(contextColumns)) {
+    const bundle = await tinyBundle({ contextColumns, districtInputs: [name], weights: [0, 0, 0.01] });
+    assert.ok(Math.abs(logit(bundle, "Thai") - expected * 0.01) < 1e-9, name);
+  }
 });
 
 test("a district input the bundle has no column for raises instead of scoring", async () => {

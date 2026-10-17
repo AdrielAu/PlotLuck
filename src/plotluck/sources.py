@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from plotluck.data import data_dir
+from plotluck import context
 
 USER_AGENT = "plotluck/0.1 (github.com/AdrielAu/PlotLuck)"
 
@@ -77,6 +78,16 @@ SOURCES = {
     },
 }
 
+for _name, _code in context.CENSUS_CODES.items():
+    SOURCES[_name] = {
+        "file": f"{_name}.zip",
+        "url": f"https://www.nomisweb.co.uk/output/census/2021/census2021-{_code}.zip",
+        "edition": f"Census 2021 {_code.upper()}, MSOA, census day 2021-03-21",
+        "licence": "Open Government Licence v3.0",
+        "attribution": "Source: Office for National Statistics licensed under the Open Government Licence v.3.0",
+    }
+SOURCES["tourism"] = {**SOURCES["osm"], "file": "tourism.json"}
+
 # England in 1-degree tiles: the whole-country query times out on Overpass.
 # shortcut: live Overpass cannot be re-pulled at the same snapshot; switch to a
 # dated Geofabrik extract if exact reproducibility is needed.
@@ -99,6 +110,11 @@ OSM_TILES = [
 OSM_QUERY = (
     '[out:json][timeout:300];area["ISO3166-2"="GB-ENG"]->.a;'
     'nwr["amenity"~"^(restaurant|fast_food)$"]({},{},{},{})(area.a);'
+    "out center tags;"
+)
+TOURISM_QUERY = (
+    '[out:json][timeout:300];area["ISO3166-2"="GB-ENG"]->.a;'
+    'nwr["tourism"~"^(attraction|hotel)$"]({},{},{},{})(area.a);'
     "out center tags;"
 )
 OSM_RETRIES = 6
@@ -152,8 +168,8 @@ def pull(name: str, data: Path, fetch=http_fetch) -> Path:
         "attribution": source["attribution"],
         "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
-    if name == "osm":
-        provenance.update(_pull_osm(raw, fetch))
+    if name in ("osm", "tourism"):
+        provenance.update(_pull_osm(raw, fetch, TOURISM_QUERY if name == "tourism" else OSM_QUERY))
     else:
         fetch(source["url"], raw)
     provenance["bytes"] = raw.stat().st_size
@@ -166,13 +182,13 @@ def pull(name: str, data: Path, fetch=http_fetch) -> Path:
     return raw
 
 
-def _pull_osm(raw: Path, fetch) -> dict:
+def _pull_osm(raw: Path, fetch, query_template: str = OSM_QUERY) -> dict:
     """Query each England tile and merge the elements into one file."""
     # shortcut: holds every element in memory (~100k, fine); stream if it grows.
     elements, snapshots = [], []
-    tile_file = raw.with_name("osm_tile.json")
+    tile_file = raw.with_name(f"{raw.stem}_tile.json")
     for i, tile in enumerate(OSM_TILES, 1):
-        query = OSM_QUERY.format(*tile)
+        query = query_template.format(*tile)
         for attempt in range(OSM_RETRIES):
             try:
                 fetch(SOURCES["osm"]["url"], tile_file, post=query)
@@ -193,7 +209,7 @@ def _pull_osm(raw: Path, fetch) -> dict:
     tile_file.unlink()
     raw.write_text(json.dumps({"elements": elements}), encoding="utf-8")
     # The oldest tile bounds the snapshot; tiles are minutes apart.
-    return {"snapshot": min(snapshots), "query": OSM_QUERY, "tiles": len(OSM_TILES)}
+    return {"snapshot": min(snapshots), "query": query_template, "tiles": len(OSM_TILES)}
 
 
 def _sha256(path: Path) -> str:
@@ -206,7 +222,8 @@ def _sha256(path: Path) -> str:
 
 def extract(name: str, data: Path) -> int:
     """Write ``<data>/<name>_england.csv`` from the raw pull; return its row count."""
-    rows = _EXTRACTORS[name](Path(data))
+    rows = (context.census_rows(Path(data), name) if name in context.CENSUS_CODES
+            else _EXTRACTORS[name](Path(data)))
     return _write_csv(Path(data) / f"{name}_england.csv", rows)
 
 
@@ -305,6 +322,22 @@ def _osm_rows(data: Path):
         ]
 
 
+def _tourism_rows(data: Path):
+    """Mapped hotels/attractions, deduplicated by OSM element type and ID."""
+    with (data / "raw" / "tourism.json").open(encoding="utf-8") as stream:
+        elements = json.load(stream)["elements"]
+    yield ("osm_type", "osm_id", "tourism", "lat", "lon")
+    seen = set()
+    for element in elements:
+        key = (element["type"], element["id"])
+        kind = element.get("tags", {}).get("tourism")
+        if key in seen or kind not in ("hotel", "attraction"):
+            continue
+        seen.add(key)
+        point = element.get("center", element)
+        yield [*key, kind, point["lat"], point["lon"]]
+
+
 # SCAT codes kept: 234 restaurants, 249 shops, 409 cafes, 442 takeaways.
 VOA_SCAT_CODES = {"234", "249", "409", "442"}
 # A type 01 record: 28 fields, each followed by "*", so 29 after splitting.
@@ -356,6 +389,7 @@ _EXTRACTORS = {
     "onspd": _onspd_rows,
     "p004": _p004_rows,
     "voa": _voa_rows,
+    "tourism": _tourism_rows,
 }
 
 
@@ -399,6 +433,7 @@ def cut_sample(full: Path, sample: Path) -> dict[str, int]:
     )
     for prov in (full / "raw").glob("*.provenance.json"):
         shutil.copyfile(prov, sample / "raw" / prov.name)
+    context.write_sample(sample)
     return counts
 
 
@@ -551,7 +586,7 @@ def _write_csv(path: Path, rows) -> int:
 
 
 # Extract order matters: p004 and voa read the ONSPD extract.
-ORDER = ("tripadvisor", "onspd", "p004", "voa", "osm")
+ORDER = ("tripadvisor", "onspd", "p004", "voa", "osm", *context.CENSUS_CODES, "tourism")
 
 
 def main(argv=None) -> None:

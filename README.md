@@ -14,6 +14,8 @@ The build is in progress; see [Progress](docs/competition/PROGRESS.md) for imple
 
 NN1 is trained in Jupyter on IBM LinuxONE (s390x). Exported JSON weights and a JavaScript forward pass run in the browser on a static GitHub Pages site. Accelerated-inference benchmarks run on LinuxONE as part of the competition evidence. Built for the IBM Z Datathon 2026 (Community Impact).
 
+District context includes population, deprivation, commercial rent, restaurant supply, estimated mean age, ethnicity and Census sex shares, and mapped attraction/hotel counts. The version 2 sample bundle uses synthetic demographic and tourism fixtures; a full-data LinuxONE rerun is needed to evaluate their usefulness. See [the feature definitions and geography limitations](docs/adr/0005-district-demographics-and-tourism-context.md).
+
 A later browser-based open-source LLM will read cuisine and traits from free text; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md). The [model/data formats](https://github.com/AdrielAu/PlotLuck/issues/38) remain an open decision.
 
 ## Dataset attribution and use
@@ -23,6 +25,8 @@ The team selected the Kaggle Tripadvisor-derived source for non-commercial train
 Required attribution for the trained model:
 
 > Model trained on a 2021 Tripadvisor-derived dataset published on Kaggle (stefanoleone992). Not affiliated with or endorsed by Tripadvisor. Scores reflect review-based success among restaurants listed in 2021; closed restaurants may be missing.
+
+Census context: Source: Office for National Statistics licensed under the Open Government Licence v.3.0. Tourism counts: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL. Geography attribution is recorded in [data sources](data/SOURCES.md).
 
 ## Contributing
 

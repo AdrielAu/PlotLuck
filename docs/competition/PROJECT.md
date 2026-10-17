@@ -17,6 +17,7 @@ The planning index is [Plan the Plotluck MVP as a vertical slice](https://github
 - Display: Leaflet map with one circle per district centroid, a score threshold slider and a ranked list of districts above it. Clusters, driver chart and cultural demand gap are after the MVP.
 - Motivation: a teammate's father's restaurant closed in COVID; help small independents; widen under-represented cuisines.
 - Training unit: one row per **restaurant**, joined to its postcode-district context. NN1 scores the selected cuisine and traits in each district. Its MVP architecture (a 64 → 32 ReLU MLP with a sigmoid output, trained in PyTorch with district-grouped 5-fold CV) is in [Choose NN1's architecture for the MVP](https://github.com/AdrielAu/PlotLuck/issues/62).
+- District context also includes estimated mean age, five broad Census ethnicity shares, female/male Census sex shares and separate mapped attraction/hotel counts. See [ADR 0005](../adr/0005-district-demographics-and-tourism-context.md) for allocation, missingness and limitations. The sample uses synthetic context; the full-data model needs a fresh LinuxONE build.
 - [ADR 0001](../adr/0001-open-source-llm-reads-the-restaurant-profile.md) supersedes the team's initial no-LLM and mandatory two-NN-hybrid choices. Free-text interpretation by an open-source LLM in the browser comes after the MVP.
 
 ## Data (current candidates)
