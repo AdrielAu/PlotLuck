@@ -14,7 +14,7 @@ What the team must submit, and our own cut-offs before the deadline. Source: the
 | GitHub repo | Link to this repo. Other rules: TBD (guidebook). | | in progress | |
 | Title | Contains the team name. | | not started | |
 | Screenshots | LinuxONE + AI/ML evidence; tracked only in [CHECKLIST.md](../evidence/CHECKLIST.md). | | not started | |
-| Live site | GitHub Pages site running the exported weights in the browser. | | not started | |
+| Live site | England MVP: GitHub Pages runs NN1 JSON weights in-browser; cuisine/trait pickers, district circles, score threshold and ranked list. | | not started | |
 
 ## Judging
 
@@ -26,7 +26,7 @@ Times are set once the deadline is known.
 
 | Cut-off | Rule | Time |
 |---|---|---|
-| Model freeze | Final hybrid weights exported; no retraining after this. | |
+| Model freeze | Final NN1 weights and preprocessing exported as JSON; x86 load check passes; no retraining after this. | |
 | Site freeze | Live site shows final scores; fixes only. | |
 | Video recorded | At least 3 h before the deadline. | |
 | Submission dry run | Every field filled and links opened from a logged-out browser, at least 1 h before the deadline. | |

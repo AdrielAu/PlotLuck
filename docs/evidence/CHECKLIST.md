@@ -11,6 +11,8 @@ Screenshots prove the judged steps. Anyone on the team can capture one: take the
 
 ## Shots
 
+The MVP is NN1 with cuisine/trait pickers and English district circles. Accelerated-inference evidence remains competition work even though it is outside the MVP planning map. Free-text interpretation is later work; a second trained network is not an MVP requirement ([ADR 0001](../adr/0001-open-source-llm-reads-the-restaurant-profile.md)). Keep existing filename numbers stable.
+
 | Step | Filename | What must be visible | Run folder | Done |
 |---|---|---|---|---|
 | SSH + `lscpu` | `01-ssh-lscpu.png` | SSH session on `linux1`@hostname; `lscpu` output showing `s390x` architecture and Big Endian byte order | none | [ ] |
@@ -18,8 +20,8 @@ Screenshots prove the judged steps. Anyone on the team can capture one: take the
 | JupyterLab | `03-jupyterlab.png` | JupyterLab open in the browser with the file browser showing the repo, and a notebook open | none | [ ] |
 | Ingest | `04-ingest.png` | Ingest notebook with executed cells and visible output (row counts, no errors) | `runs/<yyyy-mm-dd>-ingest/` | [ ] |
 | Train NN1 | `05-train-nn1.png` | NN1 training notebook with the loss curve or final epoch log, run on the server | `runs/<yyyy-mm-dd>-train-nn1/` | [ ] |
-| Train NN2 | `06-train-nn2.png` | NN2 training notebook with the loss curve or final epoch log, run on the server | `runs/<yyyy-mm-dd>-train-nn2/` | [ ] |
-| Metrics | `07-metrics.png` | Hybrid model evaluation metrics table or plot, with metric names and values readable | `runs/<yyyy-mm-dd>-metrics/` | [ ] |
+| Later model work (optional, after MVP) | `06-train-nn2.png` (reserved) | Capture only if a later model is actually trained on LinuxONE; document its role and actual output | corresponding run folder, if applicable | [ ] |
+| Metrics | `07-metrics.png` | NN1 evaluation metrics table or plot, with metric names and values readable | `runs/<yyyy-mm-dd>-metrics/` | [ ] |
 | Inference benchmark | `08-inference-benchmark.png` | Accelerated-inference benchmark output: the NNPA device in use and the timings next to the CPU baseline | `runs/<yyyy-mm-dd>-inference-benchmark/` | [ ] |
 | Weight export | `09-weight-export.png` | Export cell output listing the written weight files with sizes, and the x86 load check passing | `runs/<yyyy-mm-dd>-weight-export/` | [ ] |
-| Live site | `10-live-site.png` | The GitHub Pages site open in a browser with the address bar showing the live URL and the clustered map with scores loaded | none | [ ] |
+| Live site | `10-live-site.png` | GitHub Pages URL visible; England district circles with scores loaded, cuisine/trait pickers, score threshold and ranked list | none | [ ] |

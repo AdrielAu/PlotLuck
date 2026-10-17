@@ -1,6 +1,6 @@
 # Contributing
 
-Plotluck scores London postcode districts for restaurant survival. This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
+Plotluck's MVP scores English postcode districts for review-based success, using cuisine-and-trait pickers, district centroid circles, a score threshold and a ranked list. NN1 runs in the browser from exported JSON weights. This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
 
 ## Layout
 

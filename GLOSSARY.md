@@ -1,6 +1,6 @@
 # Plotluck
 
-Plotluck scores every London postcode district for the review-based success of a restaurant of a given cuisine. This glossary holds the language used across the whole repo. A folder may keep its own `GLOSSARY.md` for terms used only inside it. It never redefines a term from this file, and a term that spreads beyond its folder moves here.
+Plotluck scores English postcode districts for the review-based success of a restaurant of a given cuisine. This glossary holds the language used across the whole repo. A folder may keep its own `GLOSSARY.md` for terms used only inside it. It never redefines a term from this file, and a term that spreads beyond its folder moves here.
 
 ## Places
 

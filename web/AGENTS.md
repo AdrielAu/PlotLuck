@@ -1,6 +1,12 @@
 # Web
 
-The site is static: no backend, no LLM. It runs the exported weights in `models/` in the browser and deploys to GitHub Pages from `web/` on every push to `main`.
+The site is static. The England MVP runs NN1 from exported JSON weights in `models/` using a JavaScript forward pass, and deploys to GitHub Pages from `web/` on every push to `main`.
+
+Inputs are searchable fixed-list cuisine and trait pickers. Show district centroid circles on a Leaflet map, a score threshold and a ranked list of districts above it. Scores measure expected review-based success, not calibrated probabilities. Free-text interpretation by a browser-based open-source LLM, clusters, driver chart and cultural demand gap come after the MVP; see [ADR 0001](../docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
+
+Use the agreed [restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38) once resolved; architecture, preprocessing and JSON layout remain open. The [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) is also open.
+
+Follow [ADR 0003](../docs/adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md): public outputs are weights, district scores, ranked districts and cuisine/trait pick-lists. Keep raw Tripadvisor restaurant names, locations, ratings, review counts and district aggregates of those raw fields out of the site. Include the ADR's required attribution in the footer and preserve the non-commercial condition.
 
 ## Design skills
 

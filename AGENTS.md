@@ -1,12 +1,14 @@
 # Plotluck
 
-Plotluck scores every London postcode district (0–1) for how well a hypothetical restaurant of a given cuisine would survive there, and shows the scores on a zoomable clustered map. Built for the IBM Z Datathon 2026 (Community Impact), Oct 17–18, by a team of 5.
+Plotluck's MVP scores English postcode districts (0–1) for the expected review-based success of a restaurant of a given cuisine and traits. It shows district centroid circles, a score threshold and a ranked list. Built for the IBM Z Datathon 2026 (Community Impact), Oct 17–18, by a team of 5.
 
-Hard limits, fixed by the brief:
+Current implementation constraints:
 
-- The model is a hybrid of 2 neural networks. The product uses no LLM.
+- The MVP uses fixed cuisine-and-trait pickers and NN1. A browser-based open-source LLM for free text is after the MVP; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
 - Training and accelerated-inference benchmarks run in Jupyter on IBM LinuxONE (s390x, big-endian).
 - The site is static on GitHub Pages and runs the exported weights in the browser, so it stays live after the event.
+- Export uses raw JSON weights and a JavaScript forward pass. Architecture, preprocessing and exact file formats remain open in the [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38); the [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) is also open.
+- Follow [ADR 0003](docs/adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md): Tripadvisor-derived training rows stay on LinuxONE; restaurant samples are synthetic; publish only model outputs with the required attribution. The team accepted source-rights risk for non-commercial use, not unrestricted permission.
 
 Read [`docs/competition/PROJECT.md`](docs/competition/PROJECT.md) before planning any feature, model or data work: it holds the current plan, open questions and platform facts. Everything in it is a starting point, not a commitment.
 
