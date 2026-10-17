@@ -96,3 +96,33 @@ low population is otherwise preserved rather than automatically rewritten.
 The full-data build reads the UK ONSPD archive and removes postcode districts
 with active postcodes in England and another UK country. A district entirely
 in England remains eligible even when it touches the national boundary.
+
+## Release audit of the #176 bundle (#165)
+
+Run `PYTHONPATH=src python -m plotluck.ranking_audit <candidate> --against <live> --inspect TD5 TD12 EC3M …`.
+The result for the #176 run is in
+[`runs/2026-10-17-train-nn1-context/ranking_audit.json`](../../runs/2026-10-17-train-nn1-context/ranking_audit.json);
+the live bundle is `web/models/` on `main` at `fd14f90`.
+
+| Check | Live | Candidate |
+|---|---|---|
+| Districts scored | 2,324 | 2,076 (248 dropped, 0 added) |
+| Held-out MAE / RMSE | 0.0503 / 0.0655 | 0.0503 / 0.0655 |
+| Distinct cuisine score vectors | 26 | 48 |
+| Median p10–p90 score spread | 0.0203 | 0.0136 |
+| Rank correlation with live, per cuisine group (median / min) | — | 0.60 / 0.45 |
+| Top-20 overlap with live (median / min) | — | 10 / 7 |
+
+Representative districts, default Indian profile (rank / districts):
+TD5 1st and TD12 16th in live, both omitted as cross-border; EC3M 2,320th in
+live, omitted. W1D 2,297th → 779th, SW1A 2,313th → 626th, B1 2,025th → 188th,
+LA22 1,086th → 184th, TR18 1,736th → 1,791st, CA1 1,719th → 1,922nd.
+
+**Gate: not passed. The live bundle stays.** Fine cuisines now change scores,
+and removing the cross-border districts is correct. But the candidate reorders
+about half of every top 20 with no held-out gain to justify it. Its spread is
+narrower, so it adds no resolution. The `commercial_core_without_footfall`
+rule also drops 9 of the 17 City of London districts (including EC3M) and the
+West End `W1C W1M W1N W1R W1V W1X W1Y`. These are real restaurant districts,
+so the full-data evidence does not justify the rule. Next step: revise that
+threshold on LinuxONE, rerun, and repeat this audit before publishing.
