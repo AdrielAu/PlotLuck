@@ -32,6 +32,26 @@ Status: product interview complete. At the user's request, this plan has been sy
 - **Manual edits (Q26):** manual corrections remain authoritative until the user explicitly re-runs interpretation. A new interpretation is a draft for review and does not replace the confirmed restaurant profile or search area until confirmation.
 - **Failure recovery (Q27):** errors and cancellation preserve the last confirmed profile, area and results; show a recoverable error with retry/manual-edit actions. Manual recovery does not waive the NN2 release gates.
 
+Recovery refinement, requested by the user on 2026-10-17: allow at most three
+user-triggered interpretation attempts per description, then guide manual
+completion of cuisine, search area and uncertain traits. Manual entry remains
+available from the first attempt. No automatic retry loop; changing the
+description resets the attempt allowance. Cancelling an attempt consumes that
+attempt. Keep manual edits and confirmed results intact. The current browser
+preview implements this policy; it does not turn manual corrections into model
+successes or waive the quality gate.
+
+Latest user clarification (2026-10-17): NN2 extracts **search area, cuisine,
+menu price band, restaurant type and rent**, leaving other MVP inputs and feature
+encoding to the existing code. Rent is a total GBP monthly/annual budget,
+annualized for review. The user confirmed that a person chooses **low/mid/high/any
+alongside that budget**. No automatic pounds-to-band mapping is defined. The
+confirmed band uses the MVP's district rent tertiles to filter districts; it does
+not overwrite NN1's district rent proxy. Manual dietary/chain choices remain
+intact. This supersedes broad trait extraction for the current investigation;
+retain the original benchmark scores separately. The approved development cases
+lack explicit menu prices and rent, so they do not establish those extraction gates.
+
 **Boundary membership (Q24):** city/borough searches include districts whose centroids lie inside the confirmed boundary. A district overlapping the area with its centroid outside is excluded; retained scores still describe whole districts.
 
 ## Verified facts and unresolved facts

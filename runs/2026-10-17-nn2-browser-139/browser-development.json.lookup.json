@@ -1,0 +1,194 @@
+{
+  "baseline_sha256": "144489d56cf13ebe96442a2a8c385736b73a6c109c481df4279e2710b4a9f7f5",
+  "catalogue_sha256": "b3eddbe77ace8a873a34d3e3ecbe1bb728af22fc45ae6932fc5a58e208477047",
+  "evaluated": 20,
+  "correct_before_lookup": 2,
+  "correct_with_candidates": 2,
+  "note": "Lookup provides catalogue candidates without changing any extracted value or repairing failures. Candidate availability is not confirmed/resolved location correctness. Replay is not a new model run or latency measurement.",
+  "results": [
+    {
+      "id": "clear-001",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-002",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-003",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-004",
+      "validated": true,
+      "correct": false,
+      "candidates": [
+        {
+          "id": "E08000035",
+          "name": "Leeds",
+          "type": "local_authority"
+        },
+        {
+          "id": "E63000784",
+          "name": "Leeds",
+          "type": "settlement"
+        }
+      ],
+      "correct_with_candidates": false
+    },
+    {
+      "id": "clear-005",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-006",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-007",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-008",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-009",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-010",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-011",
+      "validated": true,
+      "correct": true,
+      "candidates": [
+        {
+          "id": "E09000001",
+          "name": "City of London",
+          "type": "city"
+        },
+        {
+          "id": "E12000007",
+          "name": "Greater London",
+          "type": "region"
+        }
+      ],
+      "correct_with_candidates": true
+    },
+    {
+      "id": "clear-012",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Invalid location distance."
+    },
+    {
+      "id": "clear-013",
+      "validated": true,
+      "correct": false,
+      "candidates": [
+        {
+          "id": "E08000003",
+          "name": "Manchester",
+          "type": "local_authority"
+        },
+        {
+          "id": "E63001295",
+          "name": "Manchester",
+          "type": "settlement"
+        }
+      ],
+      "correct_with_candidates": false
+    },
+    {
+      "id": "clear-014",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Invalid location distance."
+    },
+    {
+      "id": "clear-015",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Invalid location distance."
+    },
+    {
+      "id": "clear-016",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-017",
+      "validated": true,
+      "correct": true,
+      "candidates": [
+        {
+          "id": "E08000025",
+          "name": "Birmingham",
+          "type": "local_authority"
+        },
+        {
+          "id": "E63002904",
+          "name": "Birmingham",
+          "type": "settlement"
+        }
+      ],
+      "correct_with_candidates": true
+    },
+    {
+      "id": "clear-018",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Invalid location distance."
+    },
+    {
+      "id": "clear-019",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Evidence must occur in the description."
+    },
+    {
+      "id": "clear-020",
+      "validated": false,
+      "correct": false,
+      "correct_with_candidates": false,
+      "error": "Invalid location distance."
+    }
+  ]
+}

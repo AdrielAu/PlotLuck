@@ -1,12 +1,38 @@
 # NN2 runtime proof (#113)
 
-Status: the initial [browser experiment](../../runs/2026-10-17-nn2-evaluation/)
+Status: browser investigation continues in [issue #139](https://github.com/AdrielAu/PlotLuck/issues/139).
+The initial [browser experiment](../../runs/2026-10-17-nn2-evaluation/)
 failed quality and latency. The latest compact-output run completed three warm
 requests in 5.53–5.76 seconds, but scored 0/3 correct; three requests do not
 establish the release p95 gate. The [LinuxONE native CPU run](../../runs/2026-10-17-nn2-evaluation/)
 completed three warm requests in 26.14–35.75 seconds, within the 60-second
 limit, but also scored 0/3: replies were malformed or wrongly shaped JSON. This is
 pretrained inference, not training or NNPA acceleration. NN2 remains mandatory.
+
+The [#139 development report](../../runs/2026-10-17-nn2-browser-139/) extends the
+unchanged compact candidate to all 20 approved development cases: 20/20 parseable
+JSON, 4/20 validated, 2/20 complete requests correct. Warm sample p95 is 7.5333 s;
+cold initialization is 40.1331 s, and measured model/runtime response bodies total
+287,634,697 bytes. Quality fails; the narrow development sample does not establish
+release p95. Heldout cases remain reserved. The report preserves failures and
+proposes a staged-prompt investigation without claiming an unmeasured improvement.
+
+The [grounded follow-up](../../runs/2026-10-17-nn2-browser-139/grounded-comparison.md)
+measured the user's local-lookup proposal. Lookup alone preserves **2/20**;
+a revised extraction contract with local hints regresses to **0/20**, with warm
+sample p95 **17.4314 s**. Both failures are retained. The interpreter remains
+experimental, accessible on the site only with `?nn2=1`; ordinary manual entry
+remains available. Three user-triggered attempts per description lead to advice
+for manual completion, preserving manual choices and confirmed results.
+
+The subsequent [five-input investigation](../../runs/2026-10-17-nn2-browser-139/focused-extraction.md)
+records **20/20** on the user's narrowed development metric versus baseline
+**3/20**, warm sample p95 **2.038 s**. On the original full-trait metric that run
+is **13/20** versus baseline **2/20**. Explicit price/rent extraction is absent
+from those cases: three separate unlabelled price/rent probes all failed strict
+validation. The candidate remains experimental. Total rent is annualized for
+review, and a person confirms the MVP rent band rather than inventing a numeric
+budget conversion. All historical failures and release gates are retained.
 
 The candidate is Qwen2.5-0.5B-Instruct. Native revision
 `7ae557604adf67be50417f59c2c2f167def9a775`; browser MLC revision
@@ -54,10 +80,29 @@ Install the browser test tooling from setup instructions. Explicitly invoking
 `node scripts/prove-nn2-browser.mjs <output.json>` authorizes the candidate download
 for synthetic experiments. Set `PLOTLUCK_PLAYWRIGHT` to a Playwright module URL and
 `PLOTLUCK_BROWSER` to desktop Edge/Chrome if needed. The tool uses a fresh browser
-context, runs three development requests, records hardware/cold load/warm times
+context, runs all 20 approved development requests, records hardware/cold load/warm times
 and failures, and terminates on a five-minute load/request timeout. Run the score
 script on the resulting report. Never silently substitute manual parsing for a
-failed candidate. Cache reuse and production user-flow privacy are later gates.
+failed candidate. The browser receives only development IDs/descriptions, without
+expected labels or heldout descriptions. Reports include exact candidate URLs,
+source hashes, OS/CPU/memory, browser version, adapter details and raw synthetic
+replies, including rejected/truncated output. Cache reuse and production user-flow
+privacy are later gates.
+
+External response-body measurements separate model/config/tokenizer/library bytes
+from supporting runtime bytes, count redirects, and disclose failed or unmeasured
+transfers. The conservative budget comparison includes both categories. The
+external download span overlaps cold initialization; it is not an isolated
+network-only benchmark. No geography payload is used by this proof. Cold load is
+reported separately from warm inference, including initial grammar compilation.
+
+Scoring reports JSON validity, strict validation, complete semantic correctness
+and cuisine/location/explicit-trait components separately. Component successes
+require a validated draft; a syntactically valid reply can still fail validation
+or semantics. Runtime errors remain full-request failures even with valid partial
+output. Timed failures contribute to the nearest-rank sample p95, and missing
+timings are excluded with their sample count disclosed. These development reports
+never constitute final release evaluation or inferred-proposal approval.
 
 ## Human LinuxONE operator
 

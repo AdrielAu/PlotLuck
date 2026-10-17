@@ -24,5 +24,20 @@
 #profile-error { color: var(--error-ink); }
 #compare { min-height: 44px; padding: 8px 20px; border: 0; border-radius: 4px; color: var(--surface); background: var(--green); }
 #compare:hover { background: var(--focus); }
+#description-panel, .search-area-fields { grid-column: 1 / -1; min-width: 0; }
+#description-panel { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+#description-panel summary { cursor: pointer; font-weight: 600; min-height: 44px; }
+#description-panel p, .search-area-fields p { max-width: 74ch; margin: 8px 0 16px; color: var(--muted); font-size: 14px; }
+#description-panel label, .search-area-fields > label { display: block; margin: 12px 0 8px; }
+#description, #place-text, #place-choice, #radius, #rent-amount, #rent-period, #rent-band { font: inherit; max-width: 100%; min-height: 44px; border: 1px solid var(--muted); border-radius: 4px; padding: 8px 12px; background: var(--surface); color: var(--ink); }
+#description { width: 100%; resize: vertical; }
+#place-text, #place-choice { width: min(100%, 680px); }
+#radius { width: 160px; }
+.near-choice { font-weight: 400; min-height: 44px; }
+.near-choice input { width: 18px; height: 18px; }
+.interpret-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.interpret-actions button { min-height: 44px; padding: 8px 16px; border: 1px solid var(--green); border-radius: 4px; background: var(--surface); color: var(--green); }
+.interpret-actions button:hover { background: #edf3ec; }
+#interpret-status { overflow-wrap: anywhere; }
 /* Screen-reader-only, except a no-match message, which everyone sees. */
 .visually-hidden:not(.shown) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
