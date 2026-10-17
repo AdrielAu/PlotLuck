@@ -27,7 +27,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 ## Now
 
-- **Latest NN2 interface amendment**: NN2 reads the one description and fills the review card, which the user confirms before scoring. The code still opens results directly until the card is wired in.
+- **Latest NN2 interface amendment**: NN2 reads the one description and pre-fills the review card's pickers; the user can correct any wrong value manually and confirms before scoring. The code still opens results directly until the card is wired in.
 - **Earlier NN2 interface amendment**: one description replaces the six-question flow and results pickers. Clear valid interpretations go straight to results; only unclear/invalid details require clarification. Download starts on submission, with progress and cancellation. This supersedes the older review-card behavior described below; historical experiment results and all release gates remain unchanged. The current UI uses the focused candidate from #139. It has not passed the final quality gate, particularly explicit menu-price/rent extraction.
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
