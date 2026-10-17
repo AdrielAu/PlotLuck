@@ -14,6 +14,14 @@ _Avoid_: Area (on its own), region, borough
 
 ## Restaurants and scoring
 
+**District context**:
+The population, demographic composition, deprivation, commercial rent and mapped restaurant and tourism supply associated with a postcode district.
+_Avoid_: Customer profile, customer demographics
+
+**District sex composition**:
+The shares of a district's residents recorded as female or male in the Census sex measure. It is distinct from gender identity.
+_Avoid_: Most common gender, gender composition
+
 **Restaurant**:
 A real food business in the source data that serves a cuisine. Cafés, takeaways and pubs that serve food count; dark kitchens do not. The data work will tighten the exact inclusion rules.
 _Avoid_: Venue, outlet, business

@@ -13,13 +13,13 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | # | Phase | Status | Issues |
 |---|---|---|---|
 | 0 | Repo, workflow and server setup | done | #3, #19 |
-| 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42, #65, #68, #82 |
+| 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42, #65, #68, #82, #101 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
-| 3 | NN1 | in progress | #62, #65, #74 |
+| 3 | NN1 | in progress | #62, #65, #74, #101 |
 | 4 | Free-text interpretation (after MVP) | not started | #35 |
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77 |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
-| 7 | Weight export + x86 load check | in progress | #65, #67 |
+| 7 | Weight export + x86 load check | in progress | #65, #67, #101 |
 | 8 | Site: district circles, pickers, score threshold, ranked list | in progress | #67, #75, #76 |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | not started | |
 | 10 | Video | not started | |
@@ -33,3 +33,4 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 - **Next**:
   1. Work the [MVP spec](https://github.com/AdrielAu/PlotLuck/issues/64)'s tickets. The tracer bundle (#65) is in `data/sample/`; the site can build against it now.
   2. All five [MVP datasets](https://github.com/AdrielAu/PlotLuck/issues/43) are pulled and extracted on LinuxONE; next is running `python -m plotluck.build` on them there (phase 1 closes when it builds).
+  3. Pull the new Census and tourism sources for #101 and retrain on LinuxONE before replacing the sample-trained version 2 bundle. The committed demographic and tourism fixtures are synthetic.

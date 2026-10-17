@@ -265,7 +265,8 @@ def test_pull_voa_records_the_restricted_licence(tmp_path):
     assert prov["attribution"].startswith("Source: Valuation Office Agency")
 
 
-def test_pull_osm_merges_tiles_and_records_snapshot(tmp_path):
+@pytest.mark.parametrize("name", ["osm", "tourism"])
+def test_pull_osm_merges_tiles_and_records_snapshot(tmp_path, name):
     tile = {
         "osm3s": {"timestamp_osm_base": "2026-10-17T10:52:28Z"},
         "elements": [{"type": "node", "id": 1, "lat": 51.5, "lon": -0.1,
@@ -273,14 +274,15 @@ def test_pull_osm_merges_tiles_and_records_snapshot(tmp_path):
     }
     fetch = fake_fetch(json.dumps(tile).encode())
 
-    sources.pull("osm", tmp_path, fetch=fetch)
+    sources.pull(name, tmp_path, fetch=fetch)
 
-    merged = json.loads((tmp_path / "raw" / "osm.json").read_text())
-    prov = json.loads((tmp_path / "raw" / "osm.provenance.json").read_text())
+    merged = json.loads((tmp_path / "raw" / f"{name}.json").read_text())
+    prov = json.loads((tmp_path / "raw" / f"{name}.provenance.json").read_text())
     assert len(fetch.calls) > 1  # England is pulled in tiles
     assert len(merged["elements"]) == len(fetch.calls)
     assert prov["snapshot"] == "2026-10-17T10:52:28Z"
     assert "(area.a)" in fetch.calls[0][1]
+    assert ('"tourism"' if name == "tourism" else '"amenity"') in fetch.calls[0][1]
 
 
 def osm_tile(element_id):

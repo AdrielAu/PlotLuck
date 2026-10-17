@@ -8,7 +8,7 @@ from collections import Counter
 import numpy as np
 import pytest
 
-from plotluck import build, data_dir, nn1, sources
+from plotluck import build, context, data_dir, nn1, sources
 
 
 def read_csv(path):
@@ -20,7 +20,8 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv", "voa_england.csv")
+SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv", "voa_england.csv",
+           "census_age_england.csv", "census_ethnicity_england.csv", "census_sex_england.csv", "tourism_england.csv")
 
 
 def copy_sources(dest):
@@ -97,6 +98,7 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
         ("districts.csv", {"street_address": "A private address"}),
         ("districts.csv", {"postcode": "SE1 1AA"}),
         ("districts.csv", {"avg_rating": 4.5}),
+        ("districts.csv", {"most_common_ethnicity": "Private restaurant name"}),
         ("district_cuisine_supply.csv", {"total_reviews": 42}),
         ("districts.csv", {"latitude": 51.5, "longitude": -0.1}),
         ("model.json", {"R0": 3.5}),
@@ -327,6 +329,69 @@ def test_district_with_no_restaurants_appears_with_supply_zero_and_is_scored(bui
     assert all("EC3M" in case["scores"] for case in reference["cases"])
 
 
+def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    ages = read_csv(data / "census_age_england.csv")
+    for row in ages:
+        row["average_age"] = "42" if row["district"] == "SE1" else ""
+    with (data / "census_age_england.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, ["district", "average_age"], lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(ages)
+    sexes = read_csv(data / "census_sex_england.csv")
+    for row in sexes:
+        row["sex_female_share"] = row["sex_male_share"] = "0.5" if row["district"] == "SE1" else ""
+    with (data / "census_sex_england.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, list(sexes[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(sexes)
+    anchor = next(p for p in read_csv(data / "onspd_england.csv") if p["district"] == "SE1" and not p["doterm"])
+    (data / "tourism_england.csv").write_text(
+        "osm_type,osm_id,tourism,lat,lon\n"
+        f"node,1,hotel,{anchor['lat']},{anchor['long']}\n"
+        f"node,1,hotel,{anchor['lat']},{anchor['long']}\n"
+        f"way,1,attraction,{anchor['lat']},{anchor['long']}\n", encoding="utf-8",
+    )
+    out = tmp_path / "bundle"
+    build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    districts = {row["postcode_district"]: row for row in read_csv(out / "districts.csv")}
+    assert districts["SE1"]["average_age"] == "42.0"
+    assert districts["SE1"]["hotels_count"] == "1"
+    assert districts["SE1"]["attractions_count"] == "1"
+    assert districts["SE11"]["hotels_count"] == "0"
+    assert districts["SE11"]["average_age"] == ""
+    assert districts["SE1"]["most_common_sex"] == "tie"
+    assert districts["SE11"]["most_common_sex"] == "unknown"
+    assert districts["SE1"]["most_common_ethnicity"] in {"asian", "black", "mixed", "white", "other", "tie"}
+    model = read_json(out / "model.json")
+    assert set(context.INPUTS) <= set(model["features"]["district_inputs"])
+    assert model["transforms"]["average_age"] == {
+        "kind": "numeric", "log1p": False, "median": 42, "mean": 42, "std": 1,
+    }
+    assert model["transforms"]["attractions_count"]["log1p"] is True
+    assert model["transforms"]["sex_female_share"]["log1p"] is False
+
+
+@pytest.mark.parametrize("name, field, value", [
+    ("census_age", "average_age", "NaN"),
+    ("census_sex", "sex_female_share", "1.5"),
+    ("census_ethnicity", "ethnicity_white_share", "0"),
+])
+def test_build_rejects_invalid_demographic_sources_before_writing(tmp_path, name, field, value):
+    data = copy_sources(tmp_path / "data")
+    path = data / f"{name}_england.csv"
+    rows = read_csv(path)
+    rows[0][field] = value
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    out = tmp_path / "bundle"
+    with pytest.raises(ValueError, match="invalid|shares"):
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    assert not out.exists()
+
+
 def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
     districts = [{
         "postcode_district": "AB1", "population": 1000, "deprivation_index": 12.5,
@@ -372,6 +437,8 @@ def test_transforms_fitted_on_a_subset_use_only_that_subset():
         [99, 30, nan, 0, 0],
     ])
     held_out = np.array([[999999, 1000, 5, 7, 7]])
+    train = np.pad(train, ((0, 0), (0, 10)), constant_values=nan)
+    held_out = np.pad(held_out.astype(float), ((0, 0), (0, 10)), constant_values=nan)
 
     t = build.model_spec(vocab, train)["transforms"]
 
@@ -382,6 +449,7 @@ def test_transforms_fitted_on_a_subset_use_only_that_subset():
     assert t["deprivation_index"]["std"] == pytest.approx(8.164966)  # population std of 10, 20, 30
     # No training row has rent, so the held-out row's 5 must not leak into the fill.
     assert t["commercial_rent_index"] == {"kind": "numeric", "log1p": True, "mean": 0, "std": 1, "median": 0}
+    assert t["average_age"] == {"kind": "numeric", "log1p": False, "mean": 0, "std": 1, "median": 0}
 
 
 def test_a_column_constant_on_the_training_rows_keeps_held_out_values_finite():
@@ -389,11 +457,13 @@ def test_a_column_constant_on_the_training_rows_keeps_held_out_values_finite():
     # A fold whose only rented district is SE11 at £400/m²: log1p(400) repeated
     # has a float std of about 1e-15, not 0.
     train = np.array([[1000, 10, 400, 3, 1]] * 170, dtype=float)
+    train = np.pad(train, ((0, 0), (0, 10)), constant_values=np.nan)
 
     model = build.model_spec(vocab, train)
 
     assert model["transforms"]["commercial_rent_index"]["std"] == 1
-    x = build.inputs(model,{"cuisine_group": "Thai"}, np.array([[1000, 10, 150, 3, 1]], dtype=float))
+    held_out = np.array([[1000, 10, 150, 3, 1, *([np.nan] * 10)]], dtype=float)
+    x = build.inputs(model, {"cuisine_group": "Thai"}, held_out)
     assert np.abs(x).max() < 10
 
 
@@ -455,7 +525,8 @@ def test_model_declares_log1p_mean_std_and_median_for_each_district_input(built)
     for name in model["features"]["district_inputs"]:
         t = model["transforms"][name]
         assert t["kind"] == "numeric" and set(t) == {"kind", "log1p", "mean", "std", "median"}, name
-        assert t["log1p"] == (name != "deprivation_index"), name
+        assert t["log1p"] == (name in {"population", "commercial_rent_index", "total_restaurants",
+                                       "same_cuisine_supply", "attractions_count", "hotels_count"}), name
 
 
 def test_model_layers_are_inputs_64_32_1(built):
