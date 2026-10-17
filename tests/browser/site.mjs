@@ -48,18 +48,3 @@ export async function newPage(browser, options = {}) {
   await page.route("https://tile.openstreetmap.org/**", (route) => route.abort());
   return page;
 }
-
-// Answer the six questions by typing, Enter after each; "" accepts the default.
-export async function answerQuestions(page, answers) {
-  const box = page.locator("#answer");
-  await page.locator("#answer:not([disabled])").waitFor();
-  for (const text of answers) {
-    const question = await page.locator("#question").innerText();
-    await box.fill(text);
-    // Escape closes the suggestions, so Enter submits exactly the typed text.
-    await box.press("Escape");
-    await box.press("Enter");
-    await page.waitForFunction((q) => document.querySelector("#question").textContent !== q || !document.querySelector("#review").hidden, question);
-  }
-  await page.getByRole("heading", { name: "Your restaurant, as we read it" }).waitFor();
-}

@@ -16,7 +16,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
 | 3 | NN1 | done | #62, #65, #74, #101, #77, #150 |
-| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); #115 draft/confirmation foundation; #136 questions screen reads answers with NN2 after an explicit download, fallback otherwise; #35; [plan](../plans/nn2-integration.md) |
+| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); latest user amendment replaces #136/#158's questions with one description, direct results and targeted clarification; model/release gates remain open; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | done | #74, #77 |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | done | #65, #67, #101, #77 |
@@ -26,6 +26,8 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 11 | Submission | not started | |
 
 ## Now
+
+- **Latest NN2 interface amendment**: one description replaces the six-question flow and results pickers. Clear valid interpretations go straight to results; only unclear/invalid details require clarification. Download starts on submission, with progress and cancellation. This supersedes the older review-card behavior described below; historical experiment results and all release gates remain unchanged. The current UI uses the focused candidate from #139. It has not passed the final quality gate, particularly explicit menu-price/rent extraction.
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.

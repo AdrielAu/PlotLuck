@@ -1,5 +1,19 @@
 # NN2 integration plan
 
+## Latest user amendment: one description, then results (2026-10-17)
+
+The user replaced the six-question journey and confirmed: **"Show results immediately; ask only when clarification is needed."** This supersedes #158's six free-text questions, Q5/Q9's routine review-before-scoring, and #127's picker-based editing. The older requirements below remain historical context where they conflict with this amendment.
+
+- One free-text description, up to 1,000 characters, is the product entry point. No chips, autocomplete, six-question sequence, manual-input panel or second experimental description panel.
+- Submitting **Find districts** starts the pinned browser NN2 download/load if needed, with the measured size disclosed next to the action, progress and Cancel. Model assets can be reused; descriptions remain in tab memory.
+- Use the existing five-input extraction candidate. Validate its output, resolve places locally, and apply a clear valid interpretation directly to NN1 results. The results identify inferred/default values and whole-district geography limits; **Edit description** preserves the text for explicit reinterpretation.
+- Ask only for unresolved cuisine/place choices, unsupported restrictions or invalid details. Ambiguous places, conflicting cuisines and a numeric rent budget without a relative band cannot silently become defaults. Near searches use the stated distance or 5 km, converting miles to kilometres.
+- Failed/invalid inference asks the user to edit/retry, with at most three attempts per unchanged description. Cancellation counts; editing resets the allowance. There is no silent keyword-only replacement for failed NN2. Unsupported devices show a recoverable explanation with the description preserved.
+- New, failed, cancelled or superseded work preserves previous results. Never widen empty areas. Retain explicit dietary statements omitted by the focused model.
+- This interface change does not improve or validate model quality. The 95/100 quality, latency, download-size, notice and privacy gates remain open, as does separate LinuxONE evaluation.
+
+Implementation: `web/free-text.js` owns the browser flow; `description-query.js` adapts validated extraction to a query or targeted clarifications; `geography.js` owns catalogue validation and radius membership. `interpret.js` retains deterministic area/rent/dietary helpers and legacy test contracts, not a user-facing fallback.
+
 Status: product interview complete. At the user's request, this plan has been synthesized and published as [specification #110](https://github.com/AdrielAu/PlotLuck/issues/110), the implementation contract. Implementation has started with #115's manual draft/confirmation foundation. #136 connects the questions screen to browser NN2 behind `interpret(answers)`, with the deterministic fallback when NN2 is not loaded or replies invalidly; NN2 location text and clarifications await the place catalogue (#117/#118). NN2 interpretation and its feasibility/release gates remain open.
 
 ## Agreed requirements

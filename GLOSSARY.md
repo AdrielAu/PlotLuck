@@ -39,15 +39,15 @@ Two or more source rows that describe the same restaurant at the same place. Plo
 _Avoid_: Duplicate restaurant, copy
 
 **Restaurant profile**:
-The user's description of the restaurant they want to open, given as answers to the questions screen and joined into one labelled text. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
+The user's free-text description of the restaurant they want to open, including any location and preferences. Unclear or invalid details require clarification before comparing postcode districts.
 _Avoid_: Hypothetical restaurant, query, concept
 
 **Restaurant-profile interpreter (NN2)**:
-The part of Plotluck that identifies a cuisine and supported traits from a restaurant profile, for use in district scoring. Its interpretation is editable by the user.
+The part of Plotluck that interprets a restaurant profile into a cuisine, supported preferences and search-area intent. Users clarify uncertain details and can revise their description.
 _Avoid_: District scorer, success predictor
 
 **Inferred profile value**:
-A cuisine or trait suggested from the context of a restaurant profile rather than explicitly stated by its author. It is a proposal for the user to confirm.
+A cuisine or trait derived from the context of a restaurant profile rather than explicitly stated by its author. It remains distinguishable from an explicit preference.
 _Avoid_: Confirmed preference, observed fact
 
 **Cuisine**:
@@ -123,7 +123,7 @@ _Avoid_: Explanation panel, breakdown
 ## Workflow
 
 **MVP**:
-The required competition product: free-text interpretation by NN2, editable cuisine and trait choices, a confirmed search area, and district scores from NN1 shown on a map and ranked list. Clusters, driver charts and the cultural demand gap are outside this scope.
+The required competition product: free-text interpretation by NN2, clarification of unclear or invalid details, and district scores from NN1 shown on a map and ranked list within the resolved search area. Clusters, driver charts and the cultural demand gap are outside this scope.
 _Avoid_: Demo, v1, vertical slice
 
 **Sample data**:
