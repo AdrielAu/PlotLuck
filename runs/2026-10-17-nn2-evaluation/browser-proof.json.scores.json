@@ -1,0 +1,26 @@
+{
+  "label_status": "Agent-authored expected labels; human review required before tuning or quality claims.",
+  "evaluated": 3,
+  "correct": 0,
+  "warm_p95_seconds": 39.21159999999404,
+  "results": [
+    {
+      "id": "clear-001",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 39.21159999999404
+    },
+    {
+      "id": "clear-002",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 27.10920000000298
+    },
+    {
+      "id": "clear-003",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 26.68410000000894
+    }
+  ]
+}
