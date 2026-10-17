@@ -26,9 +26,17 @@ _Avoid_: Hypothetical restaurant, query, concept
 The style of food a restaurant serves, from Plotluck's fixed cuisine list.
 _Avoid_: Food type, category
 
+**Cuisine tag**:
+One raw cuisine value on a source restaurant row, such as Pizza, Pub or European. Plotluck maps each one to a cuisine or sets it aside.
+_Avoid_: Cuisine descriptor, raw cuisine
+
 **Trait**:
 A non-cuisine property of a restaurant or restaurant profile, picked from Plotluck's fixed trait list, such as price band, takeaway or vegan options.
 _Avoid_: Tag, property, attribute, feature
+
+**Venue type**:
+The trait that says what kind of place a restaurant is: restaurant, pub and bar, café, or fast food and street food.
+_Avoid_: Format, venue, establishment type
 
 **Score**:
 A number from 0 to 1 that rates the expected review-based success of a restaurant profile in one postcode district. It is not a calibrated probability.
