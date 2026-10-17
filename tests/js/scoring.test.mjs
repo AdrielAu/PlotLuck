@@ -64,7 +64,7 @@ test("invalid coordinates and supply counts are rejected while loading", async (
 });
 
 test("a district without a positive circle radius is rejected while loading", async () => {
-  for (const radiusKm of [null, "", "0", "-1", "wide"]) {
+  for (const radiusKm of [null, "", "0", "-1", "wide", "Infinity"]) {
     await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], radiusKm }), /radius_km/, `radius_km ${radiusKm}`);
   }
   const bundle = await tinyBundle({ weights: [0, 0, 0, 0], radiusKm: "0.3" });

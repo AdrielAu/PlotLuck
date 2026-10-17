@@ -19,9 +19,7 @@ export function showScreen(id) {
 // runs after the questions screen is shown again, with its state untouched.
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
-  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));
-  const radiiKm = new Map(bundle.districts.map((d) => [d.postcode_district, Number(d.radius_km)]));
-  let map = null;
+  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));  let map = null;
   let circles = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
   let onScreen = null;
@@ -46,9 +44,9 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     }).addTo(map);
     // Sized in metres, not pixels, so each circle keeps roughly covering its district at every zoom.
     circles = new Map(
-      [...centroids].map(([code, latLng]) => [
-        code,
-        L.circle(latLng, { radius: radiiKm.get(code) * 1000, color: "#284c29", weight: 1, fillOpacity: 0.5 }),
+      bundle.districts.map((d) => [
+        d.postcode_district,
+        L.circle(centroids.get(d.postcode_district), { radius: Number(d.radius_km) * 1000, color: "#284c29", weight: 1, fillOpacity: 0.5 }),
       ]),
     );
   }
