@@ -106,15 +106,16 @@ Check it worked: `python -c "import plotluck; print(plotluck.__file__)"` should 
 ```bash
 cd ~/shared/PlotLuck
 export PLOTLUCK_DATA=full
-python -m plotluck.sources pull tripadvisor onspd p004   # about 2 minutes
-nohup python -m plotluck.sources pull osm > data/full/osm_pull.log 2>&1 &
-python -m plotluck.sources extract tripadvisor onspd p004
+mkdir -p data/full     # data_dir() picks full only once this exists
+nohup python -u -m plotluck.sources pull osm > data/full/osm_pull.log 2>&1 &
+python -m plotluck.sources pull tripadvisor onspd p004 voa   # a few minutes
+python -m plotluck.sources extract tripadvisor onspd p004 voa
 # when osm_pull.log ends with "pulled osm":
 python -m plotluck.sources extract osm
 python -m plotluck.sources sample    # re-cuts data/sample/ from the extracts
 ```
 
-Run `pull tripadvisor` only here: ADR 0003 allows no laptop copies of that file, and `sample` writes made-up TripAdvisor rows, never real ones. Pulls write the raw files and `raw/<name>.provenance.json`; extracts write `<name>_england.csv` and print row counts. With no names a step runs every source. The OSM pull queries the public Overpass server in 34 tiles, and it is limited by that server's load, not ours: allow 30 to 40 minutes. It retries when the server is busy, and `tail -f data/full/osm_pull.log` shows each tile. The other pulls are about 1 GB in total. Pulling again replaces the files and the provenance, so commit the new sample and update `data/SOURCES.md` in a PR if anything changed. Unverified on s390x: none of this has run on the VM yet. If a host is blocked, download that file on a laptop, `scp` it to `data/full/raw/` and run only `extract`. Code picks the folder through `plotluck.data_dir()`; do not hard-code either path.
+Run `pull tripadvisor` and `pull voa` only here: ADR 0003 allows no laptop copies of the Tripadvisor file, the VOA licence bars passing its rows on, and `sample` writes made-up rows for both, never real ones. Pulls write the raw files and `raw/<name>.provenance.json`; extracts write `<name>_england.csv` and print row counts. With no names a step runs every source. The OSM pull queries the public Overpass server in 34 tiles, and it is limited by that server's load, not ours: allow 30 to 40 minutes. It retries when the server is busy, and `tail -f data/full/osm_pull.log` shows each tile (`-u` stops Python holding the lines back). The other pulls are about 1.2 GB in total. Pulling again replaces the files and the provenance, so commit the new sample and update `data/SOURCES.md` in a PR if anything changed. On s390x, pull and extract of tripadvisor, onspd and p004 ran on 2026-10-17 with the same row counts as the laptop run; voa, osm and `sample` are unverified there. If a host is blocked, download that file on a laptop, `scp` it to `data/full/raw/` and run only `extract`. Code picks the folder through `plotluck.data_dir()`; do not hard-code either path.
 
 ## Branches and PRs
 

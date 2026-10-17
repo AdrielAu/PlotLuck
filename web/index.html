@@ -8,27 +8,56 @@
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-<!-- shortcut: bare tracer layout; issues #75 and #76 add the styled pickers and result view. -->
-<style>
-  body { margin: 0 16px; font-family: system-ui, sans-serif; }
-  #map { height: 60vh; }
-  #error { color: #b00020; }
-</style>
+<link rel="stylesheet" href="results.css">
 </head>
 <body>
-<h1>Plotluck</h1>
-<p id="error" role="alert" hidden></p>
-<p>
-  <label for="cuisine">Cuisine</label>
-  <select id="cuisine"></select>
-  <label for="threshold">Score threshold</label>
-  <input id="threshold" type="range" min="0" max="1" step="0.01" value="0">
-  <output id="threshold-value" for="threshold">0.00</output>
-</p>
-<div id="map" role="region" aria-label="Map of district scores; the ranked list below has the same districts"></div>
-<h2 id="ranked-heading">Districts above the threshold</h2>
-<p id="count" aria-live="polite"></p>
-<ol id="ranked" aria-labelledby="ranked-heading"></ol>
+<main>
+  <header>
+    <h1>Plotluck</h1>
+    <p class="intro">Find a district for your restaurant.</p>
+    <p id="score-explanation">Compare expected review-based success: customer satisfaction and accumulated review activity. A score from 0 to 1 is not a probability of survival or profit.</p>
+  </header>
+  <section id="profile-controls" aria-label="Restaurant profile">
+    <label for="cuisine">Cuisine</label>
+    <select id="cuisine" disabled></select>
+  </section>
+  <p id="loading" role="status">Loading district scores…</p>
+  <section id="error" role="alert" hidden>
+    <h2>District scores could not load</h2>
+    <p id="error-detail"></p>
+    <button id="retry" type="button">Try loading again</button>
+  </section>
+  <section id="results" aria-label="District results" hidden>
+    <div class="threshold-control">
+      <div class="threshold-heading">
+        <label for="threshold">Score threshold</label>
+        <output id="threshold-value" for="threshold">0.0000</output>
+      </div>
+      <input id="threshold" type="range" min="0" max="1" step="0.01" value="0" aria-describedby="threshold-help" disabled>
+      <p id="threshold-help">Starts at roughly the top 10%. Move the slider to include more or fewer districts. Districts tied at the cutoff stay together.</p>
+    </div>
+    <div class="result-layout">
+      <section class="map-panel" aria-label="District map">
+        <div id="map" role="region" aria-label="Map of district scores; the ranked list has the same districts"></div>
+        <div class="legend" aria-label="Score colour scale: pale green is 0, dark green is 1">
+          <span>Lower score · 0</span>
+          <span class="legend-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span>1 · Higher score</span>
+        </div>
+      </section>
+      <section class="list-panel" aria-labelledby="ranked-heading">
+        <h2 id="ranked-heading">District shortlist</h2>
+        <p id="count" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="empty" hidden>No district reaches this threshold. Lower it to see more districts.</p>
+        <ol id="ranked" aria-labelledby="ranked-heading"></ol>
+      </section>
+    </div>
+  </section>
+  <aside class="limitations" aria-label="Score limitations">
+    <h2>One input to your decision</h2>
+    <p>Closed restaurants may be missing from the source data. This survivorship bias means the score reflects restaurants that were listed, rather than every restaurant that opened.</p>
+  </aside>
+</main>
 <footer>
   <p>Model trained on a 2021 Tripadvisor-derived dataset published on Kaggle (stefanoleone992). Not affiliated with or endorsed by Tripadvisor. Scores reflect review-based success among restaurants listed in 2021; closed restaurants may be missing. Non-commercial use only.</p>
 </footer>

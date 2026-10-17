@@ -1,12 +1,14 @@
 import csv
+import copy
 import json
 import shutil
+import statistics
 from collections import Counter
 
 import numpy as np
 import pytest
 
-from plotluck import build, data_dir
+from plotluck import build, data_dir, nn1, sources
 
 
 def read_csv(path):
@@ -18,7 +20,7 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv")
+SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv", "voa_england.csv")
 
 
 def copy_sources(dest):
@@ -87,6 +89,168 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
     assert read_json(data / "run" / "metrics.json")["restaurants"] == 200
 
 
+@pytest.mark.parametrize(
+    "filename, fields",
+    [
+        ("districts.csv", {"restaurant_name": "A private name"}),
+        ("districts.csv", {"restaurant_link": "https://example.invalid/private"}),
+        ("districts.csv", {"street_address": "A private address"}),
+        ("districts.csv", {"postcode": "SE1 1AA"}),
+        ("districts.csv", {"avg_rating": 4.5}),
+        ("district_cuisine_supply.csv", {"total_reviews": 42}),
+        ("districts.csv", {"latitude": 51.5, "longitude": -0.1}),
+        ("model.json", {"R0": 3.5}),
+    ],
+)
+def test_private_bundle_fields_raise_before_any_file_is_written(built, tmp_path, filename, fields):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    bundle = copy.deepcopy(bundle)
+    target = bundle[filename][0] if filename.endswith(".csv") else bundle[filename]
+    target.update(fields)
+    out = tmp_path / "public"
+
+    with pytest.raises(ValueError, match="private|unexpected|not allowed"):
+        build.publish_bundle(out, bundle)
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    "filename, fields",
+    [
+        ("districts.csv", {"restaurant_name": "A private name"}),
+        ("districts.csv", {"avg_rating": 4.5}),
+        ("district_cuisine_supply.csv", {"total_reviews": 42}),
+        ("districts.csv", {"latitude": 51.5, "longitude": -0.1}),
+        ("model.json", {"R0": 3.5}),
+    ],
+)
+def test_build_rejects_private_fields_before_writing(tmp_path, monkeypatch, filename, fields):
+    data = copy_sources(tmp_path / "data")
+    out = tmp_path / "public"
+    original = build.publish_bundle
+
+    def leaking_publisher(destination, bundle):
+        target = bundle[filename][0] if filename.endswith(".csv") else bundle[filename]
+        target.update(fields)
+        original(destination, bundle)
+
+    monkeypatch.setattr(build, "publish_bundle", leaking_publisher)
+    with pytest.raises(ValueError, match="private|unexpected"):
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+
+    assert not out.exists()
+    assert not (data / "restaurants.csv").exists()
+    assert not (data / "label_policy.json").exists()
+    assert not (data / "run").exists()
+
+
+def test_sample_run_folder_contains_only_metrics_and_no_policy_values(data):
+    run = data / "run"
+    assert sorted(path.name for path in run.iterdir()) == ["metrics.json"]
+    metrics = read_json(run / "metrics.json")
+    assert not {"R0", "D0", "n_ref", "avg_rating", "total_reviews"} & set(metrics)
+
+
+def test_committed_sample_run_metrics_pass_privacy_guard():
+    build.validate_run_metrics(read_json(data_dir(choice="sample") / "run" / "metrics.json"))
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("R0", 3.5),
+        ("tag_frequencies", {"Italian": 10}),
+        ("inputs_left_out", {"population": "Private restaurant name"}),
+    ],
+)
+def test_private_metadata_cannot_enter_run_metrics(data, field, value):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics[field] = value
+    with pytest.raises(ValueError, match="private|unexpected"):
+        build.validate_run_metrics(metrics)
+
+
+def test_registered_district_extension_can_be_published(built, tmp_path, monkeypatch):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    for row in bundle["districts.csv"]:
+        row["employment_index"] = "0.5"
+    monkeypatch.setattr(build, "DISTRICT_PUBLIC_EXTENSIONS", ("employment_index",))
+
+    out = tmp_path / "public"
+    build.publish_bundle(out, bundle)
+
+    assert read_csv(out / "districts.csv")[0]["employment_index"] == "0.5"
+
+
+def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
+    metrics = read_json(data / "run" / "metrics.json")
+
+    # Sample rows 0-4 carry one of each problem; see tripadvisor_england.csv.
+    # Row 4 (zero reviews, zero counts) is excluded, so its counts are no fix.
+    assert metrics["excluded"] == {"rating_missing": 1, "rating_out_of_range": 1, "n_total_zero": 1}
+    assert metrics["label_fixes"] == {"counts_partly_missing": 1, "total_below_counts": 1}
+    assert metrics["labelled"] == 197
+
+
+def test_run_metrics_report_cv_against_the_baseline_and_ship_the_median_best_epoch(data):
+    metrics = read_json(data / "run" / "metrics.json")
+    folds = metrics["cv"]["folds"]
+
+    assert len(folds) == 5
+    assert sum(f["rows"]["test"] for f in folds) == metrics["labelled"]
+    for f in folds:
+        assert set(f["rows"]) == {"fit", "early_stop", "test"}
+        losses = f["early_stop_loss"]
+        assert len(f["train_loss"]) == len(losses)
+        # Early stopping: best is the lowest early-stop loss; training ran on
+        # for the patience, or to the epoch limit.
+        assert f["best_epoch"] == 1 + int(np.argmin(losses))
+        assert len(losses) == min(f["best_epoch"] + build.PATIENCE, build.MAX_EPOCHS)
+        for name in ("mae", "rmse", "baseline_mae", "baseline_rmse"):
+            assert 0 < f[name] < 1, name
+        assert f["mae"] <= f["rmse"] and f["baseline_mae"] <= f["baseline_rmse"]
+    summary = metrics["cv"]["summary"]
+    assert set(summary) == {"mae", "rmse", "baseline_mae", "baseline_rmse"}
+    assert all(set(s) == {"mean", "std"} for s in summary.values())
+
+    shipped = metrics["shipped"]
+    # Exactly the median for the odd fold count the spec sets.
+    assert shipped["epochs"] == statistics.median(f["best_epoch"] for f in folds)
+    assert len(shipped["train_loss"]) == shipped["epochs"]
+
+
+def test_cli_parses_its_options():
+    with pytest.raises(SystemExit) as exit_:
+        build.main(["--help"])
+    assert exit_.value.code == 0
+
+
+def test_two_builds_with_seed_0_write_identical_models(data, built, tmp_path):
+    again = copy_sources(tmp_path / "data")
+    build.build(again, again / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
+
+    assert (again / "bundle" / "model.json").read_bytes() == (built / "model.json").read_bytes()
+    assert read_json(again / "run" / "metrics.json") == read_json(data / "run" / "metrics.json")
+
+
+def test_label_policy_stays_private_and_out_of_the_bundle(data, built):
+    policy = read_json(data / "label_policy.json")
+
+    assert set(policy) >= {"R0", "D0", "n_ref"}
+    for path in built.iterdir():
+        text = path.read_text(encoding="utf-8")
+        for name in ("R0", "D0", "n_ref"):
+            assert name not in text, path.name
+            assert repr(policy[name]) not in text, path.name
+
+
 def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, built):
     onspd = read_csv(data / "onspd_england.csv")
     districts = read_csv(built / "districts.csv")
@@ -100,6 +264,87 @@ def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, bu
     for d in districts:
         assert per_district[d["postcode_district"]] == int(d["total_restaurants"])
     assert sum(int(d["total_restaurants"]) for d in districts) == len(restaurants)
+
+
+def test_district_with_no_restaurants_appears_with_supply_zero_and_is_scored(built):
+    districts = {d["postcode_district"]: d for d in read_csv(built / "districts.csv")}
+    supplied = {r["postcode_district"] for r in read_csv(built / "district_cuisine_supply.csv")}
+    reference = read_json(built / "reference_scores.json")
+
+    # EC3M has ONSPD postcodes in the sample but no restaurant near them.
+    assert districts["EC3M"]["total_restaurants"] == "0"
+    assert "EC3M" not in supplied
+    assert all("EC3M" in case["scores"] for case in reference["cases"])
+
+
+def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
+    districts = [{
+        "postcode_district": "AB1", "population": 1000, "deprivation_index": 12.5,
+        "commercial_rent_index": "", "total_restaurants": 3,
+    }]
+    supply = Counter({("AB1", "Thai"): 2, ("AB1", "Italian"): 1})
+    rows = [{"postcode_district": "AB1", "cuisine_group": g} for g in ("Thai", "Italian")]
+
+    raw = build.training_district_inputs(rows, districts, supply)
+
+    thai, italian = (dict(zip(build.DISTRICT_INPUTS, row)) for row in raw)
+    assert (thai["total_restaurants"], thai["same_cuisine_supply"]) == (2, 1)
+    assert (italian["total_restaurants"], italian["same_cuisine_supply"]) == (2, 0)
+    assert thai["population"] == 1000 and thai["deprivation_index"] == 12.5
+    assert np.isnan(thai["commercial_rent_index"])  # missing stays missing until the median fill
+
+
+def test_cv_folds_never_share_a_district_across_fit_early_stop_and_test(data):
+    # The rows CV runs on: those with a label.
+    codes = [r["postcode_district"] for r in read_csv(data / "restaurants.csv") if r["review_success_label"]]
+
+    splits = nn1.group_splits(codes, folds=5)
+
+    assert len(splits) == 5
+    tested = []
+    for split in splits:
+        sides = [{codes[i] for i in split[side]} for side in ("fit", "early_stop", "test")]
+        assert all(sides), "every side holds at least one district"
+        fit, early_stop, test = sides
+        assert not (fit & early_stop or fit & test or early_stop & test)
+        assert sorted(np.concatenate(list(split.values()))) == list(range(len(codes)))
+        tested += list(split["test"])
+    assert sorted(tested) == list(range(len(codes)))  # each row is tested exactly once
+
+
+def test_transforms_fitted_on_a_subset_use_only_that_subset():
+    vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
+    nan = np.nan
+    # Columns follow DISTRICT_INPUTS: population, deprivation, rent, total, same-cuisine.
+    train = np.array([
+        [9, 10, nan, 0, 0],
+        [nan, 20, nan, 0, 0],
+        [99, 30, nan, 0, 0],
+    ])
+    held_out = np.array([[999999, 1000, 5, 7, 7]])
+
+    t = build.model_spec(vocab, train)["transforms"]
+
+    assert build.model_spec(vocab, np.vstack([train, held_out]))["transforms"]["deprivation_index"]["mean"] == 265
+    assert t["population"]["median"] == 54  # of 9 and 99; the missing row is skipped
+    assert t["population"]["log1p"] is True and t["deprivation_index"]["log1p"] is False
+    assert (t["deprivation_index"]["mean"], t["deprivation_index"]["median"]) == (20, 20)
+    assert t["deprivation_index"]["std"] == pytest.approx(8.164966)  # population std of 10, 20, 30
+    # No training row has rent, so the held-out row's 5 must not leak into the fill.
+    assert t["commercial_rent_index"] == {"kind": "numeric", "log1p": True, "mean": 0, "std": 1, "median": 0}
+
+
+def test_a_column_constant_on_the_training_rows_keeps_held_out_values_finite():
+    vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
+    # A fold whose only rented district is SE11 at £400/m²: log1p(400) repeated
+    # has a float std of about 1e-15, not 0.
+    train = np.array([[1000, 10, 400, 3, 1]] * 170, dtype=float)
+
+    model = build.model_spec(vocab, train)
+
+    assert model["transforms"]["commercial_rent_index"]["std"] == 1
+    x = build.inputs(model,{"cuisine_group": "Thai"}, np.array([[1000, 10, 150, 3, 1]], dtype=float))
+    assert np.abs(x).max() < 10
 
 
 def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
@@ -154,6 +399,13 @@ def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
     assert read_json(out / "reference_scores.json")["cases"][0]["profile"]["price_band"] == "unknown"
     for name in build.BUNDLE_FILES:
         assert "Three branches" not in (out / name).read_text(encoding="utf-8")
+def test_model_declares_log1p_mean_std_and_median_for_each_district_input(built):
+    model = read_json(built / "model.json")
+
+    for name in model["features"]["district_inputs"]:
+        t = model["transforms"][name]
+        assert t["kind"] == "numeric" and set(t) == {"kind", "log1p", "mean", "std", "median"}, name
+        assert t["log1p"] == (name != "deprivation_index"), name
 
 
 def test_model_layers_are_inputs_64_32_1(built):
@@ -171,6 +423,38 @@ def test_model_layers_are_inputs_64_32_1(built):
     assert model["activations"] == ["relu", "relu", "sigmoid"]
 
 
+def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    voa = [
+        ("SE1", "NIA", "100.00", "10000"),
+        ("SE1", "GIA", "100.00", "30000"),  # SE1 has NIA areas, so GIA is not used
+        ("SE1", "NIA", "50.00", "10000"),
+        ("SE1", "NIA", "", "90000"),  # no area: not a valid denominator
+        ("SE1", "NIA", "0.00", "90000"),
+        ("SE1", "OTH", "3.00", "90000"),  # a count of units, not square metres
+        ("SE11", "GIA", "100.00", "40000"),  # no NIA area: GIA stands in
+        ("EC4R", "NIA", "", "5000"),
+    ]
+    with (data / "voa_england.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(sources.VOA_COLUMNS)
+        for i, (district, unit, area, rv) in enumerate(voa):
+            writer.writerow([f"synthetic-{i}", f"{district} 1AA", district, "234",
+                             "Restaurant And Premises", unit, area, rv])
+
+    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+
+    rent = {d["postcode_district"]: d["commercial_rent_index"]
+            for d in read_csv(data / "bundle" / "districts.csv")}
+    assert rent["SE1"] == "150.0"  # median of 100 and 200 £/m², NIA only
+    assert rent["SE11"] == "400.0"
+    assert rent["EC4R"] == ""
+    model = read_json(data / "bundle" / "model.json")
+    assert "commercial_rent_index" in model["features"]["district_inputs"]
+    assert model["transforms"]["commercial_rent_index"]["log1p"] is True
+    assert "commercial_rent_index" not in metrics.get("inputs_left_out", {})
+
+
 def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
     copy_sources(tmp_path)
     rows = read_csv(tmp_path / "tripadvisor_england.csv")
@@ -182,6 +466,12 @@ def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
 
     with pytest.raises(ValueError, match="Martian"):
         build.build(tmp_path, tmp_path / "out", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
+
+
+def test_mapping_covers_every_tag_in_the_committed_sample():
+    rows = read_csv(data_dir(choice="sample") / "tripadvisor_england.csv")
+    tags = {t.strip() for r in rows for t in r["cuisines"].split(",") if t.strip()}
+    assert sorted(tags - set(build.load_mapping())) == []
 
 
 def encode(model, profile, group, district, supply):

@@ -6,8 +6,12 @@ One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
 - to ``data``, ``restaurants.csv``: the 15-column restaurant table of ADR 0004.
   It holds ratings and review counts, so it is private and stays beside the
   sources, on LinuxONE for full data (ADR 0003);
-- to ``data``, ``run/metrics.json``: row counts, exclusions by reason, inputs
-  left out and loss per epoch.
+- to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref).
+  It derives from ratings, so it is private like ``restaurants.csv``;
+- to ``run`` (default ``<data>/run``), ``metrics.json``: row counts, label
+  exclusions and fixes by reason, the district-grouped CV of NN1 against a
+  training-mean baseline, and loss per epoch. It holds no restaurant rows or
+  fitted label policy, so a run folder can be committed (``runs/README.md``).
 
 This is the tracer of the spec in issue #64: every stage is crude, but the
 file shapes are the contract the site builds against.
@@ -16,6 +20,8 @@ file shapes are the contract the site builds against.
 import argparse
 import csv
 import json
+import math
+import re
 import statistics
 from collections import Counter
 from pathlib import Path
@@ -23,7 +29,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from plotluck import nn1
+from plotluck import label, nn1
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
@@ -35,9 +41,11 @@ BUNDLE_FILES = (
     "model.json",
     "reference_scores.json",
 )
-TRACER_EPOCHS = 20
+# NN1 training procedure (issue #62): district-grouped CV with early stopping.
+FOLDS = 5
+MAX_EPOCHS = 100
+PATIENCE = 10
 REFERENCE_TOLERANCE = 1e-6
-PRIOR_REVIEWS = 20
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
 UNSPECIFIED = "Unspecified"
@@ -79,12 +87,22 @@ DISTRICT_COLUMNS = (
     "deprivation_index",
     "commercial_rent_index",
 )
-_CATEGORIES = ("excellent", "very_good", "average", "poor", "terrible")
+# Register each approved public economic or demographic extension here before
+# adding it to district_table. Unknown fields must never pass through by default.
+DISTRICT_PUBLIC_EXTENSIONS = ()
 
 # NN1's district inputs, in input-vector order, and which get log1p first.
-# shortcut: commercial_rent_index is left out until VOA lands (issue #72).
-DISTRICT_INPUTS = ("population", "deprivation_index", "total_restaurants", "same_cuisine_supply")
-LOG1P = {"population", "total_restaurants", "same_cuisine_supply"}
+DISTRICT_INPUTS = (
+    "population",
+    "deprivation_index",
+    "commercial_rent_index",
+    "total_restaurants",
+    "same_cuisine_supply",
+)
+LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply"}
+# VOA measuring standards the rent index divides by, in order of preference:
+# net internal area, then gross internal area where a district has no NIA.
+VOA_AREA_UNITS = ("NIA", "GIA")
 
 
 def build(
@@ -92,53 +110,51 @@ def build(
     out: Path,
     *,
     group_threshold: int = FULL_GROUP_THRESHOLD,
-    epochs: int = TRACER_EPOCHS,
+    run: Path | None = None,
+    folds: int = FOLDS,
+    max_epochs: int = MAX_EPOCHS,
+    patience: int = PATIENCE,
     seed: int = 0,
 ) -> dict:
-    """Run every stage on ``data`` and write the bundle to ``out``; return run metrics."""
+    """Run every stage on ``data`` and write the bundle to ``out``; return run metrics.
+
+    NN1 is cross-validated in ``folds`` district-grouped folds, then the
+    shipped model trains on every labelled row for the median best epoch.
+    """
     data, out = Path(data), Path(out)
-    out.mkdir(parents=True, exist_ok=True)
+    run = Path(run) if run is not None else data / "run"
+    if data.resolve() == out.resolve():
+        raise ValueError("bundle output must be separate from private data")
     postcodes = _read_csv(data / "onspd_england.csv")
     mapping = load_mapping()
     restaurants, metrics = restaurant_table(
         _read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
     )
+    policy = label_restaurants(restaurants)
     groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
-    districts = district_table(postcodes, _read_csv(data / "p004_england.csv"), restaurants)
+    districts = district_table(
+        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv")
+    )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
-    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
-    _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
-    _write_csv(
-        out / "district_cuisine_supply.csv",
-        ("postcode_district", "cuisine_group", "restaurants"),
-        [
-            {"postcode_district": d, "cuisine_group": g, "restaurants": n}
-            for (d, g), n in sorted(supply.items())
-        ],
-    )
-
     vocab = vocabulary(groups, restaurants)
+    supply_rows = [
+        {"postcode_district": d, "cuisine_group": g, "restaurants": n}
+        for (d, g), n in sorted(supply.items())
+    ]
+    vocab = vocabulary(groups)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
-    by_code = {d["postcode_district"]: d for d in districts}
-    district_raw = np.array([
-        # In training a row's own restaurant is not part of its district's supply.
-        _district_raw(
-            by_code[r["postcode_district"]],
-            supply[(r["postcode_district"], r["cuisine_group"])] - 1,
-            exclude_from_total=1,
-        )
-        for r in labelled
-    ])
+    district_raw = training_district_inputs(labelled, districts, supply)
+    cv = cross_validate(
+        labelled, district_raw, vocab, folds=folds, max_epochs=max_epochs, patience=patience, seed=seed
+    )
+    # median_low: an epoch some fold actually chose; the plain median for an odd fold count.
+    epochs = statistics.median_low(f["best_epoch"] for f in cv["folds"])
     model = model_spec(vocab, district_raw)
-    x = np.vstack([
-        inputs(model, _restaurant_values(r), row[None, :])
-        for r, row in zip(labelled, district_raw)
-    ])
     y = np.array([r["review_success_label"] for r in labelled], dtype=float)
-    model["layers"], losses = nn1.train(x, y, epochs=epochs, seed=seed)
+    model["layers"], losses = nn1.train(_design(model, labelled, district_raw), y, epochs=epochs, seed=seed)
     model["activations"] = list(nn1.ACTIVATIONS)
 
     reference = {
@@ -149,18 +165,26 @@ def build(
             for profile in reference_profiles(vocab)
         ],
     }
-    _write_json(out / "vocabulary.json", vocab)
-    _write_json(out / "model.json", model, indent=None)
-    _write_json(out / "reference_scores.json", reference)
     metrics.update(
         restaurants=len(restaurants),
         labelled=len(labelled),
-        inputs_left_out={"commercial_rent_index": "no VOA source yet (issue #72)"},
-        epochs=epochs,
-        train_loss=losses,
+        districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
+        cv=cv,
+        shipped={"epochs": epochs, "train_loss": losses},
     )
-    (data / "run").mkdir(exist_ok=True)
-    _write_json(data / "run" / "metrics.json", metrics)
+    bundle = {
+        "districts.csv": districts,
+        "district_cuisine_supply.csv": supply_rows,
+        "vocabulary.json": vocab,
+        "model.json": model,
+        "reference_scores.json": reference,
+    }
+    validate_run_metrics(metrics)
+    publish_bundle(out, bundle)
+    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
+    run.mkdir(parents=True, exist_ok=True)
+    _write_json(run / "metrics.json", metrics)
     return metrics
 
 
@@ -189,6 +213,224 @@ def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
             for f in ("chain", *DIET_FLAGS)
         ),
     ]
+def cross_validate(
+    labelled: list[dict], district_raw: np.ndarray, vocab: dict, *, folds: int, max_epochs: int, patience: int, seed: int
+) -> dict:
+    """District-grouped CV of NN1: per-fold and summary MAE and RMSE, with loss curves.
+
+    Each fold refits the label policy and the input transforms on its
+    training rows (the fit rows and the early-stopping slice), so nothing
+    from the test districts leaks in. The baseline predicts the training
+    mean; only its errors are reported, as the mean itself derives from ratings.
+    """
+    results = []
+    for split in nn1.group_splits([r["postcode_district"] for r in labelled], folds):
+        train = np.concatenate([split["fit"], split["early_stop"]])
+        policy = label.fit_policy([labelled[i] for i in train])
+        y = np.array(label.labels(labelled, policy), dtype=float)
+        x = _design(model_spec(vocab, district_raw[train]), labelled, district_raw)
+        fit, stop, test = split["fit"], split["early_stop"], split["test"]
+        layers, best, train_loss, stop_loss = nn1.train_early_stopping(
+            x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed
+        )
+        model_mae, model_rmse = _mae_rmse(nn1.forward(layers, x[test]) - y[test])
+        baseline_mae, baseline_rmse = _mae_rmse(y[train].mean() - y[test])
+        results.append({
+            "rows": {side: len(rows) for side, rows in split.items()},
+            "best_epoch": best,
+            "mae": model_mae,
+            "rmse": model_rmse,
+            "baseline_mae": baseline_mae,
+            "baseline_rmse": baseline_rmse,
+            "train_loss": train_loss,
+            "early_stop_loss": stop_loss,
+        })
+    summary = {
+        name: {"mean": statistics.fmean(f[name] for f in results), "std": statistics.pstdev(f[name] for f in results)}
+        for name in ("mae", "rmse", "baseline_mae", "baseline_rmse")
+    }
+    return {"folds": results, "summary": summary}
+
+
+def _mae_rmse(error: np.ndarray) -> tuple[float, float]:
+    return float(np.abs(error).mean()), float(np.sqrt((error**2).mean()))
+
+
+def _only_keys(value: dict, keys, where: str) -> None:
+    if not isinstance(value, dict) or set(value) != set(keys):
+        raise ValueError(f"{where} has private or unexpected fields")
+
+
+def _finite_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def validate_run_metrics(metrics: dict) -> None:
+    """Keep server run output to counts, losses and evaluation metrics."""
+    allowed = {
+        "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
+        "districts_without_rent", "cv", "shipped",
+    }
+    if not isinstance(metrics, dict) or set(metrics) - allowed:
+        raise ValueError("run metrics have private or unexpected fields")
+    for name in ("source_rows", "restaurants", "labelled", "districts_without_rent"):
+        if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
+            raise ValueError(f"run metrics {name} must be a count")
+    reasons = {
+        "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
+        "label_fixes": {"counts_partly_missing", "total_below_counts"},
+    }
+    for name, allowed_reasons in reasons.items():
+        if not isinstance(metrics.get(name), dict) or any(
+            not isinstance(count, int) or count < 0 for count in metrics[name].values()
+        ) or set(metrics[name]) - allowed_reasons:
+            raise ValueError(f"run metrics {name} must contain counts only")
+    errors = ("mae", "rmse", "baseline_mae", "baseline_rmse")
+    cv = metrics.get("cv")
+    _only_keys(cv, ("folds", "summary"), "run metrics cv")
+    _only_keys(cv["summary"], errors, "run metrics cv summary")
+    for stats in cv["summary"].values():
+        _only_keys(stats, ("mean", "std"), "run metrics cv summary")
+    folds = cv["folds"] if isinstance(cv["folds"], list) else [None]
+    for fold in folds:
+        _only_keys(fold, ("rows", "best_epoch", *errors, "train_loss", "early_stop_loss"), "run metrics cv fold")
+        _only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics cv fold rows")
+    shipped = metrics.get("shipped")
+    _only_keys(shipped, ("epochs", "train_loss"), "run metrics shipped")
+    counts = [shipped["epochs"], *(n for f in folds for n in (f["best_epoch"], *f["rows"].values()))]
+    if not all(isinstance(n, int) and not isinstance(n, bool) and n >= 0 for n in counts):
+        raise ValueError("run metrics epochs and fold rows must be counts")
+    numbers = [s for stats in cv["summary"].values() for s in stats.values()]
+    numbers += [f[name] for f in folds for name in errors]
+    curves = [shipped["train_loss"], *(f[c] for f in folds for c in ("train_loss", "early_stop_loss"))]
+    if not all(isinstance(c, list) for c in curves) or not all(
+        _finite_number(n) for n in numbers + [loss for c in curves for loss in c]
+    ):
+        raise ValueError("run metrics errors and loss curves must contain numbers only")
+
+
+def publish_bundle(out: Path, bundle: dict) -> None:
+    """Validate the complete public bundle before writing a single output file."""
+    _only_keys(bundle, BUNDLE_FILES, "bundle")
+    districts = bundle["districts.csv"]
+    supply = bundle["district_cuisine_supply.csv"]
+    if not isinstance(districts, list) or not districts or not isinstance(supply, list):
+        raise ValueError("bundle tables have private or unexpected shape")
+    district_columns = (*DISTRICT_COLUMNS, *DISTRICT_PUBLIC_EXTENSIONS)
+    for row in districts:
+        _only_keys(row, district_columns, "districts.csv")
+        if not isinstance(row["postcode_district"], str) or not re.fullmatch(
+            r"[A-Z]{1,2}\d[A-Z\d]?", row["postcode_district"]
+        ):
+            raise ValueError("districts.csv has an invalid district code")
+        for name in district_columns[1:]:
+            if row[name] != "" and not _finite_number(float(row[name])):
+                raise ValueError(f"districts.csv has an invalid {name}")
+    district_codes = {row["postcode_district"] for row in districts}
+
+    vocab = bundle["vocabulary.json"]
+    _only_keys(vocab, ("version", "cuisines", "traits"), "vocabulary.json")
+    if vocab["version"] != BUNDLE_VERSION:
+        raise ValueError("vocabulary.json has an unexpected version")
+    allowed_cuisines = {m["cuisine"] for m in load_mapping().values() if m["cuisine"]} | {UNSPECIFIED}
+    groups = set()
+    for cuisine in vocab["cuisines"]:
+        _only_keys(cuisine, ("cuisine", "cuisine_group", "label"), "vocabulary cuisine")
+        fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
+        if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
+            raise ValueError("vocabulary has a private or unexpected cuisine")
+        if cuisine["label"] != (fine if fine == group else f"{fine} (scored as {group})"):
+            raise ValueError("vocabulary has a private or unexpected label")
+        groups.add(group)
+    trait_names = []
+    allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
+    for trait in vocab["traits"]:
+        _only_keys(trait, ("name", "kind", "values", "default"), "vocabulary trait")
+        if trait["name"] not in allowed_traits or trait["name"] in trait_names:
+            raise ValueError("vocabulary has a private or unexpected trait")
+        trait_names.append(trait["name"])
+        expected = (
+            list(VENUE_TYPES) if trait["name"] == "venue_type" else
+            [*PRICE_BANDS.values(), UNKNOWN_PRICE] if trait["name"] == "price_band" else
+            [False, True]
+        )
+        kind = "single_choice" if trait["name"] in {"venue_type", "price_band"} else "on_off"
+        if trait["kind"] != kind or trait["values"] != expected or trait["default"] not in expected:
+            raise ValueError("vocabulary has private or unexpected trait values")
+
+    for row in supply:
+        _only_keys(row, ("postcode_district", "cuisine_group", "restaurants"), "supply table")
+        count = row["restaurants"]
+        if row["postcode_district"] not in district_codes or row["cuisine_group"] not in groups or (
+            isinstance(count, bool) or not str(count).isdigit()
+        ):
+            raise ValueError("supply table has private or unexpected values")
+
+    model = bundle["model.json"]
+    _only_keys(model, ("version", "features", "transforms", "layers", "activations"), "model.json")
+    if model["version"] != BUNDLE_VERSION or model["activations"] != list(nn1.ACTIVATIONS):
+        raise ValueError("model has private or unexpected metadata")
+    _only_keys(model["features"], ("restaurant_inputs", "district_inputs"), "model features")
+    restaurant_inputs = model["features"]["restaurant_inputs"]
+    district_inputs = model["features"]["district_inputs"]
+    if restaurant_inputs != ["cuisine_group", *trait_names] or (
+        len(district_inputs) != len(set(district_inputs)) or set(district_inputs) - set(DISTRICT_INPUTS)
+    ):
+        raise ValueError("model has private or unexpected inputs")
+    _only_keys(model["transforms"], [*restaurant_inputs, *district_inputs], "model transforms")
+    for name, transform in model["transforms"].items():
+        if name in district_inputs:
+            _only_keys(transform, ("kind", "log1p", "mean", "std", "median"), "numeric transform")
+            if transform["kind"] != "numeric" or not isinstance(transform["log1p"], bool) or not all(
+                _finite_number(transform[key]) for key in ("mean", "std", "median")
+            ):
+                raise ValueError("model has private or unexpected numeric transforms")
+        elif name == "cuisine_group" or name in {"venue_type", "price_band"}:
+            _only_keys(transform, ("kind", "values"), "categorical transform")
+            expected = sorted(groups) if name == "cuisine_group" else next(
+                trait["values"] for trait in vocab["traits"] if trait["name"] == name
+            )
+            if transform["kind"] != "one_hot" or transform["values"] != expected:
+                raise ValueError("model has private or unexpected categorical transforms")
+        else:
+            _only_keys(transform, ("kind",), "flag transform")
+            if transform["kind"] != "flag":
+                raise ValueError("model has private or unexpected flag transforms")
+    for layer in model["layers"]:
+        _only_keys(layer, ("weights", "biases"), "model layer")
+        if not all(_finite_number(value) for row in layer["weights"] for value in row) or not all(
+            _finite_number(value) for value in layer["biases"]
+        ):
+            raise ValueError("model layer has private or unexpected values")
+
+    reference = bundle["reference_scores.json"]
+    _only_keys(reference, ("version", "tolerance", "cases"), "reference scores")
+    if reference["version"] != BUNDLE_VERSION or not _finite_number(reference["tolerance"]):
+        raise ValueError("reference scores have private or unexpected metadata")
+    for case in reference["cases"]:
+        _only_keys(case, ("profile", "scores"), "reference case")
+        _only_keys(case["profile"], ("cuisine", *trait_names), "reference profile")
+        if case["profile"]["cuisine"] not in {c["cuisine"] for c in vocab["cuisines"]} or any(
+            case["profile"][trait["name"]] not in trait["values"] for trait in vocab["traits"]
+        ):
+            raise ValueError("reference profile has private or unexpected values")
+        _only_keys(case["scores"], district_codes, "reference district scores")
+        if not all(_finite_number(score) and 0 <= score <= 1 for score in case["scores"].values()):
+            raise ValueError("reference scores have private or unexpected values")
+
+    out = Path(out)
+    if out.exists() and {path.name for path in out.iterdir()} - set(BUNDLE_FILES) - {".gitkeep"}:
+        raise ValueError("bundle output contains private or unexpected files")
+    out.mkdir(parents=True, exist_ok=True)
+    _write_csv(out / "districts.csv", district_columns, districts)
+    _write_csv(out / "district_cuisine_supply.csv", ("postcode_district", "cuisine_group", "restaurants"), supply)
+    _write_json(out / "vocabulary.json", vocab)
+    _write_json(out / "model.json", model, indent=None)
+    _write_json(out / "reference_scores.json", reference)
+
+
+def vocabulary(groups: dict[str, str]) -> dict:
+    """Cuisines with their group and display label, and the shipped traits."""
     return {
         "version": BUNDLE_VERSION,
         "cuisines": [
@@ -197,6 +439,24 @@ def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
         ],
         "traits": [t for t in traits if t["name"] == "venue_type" or filled[t["name"]] >= 0.5],
     }
+
+
+def training_district_inputs(restaurants: list[dict], districts: list[dict], supply: Counter) -> np.ndarray:
+    """Raw ``DISTRICT_INPUTS`` per restaurant row, NaN when missing.
+
+    Each row's own restaurant is left out of both its total and its
+    same-cuisine supply, as a new entrant adds to the existing supply. The
+    published ``supply`` and ``total_restaurants`` stay unadjusted.
+    """
+    by_code = {d["postcode_district"]: d for d in districts}
+    return np.array([
+        _district_raw(
+            by_code[r["postcode_district"]],
+            supply[(r["postcode_district"], r["cuisine_group"])] - 1,
+            exclude_from_total=1,
+        )
+        for r in restaurants
+    ])
 
 
 def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
@@ -214,7 +474,7 @@ def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
     for name, column in zip(DISTRICT_INPUTS, district_raw.T):
         median = float(np.nanmedian(column)) if not np.isnan(column).all() else 0.0
         values = _fill_log1p(column, median, name in LOG1P)
-        std = float(values.std())
+        std = float(values.std()) if np.ptp(values) > 0 else 0.0  # a constant column's std is float noise
         transforms[name] = {
             "kind": "numeric",
             "log1p": name in LOG1P,
@@ -230,6 +490,13 @@ def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
         },
         "transforms": transforms,
     }
+
+
+def _design(model: dict, restaurants: list[dict], district_raw: np.ndarray) -> np.ndarray:
+    """Input matrix with one row per restaurant, beside its own row of ``district_raw``."""
+    return np.vstack([
+        inputs(model, _restaurant_values(r), row[None, :]) for r, row in zip(restaurants, district_raw)
+    ])
 
 
 def inputs(model: dict, restaurant: dict, district_raw: np.ndarray) -> np.ndarray:
@@ -286,6 +553,7 @@ def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0
     return [
         number(district["population"]),
         number(district["deprivation_index"]),
+        number(district["commercial_rent_index"]),
         float(district["total_restaurants"] - exclude_from_total),
         float(same_cuisine),
     ]
@@ -335,50 +603,33 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
         postcodes, [(float(r["latitude"]), float(r["longitude"])) for r in located]
     )
     excluded = Counter({"no_location": len(rows) - len(located)})
+    fixes = Counter()
     restaurants = []
     for row, code in zip(located, district):
         cuisine, venue = classify(row["cuisines"], mapping)
-        counts = [_int(row[c]) for c in _CATEGORIES]
-        total = _int(row["total_reviews_count"])
-        if None not in counts and total is not None:
-            total = max(total, sum(counts))  # issue #47: n_total = max(total, n_default)
         restaurants.append({
             "postcode_district": code,
             "cuisines": row["cuisines"],
             "price_band": PRICE_BANDS.get(row["price_level"], ""),
             "is_chain": int(names[row["restaurant_name"]] >= CHAIN_MIN_NAMES),
             **{f: {"Y": 1, "N": 0}.get(row[f], "") for f in DIET_FLAGS},
-            "avg_rating": row["avg_rating"],
-            "total_reviews": "" if total is None else total,
-            **{f"count_{c}": "" if n is None else n for c, n in zip(_CATEGORIES, counts)},
+            **label.review_fields(row, fixes),
             "cuisine": cuisine,
             "venue_type": venue,
         })
-    _placeholder_label(restaurants, excluded)
-    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded)}
+    excluded.update(filter(None, map(label.exclusion, restaurants)))
+    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
 
 
-def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
-    """Set ``review_success_label``: a rating smoothed by prior reviews, on 0-1.
+def label_restaurants(restaurants: list[dict]) -> dict:
+    """Set ``review_success_label`` under a policy fitted on every row; return it.
 
-    shortcut: placeholder, not the ADR 0002 formula; issue #69 replaces it
-    with the full label and a per-fold label policy.
+    The shipped model trains on every row; ``cross_validate`` refits it per fold.
     """
-    eligible = []
-    for r in restaurants:
-        rating = _float(r["avg_rating"])
-        if rating is None or not 1 <= rating <= 5:
-            excluded["rating"] += 1
-        elif not r["total_reviews"]:
-            excluded["reviews"] += 1
-        else:
-            eligible.append((r, rating, r["total_reviews"]))
-    prior = statistics.fmean(rating for _, rating, _ in eligible) if eligible else 3.0
-    for r in restaurants:
-        r["review_success_label"] = ""
-    for r, rating, n in eligible:
-        smoothed = (n * rating + PRIOR_REVIEWS * prior) / (n + PRIOR_REVIEWS)
-        r["review_success_label"] = round((smoothed - 1) / 4, 6)
+    policy = label.fit_policy(restaurants)
+    for r, value in zip(restaurants, label.labels(restaurants, policy)):
+        r["review_success_label"] = "" if value is None else round(value, 6)
+    return policy
 
 
 def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> dict[str, str]:
@@ -399,13 +650,16 @@ def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> di
     return {c: group if pool[group] >= threshold else OTHER for c, group in root.items()}
 
 
-def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:
+def district_table(
+    postcodes: list[dict], p004: list[dict], restaurants: list[dict], voa: list[dict]
+) -> list[dict]:
     """One row per district with an English postcode that has a grid reference.
 
     Restaurants come from live postcodes with a grid reference, so no
     restaurant lands in a district left out here.
     """
     residents = {r["district"]: int(r["residents"]) for r in p004}
+    rent = rent_index(voa)
     totals = Counter(r["postcode_district"] for r in restaurants)
     points, ranks = {}, {}
     for p in postcodes:
@@ -424,10 +678,28 @@ def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[di
             "total_restaurants": totals[code],
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
-            # shortcut: no VOA source yet; issue #72 fills commercial_rent_index.
-            "commercial_rent_index": "",
+            "commercial_rent_index": rent.get(code, ""),
         })
     return rows
+
+
+def rent_index(voa: list[dict]) -> dict[str, float]:
+    """Median rateable value per square metre of each district's VOA valuations.
+
+    £/m² only compares within one measuring standard, so a district uses its
+    NIA valuations, or its GIA ones when it has no NIA. Valuations without a
+    positive area have no valid denominator; a district with none is left
+    out, not filled.
+    """
+    per_m2 = {}
+    for v in voa:
+        area, rv = _float(v["total_area"]), _float(v["adopted_rv"])
+        if v["unit"] in VOA_AREA_UNITS and area and area > 0 and rv is not None:
+            per_m2.setdefault(v["district"], {}).setdefault(v["unit"], []).append(rv / area)
+    return {
+        d: round(statistics.median(next(by_unit[u] for u in VOA_AREA_UNITS if u in by_unit)), 1)
+        for d, by_unit in per_m2.items()
+    }
 
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:
@@ -455,11 +727,6 @@ def _float(value: str) -> float | None:
         return None
 
 
-def _int(value: str) -> int | None:
-    number = _float(value)
-    return None if number is None else int(number)  # source counts look like "347.0"
-
-
 def _read_csv(path: Path) -> list[dict]:
     with Path(path).open(encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
@@ -482,18 +749,22 @@ def main(argv=None) -> None:
         prog="python -m plotluck.build",
         description="Build the site bundle from the data folder chosen by data_dir().",
     )
-    parser.add_argument("--out", type=Path, help="bundle folder (default: the data folder)")
-    parser.add_argument("--epochs", type=int, default=TRACER_EPOCHS)
+    parser.add_argument("--out", type=Path, help="bundle folder (default: <data folder>/bundle)")
+    parser.add_argument("--run", type=Path, help="run-results folder (default: <data folder>/run)")
+    parser.add_argument("--max-epochs", type=int, default=MAX_EPOCHS)
+    parser.add_argument("--patience", type=int, default=PATIENCE)
     args = parser.parse_args(argv)
     data = data_dir()
     full = data == data_dir(choice="full")
     metrics = build(
         data,
-        args.out or data,
+        args.out or data / "bundle",
         group_threshold=FULL_GROUP_THRESHOLD if full else SAMPLE_GROUP_THRESHOLD,
-        epochs=args.epochs,
+        run=args.run,
+        max_epochs=args.max_epochs,
+        patience=args.patience,
     )
-    print(json.dumps({k: v for k, v in metrics.items() if k != "train_loss"}))
+    print(json.dumps({**metrics, "cv": metrics["cv"]["summary"], "shipped": {"epochs": metrics["shipped"]["epochs"]}}))
 
 
 if __name__ == "__main__":
