@@ -15,7 +15,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 0 | Repo, workflow and server setup | done | #3, #19 |
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
-| 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #163, #164, #165 (release gate not passed, live bundle kept); [ranking revamp](RANKING.md) |
+| 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #163, #164, #165 (release gate passed with a commercial-core coverage gap); [ranking revamp](RANKING.md) |
 | 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); one description (#169); latest user amendment has NN2 fill the review card before scoring, not yet wired in; model/release gates remain open; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77, #161; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |

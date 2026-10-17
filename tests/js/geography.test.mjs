@@ -31,8 +31,10 @@ test("confirmed cities, boroughs and regions use centroid membership and never w
     assert.ok(codes.size > 0);
   }
   const city = reader.districtsInScope(reader.readArea("City of London"), "any");
-  assert.equal(city.size, 17);
-  assert.equal(city.has("EC4R"), true);
+  // 9 of the City's 17 districts are omitted as commercial cores without footfall (#165).
+  assert.equal(city.size, 8);
+  assert.equal(city.has("EC4M"), true);
+  assert.equal(city.has("EC3M"), false);
   assert.equal(city.has("SE1"), false);
   const empty = catalogue.places.find(p => p.districts.length === 0);
   assert.equal(reader.districtsInScope({ kind: "place", code: empty.id }, "any").size, 0);

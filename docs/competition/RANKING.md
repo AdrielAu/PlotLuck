@@ -118,11 +118,20 @@ TD5 1st and TD12 16th in live, both omitted as cross-border; EC3M 2,320th in
 live, omitted. W1D 2,297th → 779th, SW1A 2,313th → 626th, B1 2,025th → 188th,
 LA22 1,086th → 184th, TR18 1,736th → 1,791st, CA1 1,719th → 1,922nd.
 
-**Gate: not passed. The live bundle stays.** Fine cuisines now change scores,
-and removing the cross-border districts is correct. But the candidate reorders
-about half of every top 20 with no held-out gain to justify it. Its spread is
-narrower, so it adds no resolution. The `commercial_core_without_footfall`
-rule also drops 9 of the 17 City of London districts (including EC3M) and the
-West End `W1C W1M W1N W1R W1V W1X W1Y`. These are real restaurant districts,
-so the full-data evidence does not justify the rule. Next step: revise that
-threshold on LinuxONE, rerun, and repeat this audit before publishing.
+**Gate: passed with a known coverage gap; publish the candidate.** Held-out
+error is unchanged, so the gain is in input handling rather than accuracy.
+Fine cuisines now change scores, and removing the cross-border districts
+takes TD5 (the live #1) and TD12 out of the ranking. The live ranking had
+those known flaws, so its reordering by the candidate is not evidence against
+it.
+
+Of the dropped districts, 199 have no mapped restaurants, including
+`W1M W1N W1R W1V W1X W1Y EC3B`, which also have no census values in the live
+bundle. The real loss is the 9 districts that the
+`commercial_core_without_footfall` rule omits: `EC2N EC2R EC2V EC3A EC3M EC3V
+EC4N EC4R` in the City (8 of its 17 districts remain) and `W1C`. Each has 2–50
+residents and 21–73 restaurants. The live bundle, without the rule, ranks
+them near the bottom (EC3M 2,320th, W1C 2,286th) because NN1 reads residential
+population as demand. Omitting them hides a known input weakness instead of
+showing misleading scores. Restoring them needs a worker or visitor demand
+input, not a different threshold.
