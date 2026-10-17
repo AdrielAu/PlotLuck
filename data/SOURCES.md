@@ -14,7 +14,7 @@ One row per dataset, added in the same PR as the data (see [`AGENTS.md`](AGENTS.
 
 **Built files**: `python -m plotluck.build` (`src/plotluck/build.py`) writes the site bundle (`districts.csv`, `district_cuisine_supply.csv`, `vocabulary.json`, `model.json`, `reference_scores.json`) to `--out` (default: `bundle/` in the data folder; never the data folder itself), and always writes the private `restaurants.csv` and `label_policy.json` to the data folder, never to `--out`. Run results (`metrics.json`: NN1's district-grouped CV, baseline and loss per epoch) go to `--run` (default: `run/` in the data folder); `notebooks/train_nn1.ipynb` adds `loss_curves.png`. In `sample/` these are built from the sample files above, seed 0; rerun the command with `PLOTLUCK_DATA=sample` after changing the build.
 
-**Sample box**: every row with coordinates inside latitude 51.49–51.51, longitude −0.12 to −0.08 (Southwark, the City and around; constant `SAMPLE_BBOX`). It has no randomness, so the files still join on district and location. All five sources were pulled and extracted on LinuxONE on 2026-10-17, and the sample was re-cut from those extracts; the provenance copies in `sample/raw/` are the server's.
+**Sample box**: every row with coordinates inside latitude 51.49–51.51, longitude −0.12 to −0.08 (Southwark, the City and around; constant `SAMPLE_BBOX`). It has no randomness, so the files still join on district and location. All five sources were pulled and extracted on LinuxONE on 2026-10-17, and the sample was re-cut from those extracts with the same row counts. The provenance copies in `sample/raw/` are still from the laptop run (there is none for VOA); the server's are in `full/raw/`.
 
 ## TripAdvisor European restaurants
 
