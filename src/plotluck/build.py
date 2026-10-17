@@ -30,6 +30,8 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from plotluck import context, label, nn1
+from plotluck.geometry import EARTH_RADIUS_KM, cluster_points, haversine_km
+from plotluck.names import normalise_name
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
@@ -56,6 +58,15 @@ PRICE_BANDS = {"€": "$", "€€-€€€": "$$", "€€€€": "$$$"}
 UNKNOWN_PRICE = "unknown"
 DIET_FLAGS = ("vegetarian_friendly", "vegan_options", "gluten_free")
 CHAIN_MIN_NAMES = 3
+# Cleaning thresholds (issue #150), set from the full-data audit in runs/2026-10-17-data-audit/.
+# 99.9% of located rows lie within 0.81 km of a live English postcode; rows beyond 2 km (70)
+# barely thin out by 5 km (66), so they are bad coordinates or outside England.
+FAR_FROM_POSTCODE_KM = 2.0  # a row farther than this from any live English postcode is dropped
+# Same-name groups grow steadily from 25 m to 100 m with no clean break; 50 m covers geocoding
+# scatter around one building while staying below a street block, where branches start.
+NEAR_DUPLICATE_M = 50.0  # same normalised name within this distance is one listing
+# Off: removing the suffix makes 628 merged groups span more than 5 km, so it merges unrelated places.
+DROP_BRANCH_SUFFIX = False  # strip " - Soho" / " (Kings Cross)" before comparing names
 
 # Fine cuisines with fewer label-eligible rows fold into their parent, then Other.
 FULL_GROUP_THRESHOLD = 300
@@ -112,7 +123,6 @@ VOA_AREA_UNITS = ("NIA", "GIA")
 # district with one or two postcodes (a PO box, one building) gets the minimum.
 RADIUS_SHARE = 0.9
 MIN_RADIUS_KM = 0.3
-EARTH_RADIUS_KM = 6371.0088
 
 
 def build(
@@ -135,18 +145,18 @@ def build(
     run = Path(run) if run is not None else data / "run"
     if data.resolve() == out.resolve():
         raise ValueError("bundle output must be separate from private data")
-    postcodes = _read_csv(data / "onspd_england.csv")
+    postcodes = read_csv(data / "onspd_england.csv")
     mapping = load_mapping()
     restaurants, metrics = restaurant_table(
-        _read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
+        read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
     )
     policy = label_restaurants(restaurants)
     groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
     districts = district_table(
-        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv"),
-        context.demographic_table(data), _read_csv(data / "tourism_england.csv"),
+        postcodes, read_csv(data / "p004_england.csv"), restaurants, read_csv(data / "voa_england.csv"),
+        context.demographic_table(data), read_csv(data / "tourism_england.csv"),
     )
     tiny = [d["postcode_district"] for d in districts if d["radius_km"] == MIN_RADIUS_KM]
     print(f"Districts at the minimum {MIN_RADIUS_KM} km radius ({len(tiny)}): {' '.join(tiny)}")
@@ -247,7 +257,7 @@ def _mae_rmse(error: np.ndarray) -> tuple[float, float]:
     return float(np.abs(error).mean()), float(np.sqrt((error**2).mean()))
 
 
-def _only_keys(value: dict, keys, where: str) -> None:
+def only_keys(value: dict, keys, where: str) -> None:
     if not isinstance(value, dict) or set(value) != set(keys):
         raise ValueError(f"{where} has private or unexpected fields")
 
@@ -262,7 +272,7 @@ def validate_run_metrics(metrics: dict) -> None:
         "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
         "districts_without_rent", "districts_without_census", "cv", "shipped",
     }
-    _only_keys(metrics, allowed, "run metrics")
+    only_keys(metrics, allowed, "run metrics")
 
     def count(value):
         if type(value) is not int or value < 0:
@@ -280,11 +290,14 @@ def validate_run_metrics(metrics: dict) -> None:
 
     for name in ("source_rows", "restaurants", "labelled", "districts_without_rent"):
         count(metrics[name])
-    _only_keys(metrics["districts_without_census"], context.SOURCE_COLUMNS, "run metrics districts_without_census")
+    only_keys(metrics["districts_without_census"], context.SOURCE_COLUMNS, "run metrics districts_without_census")
     for value in metrics["districts_without_census"].values():
         count(value)
     reasons = {
-        "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
+        "excluded": {
+            "no_location", "far_from_postcode", "duplicate_listing",
+            "rating_missing", "rating_out_of_range", "n_total_zero",
+        },
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
     }
     for name, allowed_reasons in reasons.items():
@@ -293,13 +306,13 @@ def validate_run_metrics(metrics: dict) -> None:
         ) or set(metrics[name]) - allowed_reasons:
             raise ValueError(f"run metrics {name} must contain counts only")
     cv = metrics["cv"]
-    _only_keys(cv, ("folds", "summary"), "run metrics cv")
+    only_keys(cv, ("folds", "summary"), "run metrics cv")
     errors = ("mae", "rmse", "baseline_mae", "baseline_rmse")
     if not isinstance(cv["folds"], list) or not cv["folds"]:
         raise ValueError("run metrics cv must contain folds")
     for fold in cv["folds"]:
-        _only_keys(fold, (*errors, "rows", "best_epoch", "train_loss", "early_stop_loss"), "run metrics fold")
-        _only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics fold rows")
+        only_keys(fold, (*errors, "rows", "best_epoch", "train_loss", "early_stop_loss"), "run metrics fold")
+        only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics fold rows")
         for value in fold["rows"].values():
             count(value)
         count(fold["best_epoch"])
@@ -307,27 +320,27 @@ def validate_run_metrics(metrics: dict) -> None:
             number(fold[name])
         loss_curve(fold["train_loss"])
         loss_curve(fold["early_stop_loss"])
-    _only_keys(cv["summary"], errors, "run metrics cv summary")
+    only_keys(cv["summary"], errors, "run metrics cv summary")
     for summary in cv["summary"].values():
-        _only_keys(summary, ("mean", "std"), "run metrics error summary")
+        only_keys(summary, ("mean", "std"), "run metrics error summary")
         for value in summary.values():
             number(value)
     shipped = metrics["shipped"]
-    _only_keys(shipped, ("epochs", "train_loss"), "run metrics shipped")
+    only_keys(shipped, ("epochs", "train_loss"), "run metrics shipped")
     count(shipped["epochs"])
     loss_curve(shipped["train_loss"])
 
 
 def publish_bundle(out: Path, bundle: dict) -> None:
     """Validate the complete public bundle before writing a single output file."""
-    _only_keys(bundle, BUNDLE_FILES, "bundle")
+    only_keys(bundle, BUNDLE_FILES, "bundle")
     districts = bundle["districts.csv"]
     supply = bundle["district_cuisine_supply.csv"]
     if not isinstance(districts, list) or not districts or not isinstance(supply, list):
         raise ValueError("bundle tables have private or unexpected shape")
     district_columns = (*DISTRICT_COLUMNS, *DISTRICT_PUBLIC_EXTENSIONS)
     for row in districts:
-        _only_keys(row, district_columns, "districts.csv")
+        only_keys(row, district_columns, "districts.csv")
         if not isinstance(row["postcode_district"], str) or not re.fullmatch(
             r"[A-Z]{1,2}\d[A-Z\d]?", row["postcode_district"]
         ):
@@ -361,13 +374,13 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     district_codes = {row["postcode_district"] for row in districts}
 
     vocab = bundle["vocabulary.json"]
-    _only_keys(vocab, ("version", "cuisines", "traits"), "vocabulary.json")
+    only_keys(vocab, ("version", "cuisines", "traits"), "vocabulary.json")
     if vocab["version"] != BUNDLE_VERSION:
         raise ValueError("vocabulary.json has an unexpected version")
     allowed_cuisines = {m["cuisine"] for m in load_mapping().values() if m["cuisine"]} | {UNSPECIFIED}
     groups = set()
     for cuisine in vocab["cuisines"]:
-        _only_keys(cuisine, ("cuisine", "cuisine_group", "label"), "vocabulary cuisine")
+        only_keys(cuisine, ("cuisine", "cuisine_group", "label"), "vocabulary cuisine")
         fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
         if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
             raise ValueError("vocabulary has a private or unexpected cuisine")
@@ -377,7 +390,7 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     trait_names = []
     allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
     for trait in vocab["traits"]:
-        _only_keys(trait, ("name", "kind", "values", "default"), "vocabulary trait")
+        only_keys(trait, ("name", "kind", "values", "default"), "vocabulary trait")
         if trait["name"] not in allowed_traits or trait["name"] in trait_names:
             raise ValueError("vocabulary has a private or unexpected trait")
         trait_names.append(trait["name"])
@@ -391,7 +404,7 @@ def publish_bundle(out: Path, bundle: dict) -> None:
             raise ValueError("vocabulary has private or unexpected trait values")
 
     for row in supply:
-        _only_keys(row, ("postcode_district", "cuisine_group", "restaurants"), "supply table")
+        only_keys(row, ("postcode_district", "cuisine_group", "restaurants"), "supply table")
         count = row["restaurants"]
         if row["postcode_district"] not in district_codes or row["cuisine_group"] not in groups or (
             isinstance(count, bool) or not str(count).isdigit()
@@ -399,54 +412,54 @@ def publish_bundle(out: Path, bundle: dict) -> None:
             raise ValueError("supply table has private or unexpected values")
 
     model = bundle["model.json"]
-    _only_keys(model, ("version", "features", "transforms", "layers", "activations"), "model.json")
+    only_keys(model, ("version", "features", "transforms", "layers", "activations"), "model.json")
     if model["version"] != BUNDLE_VERSION or model["activations"] != list(nn1.ACTIVATIONS):
         raise ValueError("model has private or unexpected metadata")
-    _only_keys(model["features"], ("restaurant_inputs", "district_inputs"), "model features")
+    only_keys(model["features"], ("restaurant_inputs", "district_inputs"), "model features")
     restaurant_inputs = model["features"]["restaurant_inputs"]
     district_inputs = model["features"]["district_inputs"]
     if restaurant_inputs != ["cuisine_group", *trait_names] or (
         len(district_inputs) != len(set(district_inputs)) or set(district_inputs) - set(DISTRICT_INPUTS)
     ):
         raise ValueError("model has private or unexpected inputs")
-    _only_keys(model["transforms"], [*restaurant_inputs, *district_inputs], "model transforms")
+    only_keys(model["transforms"], [*restaurant_inputs, *district_inputs], "model transforms")
     for name, transform in model["transforms"].items():
         if name in district_inputs:
-            _only_keys(transform, ("kind", "log1p", "mean", "std", "median"), "numeric transform")
+            only_keys(transform, ("kind", "log1p", "mean", "std", "median"), "numeric transform")
             if transform["kind"] != "numeric" or not isinstance(transform["log1p"], bool) or not all(
                 _finite_number(transform[key]) for key in ("mean", "std", "median")
             ):
                 raise ValueError("model has private or unexpected numeric transforms")
         elif name == "cuisine_group" or name in {"venue_type", "price_band"}:
-            _only_keys(transform, ("kind", "values"), "categorical transform")
+            only_keys(transform, ("kind", "values"), "categorical transform")
             expected = sorted(groups) if name == "cuisine_group" else next(
                 trait["values"] for trait in vocab["traits"] if trait["name"] == name
             )
             if transform["kind"] != "one_hot" or transform["values"] != expected:
                 raise ValueError("model has private or unexpected categorical transforms")
         else:
-            _only_keys(transform, ("kind",), "flag transform")
+            only_keys(transform, ("kind",), "flag transform")
             if transform["kind"] != "flag":
                 raise ValueError("model has private or unexpected flag transforms")
     for layer in model["layers"]:
-        _only_keys(layer, ("weights", "biases"), "model layer")
+        only_keys(layer, ("weights", "biases"), "model layer")
         if not all(_finite_number(value) for row in layer["weights"] for value in row) or not all(
             _finite_number(value) for value in layer["biases"]
         ):
             raise ValueError("model layer has private or unexpected values")
 
     reference = bundle["reference_scores.json"]
-    _only_keys(reference, ("version", "tolerance", "cases"), "reference scores")
+    only_keys(reference, ("version", "tolerance", "cases"), "reference scores")
     if reference["version"] != BUNDLE_VERSION or not _finite_number(reference["tolerance"]):
         raise ValueError("reference scores have private or unexpected metadata")
     for case in reference["cases"]:
-        _only_keys(case, ("profile", "scores"), "reference case")
-        _only_keys(case["profile"], ("cuisine", *trait_names), "reference profile")
+        only_keys(case, ("profile", "scores"), "reference case")
+        only_keys(case["profile"], ("cuisine", *trait_names), "reference profile")
         if case["profile"]["cuisine"] not in {c["cuisine"] for c in vocab["cuisines"]} or any(
             case["profile"][trait["name"]] not in trait["values"] for trait in vocab["traits"]
         ):
             raise ValueError("reference profile has private or unexpected values")
-        _only_keys(case["scores"], district_codes, "reference district scores")
+        only_keys(case["scores"], district_codes, "reference district scores")
         if not all(_finite_number(score) and 0 <= score <= 1 for score in case["scores"].values()):
             raise ValueError("reference scores have private or unexpected values")
 
@@ -627,7 +640,7 @@ def load_mapping(path: Path = MAPPING) -> dict[str, dict]:
 
     Raises ValueError if a tag has more than one row, since the later row would silently win.
     """
-    rows = _read_csv(path)
+    rows = read_csv(path)
     duplicates = sorted(tag for tag, n in Counter(r["tag"] for r in rows).items() if n > 1)
     if duplicates:
         raise ValueError(f"tag(s) listed more than once in {Path(path).name}: {', '.join(duplicates)}")
@@ -654,22 +667,33 @@ def classify(cuisines: str, mapping: dict) -> tuple[str, str]:
 
 
 def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
-    """Source rows -> restaurant dicts (ADR 0004 columns plus derived fields)."""
-    names = Counter(r["restaurant_name"] for r in rows)
-    located = [r for r in rows if _float(r["latitude"]) is not None and _float(r["longitude"]) is not None]
-    district = _nearest_district(
-        postcodes, [(float(r["latitude"]), float(r["longitude"])) for r in located]
-    )
+    """Source rows -> restaurant dicts (ADR 0004 columns plus derived fields).
+
+    Stages, in order: location check, duplicate listings, chain, label fields.
+    Supply and ``total_restaurants`` are counted from the result, so they see
+    only the cleaned rows.
+    """
+    located = [r for r in rows if float_or_none(r["latitude"]) is not None and float_or_none(r["longitude"]) is not None]
+    points = [(float(r["latitude"]), float(r["longitude"])) for r in located]
+    district, km = nearest_postcodes(postcodes, points)
     excluded = Counter({"no_location": len(rows) - len(located)})
+    kept = [i for i, d in enumerate(km) if d <= FAR_FROM_POSTCODE_KM]
+    excluded["far_from_postcode"] = len(located) - len(kept)
+    located, points, district = ([x[i] for i in kept] for x in (located, points, district))
+    kept = _without_duplicate_listings(located, points)
+    excluded["duplicate_listing"] = len(located) - len(kept)
+    located, district = [located[i] for i in kept], [district[i] for i in kept]
+    name_counts = Counter(normalise_name(r["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX) for r in located)
     fixes = Counter()
     restaurants = []
     for row, code in zip(located, district):
+        name = normalise_name(row["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX)
         cuisine, venue = classify(row["cuisines"], mapping)
         restaurants.append({
             "postcode_district": code,
             "cuisines": row["cuisines"],
             "price_band": PRICE_BANDS.get(row["price_level"], ""),
-            "is_chain": int(names[row["restaurant_name"]] >= CHAIN_MIN_NAMES),
+            "is_chain": int(name_counts[name] >= CHAIN_MIN_NAMES),
             **{f: {"Y": 1, "N": 0}.get(row[f], "") for f in DIET_FLAGS},
             **label.review_fields(row, fixes),
             "cuisine": cuisine,
@@ -677,6 +701,39 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
         })
     excluded.update(filter(None, map(label.exclusion, restaurants)))
     return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
+
+
+def _without_duplicate_listings(rows: list[dict], points: list[tuple[float, float]]) -> list[int]:
+    """Indices of the rows left once each duplicate listing set keeps its best row, in source order.
+
+    A set is rows sharing a ``restaurant_link``, then rows with one normalised
+    name within ``NEAR_DUPLICATE_M`` of each other (chained). The kept row has
+    the most reviews; ties go to the first row. Review counts are never merged.
+    """
+    reviews = [label.review_fields(r, Counter())["total_reviews"] for r in rows]
+    reviews = [0 if n == "" else n for n in reviews]
+    best = {}
+    for i, row in enumerate(rows):
+        key = row["restaurant_link"] or f"row {i}"  # a blank link identifies nothing
+        if key not in best or reviews[i] > reviews[best[key]]:
+            best[key] = i
+    survivors = sorted(best.values())
+    by_name = {}
+    for i in survivors:
+        name = normalise_name(rows[i]["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX)
+        by_name.setdefault(name, []).append(i)
+    dropped = set()
+    for members in by_name.values():
+        if len(members) < 2:
+            continue
+        cluster = cluster_points([points[i] for i in members], NEAR_DUPLICATE_M)
+        winner = {}
+        for k, i in enumerate(members):
+            root = cluster[k]
+            if root not in winner or reviews[i] > reviews[winner[root]]:
+                winner[root] = i
+        dropped.update(set(members) - set(winner.values()))
+    return [i for i in survivors if i not in dropped]
 
 
 def label_restaurants(restaurants: list[dict]) -> dict:
@@ -735,14 +792,14 @@ def district_table(
             raise ValueError("Tourism point has an unexpected kind")
         tourism_points.append((lat, lon))
         kinds.append(point["tourism"])
-    for district, kind in zip(_nearest_district(postcodes, tourism_points), kinds):
+    for district, kind in zip(nearest_postcodes(postcodes, tourism_points)[0], kinds):
         tourism_counts[district, kind] += 1
     points, ranks = {}, {}
     for p in postcodes:
-        lat, lon = _float(p["lat"]), _float(p["long"])
+        lat, lon = float_or_none(p["lat"]), float_or_none(p["long"])
         if lat is not None and lon is not None and lat <= 90:  # 99.999999 = no grid reference
             points.setdefault(p["district"], []).append((lat, lon))
-        if _float(p["imd25ind"]) is not None:
+        if float_or_none(p["imd25ind"]) is not None:
             ranks.setdefault(p["district"], []).append(float(p["imd25ind"]))
     rows = []
     for code in sorted(points):
@@ -790,7 +847,7 @@ def rent_index(voa: list[dict]) -> dict[str, float]:
     """
     per_m2 = {}
     for v in voa:
-        area, rv = _float(v["total_area"]), _float(v["adopted_rv"])
+        area, rv = float_or_none(v["total_area"]), float_or_none(v["adopted_rv"])
         if v["unit"] in VOA_AREA_UNITS and area and area > 0 and rv is not None:
             per_m2.setdefault(v["district"], {}).setdefault(v["unit"], []).append(rv / area)
     return {
@@ -799,32 +856,34 @@ def rent_index(voa: list[dict]) -> dict[str, float]:
     }
 
 
-def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:
-    """District of the nearest live postcode to each (lat, lon)."""
+def nearest_postcodes(postcodes: list[dict], points: list[tuple[float, float]]) -> tuple[list[str], list[float]]:
+    """District of the nearest live postcode to each (lat, lon), and the great-circle distance to it in km."""
     live = [
         p for p in postcodes
-        if not p["doterm"] and (_float(p["lat"]) or 99) <= 90 and _float(p["long"]) is not None
+        if not p["doterm"] and (float_or_none(p["lat"]) or 99) <= 90 and float_or_none(p["long"]) is not None
     ]
     if not points:
-        return []
+        return [], []
     scale = np.cos(np.radians(52.5))  # England's mid-latitude; fine for nearest-neighbour
 
     def xy(pairs):
         a = np.asarray(pairs, dtype=float)
         return np.column_stack((a[:, 1] * scale, a[:, 0]))
 
-    _, idx = cKDTree(xy([(float(p["lat"]), float(p["long"])) for p in live])).query(xy(points))
-    return [live[i]["district"] for i in idx]
+    coords = np.array([(float(p["lat"]), float(p["long"])) for p in live])
+    _, idx = cKDTree(xy(coords)).query(xy(points))
+    km = haversine_km(points, coords[idx])
+    return [live[i]["district"] for i in idx], km.tolist()
 
 
-def _float(value: str) -> float | None:
+def float_or_none(value: str) -> float | None:
     try:
         return float(value)
     except ValueError:
         return None
 
 
-def _read_csv(path: Path) -> list[dict]:
+def read_csv(path: Path) -> list[dict]:
     with Path(path).open(encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
 
