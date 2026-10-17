@@ -74,7 +74,7 @@ test('numeric rent requires a band choice and never overwrites district context'
 
 test('explicit relative rent words filter districts without a numeric budget', async () => {
   for (const phrase of ['low rent', 'rent low']) {
-    const text = full(`A Thai restaurant with ${phrase}.`);
+    const text = `A Thai restaurant with ${phrase}. Mid-range menu prices; no other requirements.`;
     const q = await descriptionQuery(text, extraction(text), bundle, catalogue);
     assert.equal(q.rentBand, 'low');
     assert.deepEqual(q.needs, []);
@@ -83,7 +83,7 @@ test('explicit relative rent words filter districts without a numeric budget', a
 });
 
 test('a price rejected by NN2 validation blocks scoring until explicitly clarified', async () => {
-  const text = full('A Thai restaurant with uncertain prices.');
+  const text = 'A Thai restaurant with uncertain prices. Any rent; no other requirements.';
   const partial=extraction(text,{price_band:'$'});
   const q=await descriptionQuery(text,partial,bundle,catalogue);
   assert.deepEqual(q.needs.map(n=>n.field),['price']);

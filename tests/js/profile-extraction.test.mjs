@@ -45,6 +45,63 @@ test('the product can clarify a rejected price without accepting it or weakening
   assert.equal(result.draft.location.text,'London');
 });
 
+test('menu prices and relative rent have separate evidence in the reported description',()=>{
+  const text='i want to open a thai restaurant in greater manchester that serves mid price range food. i want as cheap rent as possible';
+  const r={region:'Greater Manchester',cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null,requirements:null,rent_band:'low'};
+  const result=validateProfileExtraction(r,text,vocabulary,catalogue,{complete:true});
+  assert.equal(result.draft.profile.price_band,'$$');
+  assert.equal(result.rentBand,'low');
+  assert.equal(result.rentNeedsReview,false);
+  assert.ok(result.candidates.some(p=>p.name==='Greater Manchester'));
+});
+
+test('cheap rent cannot validate cheap menu prices and expensive menus cannot validate high rent',()=>{
+  for(const text of ['Thai restaurant with cheap rent.','Thai restaurant, rent as cheap as possible.']) {
+    const r={region:null,cuisine:'Thai',price_band:'$',venue_type:'Restaurant',rent:null,requirements:null};
+    const result=validateProfileExtraction(r,text,vocabulary,catalogue,{complete:true});
+    assert.equal(result.priceNeedsReview,true,text);
+    assert.equal(result.draft.profile.price_band,'unknown');
+  }
+  const text='Thai restaurant with expensive menu prices and cheap rent.';
+  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$$$',venue_type:'Restaurant',rent:null,requirements:null,rent_band:'high'},text,vocabulary,catalogue,{complete:true});
+  assert.equal(result.draft.profile.price_band,'$$$');
+  assert.equal(result.rentBand,'low');
+  assert.equal(result.draft.fields.rent_band.evidence,'cheap');
+});
+
+test('literal source wording corrects wrong model costs and omitted acknowledgements without inventing missing inputs',()=>{
+  const text='A premium Thai restaurant with cheap rent. No other requirements.';
+  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null,rent_band:'high',requirements:'none'},text,vocabulary,catalogue,{complete:true});
+  assert.equal(result.draft.profile.price_band,'$$$');
+  assert.equal(result.rentBand,'low');
+  assert.equal(result.requirementsText,'No other requirements');
+  const numeric='A Thai restaurant with rent budget GBP 2000 per month.';
+  const budget=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'unknown',venue_type:'Restaurant',rent:{amount:2000,period:'month',currency:'GBP'},rent_band:null,requirements:null},numeric,vocabulary,catalogue,{complete:true});
+  assert.equal(budget.draft.fields.rent_band.provenance,'default');
+  assert.equal(budget.draft.fields.price_band.provenance,'default');
+});
+
+test('conflicting cost descriptions cannot be resolved by selecting a convenient model prediction',()=>{
+  const text='Thai restaurant with cheap or premium food and low or high rent.';
+  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$',venue_type:'Restaurant',rent:null,rent_band:'low',requirements:null},text,vocabulary,catalogue,{complete:true});
+  assert.equal(result.priceNeedsReview,true);
+  assert.equal(result.draft.fields.rent_band.provenance,'default');
+  assert.ok(result.unresolvedFields.includes('rent_band'));
+});
+
+test('opposite menu and rent preferences stay independent, including negated rent',()=>{
+  for(const [food,rent,price,band] of [['cheap','premium','$','high'],['premium','cheap','$$$','low'],['mid price range','moderate','$$','mid']]) {
+    const text=`Thai restaurant with ${food} food and ${rent} rent.`;
+    const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:price,venue_type:'Restaurant',rent:null,rent_band:band,requirements:null},text,vocabulary,catalogue,{complete:true});
+    assert.equal(result.draft.profile.price_band,price);
+    assert.equal(result.rentBand,band);
+    assert.equal(result.rentNeedsReview,false);
+  }
+  const text='Thai restaurant with mid-range food and not cheap rent.';
+  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null,rent_band:'low',requirements:null},text,vocabulary,catalogue,{complete:true});
+  assert.ok(result.unresolvedFields.includes('rent_band'));
+});
+
 test('unmentioned rent remains absent and extra model features never enter the profile',()=>{
   const r={region:'London',cuisine:'Thai',price_band:'unknown',venue_type:'Restaurant',rent:null};
   const result=validateProfileExtraction(r,'Thai restaurant in London with vegan options.',vocabulary,catalogue);

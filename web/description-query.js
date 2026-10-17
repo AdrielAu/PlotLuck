@@ -56,7 +56,9 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   }
   const band = (/\brent\s*(?:band|budget)?\s*(?:is|of|:)?\s*(low|mid|medium|high|any)\b/i.exec(description)
     ?? /\b(low|mid|medium|high|any)(?:[ -]range)?\s+rent\b/i.exec(description))?.[1]?.toLowerCase();
-  const rentBand = band === 'medium' ? 'mid' : band ?? null;
+  const rentBand = extraction.unresolvedFields?.includes('rent_band') ? null
+    : draft.fields.rent_band.provenance !== 'default' ? draft.fields.rent_band.value
+    : band === 'medium' ? 'mid' : band ?? null;
   if (rentBand === null) needs.push({ field: 'rent', message: 'Which relative rent band should filter districts? A budget in pounds does not determine a band.', options: ['low', 'mid', 'high', 'any'] });
   // Preserve additional model clarifications without asking for every default.
   const messages = draft.clarifications.filter(c => !needs.some(n => n.field === 'cuisine' && /cuisine/i.test(c)));

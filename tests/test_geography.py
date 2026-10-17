@@ -9,6 +9,24 @@ import pytest
 from plotluck.geography import prepare_catalogue
 
 
+def test_counties_keep_publisher_geometry_and_do_not_duplicate_unitary_authorities():
+    feature = {"type": "Feature", "properties": {
+        "UTLA22CD": "E11000001", "UTLA22NM": "Greater Manchester", "LAT": 53.5, "LONG": -2.3,
+    }, "geometry": {"type": "Polygon", "coordinates": [[
+        [-3, 53], [-2, 53], [-2, 54], [-3, 54], [-3, 53],
+    ]]}}
+    unitary = copy.deepcopy(feature)
+    unitary["properties"]["UTLA22CD"] = "E06000001"
+    districts = [{"postcode_district": "IN1", "centroid_lat": "53.5", "centroid_lon": "-2.3"},
+                 {"postcode_district": "OUT1", "centroid_lat": "52", "centroid_lon": "-2.3"}]
+    catalogue = prepare_catalogue({"metropolitan_county": {"type": "FeatureCollection", "features": [feature, unitary]}}, districts)
+    assert len(catalogue["places"]) == 1
+    county = catalogue["places"][0]
+    assert county["districts"] == ["IN1"]
+    assert county["type"] == "county"
+    assert county["lat"] == 53.5
+
+
 def test_catalogue_includes_boundary_centroids_and_excludes_overlap_without_centroid():
     # Synthetic square: a postcode district may overlap it, but only its centre counts.
     source = {"type": "FeatureCollection", "features": [{
