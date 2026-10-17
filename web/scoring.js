@@ -22,6 +22,10 @@ export async function loadBundle(read) {
         !Number.isFinite(Number(d.centroid_lon)) || d.centroid_lat === "" || d.centroid_lon === "") {
       throw new Error("districts.csv has an invalid district code or coordinate");
     }
+    // Not an NN1 input: the results map draws each district as a circle of this radius.
+    if (!Number.isFinite(Number(d.radius_km)) || !(Number(d.radius_km) > 0)) {
+      throw new Error("districts.csv has a missing or invalid radius_km");
+    }
   }
   for (const r of supply) {
     if (!r.postcode_district || !r.cuisine_group || r.restaurants === "" ||

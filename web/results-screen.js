@@ -20,8 +20,7 @@ export function showScreen(id) {
 // runs after the questions screen is shown again, with its state untouched.
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
-  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));
-  let map = null;
+  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));  let map = null;
   let circles = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
   let onScreen = null;
@@ -44,8 +43,12 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
+    // Sized in metres, not pixels, so each circle keeps roughly covering its district at every zoom.
     circles = new Map(
-      [...centroids].map(([code, latLng]) => [code, L.circleMarker(latLng, { radius: 8, color: "#2f3437", weight: 1, fillOpacity: 0.85 })]),
+      bundle.districts.map((d) => [
+        d.postcode_district,
+        L.circle(centroids.get(d.postcode_district), { radius: Number(d.radius_km) * 1000, color: "#2f3437", weight: 1, fillOpacity: 0.5 }),
+      ]),
     );
   }
 
@@ -56,12 +59,15 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     const { shown, countLine, legend, decimals } = resultsAt(scores, threshold);
     const shownByCode = new Map(shown.map((d) => [d.postcode_district, d]));
     for (const [code, circle] of circles) {
-      const district = shownByCode.get(code);
-      if (!district) {
-        circle.remove();
-        continue;
-      }
-      circle.setStyle({ fillColor: district.colour }).setPopupContent(`${code}: ${district.score.toFixed(decimals)}`).addTo(map);
+      if (!shownByCode.has(code)) circle.remove();
+    }
+    // Worst rank first, so each better-ranked circle is drawn over those before it.
+    for (const { postcode_district, score, colour } of shown.toReversed()) {
+      circles.get(postcode_district)
+        .setStyle({ fillColor: colour })
+        .setPopupContent(`${postcode_district}: ${score.toFixed(decimals)}`)
+        .addTo(map)
+        .bringToFront();
     }
     $("legend").hidden = !legend;
     if (legend) {
