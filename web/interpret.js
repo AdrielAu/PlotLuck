@@ -1,7 +1,10 @@
 // The questions screen's one path from answers to a draft: interpret(answers) -> draft.
-// This is the deterministic fallback; NN2 (#136) replaces it behind the same seam.
+// NN2 reads the answers when it is loaded; otherwise, or if it fails, a deterministic fallback does.
 // Pure: no DOM, so it runs in Node tests.
+import { RENT_BANDS } from "./interpreter.js";
 import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
+
+export { RENT_BANDS };
 
 // The six answers, in question order, with the labels of the joined description.
 export const ANSWER_LABELS = {
@@ -12,7 +15,6 @@ export const ANSWER_LABELS = {
   rent: "Rent",
   other: "Other",
 };
-export const RENT_BANDS = ["low", "mid", "high", "any"];
 export const RENT_LABELS = { low: "Low", mid: "Mid", high: "High", any: "Any" };
 export const REQUIRED = "You must answer this question.";
 export const PLACE_SOON = "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.";
@@ -23,7 +25,7 @@ export function describe(answers) {
 }
 
 // shortcut: hand-kept English cue words, so the fallback can propose values it was not
-// told outright. NN2 (#136) replaces them; until then extend a list when a test needs it.
+// told outright. Only browsers without NN2 rely on them; extend a list when a test needs it.
 const VALUE_CUES = {
   venue_type: {
     Restaurant: ["bistro", "brasserie", "diner", "dining", "eatery", "trattoria"],
@@ -78,7 +80,8 @@ function leftover(text, phrase) {
   return ws.filter((w) => !FILLER.has(w));
 }
 
-export function makeInterpreter(bundle) {
+// `nn2`, when given: { ready() -> boolean, read(description) -> Promise of a validated NN2 draft }.
+export function makeInterpreter(bundle, nn2) {
   const { vocabulary } = bundle;
   const districts = new Set(bundle.districts.map((d) => d.postcode_district));
   const areas = new Set(bundle.districts.map((d) => d.postcode_district.match(/^[A-Z]+/)[0]));
@@ -143,7 +146,35 @@ export function makeInterpreter(bundle) {
     return unused;
   }
 
-  function interpret(answers) {
+  // NN2's validated draft in the questions screen's shape. The area is read locally, never from the model.
+  // shortcut: NN2's location text, distance and clarifications are unused until the place catalogue (#117/#118).
+  function fromModel(reply, answers) {
+    const draft = {
+      profile: { ...reply.profile, cuisine: reply.profile.cuisine ?? undefined },
+      marks: { area: "explicit" },
+      area: readArea(answers.location ?? ""),
+      rentBand: rentCuts ? reply.fields.rent_band.value : "any",
+      unused: [...reply.unused],
+    };
+    if (!draft.area) draft.marks.area = "unresolved";
+    for (const [name, f] of Object.entries(reply.fields)) draft.marks[name] = f.provenance;
+    if (!draft.profile.cuisine) draft.marks.cuisine = "unresolved";
+    if (!rentCuts) draft.marks.rent_band = "default";
+    return draft;
+  }
+
+  async function interpret(answers) {
+    if (nn2?.ready()) {
+      try {
+        return fromModel(await nn2.read(describe(answers)), answers);
+      } catch {
+        // A failed, cancelled or invalid reading leaves the answers to the fallback below.
+      }
+    }
+    return readAnswers(answers);
+  }
+
+  function readAnswers(answers) {
     const draft = {
       profile: defaultProfile(vocabulary, undefined),
       marks: { area: "explicit", cuisine: "explicit" },
@@ -182,7 +213,8 @@ export function makeInterpreter(bundle) {
   // The error a question shows for this answer, or null when it can move on.
   function check(key, text) {
     if (key === "location") return !norm(text) ? REQUIRED : readArea(text) ? null : PLACE_SOON;
-    if (key === "food") return readCuisine(text) ? null : REQUIRED;
+    // NN2 reads food the fallback cannot ("neapolitan pizza"); the review card asks if it cannot either.
+    if (key === "food") return (nn2?.ready() ? norm(text) : readCuisine(text)) ? null : REQUIRED;
     return null;
   }
 

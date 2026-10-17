@@ -14,6 +14,8 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 #title { font: 500 clamp(64px, 9vw, 128px)/0.95 Georgia, serif; letter-spacing: -0.04em; }
 .lede { margin: 16px auto 12px; max-width: 34ch; font-size: clamp(19px, 1.6vw, 22px); line-height: 1.45; }
 .model-line { margin: 0; font-size: 15px; }
+.model-progress { display: block; width: min(320px, 100%); margin: 6px 0; accent-color: var(--green); }
+.model-progress[hidden] { display: none; }
 #model-status:empty { display: none; }
 #model-status { margin-top: 8px; }
 

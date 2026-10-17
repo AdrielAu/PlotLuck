@@ -98,8 +98,41 @@ test("shown districts clear the threshold inclusively, best first, ranked from 1
     { postcode_district: "EC3M", score: 0.5 },
   ];
   assert.deepEqual(resultsAt(scores, 0.5).shown, [
-    { rank: 1, postcode_district: "EC3R", score: 0.7 },
-    { rank: 2, postcode_district: "EC3M", score: 0.5 },
-    { rank: 3, postcode_district: "WC2R", score: 0.5 },
+    { rank: 1, postcode_district: "EC3R", score: 0.7, colour: RED },
+    { rank: 2, postcode_district: "EC3M", score: 0.5, colour: BLUE },
+    { rank: 3, postcode_district: "WC2R", score: 0.5, colour: BLUE },
   ]);
+});
+
+const BLUE = "rgb(69,117,180)", YELLOW = "rgb(255,255,191)", RED = "rgb(215,48,39)";
+const colours = (scores, threshold) => resultsAt(scores, threshold).shown.map((d) => d.colour);
+
+test("the highest shown district is red, the lowest blue and the middle pale yellow", () => {
+  assert.deepEqual(colours(districts(0.2, 0.6, 0.4), 0), [RED, YELLOW, BLUE]);
+  // Stretched across the shown districts only: raising the threshold makes 0.4 the new blue.
+  assert.deepEqual(colours(districts(0.2, 0.6, 0.4), 0.4), [RED, BLUE]);
+});
+
+test("a single shown district, or all shown scores equal, is red", () => {
+  assert.deepEqual(colours(districts(0.5, 0.3), 0.4), [RED]);
+  assert.deepEqual(colours(districts(0.5, 0.5), 0), [RED, RED]);
+});
+
+test("the legend ends are the lowest and highest shown scores and follow the threshold", () => {
+  const scores = districts(0.2, 0.6, 0.4);
+  assert.deepEqual(resultsAt(scores, 0).legend, { low: 0.2, high: 0.6 });
+  assert.deepEqual(resultsAt(scores, 0.3).legend, { low: 0.4, high: 0.6 });
+  assert.equal(resultsAt(scores, 0.9).legend, null);
+});
+
+test("scores use the fewest decimals from 2 to 4 that tell the shown scores apart, else 4", () => {
+  const decimals = (...values) => resultsAt(districts(...values), 0).decimals;
+  assert.equal(decimals(0.61, 0.62), 2);
+  assert.equal(decimals(0.611, 0.612), 3);
+  assert.equal(decimals(0.6111, 0.6112), 4);
+  assert.equal(decimals(0.61111, 0.61112), 4);
+  assert.equal(decimals(0.5, 0.5), 4);
+  assert.equal(decimals(0.5), 2);
+  // Only shown scores count: hiding 0.611 leaves 0.612 and 0.9, apart at 2 decimals.
+  assert.equal(resultsAt(districts(0.611, 0.612, 0.9), 0.612).decimals, 2);
 });

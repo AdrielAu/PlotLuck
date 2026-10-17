@@ -16,7 +16,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
 | 3 | NN1 | done | #62, #65, #74, #101, #77, #150 |
-| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); #115 draft/confirmation foundation; #35; [plan](../plans/nn2-integration.md) |
+| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); #115 draft/confirmation foundation; #136 questions screen reads answers with NN2 after an explicit download, fallback otherwise; #35; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | done | #74, #77 |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | done | #65, #67, #101, #77 |

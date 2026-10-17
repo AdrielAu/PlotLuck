@@ -31,8 +31,8 @@ button { cursor: pointer; }
 ::selection { background: #bacfa9; color: var(--ink); }
 input { accent-color: var(--green); caret-color: var(--green); }
 :disabled { cursor: wait; opacity: 0.6; }
-/* The map fills the window below the top line and the restaurant pickers, above slim notes. Desktop Chrome/Edge only (#127). */
-#results-screen { display: grid; grid-template-rows: auto auto minmax(560px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
+/* The map fills the window between the top line, the collapsed restaurant pickers and slim notes; opening the pickers scrolls the page. Desktop Chrome/Edge only (#127). */
+#results-screen { display: grid; grid-template-rows: auto auto minmax(480px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }
 .wordmark { font: 500 18px/1.2 Georgia, serif; letter-spacing: -0.02em; }
@@ -51,15 +51,11 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #threshold-value { font-size: 20px; font-variant-numeric: tabular-nums; }
 #threshold { width: 100%; margin: 0; min-height: 36px; cursor: pointer; }
 #threshold-help { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
-.legend { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 12px; }
-.legend-swatches { display: flex; }
-.legend-swatches i { display: block; width: 22px; height: 12px; }
-.legend-swatches i:nth-child(1) { background: #e0edd7; }
-.legend-swatches i:nth-child(2) { background: #b2c5ac; }
-.legend-swatches i:nth-child(3) { background: #849c80; }
-.legend-swatches i:nth-child(4) { background: #567455; }
-.legend-swatches i:nth-child(5) { background: var(--green); }
-.list-panel { display: flex; flex-direction: column; padding: 20px 16px 8px; }
+.legend { display: flex; align-items: center; gap: 10px; font-size: 12px; font-variant-numeric: tabular-nums; }
+/* The one gradient allowed (#132): the same RdYlBu stops as results.js. */
+.legend-scale { flex: 1; height: 12px; border-radius: 2px; background: linear-gradient(to right, rgb(69,117,180), rgb(255,255,191), rgb(215,48,39)); }
+/* Size containment: a long list scrolls inside the panel instead of stretching the map's row. */
+.list-panel { display: flex; flex-direction: column; padding: 20px 16px 8px; contain: size; }
 .list-panel > h2, .list-panel > p { padding-inline: 8px; }
 #count { font-size: 14px; margin-bottom: 12px; }
 #ranked { flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none; overflow-y: auto; scrollbar-color: #bacfa9 var(--surface); }

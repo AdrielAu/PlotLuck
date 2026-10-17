@@ -40,9 +40,33 @@ export function thresholdRange(scores) {
   return { min, max: best + Math.max((best - min) / 50, 0.0001) };
 }
 
-// The search area's districts at or above `threshold`, best first, each with its rank from 1.
+// ColorBrewer RdYlBu ends and middle: blue, pale yellow, red, readable with common colour blindness.
+const SCALE = [[69, 117, 180], [255, 255, 191], [215, 48, 39]];
+
+// The scale's colour at `t` from 0 (blue) to 1 (red).
+function colourAt(t) {
+  const [from, to] = t < 0.5 ? [SCALE[0], SCALE[1]] : [SCALE[1], SCALE[2]];
+  const u = t < 0.5 ? t * 2 : t * 2 - 1;
+  return `rgb(${from.map((channel, i) => Math.round(channel + (to[i] - channel) * u)).join(",")})`;
+}
+
+// The fewest decimals from 2 to 4 at which the scores are pairwise distinct, else 4.
+function decimalsFor(values) {
+  return [2, 3].find((d) => new Set(values.map((v) => v.toFixed(d))).size === values.length) ?? 4;
+}
+
+// The search area's districts at or above `threshold`, best first, each with its rank from 1
+// and its colour stretched across the shown scores. `legend` gives the lowest and highest
+// shown scores (null when none is shown); `decimals` is how many to print every score with.
 export function resultsAt(scores, threshold) {
-  const shown = rankDistricts(scores, threshold).map((d, i) => ({ rank: i + 1, ...d }));
+  const ranked = rankDistricts(scores, threshold);
+  const values = ranked.map((d) => d.score);
+  const legend = ranked.length ? { low: Math.min(...values), high: Math.max(...values) } : null;
+  const shown = ranked.map((d, i) => ({
+    rank: i + 1,
+    ...d,
+    colour: colourAt(legend.high === legend.low ? 1 : (d.score - legend.low) / (legend.high - legend.low)),
+  }));
   const countLine = `${shown.length} of ${scores.length} ${scores.length === 1 ? "district" : "districts"} in your search area`;
-  return { shown, countLine };
+  return { shown, countLine, legend, decimals: decimalsFor(values) };
 }

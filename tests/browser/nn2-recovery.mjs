@@ -43,6 +43,8 @@ test('experimental NN2 preserves MVP answers and offers bounded manual recovery'
     await answerQuestions(page, ['anywhere','Thai','','','','vegan options']);
     await page.locator('#review-compare').click();
     await page.locator('#results-screen').waitFor();
+    // The pickers panel starts collapsed; open it once and it stays open for the later steps.
+    await page.getByText('Edit your restaurant',{exact:true}).click();
     await cuisine.fill('Thai');await cuisine.press('Enter');
     await page.getByRole('checkbox',{name:'Vegan options',exact:true}).check();
     await page.getByRole('button',{name:'Compare districts',exact:true}).click();
@@ -173,6 +175,7 @@ test('experimental NN2 preserves MVP answers and offers bounded manual recovery'
       await delayed.goto(url+'?nn2=1');
       await answerQuestions(delayed,['anywhere','Thai','','','','']);
       await delayed.locator('#review-compare').click();
+      await delayed.getByText('Edit your restaurant',{exact:true}).click();
       await delayed.getByLabel('Place name',{exact:true}).fill('London');
       await started;
       await delayed.locator('#change-area').click();
