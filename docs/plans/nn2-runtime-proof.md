@@ -1,6 +1,7 @@
 # NN2 runtime proof (#113)
 
-Status: reproducible tools prepared; browser and LinuxONE gates pending. This is
+Status: [browser experiment](../../runs/2026-10-17-nn2-evaluation/) fails preliminary
+quality and latency; LinuxONE execution remains pending. Reproducible tools are prepared. This is
 pretrained inference, not training or NNPA acceleration. NN2 remains mandatory.
 
 The candidate is Qwen2.5-0.5B-Instruct. Native revision
