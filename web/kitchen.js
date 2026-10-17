@@ -1,12 +1,14 @@
-// The questions screen's voxel kitchen: nine appliances round a table, a dish served every few seconds,
+// The questions screen's voxel kitchen: nine appliances round a table, a dish served every few seconds
+// until the table is full, then each flying out of the window in turn until it is empty again,
 // a window on the back wall and a clock on the right one, both running a make-believe day (#159).
 // Purely decorative. Rendered small and scaled up without smoothing for a pixel-art look.
 // State for tests and styles sits on the container: data-kitchen (running, paused, still),
-// data-frames (frames drawn), data-dishes (dishes on the table), data-flying (dishes in the air),
+// data-frames (frames drawn), data-table (filling, clearing), data-dishes (dishes on the table),
+// data-flying (dishes in the air, in or out), data-outside (dishes flying off over the city in the window view),
 // data-sky (night, sunrise, day, sunset), data-weather (sun, cloud, rain, snow), data-light (on, off).
 import * as THREE from "three";
 
-import { nextDish } from "./dishes.js";
+import { TABLE_MS, nextDish, tableStep } from "./dishes.js";
 import { PHASE_HOUR, WEATHER_MS, handAngles, kitchenHour, lightFor, phaseAt, pickWeather, readOverrides, settleSnow } from "./sky.js";
 
 const PALETTE = {
@@ -20,12 +22,12 @@ const PALETTE = {
 };
 const FRAME_MS = 1000 / 30;
 const FLIGHT_MS = 1100;
-// The first dish comes out shortly after the kitchen appears, then one every SERVE_MS of running time.
-const FIRST_SERVE_MS = 1500;
-const SERVE_MS = 4000;
+// A leaving dish's flight from the table to the window glass, then its time flying off in the window view.
+const EXIT_MS = 1000;
+const OUTSIDE_MS = 2000;
 // How fast the room's light follows a new phase or weather: settled in about two seconds.
 const LIGHT_EASE_MS = 500;
-// Places on the table top, filled in order; once all are set, each new dish takes the oldest one's place.
+// Places on the table top, filled in order; the table clears completely before it fills again.
 const SLOTS = [[-3, -1.4], [0, -1.4], [3, -1.4], [-3, 1.4], [0, 1.4], [3, 1.4]];
 // The table top's surface, where plates rest.
 const TABLE_Y = 2.5;
@@ -326,8 +328,21 @@ function makeWindowView() {
     px(colour, cx + Math.floor(size / 3), y - 1, Math.ceil(size / 3), 1);
   }
 
-  // look: the eased light (colours as sRGB arrays); time drives drift and falling weather.
-  function draw({ hour, weather, look, snow, time, still }) {
+  // A leaving dish as it flies off over the city: a white plate row under its base colour, from 4 pixels
+  // across down to 1 as it goes, up and away to one side.
+  function dish({ x, y, side, colour, start }, time) {
+    const p = Math.min(1, (time - start) / OUTSIDE_MS);
+    const s = Math.max(1, Math.round(4 - 3 * p));
+    const left = Math.round(x + side * p * 16 - s / 2);
+    const top = Math.round(y - p * 8);
+    if (s === 1) return px(colour, left, top);
+    px("rgb(247,246,243)", left, top, s, 1);
+    px(colour, left + 1, top - (s > 2 ? 2 : 1), Math.max(1, s - 2), s > 2 ? 2 : 1);
+  }
+
+  // look: the eased light (colours as sRGB arrays); time drives drift, falling weather and leaving dishes,
+  // which fly over the city but under the rain and snow.
+  function draw({ hour, weather, look, snow, time, still, outside }) {
     const sky = css(look.sky);
     px(sky, 0, 0, w, h);
     px(css(look.band), 0, Math.floor(h * 0.62), w, h);
@@ -372,6 +387,7 @@ function makeWindowView() {
       }
       if (roof) px("rgb(244,246,248)", b.x, top - (roof > 1 ? 1 : 0), b.w, roof);
     }
+    for (const d of outside) dish(d, time);
 
     if (weather === "rain") for (const [x, y, speed] of drops) {
       const fall = still ? y : (y + time / 25 * speed) % (h + 4) - 4;
@@ -470,11 +486,14 @@ export function startKitchen(container) {
   const forced = readOverrides(location.search);
   const startHour = Math.random() * 24;
   const weathers = [];
-  // This round's dishes, and the dishes on the table oldest first, as { dish, mesh, slot }.
+  // This round's dishes, the dishes on the table as { dish, mesh }, and those flying off in the window view.
   const served = [];
   const table = [];
   const flights = [];
-  let toServe = FIRST_SERVE_MS;
+  const outside = [];
+  let cycle = { stage: "filling", wait: TABLE_MS.first, dishes: 0 };
+  // The dish served before, so the next one comes from another appliance even across an empty table.
+  let lastServed = null;
   let mode = reduced.matches ? "still" : "running";
   let frames = 0;
   let raf = 0;
@@ -522,7 +541,7 @@ export function startKitchen(container) {
     sillSnow.scale.y = Math.max(0.02, snow);
     sillSnow.position.y = 4 + 0.125 * snow;
 
-    view.draw({ hour, weather, look, snow, time: elapsed, still: mode !== "running" });
+    view.draw({ hour, weather, look, snow, time: elapsed, still: mode !== "running", outside });
     viewTexture.needsUpdate = true;
     face.draw(hour);
     faceTexture.needsUpdate = true;
@@ -576,14 +595,21 @@ export function startKitchen(container) {
 
   function step(t) {
     for (const f of [...flights]) {
-      const k = Math.min(1, (t - (f.start ??= t)) / FLIGHT_MS);
+      const k = Math.min(1, (t - (f.start ??= t)) / f.ms);
       f.mesh.position.lerpVectors(f.from, f.to, k);
-      f.mesh.position.y += Math.sin(Math.PI * k) * 5;
+      f.mesh.position.y += Math.sin(Math.PI * k) * f.arc;
       f.mesh.rotation.y = (1 - k) * Math.PI * 2;
-      f.appliance.scale.y = 1 + 0.15 * Math.max(0, Math.sin(Math.PI * Math.min(1, k * 3)));
-      if (k === 1) flights.splice(flights.indexOf(f), 1);
+      // Served dishes nudge their appliance at take-off; leaving ones shrink towards the window.
+      if (f.appliance) f.appliance.scale.y = 1 + 0.15 * Math.max(0, Math.sin(Math.PI * Math.min(1, k * 3)));
+      else f.mesh.scale.setScalar(1 - 0.75 * k);
+      if (k === 1) {
+        flights.splice(flights.indexOf(f), 1);
+        f.landed?.(t);
+      }
     }
-    container.dataset.flying = String(flights.length);
+    const elapsed = Math.max(0, t - born);
+    for (const d of [...outside]) if (elapsed - d.start >= OUTSIDE_MS) outside.splice(outside.indexOf(d), 1);
+    Object.assign(container.dataset, { flying: String(flights.length), outside: String(outside.length) });
   }
 
   // The day keeps turning and dishes keep flying in every mode; still only drops the sway and falling weather.
@@ -592,11 +618,11 @@ export function startKitchen(container) {
     if (t - last < FRAME_MS) return;
     // Counts running time only: a pause (hidden tab, results screen) neither brings the next dish closer
     // nor sends a burst of missed ones on return.
-    toServe -= Math.min(250, t - (last || t));
-    if (toServe <= 0) {
-      serve();
-      toServe = SERVE_MS;
-    }
+    let action;
+    [cycle, action] = tableStep(cycle, Math.min(250, t - (last || t)), SLOTS.length);
+    if (action === "serve") serve();
+    if (action === "clear") clear();
+    container.dataset.table = cycle.stage;
     step(t);
     draw(t);
     last = t;
@@ -615,33 +641,47 @@ export function startKitchen(container) {
     setMode(reduced.matches ? "still" : "running");
   }
 
-  // One dish, from its appliance to the next free place, or to the oldest dish's place, which clears at take-off.
+  // One dish, from its appliance to the next free place; the table is always empty when filling starts.
   function serve() {
     const onTable = table.map((p) => p.dish);
-    let dish = nextDish(served, onTable, Math.random);
+    let dish = nextDish(served, onTable, Math.random, lastServed);
     if (!dish) {
       // Every dish has been out this round: start another.
       served.length = 0;
-      dish = nextDish(served, onTable, Math.random);
+      dish = nextDish(served, onTable, Math.random, lastServed);
     }
     served.push(dish);
-    let slot = table.length;
-    if (table.length === SLOTS.length) {
-      const oldest = table.shift();
-      scene.remove(oldest.mesh);
-      oldest.mesh.geometry.dispose();
-      oldest.mesh.material.dispose();
-      slot = oldest.slot;
-    }
-    const [sx, sz] = SLOTS[slot];
+    lastServed = dish;
+    const [sx, sz] = SLOTS[table.length];
     const mesh = voxelMesh(dishVoxels(dish), 0.25);
     const to = new THREE.Vector3(sx, TABLE_Y + 0.125, sz);
     const { group, mouth } = appliances.get(dish.appliance);
-    table.push({ dish, mesh, slot });
+    table.push({ dish, mesh });
     scene.add(mesh);
     container.dataset.dishes = String(table.length);
     mesh.position.copy(mouth);
-    flights.push({ mesh, from: mouth.clone(), to, appliance: group });
+    flights.push({ mesh, from: mouth.clone(), to, ms: FLIGHT_MS, arc: 5, appliance: group });
+  }
+
+  // One dish at random, from the table up to a point on the window glass, shrinking as it goes;
+  // there it leaves the room and flies on in the window view.
+  function clear() {
+    const { dish, mesh } = table.splice(Math.floor(Math.random() * table.length), 1)[0];
+    container.dataset.dishes = String(table.length);
+    const to = new THREE.Vector3(WINDOW.x + (Math.random() - 0.5) * 5, WINDOW.y + 0.5 + Math.random(), WINDOW.z + 0.3);
+    const landed = (t) => {
+      scene.remove(mesh);
+      mesh.geometry.dispose();
+      mesh.material.dispose();
+      outside.push({
+        x: (to.x - WINDOW.x + WINDOW.width / 2) * WINDOW.texels,
+        y: (WINDOW.y + WINDOW.height / 2 - to.y) * WINDOW.texels,
+        side: Math.random() < 0.5 ? -1 : 1,
+        colour: `#${dish.colours[0].toString(16).padStart(6, "0")}`,
+        start: Math.max(0, t - born),
+      });
+    };
+    flights.push({ mesh, from: mesh.position.clone(), to, ms: EXIT_MS, arc: 2, landed });
   }
 
   born = performance.now();
@@ -649,7 +689,7 @@ export function startKitchen(container) {
   new ResizeObserver(resize).observe(container);
   document.addEventListener("visibilitychange", update);
   reduced.addEventListener("change", update);
-  Object.assign(container.dataset, { dishes: "0", flying: "0" });
+  Object.assign(container.dataset, { table: "filling", dishes: "0", flying: "0", outside: "0" });
   update();
   // Paused while the results screen shows; resumed when the questions come back.
   return { update };
