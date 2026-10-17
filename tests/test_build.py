@@ -494,6 +494,34 @@ def test_cv_folds_never_share_a_district_across_fit_early_stop_and_test(data):
     assert sorted(tested) == list(range(len(codes)))  # each row is tested exactly once
 
 
+def test_cv_fits_cuisine_support_without_held_out_districts():
+    cuisine = "Italian"
+    mapping = {cuisine: {"kind": "cuisine", "cuisine": cuisine, "parent": ""}}
+    restaurants = []
+    districts = []
+    for i in range(5):
+        code = f"A{i}"
+        districts.append({
+            "postcode_district": code,
+            **{name: 1 for name in build.DISTRICT_INPUTS if name != "same_cuisine_supply"},
+        })
+        restaurants.append({
+            "postcode_district": code, "cuisine": cuisine, "cuisine_group": cuisine,
+            "review_success_label": .5, "avg_rating": 4, "total_reviews": 20,
+            **{f"count_{category}": 4 for category in ("excellent", "very_good", "average", "poor", "terrible")},
+            "venue_type": "Restaurant", "price_band": "", "is_chain": 0,
+            "vegetarian_friendly": 0, "vegan_options": 0, "gluten_free": 0,
+        })
+
+    cv = build.cross_validate(
+        restaurants, restaurants, districts, mapping,
+        group_threshold=5, fine_threshold=5, folds=5, max_epochs=1, patience=1, seed=0,
+    )
+
+    assert len(cv["folds"]) == 5
+    assert all(fold["features"] == {"cuisine_groups": 1, "fine_cuisines": 0} for fold in cv["folds"])
+
+
 def test_transforms_fitted_on_a_subset_use_only_that_subset():
     vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
     nan = np.nan
@@ -768,6 +796,10 @@ def test_numpy_forward_pass_reproduces_reference_scores(built):
     group_of = {c["cuisine"]: c["cuisine_group"] for c in vocabulary["cuisines"]}
 
     assert len(reference["cases"]) >= 3
+    supported = set(model["transforms"]["cuisine"]["values"]) - {build.UNSPECIFIED}
+    reference_cuisines = {case["profile"]["cuisine"] for case in reference["cases"]}
+    assert reference_cuisines & supported
+    assert reference_cuisines - set(model["transforms"]["cuisine"]["values"])
     for case in reference["cases"]:
         profile = case["profile"]
         assert set(case["scores"]) == {d["postcode_district"] for d in districts}

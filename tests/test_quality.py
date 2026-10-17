@@ -2,6 +2,8 @@
 
 from zipfile import ZipFile
 
+import pytest
+
 from plotluck.quality import cross_border_districts, prepare_districts
 
 
@@ -53,6 +55,34 @@ def test_unestimable_district_is_not_published():
     assert excluded["no_restaurants"] == 1
 
 
+def test_invalid_demographic_shares_are_estimated_and_never_used_as_donors():
+    donors = [district(f"A{i}", i * .01) for i in range(1, 4)]
+    invalid = district("B1", .04)
+    invalid["sex_female_share"] = 1.5
+    missing = district("M1", .05)
+    missing["sex_female_share"] = ""
+
+    prepared, reliable, excluded = prepare_districts([*donors, invalid, missing])
+    by_code = {row["postcode_district"]: row for row in prepared}
+
+    assert by_code["B1"]["sex_female_share"] == .5
+    assert by_code["M1"]["sex_female_share"] == .5
+    assert {"B1", "M1"}.isdisjoint(reliable)
+    assert not excluded
+
+
+def test_estimation_checks_valid_peers_beyond_the_nearest_eight():
+    near = [district(f"N{i}", i * .001, rent="") for i in range(1, 9)]
+    donors = [district(f"A{i}", .02 + i * .001, rent=100) for i in range(3)]
+    target = district("M1", 0, rent="")
+
+    prepared, reliable, _ = prepare_districts([target, *near, *donors])
+    by_code = {row["postcode_district"]: row for row in prepared}
+
+    assert by_code["M1"]["commercial_rent_index"] == 100
+    assert "M1" not in reliable
+
+
 def test_commercial_core_with_tiny_resident_population_needs_visitor_evidence():
     rows = [district("C1", 0, population=2, restaurants=60),
             district("R1", .02, population=9000, restaurants=20)]
@@ -73,3 +103,14 @@ def test_only_districts_with_active_postcodes_in_two_countries_are_cross_border(
             "NE1 1AA,,E92000001\nNE2 1AA,,S92000003\n"
         ))
     assert cross_border_districts(archive) == {"TD5"}
+
+
+def test_cross_border_check_rejects_missing_country_evidence(tmp_path):
+    archive = tmp_path / "onspd.zip"
+    with ZipFile(archive, "w") as file:
+        file.writestr("Data/ONSPD_OCT_2026_UK.csv", (
+            "pcds,doterm,ctry24cd\nTD5 1AA,,E92000001\nTD5 1AB,,\n"
+        ))
+
+    with pytest.raises(ValueError, match="country code"):
+        cross_border_districts(archive)

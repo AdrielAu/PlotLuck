@@ -193,7 +193,8 @@ def build(
     fine_threshold = min(MAX_FINE_CUISINE_THRESHOLD, max(3, group_threshold // 6))
     district_raw = training_district_inputs(labelled, districts, supply)
     cv = cross_validate(
-        labelled, district_raw, vocab, fine_threshold=fine_threshold,
+        labelled, restaurants, districts, mapping,
+        group_threshold=group_threshold, fine_threshold=fine_threshold,
         folds=folds, max_epochs=max_epochs, patience=patience, seed=seed
     )
     # median_low: an epoch some fold actually chose; the plain median for an odd fold count.
@@ -208,7 +209,7 @@ def build(
         "tolerance": REFERENCE_TOLERANCE,
         "cases": [
             {"profile": profile, "scores": score_districts(model, vocab, districts, supply, profile)}
-            for profile in reference_profiles(vocab)
+            for profile in reference_profiles(vocab, model)
         ],
     }
     metrics.update(
@@ -244,8 +245,8 @@ def build(
 
 
 def cross_validate(
-    labelled: list[dict], district_raw: np.ndarray, vocab: dict, *,
-    fine_threshold: int, folds: int, max_epochs: int, patience: int, seed: int
+    labelled: list[dict], restaurants: list[dict], districts: list[dict], mapping: dict, *,
+    group_threshold: int, fine_threshold: int, folds: int, max_epochs: int, patience: int, seed: int
 ) -> dict:
     """District-grouped CV of NN1: per-fold and summary MAE and RMSE, with loss curves.
 
@@ -259,11 +260,21 @@ def cross_validate(
         train = np.concatenate([split["fit"], split["early_stop"]])
         policy = label.fit_policy([labelled[i] for i in train])
         y = np.array(label.labels(labelled, policy), dtype=float)
-        model = model_spec(
-            vocab, district_raw[train],
-            fine_cuisines=_supported_cuisines([labelled[i] for i in train], fine_threshold),
+        train_codes = {labelled[i]["postcode_district"] for i in train}
+        fold_groups = cuisine_groups([labelled[i] for i in train], mapping, group_threshold)
+        fold_rows = [{**r, "cuisine_group": fold_groups[r["cuisine"]]} for r in labelled]
+        fold_supply = Counter(
+            (r["postcode_district"], fold_groups[r["cuisine"]]) for r in restaurants
         )
-        x = _design(model, labelled, district_raw)
+        fold_vocabulary = vocabulary(
+            fold_groups, [r for r in restaurants if r["postcode_district"] in train_codes]
+        )
+        fold_raw = training_district_inputs(fold_rows, districts, fold_supply)
+        fine_cuisines = _supported_cuisines([fold_rows[i] for i in train], fine_threshold)
+        model = model_spec(
+            fold_vocabulary, fold_raw[train], fine_cuisines=fine_cuisines,
+        )
+        x = _design(model, fold_rows, fold_raw)
         fit, stop, test = split["fit"], split["early_stop"], split["test"]
         layers, best, train_loss, stop_loss = nn1.train_early_stopping(
             x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed
@@ -272,6 +283,10 @@ def cross_validate(
         baseline_mae, baseline_rmse = _mae_rmse(y[train].mean() - y[test])
         results.append({
             "rows": {side: len(rows) for side, rows in split.items()},
+            "features": {
+                "cuisine_groups": len(model["transforms"]["cuisine_group"]["values"]),
+                "fine_cuisines": len(fine_cuisines),
+            },
             "best_epoch": best,
             "mae": model_mae,
             "rmse": model_rmse,
@@ -361,10 +376,15 @@ def validate_run_metrics(metrics: dict) -> None:
     if not isinstance(cv["folds"], list) or not cv["folds"]:
         raise ValueError("run metrics cv must contain folds")
     for fold in cv["folds"]:
-        only_keys(fold, (*errors, "rows", "best_epoch", "train_loss", "early_stop_loss"), "run metrics fold")
+        fields = (*errors, "rows", "best_epoch", "train_loss", "early_stop_loss")
+        only_keys(fold, (*fields, "features") if "features" in fold else fields, "run metrics fold")
         only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics fold rows")
         for value in fold["rows"].values():
             count(value)
+        if "features" in fold:
+            only_keys(fold["features"], ("cuisine_groups", "fine_cuisines"), "run metrics fold features")
+            for value in fold["features"].values():
+                count(value)
         count(fold["best_epoch"])
         for name in errors:
             number(fold[name])
@@ -670,14 +690,17 @@ def score_districts(model: dict, vocab: dict, districts: list[dict], supply: Cou
     return {d["postcode_district"]: float(s) for d, s in zip(districts, scores)}
 
 
-def reference_profiles(vocab: dict) -> list[dict]:
-    """Fixed profiles for the browser parity check: defaults, all traits set, Unspecified."""
+def reference_profiles(vocab: dict, model: dict) -> list[dict]:
+    """Profiles covering supported and fallback cuisines for browser parity."""
     defaults = {t["name"]: t["default"] for t in vocab["traits"]}
     everything = {t["name"]: t["values"][1] for t in vocab["traits"]}
     cuisines = [c["cuisine"] for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
+    supported = set(model["transforms"]["cuisine"]["values"])
+    supported_cuisine = next((c for c in cuisines if c in supported), cuisines[0])
+    fallback_cuisine = next((c for c in reversed(cuisines) if c not in supported), cuisines[-1])
     return [
-        {"cuisine": cuisines[0], **defaults},
-        {"cuisine": cuisines[-1], **everything},
+        {"cuisine": supported_cuisine, **defaults},
+        {"cuisine": fallback_cuisine, **everything},
         {"cuisine": UNSPECIFIED, **defaults},
     ]
 
