@@ -172,6 +172,7 @@ def build(
         restaurants=len(restaurants),
         labelled=len(labelled),
         districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
+        # A source's shares are all filled or all blank (context.demographic_table), so its first column stands for it.
         districts_without_census={
             name: sum(d[fields[0]] == "" for d in districts) for name, fields in context.SOURCE_COLUMNS.items()
         },

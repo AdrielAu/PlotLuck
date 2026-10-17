@@ -226,7 +226,15 @@ def test_private_metadata_cannot_enter_run_metrics(data, field, value):
         build.validate_run_metrics(metrics)
 
 
-@pytest.mark.parametrize("value", [{"census_age": "EC3M"}, {"census_age": 1, "SE1": 0}, 3])
+@pytest.mark.parametrize("value", [
+    {"census_age": "EC3M", "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": -1, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": 0.5, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": True, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": 0, "census_ethnicity": 0},
+    {"census_age": 0, "census_ethnicity": 0, "census_sex": 0, "SE1": 0},
+    3,
+])
 def test_census_coverage_in_run_metrics_must_be_counts_per_source(data, value):
     metrics = read_json(data / "run" / "metrics.json")
     metrics["districts_without_census"] = value
@@ -382,13 +390,11 @@ def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_pa
 
 def test_run_metrics_count_districts_each_census_source_leaves_blank(tmp_path):
     data = copy_sources(tmp_path / "data")
-    for name, keep in (("census_age", None), ("census_ethnicity", slice(2, None))):
+    ages = read_csv(data / "census_age_england.csv")
+    ages[0]["average_age"] = ""  # one district blank in place
+    ethnicities = read_csv(data / "census_ethnicity_england.csv")[2:]  # two districts with no row
+    for name, rows in (("census_age", ages), ("census_ethnicity", ethnicities)):
         path = data / f"{name}_england.csv"
-        rows = read_csv(path)
-        if keep is None:
-            rows[0]["average_age"] = ""
-        else:
-            rows = rows[keep]
         with path.open("w", encoding="utf-8", newline="") as stream:
             writer = csv.DictWriter(stream, list(rows[0]), lineterminator="\n")
             writer.writeheader()
