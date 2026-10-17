@@ -37,16 +37,24 @@ EARTH_RADIUS_KM = 6371.0088
 
 def cross_border_districts(archive_path: Path) -> set[str]:
     """Districts with active postcodes in England and another UK country."""
-    countries = {}
+    countries: dict[str, set[str]] = {}
     with zipfile.ZipFile(archive_path) as archive:
-        (member,) = [name for name in archive.namelist() if re.fullmatch(
+        members = [name for name in archive.namelist() if re.fullmatch(
             r"Data/ONSPD_[A-Z]{3}_\d{4}_UK.csv", name
         )]
-        with archive.open(member) as raw:
+        if len(members) != 1:
+            raise ValueError("ONSPD archive must contain one UK postcode CSV")
+        with archive.open(members[0]) as raw:
             reader = csv.DictReader(io.TextIOWrapper(raw, encoding="utf-8-sig", newline=""))
-            (country_field,) = [name for name in reader.fieldnames or [] if re.fullmatch(r"ctry\d\dcd", name)]
+            fields = reader.fieldnames or []
+            country_fields = [name for name in fields if re.fullmatch(r"ctry\d\dcd", name)]
+            if len(country_fields) != 1 or not {"pcds", "doterm"} <= set(fields):
+                raise ValueError("ONSPD archive lacks postcode, termination, or country code fields")
+            country_field = country_fields[0]
             for row in reader:
                 if not row["doterm"]:
+                    if not row["pcds"] or not row[country_field]:
+                        raise ValueError("active ONSPD postcode lacks district or country code")
                     district = row["pcds"].split()[0]
                     countries.setdefault(district, set()).add(row[country_field])
     return {district for district, codes in countries.items() if "E92000001" in codes and len(codes) > 1}

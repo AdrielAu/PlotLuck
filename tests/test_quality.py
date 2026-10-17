@@ -2,6 +2,8 @@
 
 from zipfile import ZipFile
 
+import pytest
+
 from plotluck.quality import cross_border_districts, prepare_districts
 
 
@@ -102,3 +104,14 @@ def test_only_districts_with_active_postcodes_in_two_countries_are_cross_border(
             "NE1 1AA,,E92000001\nNE2 1AA,,S92000003\n"
         ))
     assert cross_border_districts(archive) == {"TD5"}
+
+
+def test_cross_border_check_rejects_missing_country_evidence(tmp_path):
+    archive = tmp_path / "onspd.zip"
+    with ZipFile(archive, "w") as file:
+        file.writestr("Data/ONSPD_OCT_2026_UK.csv", (
+            "pcds,doterm,ctry24cd\nTD5 1AA,,E92000001\nTD5 1AB,,\n"
+        ))
+
+    with pytest.raises(ValueError, match="country code"):
+        cross_border_districts(archive)
