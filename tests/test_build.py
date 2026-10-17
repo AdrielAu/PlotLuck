@@ -45,7 +45,7 @@ def test_trait_fill_rule_controls_vocabulary_and_model(tmp_path, capsys, filled,
         writer.writerows(rows)
 
     out = tmp_path / "bundle"
-    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
     vocab = read_json(out / "vocabulary.json")
     model = read_json(out / "model.json")
     traits = {t["name"]: t for t in vocab["traits"]}
@@ -384,7 +384,7 @@ def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
         writer.writerows(rows)
 
     out = tmp_path / "bundle"
-    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
     restaurants = read_csv(tmp_path / "restaurants.csv")
     assert [r["is_chain"] for r in restaurants[:6]] == ["1", "1", "1", "0", "0", "0"]
     assert restaurants[0]["price_band"] == ""

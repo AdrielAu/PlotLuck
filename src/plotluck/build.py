@@ -139,12 +139,11 @@ def build(
     )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
-    vocab = vocabulary(groups, restaurants)
     supply_rows = [
         {"postcode_district": d, "cuisine_group": g, "restaurants": n}
         for (d, g), n in sorted(supply.items())
     ]
-    vocab = vocabulary(groups)
+    vocab = vocabulary(groups, restaurants)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
     district_raw = training_district_inputs(labelled, districts, supply)
     cv = cross_validate(
@@ -188,31 +187,6 @@ def build(
     return metrics
 
 
-def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
-    """Cuisines and traits filled on at least half the prepared England rows.
-
-    Venue type always ships. Rates include label-ineligible rows; diagnostics
-    are printed only, so they stay on the server for full-data builds.
-    """
-    filled = {
-        name: sum(r[column] != "" for r in restaurants) / len(restaurants) if restaurants else 0.0
-        for name, column in [("price_band", "price_band"), ("chain", "is_chain"), *((f, f) for f in DIET_FLAGS)]
-    }
-    for name, rate in filled.items():
-        print(f"Trait fill rate {name}: {rate:.1%}")
-    traits: list[dict] = [
-        {"name": "venue_type", "kind": "single_choice", "values": list(VENUE_TYPES), "default": DEFAULT_VENUE},
-        {
-            "name": "price_band",
-            "kind": "single_choice",
-            "values": [*PRICE_BANDS.values(), UNKNOWN_PRICE],
-            "default": UNKNOWN_PRICE,
-        },
-        *(
-            {"name": f, "kind": "on_off", "values": [False, True], "default": False}
-            for f in ("chain", *DIET_FLAGS)
-        ),
-    ]
 def cross_validate(
     labelled: list[dict], district_raw: np.ndarray, vocab: dict, *, folds: int, max_epochs: int, patience: int, seed: int
 ) -> dict:
@@ -429,8 +403,31 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     _write_json(out / "reference_scores.json", reference)
 
 
-def vocabulary(groups: dict[str, str]) -> dict:
-    """Cuisines with their group and display label, and the shipped traits."""
+def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
+    """Cuisines and traits filled on at least half the prepared England rows.
+
+    Venue type always ships. Rates include label-ineligible rows; diagnostics
+    are printed only, so they stay on the server for full-data builds.
+    """
+    filled = {
+        name: sum(r[column] != "" for r in restaurants) / len(restaurants) if restaurants else 0.0
+        for name, column in [("price_band", "price_band"), ("chain", "is_chain"), *((f, f) for f in DIET_FLAGS)]
+    }
+    for name, rate in filled.items():
+        print(f"Trait fill rate {name}: {rate:.1%}")
+    traits: list[dict] = [
+        {"name": "venue_type", "kind": "single_choice", "values": list(VENUE_TYPES), "default": DEFAULT_VENUE},
+        {
+            "name": "price_band",
+            "kind": "single_choice",
+            "values": [*PRICE_BANDS.values(), UNKNOWN_PRICE],
+            "default": UNKNOWN_PRICE,
+        },
+        *(
+            {"name": f, "kind": "on_off", "values": [False, True], "default": False}
+            for f in ("chain", *DIET_FLAGS)
+        ),
+    ]
     return {
         "version": BUNDLE_VERSION,
         "cuisines": [
