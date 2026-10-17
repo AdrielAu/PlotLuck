@@ -41,13 +41,13 @@ Status: product interview complete. At the user's request, this plan has been sy
 - Qwen2.5-0.5B-Instruct is the researched candidate, not yet validated for this task. [Publisher model card](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct). WebLLM's [model registry](https://github.com/mlc-ai/web-llm/blob/main/src/config.ts) includes a browser build; browser compatibility, download size and latency require measurement.
 - LinuxONE runtime candidates are Transformers/PyTorch CPU or llama.cpp with a big-endian GGUF. The [official s390x instructions](https://github.com/ggml-org/llama.cpp/blob/master/docs/build-s390x.md) document the latter. Hardware support is not evidence of actual accelerated inference.
 - The shared server is operated by one human at a time; coding agents do not work in that clone. Jupyter is accessed through an SSH tunnel. No public inference endpoint currently exists. See [the runbook](../server.md).
-- **Competition eligibility is unresolved:** [the eligibility investigation](../competition/nn2-eligibility.md) recovered the current official embedded rules. Their library/framework exception does not explicitly cover pretrained weights; originality clauses require clarification. Model licensing does not establish competition permission. Recorded organizer clarification remains necessary before claiming eligibility.
+- **Competition permission is team-confirmed:** on 2026-10-17 the user confirmed pretrained weights are allowed. [The eligibility investigation](../competition/nn2-eligibility.md) records that permission basis separately from the official rules, which do not explicitly cover pretrained weights. Final artifact licences/notices and technical gates remain required.
 - Offline geography source candidates: [OS Open Names](https://docs.os.uk/os-downloads/products/addresses-and-names-portfolio/os-open-names/os-open-names-technical-specification) supplies place identifiers, names, administrative context and British National Grid coordinates; [OS Open Built Up Areas](https://www.ordnancesurvey.co.uk/products/os-open-built-up-areas) supplies settlement extents; [Boundary-Line](https://www.ordnancesurvey.co.uk/products/boundary-line) supplies administrative boundaries. Coordinate conversion, a verified names-to-boundaries crosswalk, release pinning, attribution and compressed browser size need investigation. The full gazetteer must not be assumed to fit the browser budget. Precomputing area-to-district membership could avoid shipping polygons.
 - [ONS built-up-area methodology](https://www.ons.gov.uk/peoplepopulationandcommunity/housing/articles/townsandcitiescharacteristicsofbuiltupareasenglandandwales/census2021) treats London differently from ordinary settlements; London, Greater London, City of London and boroughs need typed choices rather than one unqualified matching rule.
 
 ## Feasibility still to prove
 
-- Current competition permission for pretrained weights.
+- Final model/runtime artifact licences, attribution and notices; competition permission is team-confirmed.
 - Candidate compatibility, quality, download size and measured latency in both runtimes.
 - Permitted geography releases, reliable joins, coordinate conversion, preprocessing tooling and browser payload size. The captured LinuxONE environment has no GIS libraries installed; verify suitable formats/tooling without assuming changes to the shared image.
 - Exact pinned releases, reference hardware and recorded evaluation outputs. These are implementation evidence, not established facts.
@@ -62,12 +62,12 @@ The published specification carries these implementation decisions and acceptanc
 
 ### 1. Establish eligibility and technical feasibility
 
-- Obtain readable current competition rules or a recorded organizer clarification covering pretrained weights. Preserve Qwen's licence/notice and distinguish pretrained inference from NN1 training in the submission. Planning and technical experiments can proceed while this is unresolved; eligibility claims and final competition sign-off cannot.
+- Record the readable current rules and the team-confirmed permission for pretrained weights; see the eligibility investigation for provenance. Preserve Qwen's licence/notice and distinguish pretrained inference from NN1 training in the submission. Final sign-off still requires the artifact notice audit and all technical gates.
 - Pin the model revisions, browser runtime release and native runtime versions. Start with the installed Transformers/PyTorch stack on LinuxONE, without replacing the shared environment. Download the native weights on the VM under operator control; keep large weights outside git.
 - Measure a small synthetic extraction set in both runtimes before building the full UI. Record cold download/load time, warm latency, errors, versions and hardware. A failing candidate triggers model/prompt/runtime investigation and a revised proposal; it does not remove the mandatory NN2 requirement or lower the agreed gates.
 - Verify public geography downloads, redistribution terms, coordinate conversion, place-to-boundary joins and a compact browser payload. A city name must not be silently equated to its local authority. London candidate types remain explicit.
 
-Completion: candidate inference works in both environments; source and licence paths are viable; measured sizes and latency support proceeding. Current rules remain an explicit release blocker until verified.
+Completion: candidate inference works in both environments; source and licence paths are viable; measured sizes and latency support proceeding. Pretrained-weight permission is settled by team confirmation; final artifact notices remain a release check.
 
 ### 2. Define and test the interpretation and search-area contracts
 

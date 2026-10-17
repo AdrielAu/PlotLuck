@@ -29,9 +29,9 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
-- **NN2 release prerequisites**: pretrained-model competition eligibility, browser/LinuxONE model gates and offline geography/tooling feasibility. [Spec #110](https://github.com/AdrielAu/PlotLuck/issues/110) is published; see [the plan](../plans/nn2-integration.md) for interview context. The earlier [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed; its NN1 decisions remain in force.
+- **NN2 release prerequisites**: model/runtime notices, browser/LinuxONE model gates and offline geography/tooling feasibility. Pretrained-weight permission is [team-confirmed](nn2-eligibility.md) on 2026-10-17. [Spec #110](https://github.com/AdrielAu/PlotLuck/issues/110) is published; see [the plan](../plans/nn2-integration.md) for interview context. The earlier [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed; its NN1 decisions remain in force.
 - **Next**:
   1. The full-data run ([`runs/2026-10-17-train-nn1/`](../../runs/2026-10-17-train-nn1/)) is in `web/models/`: NN1 MAE 0.0503 against 0.0823 for the baseline over 5 district-grouped folds, and x86 parity passes on the s390x weights. VOA was kept (213 districts without rent). 101 of 2,324 districts have no Census match (ONSPD has no active English postcode-to-MSOA link for them) and use the training median.
   2. Accelerated-inference benchmark on LinuxONE (phase 6).
   3. Evidence screenshots for the training run, metrics and x86 load check (phase 9).
-  4. NN2 integration has started with #115's manual draft/confirmation foundation. Eligibility, model/geography feasibility and browser interpretation remain open in spec #110's child issues.
+  4. NN2 integration has started with #115's manual draft/confirmation foundation. Competition permission is team-confirmed; model/geography feasibility and browser interpretation remain open in spec #110's child issues.

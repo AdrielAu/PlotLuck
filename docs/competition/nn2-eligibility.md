@@ -2,7 +2,7 @@
 
 Checked 2026-10-17 for [#112](https://github.com/AdrielAu/PlotLuck/issues/112), part of [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110).
 
-**Conclusion: unresolved. Competition release/sign-off remains blocked.** The current official rules are now readable. They permit open-source libraries/frameworks but do not explicitly address pretrained weights. Their originality requirements make it unsafe to infer that the library exception also covers pretrained models. Technical experiments may continue; this note does not establish eligibility or complete #112's permission requirement.
+**Conclusion: pretrained-weight competition permission is settled by team confirmation for #112.** Team confirmed on 2026-10-17 that pretrained weights are allowed, answering the permission question with “Yes its allowed”. This records the user's confirmation in this implementation session; it is not an independently verified organizer statement or a quotation from the rules. The team accepts that confirmation as the permission basis for implementation and competition submission. The current official rules are readable and retained below. Model licences, notices and technical release gates still apply.
 
 ## Primary competition evidence
 
@@ -34,7 +34,7 @@ The researched candidate is Qwen2.5-0.5B-Instruct. These are licence findings, n
 | Component | First-party evidence | Release obligation/follow-up |
 |---|---|---|
 | Native Qwen model | [Publisher licence at revision `7ae5576`](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/blob/7ae557604adf67be50417f59c2c2f167def9a775/LICENSE): Apache-2.0; Alibaba Cloud copyright. | Retain the licence and applicable copyright/attribution; identify changes to modified files and retain any applicable upstream NOTICE. The inspected repository lists LICENSE, with no NOTICE file. |
-| MLC browser conversion | [Publisher tree at revision `32ff081`](https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/tree/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad) | The inspected tree supplies no LICENSE/NOTICE and its model metadata supplies no licence field. Record the conversion's provenance and original Qwen licence; verify the actual converted artifacts' applicable terms before redistribution. Do not assume missing notices mean unrestricted rights. |
+| MLC browser conversion | [Publisher tree at revision `32ff081`](https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/tree/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad) | The inspected tree supplies no LICENSE/NOTICE and its model metadata supplies no licence field. Qwen's upstream Apache-2.0 licence permits derivative works subject to its conditions; missing conversion metadata alone does not establish a prohibition or unrestricted rights. Record conversion provenance, supply the upstream licence/attribution and audit notices for the exact converted artifacts before release. |
 | WebLLM | [Upstream licence](https://github.com/mlc-ai/web-llm/blob/main/LICENSE): Apache-2.0 plus a bundled-component section. | Preserve runtime and bundled dependency notices for the exact shipped package, compiled model library and tokenizer assets. |
 | Transformers | [Upstream licence](https://github.com/huggingface/transformers/blob/main/LICENSE): Apache-2.0. | Record the installed server version and preserve notices for any redistributed components. |
 | PyTorch | [Upstream licence](https://github.com/pytorch/pytorch/blob/main/LICENSE): BSD-style terms with component notices. | Record the installed server version; preserve applicable copyright, licence and disclaimer on redistribution. |
@@ -43,12 +43,8 @@ The `main` runtime links are discovery references: the release reviewer must ins
 
 ## Release decision and human follow-up
 
-The team submission owner must obtain recorded clarification from the organizer/sponsor, or a revised official rule that explicitly covers the following question:
+The permission question was resolved by the team's 2026-10-17 confirmation above. No message has been sent to organizers by the agent, and no separate organizer response was supplied. Keep that provenance distinction in reviews and submission evidence; do not describe the rules as explicitly permitting pretrained weights. #112's permission decision is resolved on the team-confirmed basis and does not need another permission request.
 
-> May an original project built during the event use existing Apache-2.0 Qwen2.5-0.5B-Instruct weights, including an MLC quantized conversion, for inference in a static browser application and synthetic inference/evaluation on LinuxONE, while NN1 is trained by the team during the event? What disclosure or licence conditions apply under the originality and open-source exceptions?
+The release reviewer checks the model/runtime revisions actually shipped, licence copies and notices, submission resource links, and event-window provenance. Audit the notice pack for upstream Qwen weights, the browser conversion and runtime dependencies; team permission does not replace those obligations. The human LinuxONE operator records synthetic inference separately from NN1 training. Describe NN2 as **pretrained inference/evaluation**, not team training, and CPU execution as CPU execution unless an acceleration measurement proves otherwise. No server environment changes or performance claims are authorized by this licence investigation.
 
-No message has been sent to organizers. Save the primary response, author/authority, date, scope and conditions as reviewable evidence; redact private contact details. A human reviewer must assess whether it covers both weights and their browser conversion. If denied, revise the model approach with the user; manual pickers do not satisfy mandatory NN2. Until explicit permission is recorded, keep #112 and the competition sign-off gate open.
-
-Once permission is resolved, the release reviewer checks the model/runtime revisions actually shipped, licence copies and notices, submission resource links, and event-window provenance. The human LinuxONE operator records synthetic inference separately from NN1 training. Describe NN2 as **pretrained inference/evaluation**, not team training, and CPU execution as CPU execution unless an acceleration measurement proves otherwise. No server environment changes or performance claims are authorized by this licence investigation.
-
-Unchecked: organizer permission, converted-artifact rights verification, final distribution notices and measured runtime gates remain open.
+Unchecked: independent organizer evidence was not supplied; final artifact notice audit and measured runtime gates remain open.
