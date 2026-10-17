@@ -103,16 +103,37 @@ def test_cross_border_district_is_absent_from_export_and_training(tmp_path):
             "SE1 1AA,,E92000001\nSE1 1AB,202001,W92000004\n"
         ))
 
+    mapped, _ = build.restaurant_table(
+        read_csv(data / "tripadvisor_england.csv"),
+        read_csv(data / "onspd_england.csv"),
+        build.load_mapping(),
+    )
+    mapped_counts = Counter(row["postcode_district"] for row in mapped)
+    assert mapped_counts["SE17"] > 0
+
     out = tmp_path / "bundle"
     metrics = build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, folds=3, max_epochs=1)
 
     districts = {row["postcode_district"] for row in read_csv(out / "districts.csv")}
     supply = {row["postcode_district"] for row in read_csv(out / "district_cuisine_supply.csv")}
-    private = {row["postcode_district"] for row in read_csv(data / "restaurants.csv")}
+    private_rows = read_csv(data / "restaurants.csv")
+    private = {row["postcode_district"] for row in private_rows}
     assert "SE17" not in districts | supply | private
+    assert Counter(row["postcode_district"] for row in private_rows) == {
+        code: count for code, count in mapped_counts.items() if code != "SE17"
+    }
     assert "SE1" in districts
     assert metrics["quality"]["cross_border"] == 1
-    assert metrics["excluded"]["cross_border"] > 0
+    assert metrics["excluded"]["cross_border"] == mapped_counts["SE17"]
+    for case in read_json(out / "reference_scores.json")["cases"]:
+        assert "SE17" not in case["scores"]
+        assert "SE1" in case["scores"]
+
+
+def test_full_data_build_requires_uk_postcode_archive(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    with pytest.raises(FileNotFoundError, match="raw/onspd.zip"):
+        build.build(data, tmp_path / "bundle", group_threshold=build.FULL_GROUP_THRESHOLD)
 
 
 @pytest.mark.parametrize(
