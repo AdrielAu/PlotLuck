@@ -372,19 +372,20 @@ def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
 
 
 def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> dict[str, str]:
-    """Fine cuisine -> cuisine_group, for every fine cuisine in the mapping."""
+    """Fine cuisine -> cuisine_group, for every fine cuisine in the mapping.
+
+    A cuisine with fewer than ``threshold`` label-eligible rows folds into its
+    parent. A parent's pool is its own rows plus those of its folded children;
+    a pool still under ``threshold`` folds into Other.
+    """
     parent = {m["cuisine"]: m["parent"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella")}
     parent.setdefault(UNSPECIFIED, "")
     counts = Counter(r["cuisine"] for r in restaurants if r["review_success_label"] != "")
-    small = [c for c in parent if counts[c] < threshold]
-    parent_counts = Counter()
-    for c in small:
-        parent_counts[parent[c]] += counts[c]
-    groups = {c: c for c in parent}
-    for c in small:
-        p = parent[c]
-        groups[c] = p if p and parent_counts[p] >= threshold else OTHER
-    return groups
+    root = {c: parent[c] if parent[c] and counts[c] < threshold else c for c in parent}
+    pool = Counter()
+    for c, r in root.items():
+        pool[r] += counts[c]
+    return {c: r if pool[r] >= threshold else OTHER for c, r in root.items()}
 
 
 def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:

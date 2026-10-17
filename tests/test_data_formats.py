@@ -47,6 +47,8 @@ def test_sample_restaurants_format():
             assert r["is_chain"] in ("0", "1")
             for flag in ("vegetarian_friendly", "vegan_options", "gluten_free"):
                 assert r[flag] in ("", "0", "1")
+            if r["review_success_label"] == "":
+                continue  # excluded from the label; still counts as supply
             assert float(r["avg_rating"]) >= 1.0 and float(r["avg_rating"]) <= 5.0
             label = float(r["review_success_label"])
             assert 0.0 <= label <= 1.0
