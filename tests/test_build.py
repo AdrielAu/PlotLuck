@@ -611,7 +611,7 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
 
 
 def test_district_radius_covers_its_postcodes_with_a_minimum_for_tiny_districts():
-    km_per_degree = 6371.0088 * np.pi / 180
+    km_per_degree = build.EARTH_RADIUS_KM * np.pi / 180
     lat, lon = 51.5, -0.1
     # RING: 20 postcodes on a 1 km circle. ONE: a single-postcode district (a PO box).
     postcodes = [
@@ -627,9 +627,15 @@ def test_district_radius_covers_its_postcodes_with_a_minimum_for_tiny_districts(
     assert rows["ONE1"]["radius_km"] == build.MIN_RADIUS_KM
 
 
-def test_every_sample_district_has_a_positive_radius(built):
-    for d in read_csv(built / "districts.csv"):
-        assert float(d["radius_km"]) >= build.MIN_RADIUS_KM, d["postcode_district"]
+def test_every_sample_district_has_a_positive_radius_and_the_build_names_the_tiny_ones(tmp_path, capsys):
+    data = copy_sources(tmp_path / "data")
+    build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    radii = {d["postcode_district"]: float(d["radius_km"]) for d in read_csv(data / "bundle" / "districts.csv")}
+
+    assert all(r >= build.MIN_RADIUS_KM for r in radii.values())
+    assert radii["SE1"] > build.MIN_RADIUS_KM  # 1,724 sample postcodes: a real spread, not the floor
+    # EC3N has a single sample postcode.
+    assert "EC3N" in capsys.readouterr().out.split("km radius")[1].splitlines()[0]
 
 
 @pytest.mark.parametrize("radius", ["", "0", "-1"])

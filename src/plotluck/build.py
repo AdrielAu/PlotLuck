@@ -148,6 +148,8 @@ def build(
         postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv"),
         context.demographic_table(data), _read_csv(data / "tourism_england.csv"),
     )
+    tiny = [d["postcode_district"] for d in districts if d["radius_km"] == MIN_RADIUS_KM]
+    print(f"Districts at the minimum {MIN_RADIUS_KM} km radius ({len(tiny)}): {' '.join(tiny)}")
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
     supply_rows = [
@@ -765,11 +767,13 @@ def district_table(
     return rows
 
 
-def _radius_km(lat: float, lon: float, lats, lons) -> float:
+def _radius_km(lat: float, lon: float, lats: tuple[float, ...], lons: tuple[float, ...]) -> float:
     """Circle radius around (lat, lon) covering ``RADIUS_SHARE`` of the points, at least ``MIN_RADIUS_KM``.
 
     Distances are on a flat map local to the district, which is close enough at district scale.
     """
+    # shortcut: a coverage circle from postcode points, not district boundaries; upgrade if a
+    # permitted postcode-district boundary source appears (none from OS/ONS as of 2026-10).
     dy = np.radians(np.subtract(lats, lat))
     dx = np.radians(np.subtract(lons, lon)) * math.cos(math.radians(lat))
     radius = float(np.quantile(np.hypot(dx, dy), RADIUS_SHARE)) * EARTH_RADIUS_KM
