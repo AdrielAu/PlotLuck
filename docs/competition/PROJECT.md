@@ -18,7 +18,7 @@
 - Diversity: cultural demand gap (Census vs supply). How it's used is TBD.
 
 ## Platform facts (LinuxONE Community Cloud)
-- 1 VM shared by the whole team. Jupyter Lab runs in **Docker** (not Podman) on port 38888, with one shared token. Shared folder `/home/linux1/shared` ↔ `/home/jovyan/shared`.
+- 1 VM shared by the whole team. Jupyter Lab runs in **Docker** (not Podman) on port 38888, with one shared token. Shared folder `/home/linux1/shared` ↔ `/home/ibm-user/shared`.
 - Image includes PyTorch, TensorFlow/Keras, XGBoost, scikit-learn; ONNX export supported. Upload limit 200 MB. s390x.
 - Setup repo: github.com/linuxone-community-cloud/jupyter-lab-ml
 
@@ -37,7 +37,7 @@
 - Avoid Windows-isms: `pathlib`, `.gitattributes` (LF), consistent filename case.
 
 ## Evidence (current plan)
-- `docs/evidence/CHECKLIST.md` in the repo, one owner. Shots named by step.
+- `docs/evidence/CHECKLIST.md` in the repo. Shots named by step.
 - Capture: SSH login + `lscpu` (s390x), `docker ps`, Jupyter Lab, data ingest, training of both NNs (loss curves), metrics, accelerated inference benchmark, weight export, live site.
 
 ## Abstract (initial concept text)
@@ -52,4 +52,4 @@
 - User prefs: keep TBD items general; check diagram labels fit their boxes after edits; keep handovers token-lean.
 
 ## Open
-- Decide: the NN roles and architecture, the non-cuisine properties, the exact label, how diversity is used, who operates the server and who owns evidence.
+- Decide: the NN roles and architecture, the non-cuisine properties, the exact label, how diversity is used and who operates the server.
