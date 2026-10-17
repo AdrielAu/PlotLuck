@@ -1,6 +1,6 @@
 # NN2 integration plan
 
-Status: product interview complete. At the user's request, this plan has been synthesized and published as [specification #110](https://github.com/AdrielAu/PlotLuck/issues/110), the implementation contract. Implementation has started with #115's manual draft/confirmation foundation. NN2 interpretation and its feasibility/release gates remain open.
+Status: product interview complete. At the user's request, this plan has been synthesized and published as [specification #110](https://github.com/AdrielAu/PlotLuck/issues/110), the implementation contract. Implementation has started with #115's manual draft/confirmation foundation. #136 connects the questions screen to browser NN2 behind `interpret(answers)`, with the deterministic fallback when NN2 is not loaded or replies invalidly; NN2 location text and clarifications await the place catalogue (#117/#118). NN2 interpretation and its feasibility/release gates remain open.
 
 ## Agreed requirements
 

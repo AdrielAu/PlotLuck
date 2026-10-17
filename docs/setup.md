@@ -32,7 +32,7 @@ Agent worktrees (`.claude/worktrees/`) are disposable and git-ignored. Push anyt
 
 ## Browser flow tests
 
-`node --test` remains dependency-free. The separate browser workflow installs isolated test tools and exercises the actual site with Chromium; it serves Leaflet and Three.js locally and does not fetch map tiles.
+`node --test` remains dependency-free. The separate browser workflow installs isolated test tools and exercises the actual site with Chromium; it serves Leaflet and Three.js locally and does not fetch map tiles. The NN2 flow swaps the pinned WebLLM module for a stand-in with a fixed reply, so it downloads no model and needs no WebGPU.
 
 To run it on Windows with an installed Edge browser:
 
@@ -42,6 +42,7 @@ $env:PLOTLUCK_PLAYWRIGHT = 'file:///' + $env:TEMP.Replace('\', '/') + '/plotluck
 $env:PLOTLUCK_BROWSER = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 node tests/browser/questions-flow.mjs
 node tests/browser/profile-flow.mjs
+node tests/browser/nn2-flow.mjs
 ```
 
 Without an installed browser, install Chromium with the isolated Playwright executable and omit `PLOTLUCK_BROWSER`. On other platforms, use a `file://` URL pointing to the isolated Playwright module. These tools are test-only; the deployed site has no new package dependency.
