@@ -6,11 +6,19 @@ import { cpus, platform, arch, release, totalmem } from 'node:os';
 import { NN2 } from '../web/nn2-runtime.js';
 const { chromium } = await import(process.env.PLOTLUCK_PLAYWRIGHT ?? 'playwright');
 const root = new URL('../', import.meta.url);
+const mode = process.env.PLOTLUCK_NN2_MODE ?? 'baseline';
+if (!['baseline','grounded','focused'].includes(mode)) throw new Error('Use baseline, grounded or focused mode.');
 const benchmark = JSON.parse(await readFile(new URL('tests/fixtures/nn2-benchmark.json', root)));
 // Keep heldout descriptions AND expected labels outside the browser experiment.
-const cases = benchmark.cases.filter(c => c.split === 'development').map(({id, description}) => ({id, description}));
+const probeRent = process.env.PLOTLUCK_NN2_PROBE_RENT === '1';
+if (probeRent && mode !== 'focused') throw new Error('Rent probes require focused mode.');
+const cases = probeRent ? [
+  {id:'probe-monthly',description:'A cheap Thai cafe in London, with a rent budget of £2,000 per month.'},
+  {id:'probe-annual',description:'An Italian restaurant in Manchester with moderate menu prices and rent of £24,000 per year.'},
+  {id:'probe-missing-period',description:'A Thai restaurant in London with a rent budget of £2,000.'},
+] : benchmark.cases.filter(c => c.split === 'development').map(({id, description}) => ({id, description}));
 const hashes = {};
-for (const path of ['web/interpreter.js', 'web/nn2-worker.js', 'web/nn2-runtime.js', 'web/models/vocabulary.json',
+for (const path of ['web/interpreter.js', 'web/grounded-interpreter.js', 'web/profile-extraction.js', 'web/models/geography.json', 'web/nn2-worker.js', 'web/nn2-runtime.js', 'web/models/vocabulary.json',
   'tests/fixtures/nn2-benchmark.json', 'scripts/prove-nn2-browser.mjs', 'scripts/score-nn2.mjs']) {
   hashes[path] = createHash('sha256').update(await readFile(new URL(path, root))).digest('hex');
 }
@@ -37,11 +45,15 @@ try {
   });
   page.context().on('requestfailed', request => transferFailures.push({url:request.url().split('?')[0],error:request.failure()?.errorText}));
   await page.goto(`http://127.0.0.1:${server.address().port}/web/models/vocabulary.json`);
-  report = await page.evaluate(async ({cases}) => {
+  report = await page.evaluate(async ({cases,mode}) => {
     const adapter = await navigator.gpu?.requestAdapter();
     const hardware = { userAgent: navigator.userAgent, adapter: adapter ? {vendor:adapter.info.vendor,architecture:adapter.info.architecture,device:adapter.info.device,description:adapter.info.description} : null };
     if (!adapter) return { hardware, error: 'WebGPU adapter unavailable', results: [] };
     const vocabulary = await (await fetch('/web/models/vocabulary.json')).json();
+    const catalogueStart = performance.now();
+    const catalogueBytes = mode !== 'baseline' ? await (await fetch('/web/models/geography.json')).arrayBuffer() : null;
+    const catalogue = catalogueBytes ? JSON.parse(new TextDecoder().decode(catalogueBytes)) : null;
+    const catalogue_load_seconds = (performance.now()-catalogueStart)/1000;
     const worker = new Worker('/web/nn2-worker.js', {type:'module'});
     let id = 0;
     const call = data => new Promise((resolve,reject) => {
@@ -60,22 +72,24 @@ try {
     });
     const start=performance.now(); const results=[];
     try {
-      await call({action:'load',vocabulary});
+      await call({action:'load',vocabulary,mode});
       const cold_load_seconds=(performance.now()-start)/1000;
       for (const c of cases) {
         const requestStart = performance.now();
         try {
-          const r=await call({action:'interpret',description:c.description,vocabulary,syntheticProof:true});
-          results.push({id:c.id,description:c.description,reply:r.reply,usage:r.usage,seconds:r.seconds});
+          const r=await call({action:'interpret',description:c.description,vocabulary,mode,catalogue,syntheticProof:true});
+          results.push({id:c.id,description:c.description,reply:r.reply,raw_reply:r.raw_reply,
+            ...(mode==='focused' ? {rentBudget:r.rentBudget,rentNeedsReview:r.rentNeedsReview} : {}),
+            ...(r.candidates ? {place_candidates:r.candidates.map(({id,name,type,context})=>({id,name,type,context}))} : {}),usage:r.usage,seconds:r.seconds});
         } catch(error) {
-          results.push({id:c.id,description:c.description,reply:error.reply,error:error.message,seconds:error.seconds ?? (performance.now()-requestStart)/1000});
+          results.push({id:c.id,description:c.description,reply:error.reply,raw_reply:error.raw_reply,error:error.message,seconds:error.seconds ?? (performance.now()-requestStart)/1000});
           if (error.message.includes('Proof timeout')) break;
         }
       }
-      return {hardware,cold_load_seconds,results};
+      return {hardware,cold_load_seconds,catalogue_load_seconds,catalogue_response_body_bytes:catalogueBytes?.byteLength ?? 0,results};
     } catch(error) {return {hardware,error:error.message,elapsed_seconds:(performance.now()-start)/1000,results};}
     finally {worker.terminate();}
-  }, {cases});
+  }, {cases,mode});
   report.browser_version = browser.version();
 } finally {await Promise.all(measurements); await browser.close(); await new Promise(resolve=>server.close(resolve));}
 report.transfers=transfers;
@@ -88,11 +102,12 @@ report.total_transfer_body_bytes=transfers.reduce((n,t)=>n+t.body_bytes,0);
 report.model_transfer_body_bytes=transfers.filter(t=>t.url.includes('huggingface.co')||t.url.includes('hf.co')||t.url.includes('xethub')||t.url.endsWith('.wasm')).reduce((n,t)=>n+t.body_bytes,0);
 report.supporting_transfer_body_bytes=report.total_transfer_body_bytes-report.model_transfer_body_bytes;
 report.within_download_budget=report.download_measurement_complete ? report.total_transfer_body_bytes <= NN2.downloadBudget : null;
-report.download_note='Fresh browser context. Measured external response bodies, including redirects and runtime; not shard manifest sizes, wire bytes, or GPU memory. Download span overlaps initialization. No geography assets used.';
+report.download_note='Fresh browser context. Measured external response bodies, including redirects and runtime; not shard manifest sizes, wire bytes, or GPU memory. Download span overlaps initialization. Local geography response-body bytes are reported separately.';
+report.mode=mode;
 report.candidate=NN2;
 report.source_sha256=hashes;
-report.label_status=benchmark.label_status;
-report.split='development';
+report.label_status=probeRent ? 'Unlabelled exploratory price/rent probes; no accuracy metric and no tuning on these outputs.' : benchmark.label_status;
+report.split=probeRent ? 'exploratory' : 'development';
 report.planned_cases=cases.map(c=>c.id);
 report.unexecuted_cases=cases.filter(c=>!report.results.some(r=>r.id===c.id)).map(c=>c.id);
 report.environment={platform:platform(),arch:arch(),os_release:release(),cpu:cpus()[0]?.model,logical_cpus:cpus().length,memory_bytes:totalmem(),node:process.version,headless:true,fresh_context:true};

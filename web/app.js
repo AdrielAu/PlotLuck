@@ -1,6 +1,7 @@
 // Restaurant pickers, then district results: score colours, threshold and an accessible shortlist.
 import { defaultProfile, matchCuisines } from "./pickers.js";
 import { loadBundle, rankDistricts, scoreDistricts } from "./scoring.js";
+import { setUpDescription, areaDistricts, rentBandDistricts } from "./description-controls.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -160,6 +161,7 @@ function setUpCuisinePicker(cuisines, onPick) {
       restore();
     }
   });
+  return cuisine => pick(cuisines.find(c=>c.cuisine === cuisine) ?? {cuisine:undefined,label:''});
 }
 
 async function main() {
@@ -169,6 +171,12 @@ async function main() {
   let draft = defaultProfile(bundle.vocabulary, undefined);
   let confirmedQuery = null;
   let rescore = null;
+  let draftArea = {label:'England',place:null,radius:null};
+  let interpreting = false;
+  let applyingInterpretation = false;
+  let descriptionControls;
+  let rentBudget = null;
+  let rentBand = 'any';
 
   // The map is built on the first confirmation, once its container is visible.
   function showResults() {
@@ -203,6 +211,7 @@ async function main() {
       }
       $("count").textContent = `${ranked.length} of ${scores.length} districts at or above the threshold`;
       $("empty").hidden = ranked.length > 0;
+      $("empty").textContent = scores.length ? 'No district reaches this threshold. Lower it to see more districts.' : 'No district centres match this search area and rent band. Edit the area, radius or rent band and compare again.';
       $("ranked").replaceChildren(
         ...ranked.map(({ postcode_district, score }) => {
           const button = document.createElement("button");
@@ -256,12 +265,14 @@ async function main() {
   }
 
   function updateDraft() {
-    const pending = !confirmedQuery || Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+    const pending = !confirmedQuery || Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]) ||
+      draftArea?.label !== confirmedQuery.area || (draftArea?.place?.id ?? null) !== confirmedQuery.areaId || draftArea?.radius !== confirmedQuery.radius ||
+      JSON.stringify(rentBudget) !== JSON.stringify(confirmedQuery.rentBudget) || rentBand !== confirmedQuery.rentBand;
     let message = "Review your choices, then compare districts across England.";
     if (confirmedQuery) {
       message = pending
-        ? "Edits are not applied. Results still show your last confirmed restaurant in England."
-        : "Results match your confirmed restaurant in England.";
+        ? `Edits are not applied. Results still show your last confirmed restaurant in ${confirmedQuery.area}.`
+        : `Results match your confirmed restaurant in ${confirmedQuery.area}.`;
     }
     $("profile-status").textContent = message;
     $("profile-error").hidden = true;
@@ -269,12 +280,19 @@ async function main() {
   }
 
   $("compare").addEventListener("click", () => {
+    if (interpreting) return;
     let message = "";
     if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.cuisine)) {
       message = "Choose a cuisine from the list before comparing districts.";
       $("cuisine").setAttribute("aria-invalid", "true");
     } else if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
       message = "Choose a supported value for every trait before comparing districts.";
+    } else if (!draftArea) {
+      message = "Choose a valid search area and positive radius before comparing districts.";
+    } else if (rentBudget && (!Number.isFinite(rentBudget.annualGBP) || rentBudget.amount<=0)) {
+      message = "Enter a positive rent budget and its period, or clear it.";
+    } else if (!['low','mid','high','any'].includes(rentBand)) {
+      message = "Confirm a rent band alongside your total rent budget before comparing districts.";
     }
     if (message) {
       $("profile-error").textContent = message;
@@ -283,11 +301,14 @@ async function main() {
       return;
     }
     try {
-      const query = { profile: { ...draft }, area: "England" };
-      const scores = scoreDistricts(bundle, query.profile);
+      const query = { profile: { ...draft }, area: draftArea.label, areaId:draftArea.place?.id ?? null, radius:draftArea.radius, rentBudget, rentBand };
+      const codes = areaDistricts(draftArea,bundle.districts);
+      const rents = rentBandDistricts(bundle.districts,rentBand);
+      const scores = scoreDistricts(bundle, query.profile).filter(d=>(!codes || codes.has(d.postcode_district)) && (!rents || rents.has(d.postcode_district)));
       rescore ??= showResults();
       rescore(scores);
       confirmedQuery = query;
+      $("results-heading").textContent = `Confirmed restaurant · ${query.area}`;
       const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === query.profile.cuisine);
       const traits = bundle.vocabulary.traits.map((t) => {
         let value = query.profile[t.name];
@@ -295,16 +316,28 @@ async function main() {
         else value = VALUE_LABELS[value] ?? value;
         return `${traitLabel(t.name)}: ${value}`;
       });
-      $("confirmed-profile").textContent = `${cuisine.label} · ${query.area}. ${traits.join("; ")}.`;
+      $("confirmed-profile").textContent = `${cuisine.label} · ${query.area}. ${traits.join("; ")}. Rent band: ${rentBand}.${query.rentBudget ? ` Rent budget: £${query.rentBudget.annualGBP.toLocaleString('en-GB')}/year (not used in scoring).` : ''}`;
       updateDraft();
     } catch (error) {
       showError(error);
     }
   });
 
-  setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
+  const pickCuisine = setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
+    if (!applyingInterpretation) descriptionControls?.manualEdit('cuisine');
     draft = { ...draft, cuisine };
     updateDraft();
+  });
+  descriptionControls = setUpDescription({vocabulary:bundle.vocabulary,
+    onDraft:interpretation=>{
+      draft={...draft,...Object.fromEntries(['cuisine','venue_type','price_band'].map(name=>[name,interpretation.profile[name]]))};
+      applyingInterpretation=true;pickCuisine(draft.cuisine);applyingInterpretation=false;
+      for (const input of $("trait-pickers").querySelectorAll('input')) input.checked = input.type === 'checkbox' ? draft[input.name] : input.value === draft[input.name];
+      updateDraft();
+    },
+    onArea:area=>{draftArea=area;$("area-summary").textContent=`Search area: ${area?.label ?? 'choose a place below'}`;updateDraft();},
+    onBusy:value=>{interpreting=value;$("compare").disabled=value;},
+    onRent:(value,band)=>{rentBudget=value;rentBand=band;updateDraft();},
   });
   $("trait-pickers").addEventListener("change", (event) => {
     const { name, value, checked } = event.target;

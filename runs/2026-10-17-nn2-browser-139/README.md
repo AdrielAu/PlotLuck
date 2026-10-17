@@ -1,5 +1,9 @@
 # NN2 desktop browser investigation (#139)
 
+Original baseline. See the subsequent [grounded comparison](grounded-comparison.md)
+and [five-input investigation](focused-extraction.md) for the user's later scope
+refinements. The results below remain historical evidence.
+
 **Candidate fails quality: 2/20 complete approved development requests correct.**
 NN2 remains mandatory; all release gates stay unchanged. This run demonstrates
 description-to-validated-draft inference for two cases, not a usable interpreter.

@@ -1,0 +1,219 @@
+{
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "evaluated": 20,
+  "correct": 13,
+  "json_valid": 20,
+  "validated": 20,
+  "components": {
+    "cuisine": 20,
+    "location": 20,
+    "traits": 13
+  },
+  "latency_samples": 20,
+  "warm_p95_seconds": 2.038,
+  "latency_statistic": "Nearest-rank sample p95, including timed failures; missing timings excluded and counted separately.",
+  "release_evaluation": false,
+  "release_note": "Diagnostic report only. Development cases, repeated cases or a small sample do not establish the 100-case release gates. Inferred-proposal acceptability requires separate human review.",
+  "results": [
+    {
+      "id": "clear-001",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 2.2965999999940396
+    },
+    {
+      "id": "clear-002",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 2.038
+    },
+    {
+      "id": "clear-003",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.969300000011921
+    },
+    {
+      "id": "clear-004",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.9859000000059606
+    },
+    {
+      "id": "clear-005",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 2.004199999988079
+    },
+    {
+      "id": "clear-006",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9617000000029803
+    },
+    {
+      "id": "clear-007",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.9475
+    },
+    {
+      "id": "clear-008",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9259000000059605
+    },
+    {
+      "id": "clear-009",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9297999999970197
+    },
+    {
+      "id": "clear-010",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.913
+    },
+    {
+      "id": "clear-011",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.8841000000089407
+    },
+    {
+      "id": "clear-012",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.8950999999940394
+    },
+    {
+      "id": "clear-013",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.8545
+    },
+    {
+      "id": "clear-014",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9622999999970199
+    },
+    {
+      "id": "clear-015",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9744000000059605
+    },
+    {
+      "id": "clear-016",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.9158999999910593
+    },
+    {
+      "id": "clear-017",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9872999999970198
+    },
+    {
+      "id": "clear-018",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9551000000089407
+    },
+    {
+      "id": "clear-019",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 1.8969000000059604
+    },
+    {
+      "id": "clear-020",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 1.9725999999940396
+    }
+  ]
+}

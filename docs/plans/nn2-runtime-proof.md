@@ -15,6 +15,23 @@ cold initialization is 40.1331 s, and measured model/runtime response bodies tot
 release p95. Heldout cases remain reserved. The report preserves failures and
 proposes a staged-prompt investigation without claiming an unmeasured improvement.
 
+The [grounded follow-up](../../runs/2026-10-17-nn2-browser-139/grounded-comparison.md)
+measured the user's local-lookup proposal. Lookup alone preserves **2/20**;
+a revised extraction contract with local hints regresses to **0/20**, with warm
+sample p95 **17.4314 s**. Both failures are retained. The interpreter remains
+experimental, accessible on the site only with `?nn2=1`; ordinary manual entry
+remains available. Three user-triggered attempts per description lead to advice
+for manual completion, preserving manual choices and confirmed results.
+
+The subsequent [five-input investigation](../../runs/2026-10-17-nn2-browser-139/focused-extraction.md)
+records **20/20** on the user's narrowed development metric versus baseline
+**3/20**, warm sample p95 **2.038 s**. On the original full-trait metric that run
+is **13/20** versus baseline **2/20**. Explicit price/rent extraction is absent
+from those cases: three separate unlabelled price/rent probes all failed strict
+validation. The candidate remains experimental. Total rent is annualized for
+review, and a person confirms the MVP rent band rather than inventing a numeric
+budget conversion. All historical failures and release gates are retained.
+
 The candidate is Qwen2.5-0.5B-Instruct. Native revision
 `7ae557604adf67be50417f59c2c2f167def9a775`; browser MLC revision
 `32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad`; WebLLM `0.2.86`.

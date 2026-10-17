@@ -20,6 +20,21 @@
   </header>
   <fieldset id="profile-controls" disabled>
     <legend>Your restaurant</legend>
+    <details id="description-panel" hidden>
+      <summary>Try a restaurant description (experimental)</summary>
+      <p>The interpreter can make mistakes. Review every suggestion before comparing districts.</p>
+      <label for="description">Restaurant description</label>
+      <textarea id="description" rows="3" maxlength="1000" aria-describedby="description-help"></textarea>
+      <p id="description-help">Describe your search area, cuisine, menu price range, restaurant type and rent budget. Up to 1,000 characters. Your description stays in this tab.</p>
+      <p>First use downloads about 288 MB of model files and runtime, with a 400 MB model limit. Requires desktop Chrome or Edge with WebGPU. <a href="nn2-notices.txt">Model and runtime notices</a>.</p>
+      <div class="interpret-actions">
+        <button id="interpret" type="button" disabled>Download and interpret</button>
+        <button id="cancel-interpret" type="button" hidden>Cancel interpretation</button>
+        <button id="manual-entry" type="button">Enter details myself</button>
+      </div>
+      <p id="interpret-status" role="status" aria-live="polite" aria-atomic="true">You can try up to three interpretations per description, or use the manual fields at any time.</p>
+      <p id="interpret-provenance"></p>
+    </details>
     <div class="cuisine-field">
       <label for="cuisine">Cuisine</label>
       <div class="combobox">
@@ -31,8 +46,29 @@
       <p id="cuisine-status" class="visually-hidden" role="status" aria-live="polite"></p>
     </div>
     <div id="trait-pickers"></div>
+    <div class="search-area-fields">
+      <label for="rent-amount">Total rent budget (£)</label>
+      <input id="rent-amount" type="number" min="0.01" step="any" aria-describedby="rent-summary">
+      <label for="rent-period">Rent budget period</label>
+      <select id="rent-period"><option value="month">Per month</option><option value="year">Per year</option></select>
+      <p id="rent-summary">No total rent budget stated. The current MVP compares relative district rent bands; numeric budgets are stored for review and are not used in scoring.</p>
+      <label for="rent-band">Confirm rent band</label>
+      <select id="rent-band" aria-describedby="rent-band-help">
+        <option value="">Choose a rent band</option><option value="low">Low</option><option value="mid">Mid</option><option value="high">High</option><option value="any" selected>Any</option>
+      </select>
+      <p id="rent-band-help">Relative thirds of districts by the MVP's commercial cost proxy. This is not a quoted premises rent. A numeric budget does not automatically select a band.</p>
+      <label for="place-text">Search area</label>
+      <input id="place-text" type="text" autocomplete="off" aria-describedby="place-help" placeholder="England (all districts)">
+      <p id="place-help">Enter a city, borough or region, then choose the intended place. Leave blank for all England.</p>
+      <label for="place-choice">Place to confirm</label>
+      <select id="place-choice" disabled><option value="">All England</option></select>
+      <label class="near-choice"><input id="near-place" type="checkbox"> Search near this place</label>
+      <label for="radius">Straight-line radius (km)</label>
+      <input id="radius" type="number" min="0.1" step="any" value="5" disabled>
+      <p>Searches include districts whose centres fall inside the chosen area or radius. Scores describe whole districts, including parts outside the search area.</p>
+    </div>
     <div class="profile-confirmation">
-      <p>Search area: England</p>
+      <p id="area-summary">Search area: England</p>
       <p id="profile-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <p id="profile-error" role="alert" hidden></p>
       <button id="compare" type="button" aria-describedby="profile-status">Compare districts</button>
@@ -46,7 +82,7 @@
     <button id="retry" type="button">Try loading again</button>
   </section>
   <section id="results" aria-label="District results" hidden>
-    <h2>Confirmed restaurant · England</h2>
+    <h2 id="results-heading">Confirmed restaurant · England</h2>
     <p id="confirmed-profile"></p>
     <div class="threshold-control">
       <div class="threshold-heading">
