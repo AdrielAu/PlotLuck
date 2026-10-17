@@ -76,7 +76,7 @@ export function makeNN2(vocabulary) {
       if (!loaded) throw new Error("the on-device model is not loaded");
       const timer = setTimeout(() => stop(new Error("the on-device model took too long")), READ_TIMEOUT_MS);
       try {
-        return await call({ action: "interpret", description, catalogue, mode: "focused" });
+        return await call({ action: "interpret", description, catalogue, mode: "focused", clarifyInvalidPrice: true });
       } finally {
         clearTimeout(timer);
       }

@@ -21,6 +21,7 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   const conflicting = names.length > 1;
   if (conflicting) profile.cuisine = null;
   const needs = [];
+  if (extraction.priceNeedsReview) needs.push({ field:'price', message:'Which menu price range should we use? The interpreter could not confirm it.', options:bundle.vocabulary.traits.find(t => t.name === 'price_band').values });
   if (!profile.cuisine || profile.cuisine === 'Unspecified') needs.push({ field: 'cuisine', message: 'Which cuisine should we compare?', options: names.length ? names.map(c => c.cuisine) : bundle.vocabulary.cuisines.filter(c => c.cuisine !== 'Unspecified').map(c => c.cuisine) });
   const location = draft.location;
   const placeText = location.text ?? '';
@@ -53,12 +54,13 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   if (messages.length && !needs.length) needs.push({ field: 'description', message: messages.join(' ') });
   return dietary.then(explicit => {
     for (const t of bundle.vocabulary.traits.filter(t => t.kind === 'on_off')) if (explicit.marks[t.name] === 'explicit') profile[t.name] = explicit.profile[t.name];
-    return { profile, fields: draft.fields, area, radius, rentBand, rentBudget: extraction.rentBudget ?? null, needs, unused: draft.unused, placeText };
+    return { profile, fields: draft.fields, area, radius, rentBand, rentBudget: extraction.rentBudget ?? null, priceNeedsReview:extraction.priceNeedsReview === true, needs, unused: draft.unused, placeText };
   });
 }
 
 // Validate user clarification at the final scoring boundary too.
 export function confirmedDescription(query, bundle, catalogue) {
+  if (query.priceNeedsReview) throw new Error('Choose a menu price range before comparing districts.');
   if (!bundle.vocabulary.cuisines.some(c => c.cuisine === query.profile.cuisine && c.cuisine !== 'Unspecified')) throw new Error('Choose one supported cuisine.');
   for (const t of bundle.vocabulary.traits) if (!t.values.includes(query.profile[t.name])) throw new Error('Choose a supported restaurant profile.');
   if (!['low', 'mid', 'high', 'any'].includes(query.rentBand)) throw new Error('Choose a rent band.');

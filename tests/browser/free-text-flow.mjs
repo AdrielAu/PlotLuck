@@ -18,6 +18,8 @@ function fakeRuntime(loads = true) {
       const data={region:text.includes('London')?'London':text.includes('Hugh Town')?'Hugh Town':text.includes('Greater Manchester')?'Greater Manchester':text.includes('SE1')?'SE1':null,
         cuisine:'Thai',price_band:'unknown',venue_type:'Restaurant',rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null};
       if (text.includes('Greater London')) data.region='Greater London';
+      if (text.includes('mid Range')) data.price_band='$$';
+      if (text.includes('uncertain prices')) data.price_band='$';
       return {choices:[{finish_reason:'stop',message:{content:text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
     }}}};
   }`;
@@ -73,6 +75,37 @@ test('London and conflicting cuisine prompt only their unresolved fields before 
   assert.match(await page.locator('#results-heading').innerText(), /Greater London/);
   assert.ok((await page.locator('.district-code').allInnerTexts()).every(c=>greater.districts.includes(c)));
   assert.deepEqual(page.errors, []);
+});
+
+test('the exact mid Range prompt offers London clarification, then uses the stated menu price', async t => {
+  const { page } = await openPage(t);
+  await submit(page,'A mid Range thai restaurant in London');
+  await page.waitForFunction(()=>!document.querySelector('#clarification').hidden || !document.querySelector('#description-error').hidden);
+  assert.equal(await page.locator('#description-error').isHidden(),true);
+  assert.equal(await page.locator('#clarification').isVisible(),true);
+  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)),['clarify-area']);
+  await page.locator('#clarify-area').selectOption(catalogue.places.find(p=>p.name==='Greater London').id);
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Mid-range/);
+});
+
+test('an invalid price prediction asks only for price and place, without replacing a previous result', async t => {
+  const { page } = await openPage(t);
+  await submit(page,'A Thai restaurant in SE1.');
+  await page.locator('#results-screen').waitFor();
+  const before=await page.locator('#ranked').textContent();
+  await page.getByRole('button',{name:'Edit description',exact:true}).click();
+  await submit(page,'A Thai restaurant in London with uncertain prices.');
+  await page.waitForFunction(()=>!document.querySelector('#clarification').hidden || !document.querySelector('#description-error').hidden);
+  assert.equal(await page.locator('#description-error').isHidden(),true);
+  assert.ok(await page.locator('#clarify-price').count());
+  assert.equal(await page.locator('#ranked').textContent(),before);
+  await page.locator('#clarify-price').selectOption('$$');
+  await page.locator('#clarify-area').selectOption(catalogue.places.find(p=>p.name==='Greater London').id);
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Mid-range/);
 });
 
 test('a numeric rent budget prompts only its relative band', async t => {

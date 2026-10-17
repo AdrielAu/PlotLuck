@@ -80,3 +80,13 @@ test('explicit relative rent words filter districts without a numeric budget', a
     assert.ok(confirmedDescription(q, bundle, catalogue).searchArea.length < bundle.districts.length);
   }
 });
+
+test('a price rejected by NN2 validation blocks scoring until explicitly clarified', async () => {
+  const text='A Thai restaurant with uncertain prices.';
+  const partial=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$',venue_type:'Restaurant',rent:null},text,bundle.vocabulary,catalogue,{clarifyInvalidPrice:true});
+  const q=await descriptionQuery(text,partial,bundle,catalogue);
+  assert.deepEqual(q.needs.map(n=>n.field),['price']);
+  assert.throws(()=>confirmedDescription(q,bundle,catalogue),/menu price/);
+  q.profile.price_band='$$';q.priceNeedsReview=false;
+  assert.equal(confirmedDescription(q,bundle,catalogue).profile.price_band,'$$');
+});
