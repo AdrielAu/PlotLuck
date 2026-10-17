@@ -23,6 +23,7 @@ SOURCES = {
     "local_authority": ("Local_Authority_Districts_DEC_2025_Boundaries_UK_BGC", "LAD25CD", "LAD25NM", "FID"),
     "region": ("Regions_December_2025_Boundaries_EN_BGC", "RGN25CD", "RGN25NM", "FID"),
     "metropolitan_county": ("Upper_Tier_Local_Authorities_December_2022_Boundaries_UK_BGC", "UTLA22CD", "UTLA22NM", "FID"),
+    "county": ("Counties_and_Unitary_Authorities_December_2025_Boundaries_UK_BGC", "CTYUA25CD", "CTYUA25NM", "FID"),
 }
 ATTRIBUTION = ("Source: Office for National Statistics licensed under the Open Government Licence v.3.0. "
                "Contains OS data © Crown copyright and database right 2026.")
@@ -91,6 +92,10 @@ def prepare_catalogue(sources: dict[str, dict], districts: list[dict[str, Any]])
             # adds only the six metropolitan counties, including Greater Manchester.
             if kind == "metropolitan_county" and not code.startswith("E11"):
                 continue
+            # E06 unitary authorities already exist in the LAD source. Only add
+            # the E10 administrative counties, using their own 2025 boundaries.
+            if kind == "county" and not code.startswith("E10"):
+                continue
             if code in ids:
                 raise ValueError(f"Duplicate geography ID: {code}")
             ids.add(code)
@@ -122,6 +127,17 @@ def prepare_catalogue(sources: dict[str, dict], districts: list[dict[str, Any]])
                 name, aliases = "Greater London", ["London"]
             if code == "E09000001":
                 place_type, aliases = "city", ["London", "City of London"]
+            if name == "Brighton and Hove":
+                aliases = ["Brighton", "Hove", "Brighton & Hove"]
+            if kind == "region":
+                if code in {"E12000001", "E12000002", "E12000008", "E12000009"}:
+                    aliases.extend([f"{name} England", name.replace(" ", ""),
+                                    f"{name.replace(' ', '')} England"])
+                if code == "E12000003":
+                    # A common-name proposal, not the historic county boundary.
+                    aliases.extend(["Yorkshire", "Yorks", "Yorkshire and Humber"])
+            if place_type == "county":
+                aliases.append(f"{name} county")
             place = {"id": code, "name": name, "aliases": aliases, "type": place_type,
                      "context": "England", "lat": lat, "lon": lon, "districts": members}
             places.append(place)
@@ -146,7 +162,7 @@ def acquire(cache: Path, offline: bool = False) -> tuple[dict, list[dict]]:
         features = []
         offset = 0
         while True:
-            prefix = "E11" if kind == "metropolitan_county" else "E"
+            prefix = {"metropolitan_county": "E11", "county": "E10"}.get(kind, "E")
             params = {"where": f"{code} LIKE '{prefix}%'", "outFields": f"{code},{name},LAT,LONG",
                       "returnGeometry": "true", "outSR": 4326, "f": "geojson",
                       "orderByFields": order, "resultOffset": offset, "resultRecordCount": 100}

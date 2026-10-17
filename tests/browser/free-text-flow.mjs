@@ -20,6 +20,7 @@ function fakeRuntime(loads = true, malformed = false) {
         rent_band:/cheap rent/i.test(text)?'low':null,
         requirements:/no other requirements/i.test(text)?'no other requirements':/vegan options/i.test(text)?'vegan options':null};
       if (text.includes('Greater London')) data.region='Greater London';
+      for (const place of ['Brighton','Yorkshire','Kent']) if (text.includes(place)) data.region=place;
       if (text.includes('mid Range')) data.price_band='$$';
       if (text.includes('uncertain prices')) data.price_band='$';
       if (text.includes('bad budget')) data.rent.currency='USD';
@@ -44,6 +45,24 @@ async function submit(page, text, {raw = false, omit = []} = {}) {
   await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(raw ? text : completeText(text,omit));
   await page.getByRole('button', { name:'Find districts', exact:true }).click();
 }
+
+test('Brighton and Yorkshire offer labelled scopes and county searches reach results',async t=>{
+  for(const [name,code,label] of [['Brighton','E06000043','Brighton and Hove'],['Yorkshire','E12000003','Yorkshire and The Humber'],['Kent','E10000016','Kent']]) {
+    const {page}=await openPage(t);
+    await submit(page,`A Thai restaurant in ${name}.`);
+    if(name!=='Kent') {
+      await page.locator('#clarification').waitFor();
+      const options=await page.locator('#clarify-area').innerText();
+      assert.match(options,new RegExp(label));
+      assert.doesNotMatch(options,/Breighton/);
+      await page.locator('#clarify-area').selectOption(code);
+      await page.locator('#clarify-compare').click();
+    }
+    await page.locator('#results-screen').waitFor();
+    assert.match(await page.locator('#results-heading').innerText(),new RegExp(label));
+    assert.deepEqual(page.errors,[]);
+  }
+});
 
 test('the exact mid range Chinese prompt keeps menu prices after either a valid or malformed model reply',async t=>{
   for(const [malformed,gap] of [[false,' '],[true,' '],[true,'\n  ']]) {
