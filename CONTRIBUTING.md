@@ -5,7 +5,7 @@ Plotluck's MVP scores English postcode districts for review-based success, using
 ## Layout
 
 - `src/plotluck/`: the installable Python package.
-- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring module (`node --test`, Node 22+, no install).
+- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring and picker modules (`node --test`, Node 22+, no install).
 - `data/`: `sample/` is committed and used locally; `full/` is git-ignored and exists only on the server. See `data/AGENTS.md`.
 - `notebooks/`: ingest, training, benchmark and export notebooks.
 - `runs/`: committed run results.
@@ -19,7 +19,7 @@ Plotluck's MVP scores English postcode districts for review-based success, using
 1. Open or pick a GitHub issue.
 2. Branch off `main`.
 3. Build and test locally on the **data sample** (`pytest`, and `node --test` for `web/` changes).
-4. Open a PR and merge it. Never push to `main`.
+4. Open a PR and merge it once the Tests workflow (`pytest` and `node --test`) passes. Never push to `main`.
 5. The **server operator** pulls `main` and runs on the full data on LinuxONE ([docs/server.md](docs/server.md)).
 6. If code passes locally but fails on the server, file a `linux-only` issue; the operator fixes it on a `fix/linux-*` branch and opens a PR.
 
