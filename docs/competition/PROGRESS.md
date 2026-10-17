@@ -15,7 +15,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 0 | Repo, workflow and server setup | done | #3, #19 |
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
-| 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #163, #164, #165 (release gate passed with a commercial-core coverage gap); [ranking revamp](RANKING.md) |
+| 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #163, #164, #165 (release gate passed with a commercial-core coverage gap); [ranking revamp](RANKING.md); bundle v5 ([ADR 0007](../adr/0007-percentile-label-detailed-ethnicity-and-footfall-constraints.md)) awaits a LinuxONE retrain |
 | 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); one description (#169); latest user amendment has NN2 fill the review card before scoring, not yet wired in; model/release gates remain open; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77, #161; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
@@ -27,6 +27,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 ## Now
 
+- **NN1 bundle v5 (ADR 0007)**: labels become percentiles, so they span 0–1. NN1 reads the 19 detailed Census ethnic groups plus a cuisine-matched community share. Population, restaurant count, attractions, hotels and the matched community can no longer lower a score. Code and the synthetic sample are done; the operator must re-extract `census_ethnicity`, retrain and audit (see [server.md](../server.md)). `web/models/` stays version 4 until then.
 - **Food-to-cuisine interpretation (#197)**: product source grounding recognises a small reviewed set of food associations (including dimsum/dim sum to Chinese), preserves explicit cuisine qualifiers such as Thai curry, and asks for relevant supported cuisines for shared dishes such as kebab, curry and biryani. Choices pass through the worker to the existing cuisine question. Negated cues do not silently select a cuisine. This extends interpretation rather than retraining NN1 or establishing NN2 quality gates; the historical five-field proof stays strict.
 
 - **Latest NN2 interface amendment**: one description replaces the routine six-question flow and results pickers. All six inputs must be accounted for before scoring: area/range, cuisine, menu prices, rent, restaurant type and other requirements. An omitted or unresolved place requires a city choice or a clearer area description; England-wide scope must be explicit. Missing/defaulted or invalid inputs prompt Erica's original questions, including after failed inference; complete descriptions go directly to results. The product extends the focused candidate with literal requirements and per-field recovery; historical five-field proof results do not establish this path's quality. Download starts on submission with cancellation. All quality/release gates remain open.

@@ -16,7 +16,7 @@ test = ["pytest"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-plotluck = ["cuisine_mapping.csv"]
+plotluck = ["cuisine_mapping.csv", "cuisine_communities.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

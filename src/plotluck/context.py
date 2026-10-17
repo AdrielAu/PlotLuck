@@ -15,12 +15,31 @@ import zipfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
+_ASIAN = "Asian, Asian British or Asian Welsh"
+_BLACK = "Black, Black British, Black Welsh, Caribbean or African"
+_MIXED = "Mixed or Multiple ethnic groups"
+_OTHER = "Other ethnic group"
+# TS021's 19 detailed groups (its five broad totals are their sums, so they are not read).
 ETHNICITY = {
-    "asian": "Asian, Asian British or Asian Welsh",
-    "black": "Black, Black British, Black Welsh, Caribbean or African",
-    "mixed": "Mixed or Multiple ethnic groups",
-    "white": "White",
-    "other": "Other ethnic group",
+    "bangladeshi": f"{_ASIAN}: Bangladeshi",
+    "chinese": f"{_ASIAN}: Chinese",
+    "indian": f"{_ASIAN}: Indian",
+    "pakistani": f"{_ASIAN}: Pakistani",
+    "other_asian": f"{_ASIAN}: Other Asian",
+    "african": f"{_BLACK}: African",
+    "caribbean": f"{_BLACK}: Caribbean",
+    "other_black": f"{_BLACK}: Other Black",
+    "white_and_asian": f"{_MIXED}: White and Asian",
+    "white_and_black_african": f"{_MIXED}: White and Black African",
+    "white_and_black_caribbean": f"{_MIXED}: White and Black Caribbean",
+    "other_mixed": f"{_MIXED}: Other Mixed or Multiple ethnic groups",
+    "white_british": "White: English, Welsh, Scottish, Northern Irish or British",
+    "irish": "White: Irish",
+    "gypsy_or_irish_traveller": "White: Gypsy or Irish Traveller",
+    "roma": "White: Roma",
+    "other_white": "White: Other White",
+    "arab": f"{_OTHER}: Arab",
+    "any_other": f"{_OTHER}: Any other ethnic group",
 }
 SEX = ("female", "male")
 ETHNICITY_INPUTS = tuple(f"ethnicity_{name}_share" for name in ETHNICITY)

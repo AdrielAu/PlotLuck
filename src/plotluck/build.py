@@ -6,7 +6,7 @@ One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
 - to ``data``, ``restaurants.csv``: the 15-column restaurant table of ADR 0004.
   It holds ratings and review counts, so it is private and stays beside the
   sources, on LinuxONE for full data (ADR 0003);
-- to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref).
+- to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref, quantiles).
   It derives from ratings, so it is private like ``restaurants.csv``;
 - to ``run`` (default ``<data>/run``), ``metrics.json``: row counts, label
   exclusions and fixes by reason, the district-grouped CV of NN1 against a
@@ -24,6 +24,7 @@ import math
 import re
 import statistics
 from collections import Counter
+from functools import cache
 from pathlib import Path
 
 import numpy as np
@@ -35,7 +36,7 @@ from plotluck.names import normalise_name
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
-BUNDLE_VERSION = 4
+BUNDLE_VERSION = 5
 BUNDLE_FILES = (
     "districts.csv",
     "district_cuisine_supply.csv",
@@ -51,6 +52,8 @@ PATIENCE = 10
 REFERENCE_TOLERANCE = 1e-6
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
+# Fine cuisine -> the Census ethnic groups (context.ETHNICITY keys) whose residents it is matched to.
+COMMUNITIES = Path(__file__).with_name("cuisine_communities.csv")
 UNSPECIFIED = "Unspecified"
 OTHER = "Other"
 VENUE_TYPES = ("Restaurant", "Pub and bar", "Café", "Fast food and street food")
@@ -118,9 +121,13 @@ DISTRICT_INPUTS = (
     "commercial_rent_index",
     "total_restaurants",
     "same_cuisine_supply",
+    "matched_community_share",
     *context.INPUTS,
 )
 LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply", *context.TOURISM_INPUTS}
+# Footfall and the cuisine's own community: NN1 is trained so that a higher
+# value never lowers a score (ADR 0007). Other inputs keep a learned direction.
+INCREASING = ("population", "total_restaurants", "matched_community_share", *context.TOURISM_INPUTS)
 # VOA measuring standards the rent index divides by, in order of preference:
 # net internal area, then gross internal area where a district has no NIA.
 VOA_AREA_UNITS = ("NIA", "GIA")
@@ -211,7 +218,9 @@ def build(
     # median_low: an epoch some fold actually chose; the plain median for an odd fold count.
     epochs = statistics.median_low(f["best_epoch"] for f in cv["folds"])
     y = np.array([r["review_success_label"] for r in labelled], dtype=float)
-    model["layers"], losses = nn1.train(_design(model, labelled, district_raw), y, epochs=epochs, seed=seed)
+    model["layers"], losses = nn1.train(
+        _design(model, labelled, district_raw), y, epochs=epochs, seed=seed, increasing=increasing_columns(model)
+    )
     model["activations"] = list(nn1.ACTIVATIONS)
 
     reference = {
@@ -286,7 +295,8 @@ def cross_validate(
         x = fold_design(model, groups, supply, labelled, districts)
         fit, stop, test = split["fit"], split["early_stop"], split["test"]
         layers, best, train_loss, stop_loss = nn1.train_early_stopping(
-            x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed
+            x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed,
+            increasing=increasing_columns(model),
         )
         model_mae, model_rmse = _mae_rmse(nn1.forward(layers, x[test]) - y[test])
         baseline_mae, baseline_rmse = _mae_rmse(y[train].mean() - y[test])
@@ -465,10 +475,12 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     allowed_cuisines = {m["cuisine"] for m in load_mapping().values() if m["cuisine"]} | {UNSPECIFIED}
     groups = set()
     for cuisine in vocab["cuisines"]:
-        only_keys(cuisine, ("cuisine", "cuisine_group", "label"), "vocabulary cuisine")
+        only_keys(cuisine, ("cuisine", "cuisine_group", "label", "communities"), "vocabulary cuisine")
         fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
         if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
             raise ValueError("vocabulary has a private or unexpected cuisine")
+        if cuisine["communities"] != list(load_communities().get(fine, ())):
+            raise ValueError("vocabulary has unexpected cuisine communities")
         groups.add(group)
     trait_names = []
     allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
@@ -602,7 +614,8 @@ def vocabulary(groups: dict[str, str], traits: list[dict], fine_cuisines=()) -> 
     return {
         "version": BUNDLE_VERSION,
         "cuisines": [
-            {"cuisine": c, "cuisine_group": g, "label": cuisine_label(c, g, fine_cuisines)}
+            {"cuisine": c, "cuisine_group": g, "label": cuisine_label(c, g, fine_cuisines),
+             "communities": list(load_communities().get(c, ()))}
             for c, g in sorted(groups.items())
         ],
         "traits": traits,
@@ -682,10 +695,21 @@ def training_district_inputs(restaurants: list[dict], districts: list[dict], sup
         _district_raw(
             by_code[r["postcode_district"]],
             supply[(r["postcode_district"], r["cuisine_group"])] - 1,
+            r["cuisine"],
             exclude_from_total=1,
         )
         for r in restaurants
     ])
+
+
+def increasing_columns(model: dict) -> list[int]:
+    """Input-vector columns of the ``INCREASING`` district inputs."""
+    transforms = model["transforms"]
+    head = sum(
+        len(transforms[name]["values"]) if transforms[name]["kind"] == "one_hot" else 1
+        for name in model["features"]["restaurant_inputs"]
+    )
+    return [head + i for i, name in enumerate(model["features"]["district_inputs"]) if name in INCREASING]
 
 
 def _supported_cuisines(restaurants: list[dict], threshold: int) -> set[str]:
@@ -769,7 +793,11 @@ def _fill_log1p(column: np.ndarray, median: float, log1p: bool) -> np.ndarray:
 def score_districts(model: dict, vocab: dict, districts: list[dict], supply: Counter, profile: dict) -> dict[str, float]:
     """Score ``profile`` in every district with the exported weights."""
     group = {c["cuisine"]: c["cuisine_group"] for c in vocab["cuisines"]}.get(profile["cuisine"])
-    district_raw = np.array([_district_raw(d, supply[(d["postcode_district"], group)]) for d in districts])
+    district_raw = np.array([
+        _district_raw(d, supply[(d["postcode_district"], group)], profile["cuisine"],
+                      names=model["features"]["district_inputs"])
+        for d in districts
+    ])
     scores = nn1.forward(model["layers"], inputs(model, {**profile, "cuisine_group": group}, district_raw))
     return {d["postcode_district"]: float(s) for d, s in zip(districts, scores)}
 
@@ -794,14 +822,41 @@ def reference_profiles(vocab: dict, fine_cuisines) -> list[dict]:
     ]
 
 
-def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0) -> list[float]:
-    """Raw ``DISTRICT_INPUTS`` for one district, less ``exclude_from_total`` restaurants."""
+def _district_raw(
+    district: dict, same_cuisine: int, cuisine: str, exclude_from_total: int = 0, names=DISTRICT_INPUTS,
+) -> list[float]:
+    """Raw district inputs ``names`` for one district and fine ``cuisine``, less ``exclude_from_total`` restaurants.
+
+    ``names`` defaults to this build's inputs; an older bundle passes its own.
+    """
     def number(value):
         return float(value) if value != "" else np.nan
 
     values = {**district, "total_restaurants": district["total_restaurants"] - exclude_from_total,
-              "same_cuisine_supply": same_cuisine}
-    return [number(values.get(name, "")) for name in DISTRICT_INPUTS]
+              "same_cuisine_supply": same_cuisine,
+              "matched_community_share": community_share(district, cuisine)}
+    return [number(values.get(name, "")) for name in names]
+
+
+def community_share(district: dict, cuisine: str) -> float | str:
+    """Share of residents in ``cuisine``'s matched ethnic groups; 0 for an unmatched cuisine, "" when unknown."""
+    shares = [district.get(f"ethnicity_{name}_share", "") for name in load_communities().get(cuisine, ())]
+    return "" if "" in shares else sum(float(s) for s in shares)
+
+
+@cache
+def load_communities(path: Path = COMMUNITIES) -> dict[str, tuple[str, ...]]:
+    """The committed cuisine -> matched ethnic groups table, checked against the mapping and Census groups."""
+    cuisines = {m["cuisine"] for m in load_mapping().values() if m["cuisine"]}
+    out = {}
+    for row in read_csv(path):
+        names = tuple(row["communities"].split())
+        if row["cuisine"] not in cuisines or row["cuisine"] in out or not names or (
+            set(names) - set(context.ETHNICITY) or len(set(names)) != len(names)
+        ):
+            raise ValueError(f"{Path(path).name} has an invalid row for {row['cuisine']!r}")
+        out[row["cuisine"]] = names
+    return out
 
 
 def _restaurant_values(r: dict) -> dict:

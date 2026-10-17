@@ -26,6 +26,8 @@ function tinyBundle({
   includeFineCuisine = false,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
+  // Cuisine -> matched ethnic groups, written into vocabulary.json.
+  communities = {},
   // AB1 as one closed square ring; version 4 bundles carry it, older ones do not.
   outlines = { version, quantum: 1e-4, arcs: [[0, 515000, 10, 0, 0, 10, -10, 0, 0, -10]], districts: { AB1: [[0]] } },
   // An older bundle with an ONSPD-only outlines file published beside it.
@@ -44,7 +46,7 @@ function tinyBundle({
         { cuisine: "Ethiopian", cuisine_group: "African", label: "Ethiopian (scored as African)" },
         { cuisine: "Somali", cuisine_group: "African", label: "Somali (scored as African)" },
         { cuisine: "Thai", cuisine_group: "Thai", label: "Thai" },
-      ],
+      ].map((c) => (c.cuisine in communities ? { ...c, communities: communities[c.cuisine] } : c)),
       traits: [],
     }),
     "model.json": JSON.stringify({
@@ -164,6 +166,21 @@ test("demographics and tourism features reach the forward pass in declared order
     const bundle = await tinyBundle({ contextColumns, districtInputs: [name], weights: [0, 0, 0.01] });
     assert.ok(Math.abs(logit(bundle, "Thai") - expected * 0.01) < 1e-9, name);
   }
+});
+
+test("the matched community share sums the cuisine's ethnic groups, 0 when unmatched, median when unknown", async () => {
+  const options = {
+    districtInputs: ["matched_community_share"], weights: [0, 0, 1],
+    communities: { Eritrean: ["african", "other_black"], Somali: ["african"], Ethiopian: ["caribbean"] },
+    contextColumns: { ethnicity_african_share: 0.3, ethnicity_other_black_share: 0.1, ethnicity_caribbean_share: "" },
+  };
+  const bundle = await tinyBundle(options);
+  assert.ok(Math.abs(logit(bundle, "Eritrean") - 0.4) < 1e-9);
+  assert.ok(Math.abs(logit(bundle, "Somali") - 0.3) < 1e-9);
+  assert.ok(Math.abs(logit(bundle, "Thai") - 0) < 1e-9);
+  assert.ok(Math.abs(logit(bundle, "Ethiopian") - 0) < 1e-9, "a blank share takes the median, 0 here");
+  const missing = await tinyBundle({ ...options, communities: { Thai: ["arab"] } });
+  assert.throws(() => scoreDistricts(missing, { cuisine: "Thai" }), /ethnicity share/);
 });
 
 test("a district input the bundle has no column for raises instead of scoring", async () => {

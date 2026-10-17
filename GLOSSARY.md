@@ -94,8 +94,12 @@ _Avoid_: Franchise, brand
 How many restaurants a postcode district already has, either in total or of one cuisine (same-cuisine supply).
 _Avoid_: Competition, density, saturation
 
+**Matched community share**:
+The share of a postcode district's residents in the Census ethnic groups matched to a cuisine, such as Indian, Pakistani and Bangladeshi residents for Indian food. It is an aggregate resident characteristic, not a customer preference.
+_Avoid_: Ethnic demand, target market
+
 **Score**:
-A number from 0 to 1 that rates the expected review-based success of a restaurant profile in one postcode district. It is not a calibrated probability.
+A number from 0 to 1 that rates the expected review-based success of a restaurant profile in one postcode district. From bundle version 5 it estimates the profile's percentile among England's restaurants (ADR 0007): 0.8 means expected to out-review about 80% of them. It is not a calibrated probability.
 _Avoid_: Probability, likelihood, chance, rating, rank
 
 **Review-based success**:

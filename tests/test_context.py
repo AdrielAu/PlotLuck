@@ -46,9 +46,12 @@ def test_census_extract_allocates_counts_before_computing_means_and_shares(tmp_p
         age_rows.append(row)
     csv_zip(raw / "census_age.zip", "census2021-ts007-msoa.csv", age_rows)
     csv_zip(raw / "census_ethnicity.zip", "census2021-ts021-msoa.csv", [
-        {"geography code": area, **{f"Ethnic group: {label}": count
-                                   for label, count in zip(context.ETHNICITY.values(), values)}}
-        for area, values in (("E02000001", [60, 0, 0, 40, 0]), ("E02000002", [0, 0, 0, 300, 0]))
+        {"geography code": area,
+         # A broad total must not be counted beside its detailed groups.
+         "Ethnic group: White": counts.get("white_british", 0),
+         **{f"Ethnic group: {label}": counts.get(key, 0) for key, label in context.ETHNICITY.items()}}
+        for area, counts in (("E02000001", {"indian": 60, "white_british": 40}),
+                             ("E02000002", {"white_british": 300}))
     ])
     csv_zip(raw / "census_sex.zip", "census2021-ts008-msoa.csv", [
         {"geography code": area, "Sex: Female; measures: Value": female, "Sex: Male; measures: Value": male}
@@ -59,8 +62,9 @@ def test_census_extract_allocates_counts_before_computing_means_and_shares(tmp_p
     districts = context.demographic_table(tmp_path)
     assert districts["AB1"]["average_age"] == pytest.approx(54.28571429)
     assert districts["AB2"]["average_age"] == 20
-    assert districts["AB1"]["ethnicity_asian_share"] == pytest.approx(0.08571429)
-    assert districts["AB2"]["ethnicity_asian_share"] == 0.6
+    assert districts["AB1"]["ethnicity_indian_share"] == pytest.approx(0.08571429)
+    assert districts["AB2"]["ethnicity_indian_share"] == 0.6
+    assert districts["AB2"]["ethnicity_white_british_share"] == 0.4
     assert districts["AB1"]["sex_female_share"] == pytest.approx(0.37142857)
     assert set(districts) == {"AB1", "AB2"}
 

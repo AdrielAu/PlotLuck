@@ -1,580 +1,925 @@
 {
- "version": 3,
+ "version": 5,
  "cuisines": [
   {
    "cuisine": "Afghani",
    "cuisine_group": "Other",
-   "label": "Afghani (scored as Other)"
+   "label": "Afghani (scored as Other)",
+   "communities": [
+    "other_asian",
+    "any_other"
+   ]
   },
   {
    "cuisine": "African",
    "cuisine_group": "Other",
-   "label": "African (scored as Other)"
+   "label": "African (scored as Other)",
+   "communities": [
+    "african",
+    "other_black",
+    "white_and_black_african"
+   ]
   },
   {
    "cuisine": "Albanian",
    "cuisine_group": "European",
-   "label": "Albanian (scored as European)"
+   "label": "Albanian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Algerian",
    "cuisine_group": "Other",
-   "label": "Algerian (scored as Other)"
+   "label": "Algerian (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "American",
    "cuisine_group": "Other",
-   "label": "American (scored as Other)"
+   "label": "American (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Arabic",
    "cuisine_group": "Other",
-   "label": "Arabic (scored as Other)"
+   "label": "Arabic (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Argentinean",
    "cuisine_group": "Other",
-   "label": "Argentinean (scored as Other)"
+   "label": "Argentinean (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Armenian",
    "cuisine_group": "European",
-   "label": "Armenian (scored as European)"
+   "label": "Armenian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Asian",
    "cuisine_group": "Other",
-   "label": "Asian (scored as Other)"
+   "label": "Asian (scored as Other)",
+   "communities": [
+    "bangladeshi",
+    "chinese",
+    "indian",
+    "pakistani",
+    "other_asian",
+    "white_and_asian"
+   ]
   },
   {
    "cuisine": "Assyrian",
    "cuisine_group": "Other",
-   "label": "Assyrian (scored as Other)"
+   "label": "Assyrian (scored as Other)",
+   "communities": [
+    "any_other"
+   ]
   },
   {
    "cuisine": "Australian",
    "cuisine_group": "Other",
-   "label": "Australian (scored as Other)"
+   "label": "Australian (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Austrian",
    "cuisine_group": "European",
-   "label": "Austrian (scored as European)"
+   "label": "Austrian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Azerbaijani",
    "cuisine_group": "European",
-   "label": "Azerbaijani (scored as European)"
+   "label": "Azerbaijani (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Bangladeshi",
    "cuisine_group": "Other",
-   "label": "Bangladeshi (scored as Other)"
+   "label": "Bangladeshi (scored as Other)",
+   "communities": [
+    "bangladeshi"
+   ]
   },
   {
    "cuisine": "Barbecue",
    "cuisine_group": "Other",
-   "label": "Barbecue (scored as Other)"
+   "label": "Barbecue (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Basque",
    "cuisine_group": "European",
-   "label": "Basque (scored as European)"
+   "label": "Basque (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Belgian",
    "cuisine_group": "European",
-   "label": "Belgian (scored as European)"
+   "label": "Belgian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Brazilian",
    "cuisine_group": "Other",
-   "label": "Brazilian (scored as Other)"
+   "label": "Brazilian (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "British",
    "cuisine_group": "British",
-   "label": "British"
+   "label": "British",
+   "communities": [
+    "white_british"
+   ]
   },
   {
    "cuisine": "Bulgarian",
    "cuisine_group": "European",
-   "label": "Bulgarian (scored as European)"
+   "label": "Bulgarian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Burmese",
    "cuisine_group": "Other",
-   "label": "Burmese (scored as Other)"
+   "label": "Burmese (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Cajun & Creole",
    "cuisine_group": "Other",
-   "label": "Cajun & Creole (scored as Other)"
+   "label": "Cajun & Creole (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Cambodian",
    "cuisine_group": "Other",
-   "label": "Cambodian (scored as Other)"
+   "label": "Cambodian (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Canadian",
    "cuisine_group": "Other",
-   "label": "Canadian (scored as Other)"
+   "label": "Canadian (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Caribbean",
    "cuisine_group": "Other",
-   "label": "Caribbean (scored as Other)"
+   "label": "Caribbean (scored as Other)",
+   "communities": [
+    "caribbean",
+    "white_and_black_caribbean"
+   ]
   },
   {
    "cuisine": "Caucasian",
    "cuisine_group": "European",
-   "label": "Caucasian (scored as European)"
+   "label": "Caucasian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Central American",
    "cuisine_group": "Other",
-   "label": "Central American (scored as Other)"
+   "label": "Central American (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Central Asian",
    "cuisine_group": "Other",
-   "label": "Central Asian (scored as Other)"
+   "label": "Central Asian (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Central European",
    "cuisine_group": "European",
-   "label": "Central European (scored as European)"
+   "label": "Central European (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Chilean",
    "cuisine_group": "Other",
-   "label": "Chilean (scored as Other)"
+   "label": "Chilean (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Chinese",
    "cuisine_group": "Chinese",
-   "label": "Chinese"
+   "label": "Chinese",
+   "communities": [
+    "chinese"
+   ]
   },
   {
    "cuisine": "Colombian",
    "cuisine_group": "Other",
-   "label": "Colombian (scored as Other)"
+   "label": "Colombian (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Croatian",
    "cuisine_group": "European",
-   "label": "Croatian (scored as European)"
+   "label": "Croatian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Cuban",
    "cuisine_group": "Other",
-   "label": "Cuban (scored as Other)"
+   "label": "Cuban (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Czech",
    "cuisine_group": "European",
-   "label": "Czech (scored as European)"
+   "label": "Czech (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Danish",
    "cuisine_group": "European",
-   "label": "Danish (scored as European)"
+   "label": "Danish (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Dutch",
    "cuisine_group": "European",
-   "label": "Dutch (scored as European)"
+   "label": "Dutch (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Eastern European",
    "cuisine_group": "European",
-   "label": "Eastern European (scored as European)"
+   "label": "Eastern European (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Ecuadorean",
    "cuisine_group": "Other",
-   "label": "Ecuadorean (scored as Other)"
+   "label": "Ecuadorean (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Egyptian",
    "cuisine_group": "Other",
-   "label": "Egyptian (scored as Other)"
+   "label": "Egyptian (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Eritrean",
    "cuisine_group": "Other",
-   "label": "Eritrean (scored as Other)"
+   "label": "Eritrean (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "Ethiopian",
    "cuisine_group": "Other",
-   "label": "Ethiopian (scored as Other)"
+   "label": "Ethiopian (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "European",
    "cuisine_group": "European",
-   "label": "European"
+   "label": "European",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Filipino",
    "cuisine_group": "Other",
-   "label": "Filipino (scored as Other)"
+   "label": "Filipino (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Finnish",
    "cuisine_group": "European",
-   "label": "Finnish (scored as European)"
+   "label": "Finnish (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "French",
    "cuisine_group": "European",
-   "label": "French (scored as European)"
+   "label": "French (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Georgian",
    "cuisine_group": "European",
-   "label": "Georgian (scored as European)"
+   "label": "Georgian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "German",
    "cuisine_group": "European",
-   "label": "German (scored as European)"
+   "label": "German (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Ghanaian",
    "cuisine_group": "Other",
-   "label": "Ghanaian (scored as Other)"
+   "label": "Ghanaian (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "Greek",
    "cuisine_group": "European",
-   "label": "Greek (scored as European)"
+   "label": "Greek (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Hawaiian",
    "cuisine_group": "Other",
-   "label": "Hawaiian (scored as Other)"
+   "label": "Hawaiian (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Hungarian",
    "cuisine_group": "European",
-   "label": "Hungarian (scored as European)"
+   "label": "Hungarian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Indian",
    "cuisine_group": "Indian",
-   "label": "Indian"
+   "label": "Indian",
+   "communities": [
+    "indian",
+    "pakistani",
+    "bangladeshi"
+   ]
   },
   {
    "cuisine": "Indonesian",
    "cuisine_group": "Other",
-   "label": "Indonesian (scored as Other)"
+   "label": "Indonesian (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "International",
    "cuisine_group": "Other",
-   "label": "International (scored as Other)"
+   "label": "International (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Iranian",
    "cuisine_group": "Other",
-   "label": "Iranian (scored as Other)"
+   "label": "Iranian (scored as Other)",
+   "communities": [
+    "any_other"
+   ]
   },
   {
    "cuisine": "Irish",
    "cuisine_group": "European",
-   "label": "Irish (scored as European)"
+   "label": "Irish (scored as European)",
+   "communities": [
+    "irish"
+   ]
   },
   {
    "cuisine": "Israeli",
    "cuisine_group": "Other",
-   "label": "Israeli (scored as Other)"
+   "label": "Israeli (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_white"
+   ]
   },
   {
    "cuisine": "Italian",
    "cuisine_group": "Italian",
-   "label": "Italian"
+   "label": "Italian",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Jamaican",
    "cuisine_group": "Other",
-   "label": "Jamaican (scored as Other)"
+   "label": "Jamaican (scored as Other)",
+   "communities": [
+    "caribbean",
+    "white_and_black_caribbean"
+   ]
   },
   {
    "cuisine": "Japanese",
    "cuisine_group": "Other",
-   "label": "Japanese (scored as Other)"
+   "label": "Japanese (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Korean",
    "cuisine_group": "Other",
-   "label": "Korean (scored as Other)"
+   "label": "Korean (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Kurdish",
    "cuisine_group": "Other",
-   "label": "Kurdish (scored as Other)"
+   "label": "Kurdish (scored as Other)",
+   "communities": [
+    "any_other"
+   ]
   },
   {
    "cuisine": "Latin",
    "cuisine_group": "Other",
-   "label": "Latin (scored as Other)"
+   "label": "Latin (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Latvian",
    "cuisine_group": "European",
-   "label": "Latvian (scored as European)"
+   "label": "Latvian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Lebanese",
    "cuisine_group": "Other",
-   "label": "Lebanese (scored as Other)"
+   "label": "Lebanese (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Lithuanian",
    "cuisine_group": "European",
-   "label": "Lithuanian (scored as European)"
+   "label": "Lithuanian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Malaysian",
    "cuisine_group": "Other",
-   "label": "Malaysian (scored as Other)"
+   "label": "Malaysian (scored as Other)",
+   "communities": [
+    "chinese",
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Mediterranean",
    "cuisine_group": "Other",
-   "label": "Mediterranean (scored as Other)"
+   "label": "Mediterranean (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Mexican",
    "cuisine_group": "Other",
-   "label": "Mexican (scored as Other)"
+   "label": "Mexican (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Middle Eastern",
    "cuisine_group": "Other",
-   "label": "Middle Eastern (scored as Other)"
+   "label": "Middle Eastern (scored as Other)",
+   "communities": [
+    "arab",
+    "any_other"
+   ]
   },
   {
    "cuisine": "Mongolian",
    "cuisine_group": "Other",
-   "label": "Mongolian (scored as Other)"
+   "label": "Mongolian (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Moroccan",
    "cuisine_group": "Other",
-   "label": "Moroccan (scored as Other)"
+   "label": "Moroccan (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Native American",
    "cuisine_group": "Other",
-   "label": "Native American (scored as Other)"
+   "label": "Native American (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Nepali",
    "cuisine_group": "Other",
-   "label": "Nepali (scored as Other)"
+   "label": "Nepali (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "New Zealand",
    "cuisine_group": "Other",
-   "label": "New Zealand (scored as Other)"
+   "label": "New Zealand (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Nigerian",
    "cuisine_group": "Other",
-   "label": "Nigerian (scored as Other)"
+   "label": "Nigerian (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "Norwegian",
    "cuisine_group": "European",
-   "label": "Norwegian (scored as European)"
+   "label": "Norwegian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Pakistani",
    "cuisine_group": "Other",
-   "label": "Pakistani (scored as Other)"
+   "label": "Pakistani (scored as Other)",
+   "communities": [
+    "pakistani"
+   ]
   },
   {
    "cuisine": "Persian",
    "cuisine_group": "Other",
-   "label": "Persian (scored as Other)"
+   "label": "Persian (scored as Other)",
+   "communities": [
+    "any_other"
+   ]
   },
   {
    "cuisine": "Peruvian",
    "cuisine_group": "Other",
-   "label": "Peruvian (scored as Other)"
+   "label": "Peruvian (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Polish",
    "cuisine_group": "European",
-   "label": "Polish (scored as European)"
+   "label": "Polish (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Polynesian",
    "cuisine_group": "Other",
-   "label": "Polynesian (scored as Other)"
+   "label": "Polynesian (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Portuguese",
    "cuisine_group": "European",
-   "label": "Portuguese (scored as European)"
+   "label": "Portuguese (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Romanian",
    "cuisine_group": "European",
-   "label": "Romanian (scored as European)"
+   "label": "Romanian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Russian",
    "cuisine_group": "European",
-   "label": "Russian (scored as European)"
+   "label": "Russian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Salvadoran",
    "cuisine_group": "Other",
-   "label": "Salvadoran (scored as Other)"
+   "label": "Salvadoran (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Scandinavian",
    "cuisine_group": "European",
-   "label": "Scandinavian (scored as European)"
+   "label": "Scandinavian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Scottish",
    "cuisine_group": "European",
-   "label": "Scottish (scored as European)"
+   "label": "Scottish (scored as European)",
+   "communities": [
+    "white_british"
+   ]
   },
   {
    "cuisine": "Seafood",
    "cuisine_group": "Other",
-   "label": "Seafood (scored as Other)"
+   "label": "Seafood (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Serbian",
    "cuisine_group": "European",
-   "label": "Serbian (scored as European)"
+   "label": "Serbian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Singaporean",
    "cuisine_group": "Other",
-   "label": "Singaporean (scored as Other)"
+   "label": "Singaporean (scored as Other)",
+   "communities": [
+    "chinese",
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Slovenian",
    "cuisine_group": "European",
-   "label": "Slovenian (scored as European)"
+   "label": "Slovenian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Somali",
    "cuisine_group": "Other",
-   "label": "Somali (scored as Other)"
+   "label": "Somali (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "South African",
    "cuisine_group": "Other",
-   "label": "South African (scored as Other)"
+   "label": "South African (scored as Other)",
+   "communities": [
+    "african"
+   ]
   },
   {
    "cuisine": "South American",
    "cuisine_group": "Other",
-   "label": "South American (scored as Other)"
+   "label": "South American (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Southwestern",
    "cuisine_group": "Other",
-   "label": "Southwestern (scored as Other)"
+   "label": "Southwestern (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Spanish",
    "cuisine_group": "European",
-   "label": "Spanish (scored as European)"
+   "label": "Spanish (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Sri Lankan",
    "cuisine_group": "Other",
-   "label": "Sri Lankan (scored as Other)"
+   "label": "Sri Lankan (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Steakhouse",
    "cuisine_group": "Other",
-   "label": "Steakhouse (scored as Other)"
+   "label": "Steakhouse (scored as Other)",
+   "communities": []
   },
   {
    "cuisine": "Swedish",
    "cuisine_group": "European",
-   "label": "Swedish (scored as European)"
+   "label": "Swedish (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Swiss",
    "cuisine_group": "European",
-   "label": "Swiss (scored as European)"
+   "label": "Swiss (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Syrian",
    "cuisine_group": "Other",
-   "label": "Syrian (scored as Other)"
+   "label": "Syrian (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Taiwanese",
    "cuisine_group": "Other",
-   "label": "Taiwanese (scored as Other)"
+   "label": "Taiwanese (scored as Other)",
+   "communities": [
+    "chinese"
+   ]
   },
   {
    "cuisine": "Thai",
    "cuisine_group": "Thai",
-   "label": "Thai"
+   "label": "Thai",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Tibetan",
    "cuisine_group": "Other",
-   "label": "Tibetan (scored as Other)"
+   "label": "Tibetan (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Tunisian",
    "cuisine_group": "Other",
-   "label": "Tunisian (scored as Other)"
+   "label": "Tunisian (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   },
   {
    "cuisine": "Turkish",
    "cuisine_group": "Turkish",
-   "label": "Turkish"
+   "label": "Turkish",
+   "communities": [
+    "other_white",
+    "any_other"
+   ]
   },
   {
    "cuisine": "Ukrainian",
    "cuisine_group": "European",
-   "label": "Ukrainian (scored as European)"
+   "label": "Ukrainian (scored as European)",
+   "communities": [
+    "other_white"
+   ]
   },
   {
    "cuisine": "Unspecified",
    "cuisine_group": "Unspecified",
-   "label": "Unspecified"
+   "label": "Unspecified",
+   "communities": []
   },
   {
    "cuisine": "Uzbek",
    "cuisine_group": "Other",
-   "label": "Uzbek (scored as Other)"
+   "label": "Uzbek (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Venezuelan",
    "cuisine_group": "Other",
-   "label": "Venezuelan (scored as Other)"
+   "label": "Venezuelan (scored as Other)",
+   "communities": [
+    "any_other",
+    "other_mixed"
+   ]
   },
   {
    "cuisine": "Vietnamese",
    "cuisine_group": "Other",
-   "label": "Vietnamese (scored as Other)"
+   "label": "Vietnamese (scored as Other)",
+   "communities": [
+    "other_asian"
+   ]
   },
   {
    "cuisine": "Welsh",
    "cuisine_group": "European",
-   "label": "Welsh (scored as European)"
+   "label": "Welsh (scored as European)",
+   "communities": [
+    "white_british"
+   ]
   },
   {
    "cuisine": "Yemeni",
    "cuisine_group": "Other",
-   "label": "Yemeni (scored as Other)"
+   "label": "Yemeni (scored as Other)",
+   "communities": [
+    "arab"
+   ]
   }
  ],
  "traits": [

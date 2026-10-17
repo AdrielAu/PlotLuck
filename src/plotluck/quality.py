@@ -16,11 +16,10 @@ import zipfile
 from collections import Counter
 from pathlib import Path
 
-ETHNICITY = (
-    "ethnicity_asian_share", "ethnicity_black_share", "ethnicity_mixed_share",
-    "ethnicity_white_share", "ethnicity_other_share",
-)
-SEX = ("sex_female_share", "sex_male_share")
+from plotluck import context
+
+ETHNICITY = context.ETHNICITY_INPUTS
+SEX = context.SEX_INPUTS
 GROUPS = (
     ("population",), ("deprivation_index",), ("commercial_rent_index",),
     ("average_age",), ETHNICITY, SEX,
