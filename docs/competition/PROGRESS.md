@@ -29,7 +29,8 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 - **Server operator**: unassigned
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
-- **Blockers**: the [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) blocks [the formats decision](https://github.com/AdrielAu/PlotLuck/issues/38), which blocks [the implementation split](https://github.com/AdrielAu/PlotLuck/issues/39). The [source decision](https://github.com/AdrielAu/PlotLuck/issues/46) is resolved subject to [ADR 0003](../adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md).
+- **Blockers**: none. The [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) and [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38) are resolved ([ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)), unblocking [the implementation split](https://github.com/AdrielAu/PlotLuck/issues/39).
 - **Next**:
-  1. Resolve the review-count policy; agree NN1 architecture and model/data formats (see [PROJECT.md](PROJECT.md#open)).
-  2. Continue [dataset acquisition](https://github.com/AdrielAu/PlotLuck/issues/43); finalise independent implementation issues against the agreed contracts.
+  1. Finalise independent implementation issues against the agreed contracts ([#39](https://github.com/AdrielAu/PlotLuck/issues/39)).
+  2. Define the canonical cuisine taxonomy mapping ticket.
+  3. Continue [dataset acquisition](https://github.com/AdrielAu/PlotLuck/issues/43) on LinuxONE.

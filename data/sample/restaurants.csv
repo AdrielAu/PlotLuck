@@ -1,0 +1,15 @@
+postcode_district,cuisines,price_band,avg_rating,total_reviews,count_excellent,count_very_good,count_average,count_poor,count_terrible,review_success_label
+SE15,"Italian, Pizza",$,4.5,42,28,10,2,1,1,0.785
+SE15,"Indian, Asian",$$,4.0,110,60,30,12,5,3,0.742
+SE15,"British, Pub",$,3.5,18,6,7,3,1,1,0.590
+E1,"Indian, Pakistani",$,4.5,210,135,50,15,6,4,0.812
+E1,"Italian, Cafe",$,4.0,55,28,18,5,2,2,0.710
+E1,"Chinese, Asian",$$$,4.0,85,45,25,10,3,2,0.730
+SW1A,"French, European",$$$,4.5,320,210,75,20,10,5,0.845
+SW1A,"British",$$,4.0,150,80,45,15,6,4,0.755
+M1,"Chinese, Dim Sum",$,4.5,95,58,25,7,3,2,0.795
+M1,"British, Gastropub",$$,4.0,60,32,18,6,2,2,0.725
+B1,"Indian, Balti",$,4.5,180,115,42,14,5,4,0.805
+B1,"Italian",$$,3.5,40,15,15,6,2,2,0.615
+LS1,"British, Steakhouse",$$$,4.0,130,70,40,12,5,3,0.748
+LS1,"Pizza, Fast Food",$,3.5,25,8,10,4,2,1,0.602
