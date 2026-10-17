@@ -1,0 +1,14 @@
+# Exact == pins from the LinuxONE container's `pip freeze` (Python 3.12.15,
+# issue #8). Direct imports only: add a package here when code first imports
+# it, pinned to the version in that freeze.
+#
+# Nothing is imported yet beyond the standard library. The tests import
+# pytest, which the container image does not ship: pin it here once the
+# version installed in the container is known.
+
+# Image-provided, s390x only (local wheels; not installable elsewhere).
+# Only server-only code imports these.
+# torch==2.11.0+cpu
+# torch_nnpa==1.5.0+gite861108
+# tensorflow==2.18.1
+# ibm-zdnn-plugin==2.3.0

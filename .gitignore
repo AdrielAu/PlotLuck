@@ -7,3 +7,7 @@
 
 # Claude hook scripts: per clone, opt-in (see docs/setup.md)
 .claude/hooks/
+
+# Server-only full data, virtualenv
+data/full/
+.venv/
