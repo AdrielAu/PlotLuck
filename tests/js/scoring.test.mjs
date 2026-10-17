@@ -20,13 +20,17 @@ function tinyBundle({
   population = "100",
   centroidLat = "51.5",
   supplyCount = "2",
+  radiusKm = "1.2",
   version = BUNDLE_VERSION,
+  includeFineCuisine = false,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
+  // `radiusKm: null` leaves the radius_km column out.
+  const columns = { ...contextColumns, ...(radiusKm === null ? {} : { radius_km: radiusKm }) };
   const files = {
-    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index${Object.keys(contextColumns).map((name) => `,${name}`).join("")}\nAB1,${centroidLat},-0.1,3,${population},10${Object.values(contextColumns).map((value) => `,${value}`).join("")}\n`,
+    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index${Object.keys(columns).map((name) => `,${name}`).join("")}\nAB1,${centroidLat},-0.1,3,${population},10${Object.values(columns).map((value) => `,${value}`).join("")}\n`,
     "district_cuisine_supply.csv": `postcode_district,cuisine_group,restaurants\nAB1,Thai,${supplyCount}\n`,
     "vocabulary.json": JSON.stringify({
       version,
@@ -38,9 +42,10 @@ function tinyBundle({
     }),
     "model.json": JSON.stringify({
       version,
-      features: { restaurant_inputs: ["cuisine_group"], district_inputs: districtInputs },
+      features: { restaurant_inputs: includeFineCuisine ? ["cuisine_group", "cuisine"] : ["cuisine_group"], district_inputs: districtInputs },
       transforms: {
         cuisine_group: { kind: "one_hot", values: ["African", "Thai"] },
+        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", "Thai"] } } : {}),
         ...Object.fromEntries(districtInputs.map((name) => [name, numeric])),
         population: { ...numeric, median: 7 },
       },
@@ -55,9 +60,27 @@ test("a bundle version the site does not know raises", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: BUNDLE_VERSION + 1 }), /version/);
 });
 
+test("the current site also loads the published version 2 bundle", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], version: 2 });
+  assert.equal(scoreDistricts(bundle, { cuisine: "Thai" }).length, 1);
+});
+
+test("fine cuisine changes the input even when its group is unchanged", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 1, 0, 0, 0], includeFineCuisine: true });
+  assert.ok(logit(bundle, "Eritrean") > logit(bundle, "Thai"));
+});
+
 test("invalid coordinates and supply counts are rejected while loading", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], centroidLat: "missing" }), /coordinate/i);
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], supplyCount: "missing" }), /supply/i);
+});
+
+test("a district without a positive circle radius is rejected while loading", async () => {
+  for (const radiusKm of [null, "", "0", "-1", "wide", "Infinity"]) {
+    await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], radiusKm }), /radius_km/, `radius_km ${radiusKm}`);
+  }
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], radiusKm: "0.3" });
+  assert.equal(bundle.districts[0].radius_km, "0.3");
 });
 
 test("invalid numeric inputs and model shapes raise instead of returning NaN", async () => {
