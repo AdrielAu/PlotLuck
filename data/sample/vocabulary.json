@@ -307,6 +307,11 @@
    "label": "Korean (scored as Other)"
   },
   {
+   "cuisine": "Mediterranean",
+   "cuisine_group": "Other",
+   "label": "Mediterranean (scored as Other)"
+  },
+  {
    "cuisine": "Kurdish",
    "cuisine_group": "Other",
    "label": "Kurdish (scored as Other)"

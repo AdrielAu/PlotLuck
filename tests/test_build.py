@@ -1,4 +1,5 @@
 import csv
+import copy
 import json
 import shutil
 import statistics
@@ -52,6 +53,106 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
     ]
     assert (data / "restaurants.csv").is_file()
     assert read_json(data / "run" / "metrics.json")["restaurants"] == 200
+
+
+@pytest.mark.parametrize(
+    "filename, fields",
+    [
+        ("districts.csv", {"restaurant_name": "A private name"}),
+        ("districts.csv", {"restaurant_link": "https://example.invalid/private"}),
+        ("districts.csv", {"street_address": "A private address"}),
+        ("districts.csv", {"postcode": "SE1 1AA"}),
+        ("districts.csv", {"avg_rating": 4.5}),
+        ("district_cuisine_supply.csv", {"total_reviews": 42}),
+        ("districts.csv", {"latitude": 51.5, "longitude": -0.1}),
+        ("model.json", {"R0": 3.5}),
+    ],
+)
+def test_private_bundle_fields_raise_before_any_file_is_written(built, tmp_path, filename, fields):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    bundle = copy.deepcopy(bundle)
+    target = bundle[filename][0] if filename.endswith(".csv") else bundle[filename]
+    target.update(fields)
+    out = tmp_path / "public"
+
+    with pytest.raises(ValueError, match="private|unexpected|not allowed"):
+        build.publish_bundle(out, bundle)
+
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    "filename, fields",
+    [
+        ("districts.csv", {"restaurant_name": "A private name"}),
+        ("districts.csv", {"avg_rating": 4.5}),
+        ("district_cuisine_supply.csv", {"total_reviews": 42}),
+        ("districts.csv", {"latitude": 51.5, "longitude": -0.1}),
+        ("model.json", {"R0": 3.5}),
+    ],
+)
+def test_build_rejects_private_fields_before_writing(tmp_path, monkeypatch, filename, fields):
+    data = copy_sources(tmp_path / "data")
+    out = tmp_path / "public"
+    original = build.publish_bundle
+
+    def leaking_publisher(destination, bundle):
+        target = bundle[filename][0] if filename.endswith(".csv") else bundle[filename]
+        target.update(fields)
+        original(destination, bundle)
+
+    monkeypatch.setattr(build, "publish_bundle", leaking_publisher)
+    with pytest.raises(ValueError, match="private|unexpected"):
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+
+    assert not out.exists()
+    assert not (data / "restaurants.csv").exists()
+    assert not (data / "label_policy.json").exists()
+    assert not (data / "run").exists()
+
+
+def test_sample_run_folder_contains_only_metrics_and_no_policy_values(data):
+    run = data / "run"
+    assert sorted(path.name for path in run.iterdir()) == ["metrics.json"]
+    metrics = read_json(run / "metrics.json")
+    assert not {"R0", "D0", "n_ref", "avg_rating", "total_reviews"} & set(metrics)
+
+
+def test_committed_sample_run_metrics_pass_privacy_guard():
+    build.validate_run_metrics(read_json(data_dir(choice="sample") / "run" / "metrics.json"))
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("R0", 3.5),
+        ("tag_frequencies", {"Italian": 10}),
+        ("inputs_left_out", {"population": "Private restaurant name"}),
+    ],
+)
+def test_private_metadata_cannot_enter_run_metrics(data, field, value):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics[field] = value
+    with pytest.raises(ValueError, match="private|unexpected"):
+        build.validate_run_metrics(metrics)
+
+
+def test_registered_district_extension_can_be_published(built, tmp_path, monkeypatch):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    for row in bundle["districts.csv"]:
+        row["employment_index"] = "0.5"
+    monkeypatch.setattr(build, "DISTRICT_PUBLIC_EXTENSIONS", ("employment_index",))
+
+    out = tmp_path / "public"
+    build.publish_bundle(out, bundle)
+
+    assert read_csv(out / "districts.csv")[0]["employment_index"] == "0.5"
 
 
 def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
