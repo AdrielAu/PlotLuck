@@ -57,12 +57,9 @@ def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
     metrics = read_json(data / "run" / "metrics.json")
 
     # Sample rows 0-4 carry one of each problem; see tripadvisor_england.csv.
+    # Row 4 (zero reviews, zero counts) is excluded, so its counts are no fix.
     assert metrics["excluded"] == {"rating_missing": 1, "rating_out_of_range": 1, "n_total_zero": 1}
-    assert metrics["label_fixes"] == {
-        "counts_partly_missing": 1,
-        "total_below_counts": 1,
-        "counts_missing_or_zero": 1,
-    }
+    assert metrics["label_fixes"] == {"counts_partly_missing": 1, "total_below_counts": 1}
     assert metrics["labelled"] == 197
 
 

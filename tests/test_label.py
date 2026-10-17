@@ -23,7 +23,7 @@ def test_label_matches_a_worked_example():
     assert label.labels([restaurant()], POLICY) == [pytest.approx(0.649472, abs=1e-6)]
 
 
-@pytest.mark.parametrize("counts", [(10, "", 3, 1, 1), (0, 0, 0, 0, 0), ("",) * 5])
+@pytest.mark.parametrize("counts", [(10, "", 3, 1, 1), (10, -5, 3, 1, 1), (0, 0, 0, 0, 0), ("",) * 5])
 def test_distribution_term_falls_back_to_d0_without_a_full_set_of_counts(counts):
     # D_s = D0 = 0.6, so 0.5 * 0.625 + 0.3 * 0.6 + 0.2 * 0.661110 = 0.624722.
     assert label.labels([restaurant(counts=counts)], POLICY) == [pytest.approx(0.624722, abs=1e-6)]
@@ -52,45 +52,62 @@ FIT_ROWS = [
     restaurant(rating="3.0", total=30, counts=(0, 0, 30, 0, 0)),  # R = 0.5, D = 0.4
     restaurant(rating="1.0", total=100, counts=("",) * 5),  # R = 0, no D
     restaurant(rating="", total=50, counts=(0, 0, 0, 0, 50)),  # excluded: D = 0 must not count
+    restaurant(rating="3.0", total=40, counts=(0, 0, 0, 40, 0)),  # R = 0.5, D = 0.1
 ]
 
 
 def test_policy_is_fitted_on_the_eligible_rows_passed_in():
-    # n_ref is numpy's linear 95th percentile: 30 + 0.9 * 70 = 93 and 10 + 0.95 * 20 = 29.
-    assert label.fit_policy(FIT_ROWS) == pytest.approx({"R0": 0.5, "D0": 0.7, "n_ref": 93.0})
+    # R0 = mean(1, 0.5, 0, 0.5); D0 = mean(1, 0.4, 0.1). n_ref is numpy's linear
+    # 95th percentile: of (10, 30, 40, 100), 40 + 0.85 * 60 = 91; of (10, 30), 29.
+    assert label.fit_policy(FIT_ROWS) == pytest.approx({"R0": 0.5, "D0": 0.5, "n_ref": 91.0})
     assert label.fit_policy(FIT_ROWS[:2]) == pytest.approx({"R0": 0.75, "D0": 0.7, "n_ref": 29.0})
 
 
 def test_policy_needs_eligible_rows_with_counts():
     with pytest.raises(ValueError, match="eligible"):
-        label.fit_policy(FIT_ROWS[3:])
+        label.fit_policy(FIT_ROWS[3:4])
     with pytest.raises(ValueError, match="counts"):
         label.fit_policy(FIT_ROWS[2:3])
 
 
-def source(total, counts):
+def source(total, counts, rating="4.0"):
     """A Tripadvisor source row's review columns, as the CSV spells them."""
-    return {"avg_rating": "4.0", "total_reviews_count": total, **dict(zip(label.CATEGORIES, counts))}
+    return {"avg_rating": rating, "total_reviews_count": total, **dict(zip(label.CATEGORIES, counts))}
+
+
+FULL = ("10.0", "5.0", "3.0", "1.0", "1.0")
 
 
 @pytest.mark.parametrize(
-    "total, counts, n_total, fix",
+    "total, counts, n_total, excellent, fix",
     [
-        ("30.0", ("10.0", "5.0", "3.0", "1.0", "1.0"), 30, None),  # counts are a lower bound
-        ("15.0", ("10.0", "5.0", "3.0", "1.0", "1.0"), 20, "total_below_counts"),
-        ("", ("10.0", "5.0", "3.0", "1.0", "1.0"), 20, "total_missing"),
-        ("30.0", ("10.0", "", "3.0", "1.0", "1.0"), 30, "counts_partly_missing"),
-        ("30.0", ("",) * 5, 30, "counts_missing_or_zero"),
-        ("30.0", ("0.0",) * 5, 30, "counts_missing_or_zero"),
-        ("", ("",) * 5, "", "counts_missing_or_zero"),  # no n_total either; excluded later
+        ("30.0", FULL, 30, 10, None),  # counts are a lower bound
+        ("15.0", FULL, 20, 10, "total_below_counts"),
+        ("", FULL, 20, 10, "total_missing"),
+        ("30.0", ("10.0", "", "3.0", "1.0", "1.0"), 30, 10, "counts_partly_missing"),
+        ("30.0", ("-10.0", *FULL[1:]), 30, "", "counts_partly_missing"),  # a negative count is no count
+        ("30.0", ("",) * 5, 30, "", "counts_missing_or_zero"),
+        ("30.0", ("0.0",) * 5, 30, 0, "counts_missing_or_zero"),
+        ("", ("0.0",) * 5, 0, 0, None),  # max(blank, 0) = 0; excluded, so not counted
+        ("", ("",) * 5, "", "", None),  # no n_total either; excluded, so not counted
     ],
 )
-def test_review_fields_repair_n_total_and_count_each_fix(total, counts, n_total, fix):
+def test_review_fields_repair_n_total_and_count_each_fix(total, counts, n_total, excellent, fix):
     fixes = Counter()
 
     fields = label.review_fields(source(total, counts), fixes)
 
     assert fields["avg_rating"] == "4.0"
     assert fields["total_reviews"] == n_total
-    assert fields["count_excellent"] == (10 if counts[0] == "10.0" else 0 if counts[0] else "")
+    assert fields["count_excellent"] == excellent
     assert fixes == (Counter({fix: 1}) if fix else Counter())
+
+
+def test_review_fields_count_no_fix_on_a_row_the_label_excludes():
+    fixes = Counter()
+
+    fields = label.review_fields(source("15.0", FULL, rating=""), fixes)
+
+    assert fields["total_reviews"] == 20  # still repaired, but nothing labelled was fixed
+    assert label.exclusion(fields) == "rating_missing"
+    assert fixes == Counter()

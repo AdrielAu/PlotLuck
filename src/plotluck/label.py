@@ -20,27 +20,28 @@ def review_fields(row: dict, fixes: Counter) -> dict:
     """ADR 0004 review columns from a Tripadvisor source row.
 
     n_total = max(total, n_default), over whichever of the two is present
-    (issue #47). Every repair, on any row, is counted in ``fixes`` by reason.
+    (issue #47). A negative count is treated as missing. Each repair on a row
+    that gets a label is counted in ``fixes`` by reason.
     """
-    counts = [_int(row[c]) for c in CATEGORIES]
+    counts = [n if n is not None and n >= 0 else None for n in map(_int, (row[c] for c in CATEGORIES))]
     total = _int(row["total_reviews_count"])
-    if None in counts:
-        fixes["counts_missing_or_zero" if counts.count(None) == len(counts) else "counts_partly_missing"] += 1
-    elif sum(counts) == 0:
-        fixes["counts_missing_or_zero"] += 1
-    else:
-        n_default = sum(counts)
-        if total is None:
-            fixes["total_missing"] += 1
-            total = n_default
-        elif total < n_default:
-            fixes["total_below_counts"] += 1
-            total = n_default
-    return {
+    n_default = _n_default(counts)
+    repairs = []
+    if n_default is None:
+        repairs.append("counts_missing_or_zero" if counts.count(None) == len(counts) else "counts_partly_missing")
+    elif n_default == 0:
+        repairs.append("counts_missing_or_zero")
+    if n_default is not None and (total is None or total < n_default):
+        repairs.append("total_missing" if total is None else "total_below_counts")
+        total = n_default
+    fields = {
         "avg_rating": row["avg_rating"],
         "total_reviews": "" if total is None else total,
         **{f"count_{c}": "" if n is None else n for c, n in zip(CATEGORIES, counts)},
     }
+    if not exclusion(fields):
+        fixes.update(repairs)
+    return fields
 
 
 def exclusion(r: dict) -> str | None:
@@ -104,12 +105,22 @@ def _rating(r: dict) -> float:
 
 
 def _distribution(r: dict) -> tuple[float, float] | None:
-    """(D, n_default), or None when any count is missing or all are zero."""
+    """(D, n_default), or None when ``_n_default`` gives no counts to use."""
     counts = [_number(r[f"count_{c}"]) for c in CATEGORIES]
-    if None in counts or sum(counts) == 0:
+    n_default = _n_default(counts)
+    if not n_default:
         return None
-    n_default = sum(counts)
     return sum(n * u for n, u in zip(counts, UTILITY.values())) / n_default, n_default
+
+
+def _n_default(counts: list[float | None]) -> float | None:
+    """Sum of the category counts; None unless all are present and non-negative.
+
+    A None or 0 result means D_s = D0 (issue #47).
+    """
+    if any(n is None or n < 0 for n in counts):
+        return None
+    return sum(counts)
 
 
 def _smooth(value: float, n: float, prior: float) -> float:
