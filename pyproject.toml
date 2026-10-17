@@ -5,15 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "plotluck"
 version = "0.1.0"
-description = "Plotluck: review-based success scores for English postcode districts"
+description = "Plotluck: scores English postcode districts for the review-based success of a restaurant"
 requires-python = ">=3.12"
-dependencies = ["numpy==2.0.2", "torch==2.11.0"]
+dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+plotluck = ["cuisine_mapping.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

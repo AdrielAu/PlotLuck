@@ -11,13 +11,15 @@ One row per dataset, added in the same PR as the data (see [`AGENTS.md`](AGENTS.
 | Census 2021 P004, usual residents by postcode district | `p004_england.csv` | [Nomis](https://www.nomisweb.co.uk/sources/census_2021_pc) | OGL v3.0 | Districts in the ONSPD sample |
 | OpenStreetMap restaurants and fast food, England | `osm_england.csv` | [Overpass API](https://overpass-api.de/) | ODbL 1.0 | Sample box |
 
+**Built files**: `python -m plotluck.build` (`src/plotluck/build.py`) writes the site bundle (`districts.csv`, `district_cuisine_supply.csv`, `vocabulary.json`, `model.json`, `reference_scores.json`) to `--out` (default: the data folder), and always writes the private `restaurants.csv` and `run/metrics.json` to the data folder, never to `--out`. In `sample/` these are built from the sample files above, seed 0; rerun the command with `PLOTLUCK_DATA=sample` after changing the build.
+
 **Sample box**: every row with coordinates inside latitude 51.49–51.51, longitude −0.12 to −0.08 (Southwark, the City and around; constant `SAMPLE_BBOX`). It has no randomness, so the files still join on district and location. Retrieval date for ONSPD, P004 and the OSM sample box: 2026-10-17, by a laptop run of the same code; the server pull will replace these values.
 
 ## TripAdvisor European restaurants
 
 - **Edition**: Kaggle `stefanoleone992/tripadvisor-european-restaurants`, version 1, updated 2021-05-18; scraped from tripadvisor.com in early May 2021. Raw: `raw/tripadvisor.zip` (one 680 MB CSV, 1,083,397 rows).
 - **England filter**: `country == "England"`, giving 144,681 rows in the 2026-10-17 check run; the server pull will confirm it.
-- **Sample**: 200 synthetic rows (`SYNTHETIC_SEED = 43`) in the sample box, made up by `_synthetic_tripadvisor_rows` with the extract's columns and value formats. No real row is read. Unlike the real file, no rating or count is blank.
+- **Sample**: 200 synthetic rows (`SYNTHETIC_SEED = 43`) in the sample box, made up by `_synthetic_tripadvisor_rows` with the extract's columns and value formats. No real restaurant row is read. Rows cycle through the 13 sampled ONSPD districts using each district's first postcode point as an anchor; the coordinates are public postcode locations, not source restaurant locations. The seeded rows include specific, dish-style, umbrella, venue and set-aside cuisine tags, repeated chain names, missing ratings and traits, an out-of-range rating, missing category counts, a total below the category sum and a zero-review row. Regenerate with `python -m plotluck.sources sample` on LinuxONE after the source extract is refreshed.
 - **Kept columns**: `restaurant_link` (source ID), name, address, city, latitude, longitude, cuisines, `avg_rating`, `total_reviews_count`, `reviews_count_in_default_language`, the five category counts, `features`, `price_level`, `special_diets`, `vegetarian_friendly`, `vegan_options`, `gluten_free`. Values are copied unchanged: counts are strings like `347.0`, and `price_level` uses `€` symbols.
 - **Licence**: see [ADR 0003](../docs/adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md). The full file stays on LinuxONE; no laptop copies, no committed rows, and only model outputs are published.
 - **Attribution**: TripAdvisor European restaurants, Stefano Leone (Kaggle).

@@ -43,6 +43,10 @@ def test_sample_restaurants_format():
 
         for r in rows:
             assert r["postcode_district"]
+            assert r["price_band"] in ("", "$", "$$", "$$$")
+            assert r["is_chain"] in ("0", "1")
+            for flag in ("vegetarian_friendly", "vegan_options", "gluten_free"):
+                assert r[flag] in ("", "0", "1")
             assert float(r["avg_rating"]) >= 1.0 and float(r["avg_rating"]) <= 5.0
             label = float(r["review_success_label"])
             assert 0.0 <= label <= 1.0
@@ -64,8 +68,7 @@ def test_sample_districts_format():
             assert -90.0 <= float(r["centroid_lat"]) <= 90.0
             assert -180.0 <= float(r["centroid_lon"]) <= 180.0
             assert int(r["total_restaurants"]) >= 0
-            if r["population"]:
-                assert int(r["population"]) >= 0
+            assert r["population"] == "" or int(r["population"]) >= 0
 
 
 def test_sample_model_json_format():
