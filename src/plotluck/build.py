@@ -18,6 +18,8 @@ file shapes are the contract the site builds against.
 import argparse
 import csv
 import json
+import math
+import re
 import statistics
 from collections import Counter
 from pathlib import Path
@@ -105,7 +107,8 @@ def build(
 ) -> dict:
     """Run every stage on ``data`` and write the bundle to ``out``; return run metrics."""
     data, out = Path(data), Path(out)
-    out.mkdir(parents=True, exist_ok=True)
+    if data.resolve() == out.resolve():
+        raise ValueError("bundle output must be separate from private data")
     postcodes = _read_csv(data / "onspd_england.csv")
     mapping = load_mapping()
     restaurants, metrics = restaurant_table(
@@ -120,18 +123,10 @@ def build(
     )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
-    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
-    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
-    _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
-    _write_csv(
-        out / "district_cuisine_supply.csv",
-        ("postcode_district", "cuisine_group", "restaurants"),
-        [
-            {"postcode_district": d, "cuisine_group": g, "restaurants": n}
-            for (d, g), n in sorted(supply.items())
-        ],
-    )
-
+    supply_rows = [
+        {"postcode_district": d, "cuisine_group": g, "restaurants": n}
+        for (d, g), n in sorted(supply.items())
+    ]
     vocab = vocabulary(groups)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
     by_code = {d["postcode_district"]: d for d in districts}
@@ -161,9 +156,6 @@ def build(
             for profile in reference_profiles(vocab)
         ],
     }
-    _write_json(out / "vocabulary.json", vocab)
-    _write_json(out / "model.json", model, indent=None)
-    _write_json(out / "reference_scores.json", reference)
     metrics.update(
         restaurants=len(restaurants),
         labelled=len(labelled),
@@ -171,9 +163,180 @@ def build(
         epochs=epochs,
         train_loss=losses,
     )
+    bundle = {
+        "districts.csv": districts,
+        "district_cuisine_supply.csv": supply_rows,
+        "vocabulary.json": vocab,
+        "model.json": model,
+        "reference_scores.json": reference,
+    }
+    validate_run_metrics(metrics)
+    publish_bundle(out, bundle)
+    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
     (data / "run").mkdir(exist_ok=True)
     _write_json(data / "run" / "metrics.json", metrics)
     return metrics
+
+
+def _only_keys(value: dict, keys, where: str) -> None:
+    if not isinstance(value, dict) or set(value) != set(keys):
+        raise ValueError(f"{where} has private or unexpected fields")
+
+
+def _finite_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def validate_run_metrics(metrics: dict) -> None:
+    """Keep server run output to counts, losses and evaluation metrics."""
+    allowed = {
+        "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
+        "districts_without_rent", "inputs_left_out", "epochs", "train_loss",
+    }
+    if not isinstance(metrics, dict) or set(metrics) - allowed:
+        raise ValueError("run metrics have private or unexpected fields")
+    for name in ("source_rows", "restaurants", "labelled", "districts_without_rent", "epochs"):
+        if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
+            raise ValueError(f"run metrics {name} must be a count")
+    if "inputs_left_out" in metrics and (
+        not isinstance(metrics["inputs_left_out"], dict) or
+        set(metrics["inputs_left_out"]) - set(DISTRICT_INPUTS) or
+        not all(isinstance(reason, str) for reason in metrics["inputs_left_out"].values())
+    ):
+        raise ValueError("run metrics inputs_left_out has private or unexpected fields")
+    reasons = {
+        "excluded": {"rating_missing", "rating_out_of_range", "n_total_zero"},
+        "label_fixes": {"counts_partly_missing", "total_below_counts"},
+    }
+    for name, allowed_reasons in reasons.items():
+        if not isinstance(metrics.get(name), dict) or any(
+            not isinstance(count, int) or count < 0 for count in metrics[name].values()
+        ) or set(metrics[name]) - allowed_reasons:
+            raise ValueError(f"run metrics {name} must contain counts only")
+    if not isinstance(metrics.get("train_loss"), list) or not all(
+        _finite_number(loss) for loss in metrics["train_loss"]
+    ):
+        raise ValueError("run metrics loss curve must contain numbers only")
+
+
+def publish_bundle(out: Path, bundle: dict) -> None:
+    """Validate the complete public bundle before writing a single output file."""
+    _only_keys(bundle, BUNDLE_FILES, "bundle")
+    districts = bundle["districts.csv"]
+    supply = bundle["district_cuisine_supply.csv"]
+    if not isinstance(districts, list) or not districts or not isinstance(supply, list):
+        raise ValueError("bundle tables have private or unexpected shape")
+    for row in districts:
+        _only_keys(row, DISTRICT_COLUMNS, "districts.csv")
+        if not isinstance(row["postcode_district"], str) or not re.fullmatch(
+            r"[A-Z]{1,2}\d[A-Z\d]?", row["postcode_district"]
+        ):
+            raise ValueError("districts.csv has an invalid district code")
+        for name in DISTRICT_COLUMNS[1:]:
+            if row[name] != "" and not _finite_number(float(row[name])):
+                raise ValueError(f"districts.csv has an invalid {name}")
+    district_codes = {row["postcode_district"] for row in districts}
+
+    vocab = bundle["vocabulary.json"]
+    _only_keys(vocab, ("version", "cuisines", "traits"), "vocabulary.json")
+    if vocab["version"] != BUNDLE_VERSION:
+        raise ValueError("vocabulary.json has an unexpected version")
+    allowed_cuisines = {m["cuisine"] for m in load_mapping().values() if m["cuisine"]} | {UNSPECIFIED}
+    groups = set()
+    for cuisine in vocab["cuisines"]:
+        _only_keys(cuisine, ("cuisine", "cuisine_group", "label"), "vocabulary cuisine")
+        fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
+        if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
+            raise ValueError("vocabulary has a private or unexpected cuisine")
+        if cuisine["label"] != (fine if fine == group else f"{fine} (scored as {group})"):
+            raise ValueError("vocabulary has a private or unexpected label")
+        groups.add(group)
+    trait_names = []
+    allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
+    for trait in vocab["traits"]:
+        _only_keys(trait, ("name", "kind", "values", "default"), "vocabulary trait")
+        if trait["name"] not in allowed_traits or trait["name"] in trait_names:
+            raise ValueError("vocabulary has a private or unexpected trait")
+        trait_names.append(trait["name"])
+        expected = (
+            list(VENUE_TYPES) if trait["name"] == "venue_type" else
+            [*PRICE_BANDS.values(), UNKNOWN_PRICE] if trait["name"] == "price_band" else
+            [False, True]
+        )
+        kind = "single_choice" if trait["name"] in {"venue_type", "price_band"} else "on_off"
+        if trait["kind"] != kind or trait["values"] != expected or trait["default"] not in expected:
+            raise ValueError("vocabulary has private or unexpected trait values")
+
+    for row in supply:
+        _only_keys(row, ("postcode_district", "cuisine_group", "restaurants"), "supply table")
+        count = row["restaurants"]
+        if row["postcode_district"] not in district_codes or row["cuisine_group"] not in groups or (
+            isinstance(count, bool) or not str(count).isdigit()
+        ):
+            raise ValueError("supply table has private or unexpected values")
+
+    model = bundle["model.json"]
+    _only_keys(model, ("version", "features", "transforms", "layers", "activations"), "model.json")
+    if model["version"] != BUNDLE_VERSION or model["activations"] != list(nn1.ACTIVATIONS):
+        raise ValueError("model has private or unexpected metadata")
+    _only_keys(model["features"], ("restaurant_inputs", "district_inputs"), "model features")
+    restaurant_inputs = model["features"]["restaurant_inputs"]
+    district_inputs = model["features"]["district_inputs"]
+    if restaurant_inputs != ["cuisine_group", *trait_names] or (
+        len(district_inputs) != len(set(district_inputs)) or set(district_inputs) - set(DISTRICT_INPUTS)
+    ):
+        raise ValueError("model has private or unexpected inputs")
+    _only_keys(model["transforms"], [*restaurant_inputs, *district_inputs], "model transforms")
+    for name, transform in model["transforms"].items():
+        if name in district_inputs:
+            _only_keys(transform, ("kind", "log1p", "mean", "std", "median"), "numeric transform")
+            if transform["kind"] != "numeric" or not isinstance(transform["log1p"], bool) or not all(
+                _finite_number(transform[key]) for key in ("mean", "std", "median")
+            ):
+                raise ValueError("model has private or unexpected numeric transforms")
+        elif name == "cuisine_group" or name in {"venue_type", "price_band"}:
+            _only_keys(transform, ("kind", "values"), "categorical transform")
+            expected = sorted(groups) if name == "cuisine_group" else next(
+                trait["values"] for trait in vocab["traits"] if trait["name"] == name
+            )
+            if transform["kind"] != "one_hot" or transform["values"] != expected:
+                raise ValueError("model has private or unexpected categorical transforms")
+        else:
+            _only_keys(transform, ("kind",), "flag transform")
+            if transform["kind"] != "flag":
+                raise ValueError("model has private or unexpected flag transforms")
+    for layer in model["layers"]:
+        _only_keys(layer, ("weights", "biases"), "model layer")
+        if not all(_finite_number(value) for row in layer["weights"] for value in row) or not all(
+            _finite_number(value) for value in layer["biases"]
+        ):
+            raise ValueError("model layer has private or unexpected values")
+
+    reference = bundle["reference_scores.json"]
+    _only_keys(reference, ("version", "tolerance", "cases"), "reference scores")
+    if reference["version"] != BUNDLE_VERSION or not _finite_number(reference["tolerance"]):
+        raise ValueError("reference scores have private or unexpected metadata")
+    for case in reference["cases"]:
+        _only_keys(case, ("profile", "scores"), "reference case")
+        _only_keys(case["profile"], ("cuisine", *trait_names), "reference profile")
+        if case["profile"]["cuisine"] not in {c["cuisine"] for c in vocab["cuisines"]} or any(
+            case["profile"][trait["name"]] not in trait["values"] for trait in vocab["traits"]
+        ):
+            raise ValueError("reference profile has private or unexpected values")
+        _only_keys(case["scores"], district_codes, "reference district scores")
+        if not all(_finite_number(score) and 0 <= score <= 1 for score in case["scores"].values()):
+            raise ValueError("reference scores have private or unexpected values")
+
+    out = Path(out)
+    if out.exists() and {path.name for path in out.iterdir()} - set(BUNDLE_FILES) - {".gitkeep"}:
+        raise ValueError("bundle output contains private or unexpected files")
+    out.mkdir(parents=True, exist_ok=True)
+    _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
+    _write_csv(out / "district_cuisine_supply.csv", ("postcode_district", "cuisine_group", "restaurants"), supply)
+    _write_json(out / "vocabulary.json", vocab)
+    _write_json(out / "model.json", model, indent=None)
+    _write_json(out / "reference_scores.json", reference)
 
 
 def vocabulary(groups: dict[str, str]) -> dict:
@@ -484,14 +647,14 @@ def main(argv=None) -> None:
         prog="python -m plotluck.build",
         description="Build the site bundle from the data folder chosen by data_dir().",
     )
-    parser.add_argument("--out", type=Path, help="bundle folder (default: the data folder)")
+    parser.add_argument("--out", type=Path, help="bundle folder (default: data/bundle)")
     parser.add_argument("--epochs", type=int, default=TRACER_EPOCHS)
     args = parser.parse_args(argv)
     data = data_dir()
     full = data == data_dir(choice="full")
     metrics = build(
         data,
-        args.out or data,
+        args.out or data / "bundle",
         group_threshold=FULL_GROUP_THRESHOLD if full else SAMPLE_GROUP_THRESHOLD,
         epochs=args.epochs,
     )
