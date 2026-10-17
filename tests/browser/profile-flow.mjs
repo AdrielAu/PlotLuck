@@ -39,6 +39,8 @@ test("a profile needs confirmation before its district results appear", async (t
     assert.match(await tooltip.innerText(), new RegExp(`^#3 · ${code} · \\d\\.\\d{2,4}$`));
     // Hovering the circle at the map's centre, where the click glided to, highlights that circle's row.
     await page.waitForTimeout(1500);
+    // The opened pickers panel can push the map's centre below the window.
+    await page.locator("#map").scrollIntoViewIfNeeded();
     const box = await page.locator("#map").boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     // Leaflet fades a closed tooltip out for 200 ms before removing it.
@@ -46,7 +48,7 @@ test("a profile needs confirmation before its district results appear", async (t
     const hovered = (await tooltip.innerText()).split(" · ")[1];
     assert.equal(await page.locator("#ranked button.is-highlighted .district-code").innerText(), hovered);
     await page.mouse.move(box.x + box.width + 40, box.y + 10);
-    assert.equal(await page.locator("#ranked button.is-highlighted").count(), 0);
+    await page.locator("#ranked button.is-highlighted").waitFor({ state: "detached" });
   });
 
   await t.test("a moved threshold is kept for the same answers and reset for new ones", async () => {

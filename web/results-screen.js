@@ -62,6 +62,9 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       return;
     }
     map = L.map("map").fitBounds(ENGLAND);
+    // Opening or closing the pickers panel resizes the map; Leaflet must re-measure it, or
+    // its centre (where a row click glides to) and tiles are off.
+    new ResizeObserver(() => map.invalidateSize()).observe($("map"));
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -121,7 +124,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
         }));
         button.addEventListener("click", () => {
           const circle = circles.get(postcode_district);
-          map.flyTo(circle.getLatLng(), map.getZoom(), { animate: !reducedMotion(), duration: 1 });
+          // Zoom in until the district fills about a third of the view (a small one is under a
+          // pixel at England's zoom), never out, and no closer than street level.
+          const fit = map.getBoundsZoom(circle.getLatLng().toBounds(circle.getRadius() * 6));
+          map.flyTo(circle.getLatLng(), Math.max(map.getZoom(), Math.min(fit, 13)), { animate: !reducedMotion(), duration: 1 });
           highlight(postcode_district);
           circle.openTooltip();
         });
