@@ -14,7 +14,9 @@ export function readAnswers(bundle, answers) {
   if (!traitsValid || !Array.isArray(searchArea)) return null;
   const wanted = new Set(searchArea);
   const codes = bundle.districts.map((d) => d.postcode_district).filter((code) => !wanted.size || wanted.has(code));
-  return codes.length ? { profile, searchArea: codes } : null;
+  if (!codes.length) return null;
+  // Vocabulary order, so equal answers give an equal query whatever order they came in.
+  return { profile: { cuisine: profile.cuisine, ...Object.fromEntries(traits.map((t) => [t.name, profile[t.name]])) }, searchArea: codes };
 }
 
 // The NN1 scores of the query's search area, unchanged.

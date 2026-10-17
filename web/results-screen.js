@@ -5,15 +5,17 @@ import { defaultThreshold, inSearchArea, readAnswers, resultsAt } from "./result
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function showScreen(id) {
+// Show one of the page's three screens and hide the others.
+export function showScreen(id) {
   for (const screen of ["questions-screen", "results-screen", "answers-error"]) $(screen).hidden = screen !== id;
 }
 
 // Hand-off from the questions screen. Returns `openResults({ profile, searchArea })`:
 // `profile` is a cuisine plus every shipped trait in the vocabulary's values, and
 // `searchArea` lists postcode district codes (empty or absent means all England).
-// Unreadable answers show "We couldn't read your answers" instead of a map.
-// `describeProfile(profile)` gives the heading and summary text; `onChangeAnswers()`
+// Unreadable answers show "We couldn't read your answers" instead of a map, and
+// `openResults` returns false. `describeProfile(profile, searchAreaName)` gives
+// `{ heading, summary }` text; `onChangeAnswers()`
 // runs after the questions screen is shown again, with its state untouched.
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
@@ -21,7 +23,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
   let map = null;
   let circles = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
-  let current = null;
+  let onScreen = null;
 
   function backToQuestions() {
     showScreen("questions-screen");
@@ -32,7 +34,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
 
   // The map is built on first use, once its container is visible.
   function ensureMap() {
-    if (map) return map.invalidateSize();
+    if (map) {
+      map.invalidateSize();
+      return;
+    }
     map = L.map("map");
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -44,7 +49,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
   }
 
   function render() {
-    const { scores, threshold } = current;
+    const { scores, threshold } = onScreen;
     $("threshold-value").value = threshold.toFixed(4);
     $("threshold").setAttribute("aria-valuetext", `${threshold.toFixed(4)} review-based success score`);
     const { shown, countLine } = resultsAt(scores, threshold);
@@ -79,7 +84,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
   }
 
   $("threshold").addEventListener("input", () => {
-    current.threshold = Number($("threshold").value);
+    onScreen.threshold = Number($("threshold").value);
     render();
   });
 
@@ -88,15 +93,15 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     if (!query) {
       showScreen("answers-error");
       $("answers-error-heading").focus();
-      return;
+      return false;
     }
     showScreen("results-screen");
     ensureMap();
     const key = JSON.stringify(query);
-    if (current?.key !== key) {
+    if (onScreen?.key !== key) {
       // Scores change only with the query; the slider just filters them.
       const scores = inSearchArea(scoreDistricts(bundle, query.profile), query);
-      current = { key, scores, threshold: defaultThreshold(scores) };
+      onScreen = { key, scores, threshold: defaultThreshold(scores) };
       for (const { postcode_district, score } of scores) {
         const pale = [224, 237, 215], dark = [40, 76, 41];
         const fill = pale.map((channel, i) => Math.round(channel + (dark[i] - channel) * score));
@@ -106,18 +111,19 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       }
       const values = scores.map((d) => d.score);
       Object.assign($("threshold"), { min: String(Math.min(...values)), max: String(Math.max(...values)) });
-      $("threshold").value = String(current.threshold);
+      $("threshold").value = String(onScreen.threshold);
       // Frame the whole search area, not just the shown districts, clear of the threshold bar.
       map.fitBounds(L.latLngBounds(query.searchArea.map((code) => centroids.get(code))), {
         paddingTopLeft: [32, 32],
         paddingBottomRight: [32, document.querySelector(".map-bar").offsetHeight + 24],
         maxZoom: 13,
       });
-      const { heading, summary } = describeProfile(query.profile, answers.searchArea?.length ? "your search area" : "England");
-      $("results-heading").textContent = heading;
-      $("confirmed-profile").textContent = summary;
     }
+    const { heading, summary } = describeProfile(query.profile, answers.searchArea?.length ? "your search area" : "England");
+    $("results-heading").textContent = heading;
+    $("confirmed-profile").textContent = summary;
     render();
     $("results-heading").focus();
+    return true;
   };
 }

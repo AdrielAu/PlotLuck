@@ -27,6 +27,11 @@ test("an empty or absent search area means all England", () => {
   }
 });
 
+test("the same answers in a different order give the same query", () => {
+  const reordered = { vegan_options: true, cuisine: "Thai", price_band: "$$" };
+  assert.equal(JSON.stringify(readAnswers(bundle, { profile: reordered })), JSON.stringify(readAnswers(bundle, { profile: thai })));
+});
+
 test("a search area keeps only the postcode districts Plotluck knows", () => {
   assert.deepEqual(readAnswers(bundle, { profile: thai, searchArea: ["SE1", "M1", "ZZ9"] }).searchArea, ["M1", "SE1"]);
 });

@@ -32,7 +32,8 @@ button { cursor: pointer; }
 ::selection { background: #bacfa9; color: var(--ink); }
 input { accent-color: var(--green); caret-color: var(--green); }
 :disabled { cursor: wait; opacity: 0.6; }
-/* Results screen: desktop only (#127). The map fills the viewport between a top line and slim notes. */
+/* The map fills the viewport between a top line and slim notes.
+   shortcut: desktop Chrome/Edge only, as #127 and #110 support; add a phone layout if that contract widens. */
 #results-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 16px; height: 100vh; min-height: 640px; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }

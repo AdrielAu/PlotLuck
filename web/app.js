@@ -1,6 +1,6 @@
 // The questions screen: restaurant pickers whose confirmed answers open the results screen.
 import { defaultProfile, matchCuisines } from "./pickers.js";
-import { setUpResultsScreen } from "./results-screen.js";
+import { setUpResultsScreen, showScreen } from "./results-screen.js";
 import { loadBundle } from "./scoring.js";
 
 const $ = (id) => document.getElementById(id);
@@ -19,9 +19,7 @@ const VALUE_LABELS = { unknown: "Unknown" };
 const traitLabel = (name) => TRAIT_LABELS[name] ?? name.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 
 function showError(error) {
-  $("questions-screen").hidden = false;
-  $("results-screen").hidden = true;
-  $("answers-error").hidden = true;
+  showScreen("questions-screen");
   $("loading").hidden = true;
   $("pick-prompt").hidden = true;
   $("profile-controls").disabled = true;
@@ -218,8 +216,8 @@ async function main() {
       return;
     }
     try {
-      // The pickers only offer England; a search area comes with NN2 (#110).
-      openResults({ profile: { ...draft }, searchArea: [] });
+      // shortcut: the pickers only offer England, upgrade when NN2 proposes a search area (#110).
+      if (!openResults({ profile: { ...draft }, searchArea: [] })) return;
       confirmed = { ...draft };
       $("pick-prompt").hidden = true;
       updateDraft();
