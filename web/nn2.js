@@ -52,7 +52,7 @@ export function makeNN2(vocabulary) {
     async download(onProgress, mode) {
       const timer = setTimeout(() => stop(new Error("the on-device model could not finish loading")), 300_000);
       try {
-        await call({ action: "load", mode }, onProgress);
+        await call({ action: "load", mode, complete:mode === 'focused' }, onProgress);
         loaded = true;
       } finally {
         clearTimeout(timer);
@@ -76,7 +76,7 @@ export function makeNN2(vocabulary) {
       if (!loaded) throw new Error("the on-device model is not loaded");
       const timer = setTimeout(() => stop(new Error("the on-device model took too long")), READ_TIMEOUT_MS);
       try {
-        return await call({ action: "interpret", description, catalogue, mode: "focused", clarifyInvalidPrice: true });
+        return await call({ action: "interpret", description, catalogue, mode: "focused", clarifyInvalidPrice: true, complete:true });
       } finally {
         clearTimeout(timer);
       }

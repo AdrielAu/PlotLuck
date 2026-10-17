@@ -39,7 +39,7 @@ async function main() {
     onResults(confirmed, query) {
       const defaults = Object.entries(query.fields).filter(([name, f]) => ['venue_type', 'price_band'].includes(name) && f.provenance === 'default').map(([name]) => traitLabel(name));
       const inferred = Object.entries(query.fields).filter(([, f]) => f.provenance === 'inferred').map(([name, f]) => `${traitLabel(name)}: ${valueLabel(f.value)}${f.evidence ? ` (${f.evidence})` : ''}`);
-      $('query-notes').textContent = [defaults.length ? `Not specified: ${defaults.join(', ')}; scoring uses the model defaults.` : '', inferred.length ? `Inferred: ${inferred.join('; ')}.` : '', `Rent band: ${query.rentBand}.`, query.rentBudget ? `Rent budget: £${query.rentBudget.annualGBP.toLocaleString('en-GB')} per year; the amount is not used in scoring.` : ''].filter(Boolean).join(' ');
+      $('query-notes').textContent = [defaults.length ? `Not specified: ${defaults.join(', ')}; scoring uses the model defaults.` : '', inferred.length ? `Inferred: ${inferred.join('; ')}.` : '', `Rent band: ${query.rentBand}.`, query.rentBudget ? `Rent budget: £${query.rentBudget.annualGBP.toLocaleString('en-GB')} per year; the amount is not used in scoring.` : '', query.requirementsText ? `Other requirements: ${query.requirementsText}.` : ''].filter(Boolean).join(' ');
       $('unused-details').hidden = !query.unused.length;
       $('unused-details').textContent = `Not used in scoring: ${query.unused.join('; ')}`;
       if (!openResults(confirmed)) return false;

@@ -1,4 +1,4 @@
-import { descriptionQuery, confirmedDescription } from './description-query.js';
+import { descriptionQuery, confirmedDescription, unreadDescription } from './description-query.js';
 import { makeInterpreter } from './interpret.js';
 import { valueLabel } from './pickers.js';
 
@@ -52,14 +52,72 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDes
   }
   function clarify() {
     $('clarification-fields').replaceChildren();
+    const answer = field => {
+      query.completion[field] = true;
+      $('description-error').hidden = true;
+      input.removeAttribute('aria-invalid');
+    };
     for (const need of query.needs) {
       if (need.field === 'price') select('price', need.message, need.options).addEventListener('change', event => {
         query.profile.price_band = event.target.value;
         query.priceNeedsReview = !bundle.vocabulary.traits.find(t => t.name === 'price_band').values.includes(event.target.value);
         query.fields.price_band = {value:event.target.value,provenance:'explicit',evidence:null};
+        query.completion.price = !query.priceNeedsReview;
       });
-      if (need.field === 'cuisine') select('cuisine', need.message, need.options).addEventListener('change', event => { query.profile.cuisine = event.target.value; });
-      if (need.field === 'rent') select('rent', need.message, need.options).addEventListener('change', event => { query.rentBand = event.target.value; });
+      if (need.field === 'cuisine') select('cuisine', need.message, need.options).addEventListener('change', event => { query.profile.cuisine = event.target.value; answer('cuisine'); });
+      if (need.field === 'venue') select('venue', need.message, need.options).addEventListener('change', event => {
+        query.profile.venue_type = event.target.value;
+        query.fields.venue_type = {value:event.target.value,provenance:'explicit',evidence:null};
+        answer('venue');
+      });
+      if (need.field === 'rent') {
+        select('rent', need.message, need.options).addEventListener('change', event => {
+          query.rentBand = event.target.value;
+          query.completion.rent = !query.rentBudgetNeedsReview;
+        });
+        if (query.rentBudgetNeedsReview) {
+          const group = document.createElement('div');
+          const label = document.createElement('label');label.htmlFor = 'clarify-budget';label.textContent = 'Re-enter your rent budget (£), or confirm no numeric budget.';
+          const amount = document.createElement('input');amount.id = 'clarify-budget';amount.type = 'number';amount.min = '0.01';amount.step = 'any';
+          const period = document.createElement('select');period.id = 'clarify-period';period.setAttribute('aria-label','Rent budget period');period.append(new Option('Per month','month'),new Option('Per year','year'));
+          const none = document.createElement('button');none.type = 'button';none.className = 'link';none.textContent = 'No numeric budget';
+          const update = () => {
+            const value = Number(amount.value);
+            const valid = Number.isFinite(value) && value > 0 && Number.isFinite(value * (period.value === 'month' ? 12 : 1));
+            query.rentBudgetNeedsReview = !valid;
+            query.rentBudget = valid ? {amount:value,period:period.value,currency:'GBP',annualGBP:value * (period.value === 'month' ? 12 : 1)} : null;
+            query.completion.rent = valid && ['low','mid','high','any'].includes(query.rentBand);
+          };
+          amount.addEventListener('input',update);period.addEventListener('change',update);
+          none.addEventListener('click',() => {amount.value='';query.rentBudget=null;query.rentBudgetNeedsReview=false;query.completion.rent=['low','mid','high','any'].includes(query.rentBand);});
+          group.append(label,amount,period,none);$('clarification-fields').append(group);
+        }
+      }
+      if (need.field === 'other') {
+        const group = document.createElement('div');
+        const label = document.createElement('label');label.htmlFor = 'clarify-other';label.textContent = need.message;
+        const other = document.createElement('textarea');other.id = 'clarify-other';other.rows = 2;other.required = true;other.setAttribute('aria-describedby','clarify-other-help');
+        const help = document.createElement('p');help.id = 'clarify-other-help';help.textContent = 'Dietary needs or other requirements. Enter “none” if there are no others. Unsupported details are kept but not used in scoring.';
+        const none = document.createElement('button');none.type = 'button';none.className = 'link';none.textContent = 'No other requirements';
+        let revision = 0;
+        const original = {...query.profile};
+        const originalUnused = [...query.unused];
+        other.addEventListener('input',async () => {
+          const current = ++revision;
+          const target = query;
+          query.completion.other = false;
+          if (!other.value.trim()) return;
+          const noOther = /^(?:none|nothing|no(?: other)? requirements)[.!]?$/i.test(other.value.trim());
+          const read = await makeInterpreter(bundle).interpret({other:noOther ? 'none' : other.value});
+          if (current !== revision || target !== query) return;
+          for (const t of bundle.vocabulary.traits.filter(t=>t.kind==='on_off')) query.profile[t.name] = read.marks[t.name] === 'explicit' ? read.profile[t.name] : original[t.name];
+          query.requirementsText = other.value.trim();
+          query.unused = [...originalUnused,...read.unused];
+          answer('other');
+        });
+        none.addEventListener('click',() => {other.value='None';other.dispatchEvent(new Event('input'));});
+        group.append(label,other,help,none);$('clarification-fields').append(group);
+      }
       if (need.field === 'area') {
         const search = document.createElement('input');
         search.id = 'clarify-area-text'; search.type = 'text'; search.autocomplete = 'off';
@@ -71,14 +129,15 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDes
         const reader = makeInterpreter(bundle, undefined, catalogue);
         search.addEventListener('input', () => {
           query.area = null;
+          query.completion.area = false;
           const direct = reader.readArea(search.value);
           const options = reader.areaCandidates(search.value);
           if (direct && !options.some(p => p.code === direct.code)) options.push(direct);
           control.replaceChildren(new Option('Choose…', ''), ...options.map(p => new Option(p.label, `${p.kind}:${p.code}`)));
-          control.onchange = () => { query.area = options.find(p => `${p.kind}:${p.code}` === control.value) ?? null; };
+          control.onchange = () => { query.area = options.find(p => `${p.kind}:${p.code}` === control.value) ?? null; query.completion.area = Boolean(query.area); };
         });
         control.addEventListener('change', () => {
-          if (!control.onchange) query.area = need.options.find(p => p.code === control.value) ?? null;
+          if (!control.onchange) { query.area = need.options.find(p => p.code === control.value) ?? null; query.completion.area = Boolean(query.area); }
         });
       }
       if (need.field === 'description') {
@@ -95,7 +154,7 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDes
     $('clarification').hidden = false;
     $('clarification-heading').textContent = query.needs.length === 1 ? 'One thing to clarify' : 'A few things to clarify';
     $('clarification-heading').focus();
-    status('Please clarify the details below. Everything else has already been read.');
+    status('Please complete the unanswered questions below. The details already read have been kept.');
   }
   input.addEventListener('input', () => {
     cancel(); attempts = 0; query = null;
@@ -138,9 +197,11 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDes
     } catch (error) {
       if (current !== generation) return;
       const recovery = attempts >= 3 ? ' Three attempts used. Edit your description to try again.' : ' Edit your description or try again.';
-      const message = /WebGPU/.test(error.message) ? error.message : 'We could not read this description reliably.';
-      showError(`${message}${recovery}`);
-      status('No new results have been applied.');
+      query = await unreadDescription(description,bundle,catalogue);
+      if (current !== generation) return;
+      clarify();
+      const message = /WebGPU/.test(error.message) ? error.message : 'The interpreter could not read all the inputs.';
+      status(`${message} Complete the questions below to continue.${recovery}`);
     } finally {
       if (current === generation) {busy = false;refresh();$('model-progress').hidden = true;}
     }
