@@ -31,6 +31,9 @@ EXCLUSION_REASONS = (
     "no_restaurants", "commercial_core_without_footfall", "too_many_missing_groups", "no_comparable_peers",
 )
 MIN_PEERS = 3
+# shortcut: provisional donor screens, like the peer limits; upgrade from the full-data audit.
+OUTLIER_FACTOR = 4
+OUTLIER_SHARE_DISTANCE = 0.5
 MAX_DISTANCE_KM = 30
 EARTH_RADIUS_KM = 6371.0088
 
@@ -113,11 +116,23 @@ def _valid(group: tuple[str, ...], values: list[float]) -> bool:
     return all(0 <= value <= 1 for value in values) and abs(sum(values) - 1) <= SHARE_SUM_TOLERANCE
 
 
+def _outlying(group: tuple[str, ...], values: list[float], centre: list[float]) -> bool:
+    """A donor value far from the other donors' median: a single value more than
+    OUTLIER_FACTOR times above or below it, or shares differing by over half the mix."""
+    if len(group) == 1:
+        return not centre[0] / OUTLIER_FACTOR <= values[0] <= centre[0] * OUTLIER_FACTOR
+    return sum(abs(value - middle) for value, middle in zip(values, centre)) / 2 > OUTLIER_SHARE_DISTANCE
+
+
 def _estimate(group: tuple[str, ...], peers: list[dict], suspect_rents: set[str]) -> list[float] | None:
     if group == ("commercial_rent_index",):
         peers = [row for row in peers if row["postcode_district"] not in suspect_rents]
     donors = [[_number(row[name]) for name in group] for row in peers]
     donors = [values for values in donors if None not in values and _valid(group, values)]
+    if len(donors) < MIN_PEERS:
+        return None
+    centre = [statistics.median(column) for column in zip(*donors)]
+    donors = [values for values in donors if not _outlying(group, values, centre)]
     if len(donors) < MIN_PEERS:
         return None
     estimate = [statistics.median(column) for column in zip(*donors)]
@@ -136,18 +151,22 @@ def _suspect_low_rent(value: float, peers: list[dict], global_floor: float) -> b
     return value < statistics.median(rents) / 4 and sum(r > value * 3 for r in rents) >= MIN_PEERS
 
 
-def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Counter, Counter]:
-    """Return publishable context, unmodified training codes, exclusion counts and estimate counts.
+def prepare_districts(
+    districts: list[dict],
+) -> tuple[list[dict], set[str], Counter, Counter, dict[str, tuple[str, str]]]:
+    """Return publishable context, unmodified training codes, exclusion counts, estimate counts and audit.
 
     Estimate counts are keyed ``<group>_<missing|invalid|low>``, one per
-    repaired group of a published district.
+    repaired group of a published district. The audit maps every district to
+    its status (``recorded``, ``estimated`` or ``excluded``) and its
+    ``;``-joined reasons: an exclusion reason first, then the groups needing repair.
 
     A missing value is estimated only when at least three nearby districts of
     similar mapped supply and geographic size provide that field. Districts
     needing more than two context groups repaired, or lacking donors, are not
     exported. Positive low population is not automatically called erroneous.
     """
-    prepared, reliable, excluded, estimated = [], set(), Counter(), Counter()
+    prepared, reliable, excluded, estimated, audit = [], set(), Counter(), Counter(), {}
     positive_rents = [rent for row in districts if (rent := _number(row["commercial_rent_index"])) is not None and rent > 0]
     global_floor = statistics.median(positive_rents) / 10 if positive_rents else 0
     peer_map = {row["postcode_district"]: _peers(row, districts) for row in districts}
@@ -157,14 +176,17 @@ def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Coun
         and rent > 0 and _suspect_low_rent(rent, peer_map[row["postcode_district"]], global_floor)
     }
     for original in districts:
+        code = original["postcode_district"]
         if int(original["total_restaurants"]) <= 0:
             excluded["no_restaurants"] += 1
+            audit[code] = ("excluded", "no_restaurants")
             continue
         if _unsupported_commercial_core(original):
             excluded["commercial_core_without_footfall"] += 1
+            audit[code] = ("excluded", "commercial_core_without_footfall")
             continue
         row = original.copy()
-        peers = peer_map[original["postcode_district"]]
+        peers = peer_map[code]
         needs = []
         for group in GROUPS:
             values = [_number(row[name]) for name in group]
@@ -174,19 +196,23 @@ def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Coun
                 needs.append((group, "invalid"))
             elif group == ("commercial_rent_index",) and row["postcode_district"] in suspect_rents:
                 needs.append((group, "low"))
+        reasons = [f"{_group_name(group)}_{reason}" for group, reason in needs]
         if len(needs) > MAX_REPAIRED_GROUPS:
             excluded["too_many_missing_groups"] += 1
+            audit[code] = ("excluded", ";".join(["too_many_missing_groups", *reasons]))
             continue
         for group, _ in needs:
             values = _estimate(group, peers, suspect_rents)
             if values is None:
                 excluded["no_comparable_peers"] += 1
+                audit[code] = ("excluded", ";".join(["no_comparable_peers", *reasons]))
                 break
             for name, value in zip(group, values):
                 row[name] = round(value) if name == "population" else round(value, 8)
         else:
             prepared.append(row)
-            estimated.update(f"{_group_name(group)}_{reason}" for group, reason in needs)
+            estimated.update(reasons)
+            audit[code] = ("estimated", ";".join(reasons)) if needs else ("recorded", "")
             if not needs:
-                reliable.add(row["postcode_district"])
-    return prepared, reliable, excluded, estimated
+                reliable.add(code)
+    return prepared, reliable, excluded, estimated, audit
