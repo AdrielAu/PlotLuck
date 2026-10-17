@@ -4,7 +4,7 @@ import { valueLabel } from './pickers.js';
 
 // One description, then only the clarifications required to make a valid query.
 // A generation token protects edits and previous results from late completions.
-export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDescription }) {
+export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy }) {
   const $ = id => document.getElementById(id);
   const input = $('description');
   let generation = 0, attempts = 0, busy = false, query = null;
@@ -192,7 +192,6 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy, onDes
       const next = await descriptionQuery(description, extraction, bundle, catalogue);
       if (current !== generation) return;
       query = next;
-      onDescription();
       if (query.needs.length) clarify(); else compare();
     } catch (error) {
       if (current !== generation) return;

@@ -39,9 +39,10 @@ export const DISHES = [
   dish("Tiramisu", "Italian", "fridge", "slab", 0x6b4226, 0xf3e6c4, 0x8a5a3a),
 ];
 
-// A dish not yet served whose appliance did not fire last, or null when none is left.
-export function nextDish(served, random) {
-  const last = served.at(-1)?.appliance;
-  const left = DISHES.filter((d) => !served.includes(d) && d.appliance !== last);
+// A dish not yet served this round, not on the table and not from the appliance that fired last
+// (the newest dish on `table`), or null when none is left and a new round should start.
+export function nextDish(served, table, random) {
+  const last = table.at(-1)?.appliance;
+  const left = DISHES.filter((d) => !served.includes(d) && !table.includes(d) && d.appliance !== last);
   return left.length ? left[Math.floor(random() * left.length)] : null;
 }
