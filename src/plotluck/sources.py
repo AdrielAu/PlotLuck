@@ -146,7 +146,9 @@ def pull(name: str, data: Path, fetch=http_fetch) -> Path:
     provenance["bytes"] = raw.stat().st_size
     provenance["sha256"] = _sha256(raw)
     (raw_dir / f"{name}.provenance.json").write_text(
-        json.dumps(provenance, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(provenance, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",  # LF on every platform
     )
     return raw
 
