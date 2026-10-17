@@ -7,7 +7,7 @@ Current implementation constraints:
 - The MVP uses fixed cuisine-and-trait pickers and NN1. A browser-based open-source LLM for free text is after the MVP; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
 - Training and accelerated-inference benchmarks run in Jupyter on IBM LinuxONE (s390x, big-endian).
 - The site is static on GitHub Pages and runs the exported weights in the browser, so it stays live after the event.
-- Export uses raw JSON weights and a JavaScript forward pass. Architecture, preprocessing and exact file formats remain open in the [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38); the [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) is also open.
+- Export uses raw JSON weights and a JavaScript forward pass. Architecture, preprocessing and exact file formats remain open in the [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38).
 - Follow [ADR 0003](docs/adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md): Tripadvisor-derived training rows stay on LinuxONE; restaurant samples are synthetic; publish only model outputs with the required attribution. The team accepted source-rights risk for non-commercial use, not unrestricted permission.
 
 Read [`docs/competition/PROJECT.md`](docs/competition/PROJECT.md) before planning any feature, model or data work: it holds the current plan, open questions and platform facts. Everything in it is a starting point, not a commitment.

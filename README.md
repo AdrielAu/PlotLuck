@@ -14,7 +14,7 @@ The build is in progress; see [Progress](docs/competition/PROGRESS.md) for imple
 
 NN1 is trained in Jupyter on IBM LinuxONE (s390x). Exported JSON weights and a JavaScript forward pass run in the browser on a static GitHub Pages site. Accelerated-inference benchmarks run on LinuxONE as part of the competition evidence. Built for the IBM Z Datathon 2026 (Community Impact).
 
-A later browser-based open-source LLM will read cuisine and traits from free text; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md). The [model/data formats](https://github.com/AdrielAu/PlotLuck/issues/38) and [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) remain open decisions.
+A later browser-based open-source LLM will read cuisine and traits from free text; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md). The [model/data formats](https://github.com/AdrielAu/PlotLuck/issues/38) remain an open decision.
 
 ## Dataset attribution and use
 
