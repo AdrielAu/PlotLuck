@@ -14,7 +14,7 @@ const TRAIT_LABELS = {
   vegan_options: "Vegan options",
   gluten_free: "Gluten free",
 };
-const VALUE_LABELS = { $: "$ Cheap eats", $$: "$$ Mid-range", $$$: "$$$ Fine dining", unknown: "Not decided" };
+const VALUE_LABELS = { unknown: "Unknown" };
 const traitLabel = (name) => TRAIT_LABELS[name] ?? name.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 
 function showError(error) {
@@ -138,8 +138,8 @@ function setUpCuisinePicker(cuisines, onPick) {
     onPick(cuisine.cuisine);
   }
 
+  // No open on focus: tabbing through should not announce the whole list.
   input.addEventListener("input", open);
-  input.addEventListener("focus", () => { if (list.hidden) open(); });
   input.addEventListener("click", () => { if (list.hidden) open(); });
   input.addEventListener("blur", restore);
   input.addEventListener("keydown", (event) => {

@@ -25,7 +25,8 @@ test("a picked cuisine starts with the vocabulary defaults for every shipped tra
   });
 });
 
-test("a trait missing from the vocabulary is missing from the profile", () => {
+// The picker DOM itself is checked by hand (#64: picker rendering is not automated).
+test("a trait missing from the vocabulary gets no value in the profile", () => {
   const withoutChain = { ...vocabulary, traits: vocabulary.traits.filter((t) => t.name !== "chain") };
   assert.ok(!("chain" in defaultProfile(withoutChain, "Thai")));
 });
