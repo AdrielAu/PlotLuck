@@ -566,7 +566,9 @@ def test_row_counts_names_a_missing_extract(tmp_path):
         sources.row_counts(tmp_path)
 
 
-@pytest.mark.parametrize("content", ["", "osm_type,osm_id,tourism,lat,lon\n"])
+@pytest.mark.parametrize(
+    "content", ["", "osm_type,osm_id,tourism,lat,lon\n", "osm_type,osm_id,tourism,lat,lon\n\n\n"]
+)
 def test_row_counts_names_an_extract_without_data_rows(tmp_path, content):
     copy_sample_extracts(tmp_path)
     (tmp_path / "tourism_england.csv").write_text(content, encoding="utf-8")

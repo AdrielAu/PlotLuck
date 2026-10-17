@@ -641,7 +641,8 @@ def row_counts(data: Path) -> dict[str, int]:
         if not path.is_file():
             raise FileNotFoundError(f"{name} extract is missing: {path}")
         with path.open(encoding="utf-8", newline="") as f:
-            rows = sum(1 for _ in csv.reader(f)) - 1  # a quoted field may span lines
+            # csv.reader: a quoted field may span lines; blank lines are not rows.
+            rows = sum(1 for row in csv.reader(f) if row) - 1
         if rows < 1:
             raise ValueError(f"{name} extract has no data rows: {path}")
         counts[name] = rows
