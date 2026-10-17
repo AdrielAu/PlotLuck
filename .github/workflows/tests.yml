@@ -38,3 +38,19 @@ jobs:
           node-version: "22"
       # No install: the tests use only node: built-ins.
       - run: node --test
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated browser test tools
+        run: npm install --prefix "$RUNNER_TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4
+      - name: Install Chromium
+        run: '"$RUNNER_TEMP/plotluck-browser-tools/node_modules/.bin/playwright" install --with-deps chromium'
+      - name: Test profile confirmation in Chromium
+        run: node tests/browser/profile-flow.mjs
+        env:
+          PLOTLUCK_PLAYWRIGHT: file://${{ runner.temp }}/plotluck-browser-tools/node_modules/playwright/index.mjs

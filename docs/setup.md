@@ -30,6 +30,21 @@ Follow this once after cloning, in order. The last step is a green `pytest`. Com
 
 Agent worktrees (`.claude/worktrees/`) are disposable and git-ignored. Push anything you want to keep before deleting one.
 
+## Browser flow tests
+
+`node --test` remains dependency-free. The separate browser workflow installs isolated test tools and exercises the actual site with Chromium; it serves Leaflet locally and does not fetch map tiles.
+
+To run it on Windows with an installed Edge browser:
+
+```powershell
+npm.cmd install --prefix "$env:TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4
+$env:PLOTLUCK_PLAYWRIGHT = 'file:///' + $env:TEMP.Replace('\', '/') + '/plotluck-browser-tools/node_modules/playwright/index.mjs'
+$env:PLOTLUCK_BROWSER = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+node tests/browser/profile-flow.mjs
+```
+
+Without an installed browser, install Chromium with the isolated Playwright executable and omit `PLOTLUCK_BROWSER`. On other platforms, use a `file://` URL pointing to the isolated Playwright module. These tools are test-only; the deployed site has no new package dependency.
+
 ## Agent setup
 
 The repo works the same in Claude Code, Codex and Antigravity. Instructions live in `AGENTS.md`; skills live in `.agents/skills/`.

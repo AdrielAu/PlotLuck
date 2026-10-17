@@ -31,15 +31,23 @@
       <p id="cuisine-status" class="visually-hidden" role="status" aria-live="polite"></p>
     </div>
     <div id="trait-pickers"></div>
+    <div class="profile-confirmation">
+      <p>Search area: England</p>
+      <p id="profile-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <p id="profile-error" role="alert" hidden></p>
+      <button id="compare" type="button" aria-describedby="profile-status">Compare districts</button>
+    </div>
   </fieldset>
   <p id="loading" role="status">Loading district scores…</p>
-  <p id="pick-prompt" hidden>Pick a cuisine to see a score for every district.</p>
+  <p id="pick-prompt" hidden>Choose a cuisine and review the traits, then select Compare districts to see results.</p>
   <section id="error" role="alert" hidden>
     <h2>District scores could not load</h2>
     <p id="error-detail"></p>
     <button id="retry" type="button">Try loading again</button>
   </section>
   <section id="results" aria-label="District results" hidden>
+    <h2>Confirmed restaurant · England</h2>
+    <p id="confirmed-profile"></p>
     <div class="threshold-control">
       <div class="threshold-heading">
         <label for="threshold">Score threshold</label>

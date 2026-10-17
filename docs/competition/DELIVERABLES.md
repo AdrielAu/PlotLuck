@@ -1,6 +1,6 @@
 # Deliverables
 
-What the team must submit, and our own cut-offs before the deadline. Source: the Participant Guidebook (IBM Z Datathon 2026). Rows marked `TBD (guidebook)` wait on the guidebook's submission section. Build status is in [PROGRESS.md](PROGRESS.md).
+What the team plans to submit, and our own cut-offs before the deadline. Organizer requirements still need verification against the current Participant Guidebook (IBM Z Datathon 2026); `TBD (guidebook)` marks missing submission details. Mandatory NN2 is the team's product requirement, not a verified organizer rule. Pretrained-weight eligibility remains unresolved in [the NN2 plan](../plans/nn2-integration.md). Build status is in [PROGRESS.md](PROGRESS.md).
 
 ## Submission
 
@@ -14,7 +14,8 @@ What the team must submit, and our own cut-offs before the deadline. Source: the
 | GitHub repo | Link to this repo. Other rules: TBD (guidebook). | | in progress | |
 | Title | Contains the team name. | | not started | |
 | Screenshots | LinuxONE + AI/ML evidence; tracked only in [CHECKLIST.md](../evidence/CHECKLIST.md). | | not started | |
-| Live site | England MVP: GitHub Pages runs NN1 JSON weights in-browser; cuisine/trait pickers, district circles, score threshold and ranked list. | | not started | |
+| Live site | Required team scope: browser NN2 proposes an editable profile and area; confirmation scopes NN1 district circles, threshold and ranked list. Interpretation continues after the VM expires. | | not started | |
+| NN2 evaluation | Team release gates: browser quality, latency and download-size results; LinuxONE synthetic inference/evaluation evidence. Describe pretrained inference accurately. See the NN2 plan. | | not started | |
 
 ## Judging
 
