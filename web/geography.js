@@ -1,3 +1,16 @@
+// Confirmed boundary or straight-line radius -> district centroid membership.
+export function areaDistricts(area, districts) {
+  if (!area) throw new Error('Choose a valid search area before comparing districts.');
+  if (!area.place) return null;
+  if (area.radius === null) return new Set(area.place.districts);
+  if (!Number.isFinite(area.radius) || area.radius <= 0) throw new Error('Enter a positive radius.');
+  const rad = degrees => degrees * Math.PI / 180;
+  return new Set(districts.filter(d => {
+    const a = Math.sin(rad(Number(d.centroid_lat) - area.place.lat) / 2) ** 2 + Math.cos(rad(area.place.lat)) * Math.cos(rad(Number(d.centroid_lat))) * Math.sin(rad(Number(d.centroid_lon) - area.place.lon) / 2) ** 2;
+    return 6371.0088 * 2 * Math.asin(Math.sqrt(Math.min(1, a))) <= area.radius;
+  }).map(d => d.postcode_district));
+}
+
 // Check that the public, polygon-free catalogue belongs to these exact NN1 centroids.
 export async function validateCatalogue(catalogue, districts) {
   const keys = (value, allowed) => value && typeof value === "object" && !Array.isArray(value) &&

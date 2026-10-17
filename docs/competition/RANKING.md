@@ -33,6 +33,14 @@ validated full-data export is available. The synthetic sample verifies the
 new input path and export; its ranking metrics cannot establish real-world
 quality.
 
+A supported fine cuisine is labelled by its own name; only a fallback cuisine
+reads "(scored as <group>)". The reference scores include a supported fine
+cuisine (one outside its own-named group where any exists) and a fallback
+cuisine, so the browser parity check covers both input paths. The committed
+`data/sample/` bundle is version 3, rebuilt with the quality stage above, so 5
+of its 13 synthetic districts remain; `web/models/` stays version 2 until the
+full-data export passes (#164).
+
 The LinuxONE operator should retrain from the full private rows, then run
 `python -m plotluck.ranking_audit <new-bundle-dir>` and compare the result with
 the published baseline above. Check held-out error, rank changes across
@@ -54,7 +62,22 @@ population, deprivation, rent index, age or demographic shares may remain in
 the bundle if comparable nearby districts support an estimate. The raw source
 values remain in the private extracts; the exported values are the prepared
 ones used for scoring. The run metrics count reliable, estimated and excluded
-districts.
+districts (#161).
+
+A required value is repaired when it is missing or invalid: a non-positive
+population, deprivation, rent index or average age, or ethnicity or sex shares
+outside 0–1 or not summing to 1. `quality.estimated_reasons` counts each
+repaired group as `<group>_missing`, `<group>_invalid` or
+`commercial_rent_index_low`; `quality.training_with_labels` counts the reliable
+districts that contributed labelled rows. The build refuses to train if a
+training district still lacks a value, so no training median can stand in for
+it. Each CV fold refits the label policy, cuisine groups, fine-cuisine support
+and input transforms on its own training rows.
+
+`label_anomalies` counts labelled rows, in every district, whose rating is more than a star from
+the star mean of at least 10 default-language reviews, or not a half-star
+value. They are flagged for audit only: the ADR 0002 target and its
+eligibility are unchanged.
 
 The current conservative rule needs at least three peers within 30 km with
 similar mapped restaurant supply and map radius. A clearly anomalous low rent

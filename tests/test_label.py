@@ -111,3 +111,18 @@ def test_review_fields_count_no_fix_on_a_row_the_label_excludes():
     assert fields["total_reviews"] == 20  # still repaired, but nothing labelled was fixed
     assert label.exclusion(fields) == "rating_missing"
     assert fixes == Counter()
+
+
+@pytest.mark.parametrize("row, flags", [
+    (restaurant(4.5, 40, (30, 10, 0, 0, 0)), []),  # star mean 4.75
+    (restaurant(4.5, 40, (0, 0, 0, 0, 40)), ["rating_disagrees_with_counts"]),  # star mean 1
+    (restaurant(4.5, 40, (0, 0, 0, 0, 9)), []),  # too few default-language reviews to judge
+    (restaurant(4.3, 40, (30, 10, 0, 0, 0)), ["rating_off_half_step"]),
+    (restaurant(4.5, 40, ("", 10, 0, 0, 0)), []),  # no full set of counts
+    (restaurant("", 40, (0, 0, 0, 0, 40)), []),  # excluded rows have no label to audit
+])
+def test_label_anomalies_flag_suspect_source_rows_without_changing_the_label(row, flags):
+    before = label.labels([row], POLICY)
+
+    assert label.anomalies(row) == flags
+    assert label.labels([row], POLICY) == before

@@ -49,9 +49,14 @@ export function makeNN2(vocabulary) {
     },
     ready: () => loaded,
     // Downloads (or reloads from the browser's cache) and starts the model. `onProgress({ progress })`, 0 to 1.
-    async download(onProgress) {
-      await call({ action: "load" }, onProgress);
-      loaded = true;
+    async download(onProgress, mode) {
+      const timer = setTimeout(() => stop(new Error("the on-device model could not finish loading")), 300_000);
+      try {
+        await call({ action: "load", mode, complete:mode === 'focused' }, onProgress);
+        loaded = true;
+      } finally {
+        clearTimeout(timer);
+      }
     },
     cancel: () => stop(new Error("cancelled")),
     // The validated NN2 draft for `description`; rejects on a failed, invalid or slow reading.
@@ -61,6 +66,17 @@ export function makeNN2(vocabulary) {
       const timer = setTimeout(() => stop(new Error("the on-device model took too long")), READ_TIMEOUT_MS);
       try {
         return (await call({ action: "interpret", description })).draft;
+      } finally {
+        clearTimeout(timer);
+      }
+    },
+    // The five-input candidate used by the product's free-text flow. Keep its
+    // rent budget and place candidates alongside the validated restaurant draft.
+    async readProfile(description, catalogue) {
+      if (!loaded) throw new Error("the on-device model is not loaded");
+      const timer = setTimeout(() => stop(new Error("the on-device model took too long")), READ_TIMEOUT_MS);
+      try {
+        return await call({ action: "interpret", description, catalogue, mode: "focused", clarifyInvalidPrice: true, complete:true });
       } finally {
         clearTimeout(timer);
       }

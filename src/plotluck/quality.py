@@ -1,8 +1,10 @@
 """Conservative district-context repair before NN1 training and export.
 
-Only public context is used. Recorded positive values are preserved except a
+Only public context is used. Recorded valid values are preserved except a
 rent index markedly below comparable peers, or an extremely low value with too
-few peers to establish that it is plausible.
+few peers to establish that it is plausible. A missing or invalid value (a
+non-positive single value, or shares outside 0-1 or not summing to 1) is
+estimated, so its district never trains NN1.
 """
 
 import math
@@ -23,6 +25,11 @@ GROUPS = (
     ("population",), ("deprivation_index",), ("commercial_rent_index",),
     ("average_age",), ETHNICITY, SEX,
 )
+SHARE_SUM_TOLERANCE = 0.01
+MAX_REPAIRED_GROUPS = 2
+EXCLUSION_REASONS = (
+    "no_restaurants", "commercial_core_without_footfall", "too_many_missing_groups", "no_comparable_peers",
+)
 MIN_PEERS = 3
 MAX_DISTANCE_KM = 30
 EARTH_RADIUS_KM = 6371.0088
@@ -30,18 +37,28 @@ EARTH_RADIUS_KM = 6371.0088
 
 def cross_border_districts(archive_path: Path) -> set[str]:
     """Districts with active postcodes in England and another UK country."""
-    countries = {}
+    countries: dict[str, set[str]] = {}
     with zipfile.ZipFile(archive_path) as archive:
-        (member,) = [name for name in archive.namelist() if re.fullmatch(
+        members = [name for name in archive.namelist() if re.fullmatch(
             r"Data/ONSPD_[A-Z]{3}_\d{4}_UK.csv", name
         )]
-        with archive.open(member) as raw:
+        if len(members) != 1:
+            raise ValueError("ONSPD archive must contain one UK postcode CSV")
+        with archive.open(members[0]) as raw:
             reader = csv.DictReader(io.TextIOWrapper(raw, encoding="utf-8-sig", newline=""))
-            (country_field,) = [name for name in reader.fieldnames or [] if re.fullmatch(r"ctry\d\dcd", name)]
+            fields = reader.fieldnames or []
+            country_fields = [name for name in fields if re.fullmatch(r"ctry\d\dcd", name)]
+            if len(country_fields) != 1 or not {"pcds", "doterm"} <= set(fields):
+                raise ValueError("ONSPD archive lacks postcode, termination, or country code fields")
+            country_field = country_fields[0]
             for row in reader:
                 if not row["doterm"]:
+                    if not row["pcds"] or not row[country_field]:
+                        raise ValueError("active ONSPD postcode lacks district or country code")
                     district = row["pcds"].split()[0]
                     countries.setdefault(district, set()).add(row[country_field])
+    if not countries:
+        raise ValueError("ONSPD archive has no active UK postcodes")
     return {district for district, codes in countries.items() if "E92000001" in codes and len(codes) > 1}
 
 
@@ -78,14 +95,29 @@ def _peers(target: dict, rows: list[dict]) -> list[dict]:
     return [row for _, _, row in sorted(candidates)[:8]]
 
 
+def _group_name(group: tuple[str, ...]) -> str:
+    return group[0] if len(group) == 1 else group[0].split("_")[0]
+
+
+def estimate_reasons() -> set[str]:
+    """Every key ``prepare_districts`` may count an estimate under."""
+    return {
+        f"{_group_name(group)}_{reason}" for group in GROUPS for reason in ("missing", "invalid")
+    } | {"commercial_rent_index_low"}
+
+
+def _valid(group: tuple[str, ...], values: list[float]) -> bool:
+    """A recorded group is usable: a positive single value, or shares in 0-1 that sum to 1."""
+    if len(group) == 1:
+        return values[0] > 0
+    return all(0 <= value <= 1 for value in values) and abs(sum(values) - 1) <= SHARE_SUM_TOLERANCE
+
+
 def _estimate(group: tuple[str, ...], peers: list[dict], suspect_rents: set[str]) -> list[float] | None:
     if group == ("commercial_rent_index",):
         peers = [row for row in peers if row["postcode_district"] not in suspect_rents]
-    donors = [tuple(_number(row[name]) for name in group) for row in peers]
-    positive = group in (("population",), ("commercial_rent_index",), ("average_age",))
-    donors = [values for values in donors if all(
-        value is not None and (value > 0 if positive else value >= 0) for value in values
-    )]
+    donors = [[_number(row[name]) for name in group] for row in peers]
+    donors = [values for values in donors if None not in values and _valid(group, values)]
     if len(donors) < MIN_PEERS:
         return None
     estimate = [statistics.median(column) for column in zip(*donors)]
@@ -104,15 +136,18 @@ def _suspect_low_rent(value: float, peers: list[dict], global_floor: float) -> b
     return value < statistics.median(rents) / 4 and sum(r > value * 3 for r in rents) >= MIN_PEERS
 
 
-def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Counter]:
-    """Return publishable context, unmodified training codes, and exclusion counts.
+def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Counter, Counter]:
+    """Return publishable context, unmodified training codes, exclusion counts and estimate counts.
+
+    Estimate counts are keyed ``<group>_<missing|invalid|low>``, one per
+    repaired group of a published district.
 
     A missing value is estimated only when at least three nearby districts of
     similar mapped supply and geographic size provide that field. Districts
     needing more than two context groups repaired, or lacking donors, are not
     exported. Positive low population is not automatically called erroneous.
     """
-    prepared, reliable, excluded = [], set(), Counter()
+    prepared, reliable, excluded, estimated = [], set(), Counter(), Counter()
     positive_rents = [rent for row in districts if (rent := _number(row["commercial_rent_index"])) is not None and rent > 0]
     global_floor = statistics.median(positive_rents) / 10 if positive_rents else 0
     peer_map = {row["postcode_district"]: _peers(row, districts) for row in districts}
@@ -133,17 +168,16 @@ def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Coun
         needs = []
         for group in GROUPS:
             values = [_number(row[name]) for name in group]
-            missing = any(value is None for value in values)
-            invalid = any(value is not None and value <= 0 for value in values) if group in (
-                ("population",), ("commercial_rent_index",)
-            ) else False
-            low_rent = group == ("commercial_rent_index",) and row["postcode_district"] in suspect_rents
-            if missing or invalid or low_rent:
-                needs.append(group)
-        if len(needs) > 2:
+            if None in values:
+                needs.append((group, "missing"))
+            elif not _valid(group, values):
+                needs.append((group, "invalid"))
+            elif group == ("commercial_rent_index",) and row["postcode_district"] in suspect_rents:
+                needs.append((group, "low"))
+        if len(needs) > MAX_REPAIRED_GROUPS:
             excluded["too_many_missing_groups"] += 1
             continue
-        for group in needs:
+        for group, _ in needs:
             values = _estimate(group, peers, suspect_rents)
             if values is None:
                 excluded["no_comparable_peers"] += 1
@@ -152,6 +186,7 @@ def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Coun
                 row[name] = round(value) if name == "population" else round(value, 8)
         else:
             prepared.append(row)
+            estimated.update(f"{_group_name(group)}_{reason}" for group, reason in needs)
             if not needs:
                 reliable.add(row["postcode_district"])
-    return prepared, reliable, excluded
+    return prepared, reliable, excluded, estimated

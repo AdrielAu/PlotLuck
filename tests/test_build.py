@@ -4,6 +4,7 @@ import json
 import shutil
 import statistics
 from collections import Counter
+from zipfile import ZipFile
 
 import numpy as np
 import pytest
@@ -90,6 +91,50 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
     ]
     assert (data / "restaurants.csv").is_file()
     assert read_json(data / "run" / "metrics.json")["restaurants"] == 203
+
+
+def test_cross_border_district_is_absent_from_export_and_training(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    archive = data / "raw" / "onspd.zip"
+    archive.parent.mkdir()
+    with ZipFile(archive, "w") as file:
+        file.writestr("Data/ONSPD_OCT_2026_UK.csv", (
+            "pcds,doterm,ctry24cd\n"
+            "SE17 1AA,,E92000001\nSE17 1AB,,S92000003\n"
+            "SE1 1AA,,E92000001\nSE1 1AB,202001,W92000004\n"
+        ))
+
+    mapped, _ = build.restaurant_table(
+        read_csv(data / "tripadvisor_england.csv"),
+        read_csv(data / "onspd_england.csv"),
+        build.load_mapping(),
+    )
+    mapped_counts = Counter(row["postcode_district"] for row in mapped)
+    assert mapped_counts["SE17"] > 0
+
+    out = tmp_path / "bundle"
+    metrics = build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, folds=3, max_epochs=1)
+
+    districts = {row["postcode_district"] for row in read_csv(out / "districts.csv")}
+    supply = {row["postcode_district"] for row in read_csv(out / "district_cuisine_supply.csv")}
+    private_rows = read_csv(data / "restaurants.csv")
+    private = {row["postcode_district"] for row in private_rows}
+    assert "SE17" not in districts | supply | private
+    assert Counter(row["postcode_district"] for row in private_rows) == {
+        code: count for code, count in mapped_counts.items() if code != "SE17"
+    }
+    assert "SE1" in districts
+    assert metrics["quality"]["cross_border"] == 1
+    assert metrics["excluded"]["cross_border"] == mapped_counts["SE17"]
+    for case in read_json(out / "reference_scores.json")["cases"]:
+        assert "SE17" not in case["scores"]
+        assert "SE1" in case["scores"]
+
+
+def test_full_data_build_requires_uk_postcode_archive(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    with pytest.raises(FileNotFoundError, match="raw/onspd.zip"):
+        build.build(data, tmp_path / "bundle", group_threshold=build.FULL_GROUP_THRESHOLD)
 
 
 @pytest.mark.parametrize(
@@ -379,6 +424,63 @@ def test_district_with_no_restaurants_is_not_scored(built):
     assert all("EC3M" not in case["scores"] for case in reference["cases"])
 
 
+def test_estimated_and_unsupported_districts_never_train_and_metrics_say_why(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    voa = read_csv(data / "voa_england.csv")
+    with (data / "voa_england.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, voa[0].keys())
+        writer.writeheader()
+        writer.writerows(r for r in voa if r["district"] != "SE17")
+    sources_before = {name: (data / name).read_bytes() for name in SOURCES}
+
+    metrics = build.build(
+        data, tmp_path / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, folds=3, max_epochs=1
+    )
+
+    published = {d["postcode_district"]: d for d in read_csv(tmp_path / "bundle" / "districts.csv")}
+    assert set(published) == {"EC3R", "SE1", "SE11", "SE17", "WC2R"}
+    assert published["SE17"]["commercial_rent_index"] == "468.2"  # median of SE1, SE11 and WC2R
+    restaurants = read_csv(data / "restaurants.csv")
+    # Reliable districts only: SE17 is estimated; EC4R and SE1P are tiny-population commercial cores.
+    training = [r for r in restaurants if r["review_success_label"] and r["postcode_district"] in {"EC3R", "SE1", "SE11", "WC2R"}]
+    assert metrics["labelled"] == len(training) == 110
+    assert sum(f["rows"]["test"] for f in metrics["cv"]["folds"]) == 110
+    assert metrics["quality"] == {
+        "districts": 13, "scored": 5, "training": 4, "training_with_labels": 4, "estimated": 1,
+        "cross_border": 0, "estimated_reasons": {"commercial_rent_index_missing": 1},
+        "excluded": {"no_restaurants": 6, "commercial_core_without_footfall": 2},
+    }
+    assert {name: (data / name).read_bytes() for name in SOURCES} == sources_before
+
+
+def test_training_refuses_to_fill_missing_context_with_a_median(tmp_path, monkeypatch):
+    data = copy_sources(tmp_path / "data")
+    p004 = read_csv(data / "p004_england.csv")
+    with (data / "p004_england.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, p004[0].keys())
+        writer.writeheader()
+        writer.writerows(r for r in p004 if r["district"] != "SE17")
+    # A faulty quality stage that calls every district with restaurants reliable.
+    def everything_reliable(rows):
+        kept = [r for r in rows if r["total_restaurants"]]
+        return kept, {r["postcode_district"] for r in kept}, Counter(no_restaurants=len(rows) - len(kept)), Counter()
+    monkeypatch.setattr(build.quality, "prepare_districts", everything_reliable)
+
+    with pytest.raises(ValueError, match="median"):
+        build.build(data, tmp_path / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    assert not (tmp_path / "bundle").exists()
+
+
+def test_quality_metrics_reject_estimate_reasons_that_do_not_add_up(data):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics["quality"]["estimated_reasons"] = {"commercial_rent_index_missing": 1}  # but no district is estimated
+    with pytest.raises(ValueError, match="estimate"):
+        build.validate_run_metrics(metrics)
+    metrics["quality"]["estimated_reasons"] = {"private_restaurant_name": 0}
+    with pytest.raises(ValueError, match="unexpected"):
+        build.validate_run_metrics(metrics)
+
+
 def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_path):
     data = copy_sources(tmp_path / "data")
     ages = read_csv(data / "census_age_england.csv")
@@ -576,6 +678,70 @@ def test_rare_fine_cuisine_falls_back_to_its_group_input():
     rare = build.inputs(model, {"cuisine": "Ethiopian", "cuisine_group": "African"}, district)
     assert not np.array_equal(frequent, rare)
     assert rare[0, 0] == 1 and rare[0, 1] == 0  # broad group on; unsupported fine cuisine off
+
+
+@pytest.fixture(scope="module")
+def two_european(tmp_path_factory):
+    """A bundle built from the sample with its plain European rows split into French and Spanish."""
+    data = copy_sources(tmp_path_factory.mktemp("two_european"))
+    source = data / "tripadvisor_england.csv"
+    rows = read_csv(source)
+    european = [row for row in rows if row["cuisines"] == "European"]
+    for i, row in enumerate(european):
+        row["cuisines"] = "French" if i % 2 else "Spanish"
+    with source.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    out = data / "bundle"
+    build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=5)
+    return out
+
+
+def test_two_supported_cuisines_in_one_group_get_distinct_inputs_and_labels(two_european):
+    model = read_json(two_european / "model.json")
+    vocabulary = read_json(two_european / "vocabulary.json")
+    cuisines = {c["cuisine"]: c for c in vocabulary["cuisines"]}
+    defaults = {t["name"]: t["default"] for t in vocabulary["traits"]}
+
+    assert {"French", "Spanish"} <= set(model["transforms"]["cuisine"]["values"])
+    assert cuisines["French"]["cuisine_group"] == cuisines["Spanish"]["cuisine_group"] == "European"
+    # Each now has its own input, so its label must not claim it is scored as the group.
+    assert cuisines["French"]["label"] == "French"
+    assert cuisines["Greek"]["label"] == "Greek (scored as European)"  # no sample rows: falls back
+    district = np.zeros((1, len(build.DISTRICT_INPUTS)))
+    french, spanish, greek = (
+        build.inputs(model, {**defaults, "cuisine": c, "cuisine_group": "European"}, district)[0]
+        for c in ("French", "Spanish", "Greek")
+    )
+    groups = len(model["transforms"]["cuisine_group"]["values"])
+    assert np.array_equal(french[:groups], spanish[:groups])  # same broad group input
+    assert not np.array_equal(french, spanish)
+    assert not greek[groups:groups + len(model["transforms"]["cuisine"]["values"])].any()
+
+
+@pytest.mark.parametrize("cuisine, label", [
+    ("French", "French (scored as European)"),  # supported: has its own input
+    ("Greek", "Greek"),  # fallback: scored as its group
+])
+def test_publish_rejects_a_label_that_misstates_fine_cuisine_support(two_european, tmp_path, cuisine, label):
+    bundle = {
+        name: read_csv(two_european / name) if name.endswith(".csv") else read_json(two_european / name)
+        for name in build.BUNDLE_FILES
+    }
+    next(c for c in bundle["vocabulary.json"]["cuisines"] if c["cuisine"] == cuisine)["label"] = label
+    with pytest.raises(ValueError, match="label"):
+        build.publish_bundle(tmp_path / "public", bundle)
+
+
+def test_reference_scores_cover_a_supported_and_a_fallback_fine_cuisine(two_european):
+    model = read_json(two_european / "model.json")
+    cuisines = {c["cuisine"]: c["cuisine_group"] for c in read_json(two_european / "vocabulary.json")["cuisines"]}
+    fine = set(model["transforms"]["cuisine"]["values"])
+    profiles = [case["profile"]["cuisine"] for case in read_json(two_european / "reference_scores.json")["cases"]]
+
+    assert any(c in fine and c != cuisines[c] for c in profiles)  # its fine input differs from its group's
+    assert any(c not in fine for c in profiles)
 
 
 def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
@@ -942,6 +1108,40 @@ def test_cuisine_groups_fold_small_cuisines_into_their_parent_then_other():
     }
 
 
+def test_fold_inputs_count_cuisine_support_and_fit_transforms_on_training_rows_only():
+    mapping = {c: {"cuisine": c, "kind": "cuisine", "parent": p} for c, p in [
+        ("Asian", ""), ("Thai", "Asian"), ("Japanese", "Asian"),
+    ]}
+    def restaurant(code, cuisine):
+        return {"postcode_district": code, "cuisine": cuisine, "review_success_label": 0.5,
+                "venue_type": "Restaurant", "price_band": "", "is_chain": 0, **{f: "" for f in build.DIET_FLAGS}}
+    def district(code, population):
+        return {"postcode_district": code, "population": population, "deprivation_index": 10,
+                "commercial_rent_index": 100, "total_restaurants": 9,
+                **{name: 1 for name in context.INPUTS}}
+    train = [restaurant("AB1", "Thai")] * 3 + [restaurant("AB1", "Asian")] + [restaurant("AB1", "Japanese")] * 6
+    held_out = [restaurant("CD2", "Thai")] * 9
+    districts = [district("AB1", 1000), district("CD2", 999999)]
+
+    model, groups, supply = build.fit_inputs(
+        train, train + held_out, districts, [], mapping, group_threshold=4, fine_threshold=4
+    )
+    leaky, *_ = build.fit_inputs(
+        train + held_out, train + held_out, districts, [], mapping, group_threshold=4, fine_threshold=4
+    )
+
+    # Three training Thai rows are below both thresholds; nine held-out ones must not lift them.
+    assert groups["Thai"] == "Asian" and groups["Japanese"] == "Japanese"
+    assert model["transforms"]["cuisine"]["values"] == ["Japanese"]
+    assert model["transforms"]["population"]["median"] == 1000
+    assert "Thai" in leaky["transforms"]["cuisine"]["values"]  # what leaking would look like
+    # Supply is an observed input, so held-out districts still count, under the fold's groups.
+    assert supply[("CD2", "Asian")] == 9
+    x = build.fold_design(model, groups, supply, held_out[:1], districts)
+    group_values = model["transforms"]["cuisine_group"]["values"]
+    assert x[0, group_values.index("Asian")] == 1
+
+
 def test_restaurant_table_keeps_raw_cuisines_and_the_sample_keeps_several_groups(data, built):
     # The far point and the losing row of each duplicate pair are cleaned out; see the sample metrics test.
     rows = read_csv(data / "tripadvisor_england.csv")
@@ -1061,5 +1261,25 @@ def test_run_metrics_accept_the_cleaning_exclusion_reasons(data):
     metrics["excluded"] = {"far_from_postcode": 1, "duplicate_listing": 2}
     build.validate_run_metrics(metrics)
     metrics["excluded"] = {"duplicate_restaurant": 2}
+    with pytest.raises(ValueError, match="counts"):
+        build.validate_run_metrics(metrics)
+
+
+def test_run_metrics_flag_label_source_anomalies_for_audit_without_dropping_rows(data):
+    rows = read_csv(data / "tripadvisor_england.csv")
+    postcodes = read_csv(data / "onspd_england.csv")
+    _, before = build.restaurant_table(rows, postcodes, build.load_mapping())
+    seeded = copy.deepcopy(rows)
+    seeded[10]["avg_rating"] = "4.3"  # an eligible row; Tripadvisor ratings are half stars
+
+    restaurants, after = build.restaurant_table(seeded, postcodes, build.load_mapping())
+
+    flagged = Counter(after["label_anomalies"]) - Counter(before["label_anomalies"])
+    assert flagged == {"rating_off_half_step": 1}
+    assert after["excluded"] == before["excluded"]  # flagged, not dropped
+    assert "4.3" in {r["avg_rating"] for r in restaurants}  # the label still uses the source value
+    build.validate_run_metrics(read_json(data / "run" / "metrics.json"))
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics["label_anomalies"] = {"restaurant_name": 1}
     with pytest.raises(ValueError, match="counts"):
         build.validate_run_metrics(metrics)
