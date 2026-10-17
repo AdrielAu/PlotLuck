@@ -110,13 +110,13 @@ def test_model_layers_are_inputs_64_32_1(built):
 def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
     copy_sources(tmp_path)
     rows = read_csv(tmp_path / "tripadvisor_england.csv")
-    rows[0]["cuisines"] = "Eritrean, Cafe"
+    rows[0]["cuisines"] = "Martian, Cafe"
     with (tmp_path / "tripadvisor_england.csv").open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
 
-    with pytest.raises(ValueError, match="Eritrean"):
+    with pytest.raises(ValueError, match="Martian"):
         build.build(tmp_path, tmp_path / "out", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
 
 
@@ -164,3 +164,79 @@ def test_numpy_forward_pass_reproduces_reference_scores(built):
                 x = np.maximum(x, 0) if activation == "relu" else 1 / (1 + np.exp(-x))
             expected = case["scores"][district["postcode_district"]]
             assert abs(x[0] - expected) <= reference["tolerance"]
+
+
+@pytest.mark.parametrize(
+    "cuisines, expected",
+    [
+        ("European, Italian, Pizza", ("Italian", "Restaurant")),  # specific beats an earlier umbrella
+        ("European, Mediterranean", ("European", "Restaurant")),  # first umbrella when nothing specific
+        ("Healthy, Cafe", ("Unspecified", "Café")),  # no cuisine tag at all
+        ("Sushi", ("Japanese", "Restaurant")),  # dish-style tags fold
+        ("Dim Sum, Thai", ("Chinese", "Restaurant")),
+        ("Thai, Bar, Cafe", ("Thai", "Pub and bar")),  # first venue tag wins
+        ("Indian", ("Indian", "Restaurant")),  # venue type defaults to Restaurant
+        ("", ("Unspecified", "Restaurant")),
+    ],
+)
+def test_classify_follows_the_cuisine_rules(cuisines, expected):
+    assert build.classify(cuisines, build.load_mapping()) == expected
+
+
+def test_mapping_rows_are_well_formed_with_one_parent_per_cuisine():
+    mapping = build.load_mapping()
+    roots = {m["cuisine"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella") and not m["parent"]}
+    parents = {}
+    for m in mapping.values():
+        if m["kind"] in ("cuisine", "umbrella"):
+            # A dish-style tag must agree with its cuisine's own row (Pizza and Italian).
+            assert parents.setdefault(m["cuisine"], m["parent"]) == m["parent"], m
+        assert m["kind"] in ("cuisine", "umbrella", "venue", "set_aside"), m
+        if m["kind"] == "venue":
+            assert m["venue_type"] in build.VENUE_TYPES, m
+        if m["parent"]:
+            assert m["parent"] in roots, m
+
+
+def test_cuisine_groups_fold_small_cuisines_into_their_parent_then_other():
+    mapping = {
+        tag: {"tag": tag, "kind": kind, "cuisine": tag, "parent": parent, "venue_type": ""}
+        for tag, kind, parent in [
+            ("European", "umbrella", ""),
+            ("Italian", "cuisine", "European"),
+            ("Basque", "cuisine", "European"),
+            ("African", "cuisine", ""),
+            ("Eritrean", "cuisine", "African"),
+            ("Ethiopian", "cuisine", "African"),
+            ("Middle Eastern", "cuisine", ""),
+            ("Kurdish", "cuisine", "Middle Eastern"),
+            ("Seafood", "cuisine", ""),
+        ]
+    }
+    labelled = {"Italian": 3, "European": 3, "Basque": 1, "Eritrean": 1, "Ethiopian": 2, "Kurdish": 2, "Seafood": 1}
+    restaurants = [{"cuisine": c, "review_success_label": 0.5} for c, n in labelled.items() for _ in range(n)]
+    restaurants += [{"cuisine": "Kurdish", "review_success_label": ""}] * 5  # not label-eligible
+
+    groups = build.cuisine_groups(restaurants, mapping, threshold=3)
+
+    assert groups == {
+        "Italian": "Italian",  # clears the threshold alone
+        "European": "European",
+        "Basque": "European",  # parent is a group in its own right
+        "Eritrean": "African",  # small siblings together clear it
+        "Ethiopian": "African",
+        "African": "African",
+        "Kurdish": "Other",  # parent with its children still under it
+        "Middle Eastern": "Other",
+        "Seafood": "Other",  # no parent
+        "Unspecified": "Other",
+    }
+
+
+def test_restaurant_table_keeps_raw_cuisines_and_the_sample_keeps_several_groups(data, built):
+    source = Counter(r["cuisines"] for r in read_csv(data / "tripadvisor_england.csv"))
+    restaurants = Counter(r["cuisines"] for r in read_csv(data / "restaurants.csv"))
+    groups = read_json(built / "model.json")["transforms"]["cuisine_group"]["values"]
+
+    assert restaurants == source
+    assert len(groups) >= 5
