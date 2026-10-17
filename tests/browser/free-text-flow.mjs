@@ -7,7 +7,7 @@ import { NN2 } from '../../web/nn2-runtime.js';
 import { openSite, newPage } from './site.mjs';
 
 const catalogue = JSON.parse(await readFile(new URL('../../web/models/geography.json', import.meta.url)));
-function fakeRuntime(loads = true) {
+function fakeRuntime(loads = true, malformed = false) {
   return `export async function CreateMLCEngine(id, {initProgressCallback}) {
     initProgressCallback({progress:0.25,text:'Fetching'});
     if (!${loads}) await new Promise(()=>{});
@@ -15,25 +15,25 @@ function fakeRuntime(loads = true) {
     return {chat:{completions:{create:async options=>{
       const text=options.messages.at(-1).content;
       if (text.includes('slow')) await new Promise(resolve=>setTimeout(resolve,700));
-      const data={region:/hammersmith/i.test(text)?'hammersmith':/london/i.test(text)?'London':/England/i.test(text)?'England':text.includes('Hugh Town')?'Hugh Town':/greater manchester/i.test(text)?'Greater Manchester':text.includes('SE1')?'SE1':null,
-        cuisine:/thai/i.test(text)?'Thai':/italian/i.test(text)?'Italian':null,price_band:/mid(?:[ -]?range| price range)/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':/pub/i.test(text)?'Pub and bar':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
+      const data={region:/hammersmith/i.test(text)?'hammersmith':/york/i.test(text)?'York':/london/i.test(text)?'London':/England/i.test(text)?'England':text.includes('Hugh Town')?'Hugh Town':/greater manchester/i.test(text)?'Greater Manchester':text.includes('SE1')?'SE1':null,
+        cuisine:/thai/i.test(text)?'Thai':/italian/i.test(text)?'Italian':/chinese/i.test(text)?'Chinese':null,price_band:/mid(?:[ -]?range| price range)/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':/pub/i.test(text)?'Pub and bar':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
         rent_band:/cheap rent/i.test(text)?'low':null,
         requirements:/no other requirements/i.test(text)?'no other requirements':/vegan options/i.test(text)?'vegan options':null};
       if (text.includes('Greater London')) data.region='Greater London';
       if (text.includes('mid Range')) data.price_band='$$';
       if (text.includes('uncertain prices')) data.price_band='$';
       if (text.includes('bad budget')) data.rent.currency='USD';
-      return {choices:[{finish_reason:'stop',message:{content:text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
+      return {choices:[{finish_reason:'stop',message:{content:${malformed}||text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
     }}}};
   }`;
 }
-async function openPage(t, { gpu = true, loads = true } = {}) {
+async function openPage(t, { gpu = true, loads = true, malformed = false } = {}) {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser, { reducedMotion:'reduce' });
   const sent = [];
   page.context().on('request', r => sent.push(r.url() + ' ' + (r.postData() ?? '')));
   await page.addInitScript(gpu => Object.defineProperty(Navigator.prototype, 'gpu', { configurable:true, get:()=>gpu?{requestAdapter:async()=>({})}:undefined }), gpu);
-  await page.context().route(NN2.runtimeUrl, route => route.fulfill({ body:fakeRuntime(loads), contentType:'text/javascript' }));
+  await page.context().route(NN2.runtimeUrl, route => route.fulfill({ body:fakeRuntime(loads,malformed), contentType:'text/javascript' }));
   await page.goto(url);
   await page.locator('#interpret:enabled').waitFor();
   return { page, sent };
@@ -44,6 +44,43 @@ async function submit(page, text, {raw = false, omit = []} = {}) {
   await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(raw ? text : completeText(text,omit));
   await page.getByRole('button', { name:'Find districts', exact:true }).click();
 }
+
+test('the exact mid range Chinese prompt keeps menu prices after either a valid or malformed model reply',async t=>{
+  for(const malformed of [false,true]) {
+    const {page}=await openPage(t,{malformed});
+    await submit(page,'A mid range chinese restaurant in hammersmith',{raw:true});
+    await page.locator('#clarification').waitFor();
+    assert.equal(await page.locator('#clarify-price').count(),0);
+    if(malformed) {
+      await page.locator('#clarify-cuisine').selectOption('Chinese');
+      await page.locator('#clarify-venue').selectOption('Restaurant');
+      assert.match(await page.locator('#interpret-status').innerText(),/could not read/);
+    }
+    await page.locator('#clarify-area').selectOption('E09000013');
+    await page.locator('#clarify-rent').selectOption('any');
+    await page.getByRole('button',{name:'No other requirements',exact:true}).click();
+    await page.locator('#clarify-compare').click();
+    await page.locator('#results-screen').waitFor();
+    assert.match(await page.locator('#confirmed-profile').innerText(),/Mid-range/);
+    assert.match(await page.locator('#results-heading').innerText(),/Chinese.*Hammersmith and Fulham/);
+    assert.deepEqual(page.errors,[]);
+  }
+});
+
+test('near a city offers no radius input and uses its complete boundary',async t=>{
+  const {page}=await openPage(t);
+  await submit(page,'A Chinese restaurant near York.');
+  await page.locator('#clarification').waitFor();
+  assert.equal(await page.locator('#clarify-radius').count(),0);
+  await page.locator('#clarify-area').selectOption('E06000014');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Chinese.*York/);
+  assert.doesNotMatch(await page.locator('#results-heading').innerText(),/Within|km/);
+  await page.getByRole('slider',{name:'Score threshold',exact:true}).press('Home');
+  assert.deepEqual((await page.locator('#ranked .district-code').allTextContents()).sort(),catalogue.places.find(p=>p.id==='E06000014').districts);
+  assert.deepEqual(page.errors,[]);
+});
 
 test('high end Italian pub offers Hammersmith borough and keeps stated prices and type',async t=>{
   const {page}=await openPage(t);

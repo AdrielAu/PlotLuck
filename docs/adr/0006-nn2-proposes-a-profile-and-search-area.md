@@ -1,5 +1,7 @@
 # NN2 proposes an editable profile and search area before NN1 scores
 
+**Near-city amendment (#188), 2026-10-17:** `near` a named place without an explicit distance now uses that place's boundary. Remove the former automatic 5 km radius and radius question. Explicitly stated distances retain straight-line filtering and unit conversion. Ambiguous area choices and empty-scope guards remain unchanged.
+
 **Place amendment (#183), 2026-10-17:** an omitted or unresolved place now requires an English city choice or a description at another resolution. This supersedes the original missing-location England default. Explicit England-wide requests remain valid. Compare a whole city when only a city is named, and accept borough boundaries when named. A shortened neighbourhood name such as Hammersmith proposes the labelled Hammersmith and Fulham borough for confirmation rather than silently adopting that larger extent. See the current NN2 plan.
 
 **Later user amendment, 2026-10-17:** the one free-text description stays, but NN2 pre-fills the review card's pickers; the user can manually correct any wrong value and confirms before NN1 scores. This restores the review-before-scoring requirement below; the six questions do not return. See the NN2 plan.
@@ -14,6 +16,6 @@ A description such as "Thai restaurant in London" expresses both a restaurant pr
 
 The user reviews and edits the whole draft, then confirms with "Compare districts". Manual edits remain authoritative until explicit reinterpretation. A new draft, failure or cancellation preserves the last confirmed profile, area and results. Unsupported details are visible as unused in scoring.
 
-NN1 retains its numeric input contract and scores whole postcode districts. Search areas filter which districts are compared, mapped and ranked. City/borough membership uses district centroids inside the confirmed boundary; near searches use centroids within a confirmed straight-line radius. Overlapping districts whose centroids fall outside are excluded. These limits must be visible to users.
+NN1 retains its numeric input contract and scores whole postcode districts. Search areas filter which districts are compared, mapped and ranked. City/borough and bare-near membership use district centroids inside the confirmed boundary; explicitly stated distances use centroids within a confirmed straight-line radius. Overlapping districts whose centroids fall outside are excluded. These limits must be visible to users.
 
 Browser inference and offline place resolution keep descriptions and interpretations in tab memory, with no server transmission or persistent query storage, and keep interpretation working after the VM expires. LinuxONE evaluation uses synthetic descriptions. This requires a downloadable browser model and local geography assets, whose size and feasibility remain to be measured. Device support, runtime candidates and acceptance gates are in [the integration plan](../plans/nn2-integration.md).
