@@ -27,8 +27,12 @@ The shares of a district's residents recorded as female or male in the Census se
 _Avoid_: Most common gender, gender composition
 
 **Restaurant**:
-A real food business in the source data that serves a cuisine. Cafés, takeaways and pubs that serve food count; dark kitchens do not. The data work will tighten the exact inclusion rules.
+A real food business in the source data that serves a cuisine. Cafés, takeaways and pubs that serve food count; dark kitchens do not. A restaurant needs a usable location in England and appears once, however many duplicate listings it has.
 _Avoid_: Venue, outlet, business
+
+**Duplicate listing**:
+Two or more source rows that describe the same restaurant at the same place. Plotluck keeps one.
+_Avoid_: Duplicate restaurant, copy
 
 **Restaurant profile**:
 The user's free-text description of the restaurant they want to open. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
@@ -59,7 +63,7 @@ The trait that says what kind of place a restaurant is: restaurant, pub and bar,
 _Avoid_: Format, venue, establishment type
 
 **Chain**:
-The trait for a restaurant whose name appears at least three times in England.
+The trait for a restaurant whose name, ignoring case, accents and punctuation, appears at least three times in England.
 _Avoid_: Franchise, brand
 
 **Supply**:
