@@ -9,6 +9,37 @@ import pytest
 from plotluck.geography import prepare_catalogue
 
 
+def test_administrative_counties_use_their_own_boundaries_and_common_names_survive_rebuild():
+    def feature(code_key, name_key, code, name):
+        return {"type": "Feature", "properties": {
+            code_key: code, name_key: name, "LAT": 51, "LONG": 0,
+        }, "geometry": {"type": "Polygon", "coordinates": [[
+            [-1, 50], [1, 50], [1, 52], [-1, 52], [-1, 50],
+        ]]}}
+
+    sources = {
+        "county": {"type": "FeatureCollection", "features": [
+            feature("CTYUA25CD", "CTYUA25NM", "E10000016", "Kent"),
+            feature("CTYUA25CD", "CTYUA25NM", "E06000043", "Brighton and Hove"),
+        ]},
+        "local_authority": {"type": "FeatureCollection", "features": [
+            feature("LAD25CD", "LAD25NM", "E06000043", "Brighton and Hove"),
+        ]},
+        "region": {"type": "FeatureCollection", "features": [
+            feature("RGN25CD", "RGN25NM", "E12000003", "Yorkshire and The Humber"),
+        ]},
+    }
+    districts = [{"postcode_district": "IN1", "centroid_lat": "51", "centroid_lon": "0"},
+                 {"postcode_district": "OUT1", "centroid_lat": "53", "centroid_lon": "0"}]
+    places = {p["id"]: p for p in prepare_catalogue(sources, districts)["places"]}
+    assert len(places) == 3
+    assert places["E10000016"]["districts"] == ["IN1"]
+    assert places["E10000016"]["type"] == "county"
+    assert "Kent county" in places["E10000016"]["aliases"]
+    assert "Brighton" in places["E06000043"]["aliases"]
+    assert "Yorkshire" in places["E12000003"]["aliases"]
+
+
 def test_counties_keep_publisher_geometry_and_do_not_duplicate_unitary_authorities():
     feature = {"type": "Feature", "properties": {
         "UTLA22CD": "E11000001", "UTLA22NM": "Greater Manchester", "LAT": 53.5, "LONG": -2.3,

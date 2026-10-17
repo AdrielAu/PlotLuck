@@ -10,6 +10,33 @@ const bundle=await loadBundle(n=>readFile(new URL('../../web/models/'+n,import.m
 const catalogue=JSON.parse(await readFile(new URL('../../web/models/geography.json',import.meta.url)));
 const extraction=(text,region)=>validateProfileExtraction({region,cuisine:'Italian',price_band:'unknown',venue_type:'Pub and bar',rent:null,rent_band:null,requirements:null},text,bundle.vocabulary,catalogue,{complete:true});
 
+test('common place names beat spelling suggestions and retain labelled boundary choices',()=>{
+  const reader=makeInterpreter(bundle,undefined,catalogue);
+  const brighton=reader.areaCandidates('Brighton');
+  assert.ok(brighton.some(p=>p.code==='E06000043'));
+  assert.ok(brighton.some(p=>p.code==='E63006520'));
+  assert.ok(brighton.every(p=>p.label.startsWith('Brighton and Hove')));
+  assert.equal(reader.readArea('Brighton'),null);
+  assert.ok(reader.areaCandidates('Breighton').some(p=>p.code==='E63000782'));
+  for(const [name,code] of [['Yorkshire','E12000003'],['Yorks','E12000003'],['South East England','E12000008'],['northwest','E12000002']]) {
+    assert.ok(reader.areaCandidates(name).some(p=>p.code===code),name);
+  }
+  for(const name of ['Kent','Surrey','Essex','Hampshire','Devon','East Sussex','West Sussex']) {
+    const area=reader.areaCandidates(name).find(p=>p.label.includes('(county,'));
+    assert.ok(area,name);
+    assert.ok(reader.districtsInScope(area,'any').size>0,name);
+  }
+});
+
+test('Brighton and Yorkshire descriptions offer their intended scopes without widening',async()=>{
+  for(const [name,code] of [['Brighton','E06000043'],['Yorkshire','E12000003']]) {
+    const text=`A mid range Italian pub in ${name}`;
+    const q=await descriptionQuery(text,extraction(text,name),bundle,catalogue);
+    assert.equal(q.area,null);
+    assert.ok(q.needs.find(n=>n.field==='area').options.some(p=>p.code===code));
+  }
+});
+
 test('high end and high-end describe premium menu prices, not premises rent',()=>{
   for(const wording of ['high end','high-end']) {
     const text=`An ${wording} italian pub in hammersmith`;
