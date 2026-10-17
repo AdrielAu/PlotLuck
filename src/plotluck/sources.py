@@ -633,6 +633,22 @@ def _write_csv(path: Path, rows) -> int:
 ORDER = ("tripadvisor", "onspd", "p004", "voa", "osm", *context.CENSUS_CODES, "tourism")
 
 
+def row_counts(data: Path) -> dict[str, int]:
+    """Count the data rows of every England extract, in extract order."""
+    counts = {}
+    for name in ORDER:
+        path = Path(data) / f"{name}_england.csv"
+        if not path.is_file():
+            raise FileNotFoundError(f"{name} extract is missing: {path}")
+        with path.open(encoding="utf-8", newline="") as f:
+            # csv.reader: a quoted field may span lines; blank lines are not rows.
+            rows = sum(1 for row in csv.reader(f) if row) - 1
+        if rows < 1:
+            raise ValueError(f"{name} extract has no data rows: {path}")
+        counts[name] = rows
+    return counts
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(
         prog="python -m plotluck.sources",

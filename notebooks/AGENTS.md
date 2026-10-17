@@ -11,4 +11,6 @@ Ingest, training, benchmark and export notebooks. Keep them thin: orchestration 
 
 `smoke.ipynb` resolves the data folder and lists it; run it first to confirm an environment works.
 
+`ingest.ipynb` prints each England extract's data-row count and stops on a missing or empty one. It reads existing extracts; pull and extract run in the terminal (`docs/server.md`). On full data it writes the counts to `runs/<yyyy-mm-dd>-ingest/`.
+
 `train_nn1.ipynb` builds the bundle, cross-validates NN1 and plots its loss curves. On full data it writes the run to `runs/<yyyy-mm-dd>-train-nn1/`.
