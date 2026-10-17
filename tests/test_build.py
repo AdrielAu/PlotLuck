@@ -183,10 +183,14 @@ def test_classify_follows_the_cuisine_rules(cuisines, expected):
     assert build.classify(cuisines, build.load_mapping()) == expected
 
 
-def test_every_mapped_cuisine_has_a_mapped_root_parent():
+def test_mapping_rows_are_well_formed_with_one_parent_per_cuisine():
     mapping = build.load_mapping()
     roots = {m["cuisine"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella") and not m["parent"]}
+    parents = {}
     for m in mapping.values():
+        if m["kind"] in ("cuisine", "umbrella"):
+            # A dish-style tag must agree with its cuisine's own row (Pizza and Italian).
+            assert parents.setdefault(m["cuisine"], m["parent"]) == m["parent"], m
         assert m["kind"] in ("cuisine", "umbrella", "venue", "set_aside"), m
         if m["kind"] == "venue":
             assert m["venue_type"] in build.VENUE_TYPES, m

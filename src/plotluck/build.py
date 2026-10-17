@@ -376,16 +376,17 @@ def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> di
 
     A cuisine with fewer than ``threshold`` label-eligible rows folds into its
     parent. A parent's pool is its own rows plus those of its folded children;
-    a pool still under ``threshold`` folds into Other.
+    a pool still under ``threshold`` folds into Other. Parents are one level
+    deep: a parent never has a parent of its own (checked in the tests).
     """
     parent = {m["cuisine"]: m["parent"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella")}
     parent.setdefault(UNSPECIFIED, "")
     counts = Counter(r["cuisine"] for r in restaurants if r["review_success_label"] != "")
     root = {c: parent[c] if parent[c] and counts[c] < threshold else c for c in parent}
     pool = Counter()
-    for c, r in root.items():
-        pool[r] += counts[c]
-    return {c: r if pool[r] >= threshold else OTHER for c, r in root.items()}
+    for c, group in root.items():
+        pool[group] += counts[c]
+    return {c: group if pool[group] >= threshold else OTHER for c, group in root.items()}
 
 
 def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:
