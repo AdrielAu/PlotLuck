@@ -32,7 +32,9 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 #description-error { margin: 16px 0 0; color: var(--error-ink); font-weight: 600; }
 #clarification-fields { display: grid; gap: 12px; margin: 20px 0; }
 #clarification-fields label { display: block; }
-#clarification-fields input, #clarification-fields select { width: 100%; min-height: 44px; padding: 8px; background: var(--canvas); color: var(--ink); border: 1px solid var(--muted); border-radius: 0; font: inherit; }
+#clarification-fields input, #clarification-fields select, #clarification-fields textarea { width: 100%; min-height: 44px; padding: 8px; background: var(--canvas); color: var(--ink); border: 1px solid var(--muted); border-radius: 0; font: inherit; }
+#clarification-fields textarea { resize: vertical; }
+#clarify-other-help { margin: 4px 0 0; font-size: 14px; }
 .results-summary { max-width: 85ch; font-size: 14px; }
 .results-summary p { margin: 0 0 4px; }
 

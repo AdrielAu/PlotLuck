@@ -10,8 +10,9 @@ self.onmessage = async ({ data }) => {
   let rawReply;
   try {
     const focused = data.mode === 'focused';
+    const complete = focused && data.complete === true;
     const grounded = data.mode === 'grounded' || focused;
-    const schema = focused ? profileSchema(vocabulary) : grounded ? groundedSchema(vocabulary) : interpretationSchema(vocabulary);
+    const schema = focused ? profileSchema(vocabulary,{complete}) : grounded ? groundedSchema(vocabulary) : interpretationSchema(vocabulary);
     if (action === 'load') {
       const { CreateMLCEngine } = await import(NN2.runtimeUrl);
       engine = await CreateMLCEngine(NN2.modelId, {
@@ -27,12 +28,12 @@ self.onmessage = async ({ data }) => {
     } else if (action === 'interpret') {
       if (!engine) throw new Error('Download the interpreter first.');
       const start = performance.now();
-      const result = await engine.chat.completions.create({ messages: focused ? profilePrompt(description) : grounded ? groundedPrompt(description, vocabulary, data.catalogue) : buildPrompt(description, vocabulary), temperature: 0,
+      const result = await engine.chat.completions.create({ messages: focused ? profilePrompt(description,{complete}) : grounded ? groundedPrompt(description, vocabulary, data.catalogue) : buildPrompt(description, vocabulary), temperature: 0,
         max_tokens: 512, response_format: { type: 'json_object', schema: JSON.stringify(schema) } });
       reply = result.choices[0].message.content;
       rawReply = reply;
       if (result.choices[0].finish_reason === 'length') throw new Error('Interpretation was truncated. Please retry.');
-      const extraction = focused ? validateProfileExtraction(reply, description, vocabulary, data.catalogue, {clarifyInvalidPrice:data.clarifyInvalidPrice === true}) : grounded ? groundInterpretation(reply, description, vocabulary, data.catalogue) : null;
+      const extraction = focused ? validateProfileExtraction(reply, description, vocabulary, data.catalogue, {clarifyInvalidPrice:data.clarifyInvalidPrice === true,complete}) : grounded ? groundInterpretation(reply, description, vocabulary, data.catalogue) : null;
       const draft = extraction?.draft ?? validateInterpretation(reply, description, vocabulary);
       if (grounded) {
         const {profile,...normalized} = draft;
@@ -40,7 +41,7 @@ self.onmessage = async ({ data }) => {
       }
       self.postMessage({ id, draft, seconds: (performance.now() - start) / 1000,
         ...(grounded ? {candidates:extraction.candidates} : {}),
-        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview,priceNeedsReview:extraction.priceNeedsReview} : {}),
+        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview,priceNeedsReview:extraction.priceNeedsReview,requirementsText:extraction.requirementsText,unresolvedFields:extraction.unresolvedFields} : {}),
         ...(data.syntheticProof ? { reply, raw_reply:rawReply, usage: result.usage } : {}) });
     } else throw new Error('Unknown interpreter action.');
   } catch (error) { self.postMessage({ id, error: error.message, seconds: (performance.now()-started)/1000,

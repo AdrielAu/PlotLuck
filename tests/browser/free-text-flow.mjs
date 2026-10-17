@@ -15,11 +15,13 @@ function fakeRuntime(loads = true) {
     return {chat:{completions:{create:async options=>{
       const text=options.messages.at(-1).content;
       if (text.includes('slow')) await new Promise(resolve=>setTimeout(resolve,700));
-      const data={region:text.includes('London')?'London':text.includes('Hugh Town')?'Hugh Town':text.includes('Greater Manchester')?'Greater Manchester':text.includes('SE1')?'SE1':null,
-        cuisine:'Thai',price_band:'unknown',venue_type:'Restaurant',rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null};
+      const data={region:/london/i.test(text)?'London':text.includes('Hugh Town')?'Hugh Town':text.includes('Greater Manchester')?'Greater Manchester':text.includes('SE1')?'SE1':null,
+        cuisine:/thai/i.test(text)?'Thai':null,price_band:/mid[ -]?range/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
+        requirements:/no other requirements/i.test(text)?'no other requirements':/vegan options/i.test(text)?'vegan options':null};
       if (text.includes('Greater London')) data.region='Greater London';
       if (text.includes('mid Range')) data.price_band='$$';
       if (text.includes('uncertain prices')) data.price_band='$';
+      if (text.includes('bad budget')) data.rent.currency='USD';
       return {choices:[{finish_reason:'stop',message:{content:text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
     }}}};
   }`;
@@ -35,10 +37,66 @@ async function openPage(t, { gpu = true, loads = true } = {}) {
   await page.locator('#interpret:enabled').waitFor();
   return { page, sent };
 }
-async function submit(page, text) {
-  await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(text);
+const completeText = (text, omit = []) => text + (omit.includes('price') ? '' : ' Mid-range menu prices;') + (omit.includes('rent') ? '' : ' any rent;') + (omit.includes('other') ? '' : ' no other requirements.');
+// Unrelated workflow checks supply all six inputs; missing-field cases opt out.
+async function submit(page, text, {raw = false, omit = []} = {}) {
+  await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(raw ? text : completeText(text,omit));
   await page.getByRole('button', { name:'Find districts', exact:true }).click();
 }
+
+test('A restaurant in london asks every unanswered Erica question and retains the read restaurant type', async t => {
+  const {page}=await openPage(t);
+  await submit(page,'A restaurant in london',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)),['clarify-area','clarify-cuisine','clarify-price','clarify-rent']);
+  assert.equal(await page.locator('#clarify-venue').count(),0);
+  assert.equal(await page.locator('#clarify-other').count(),1);
+  assert.equal(await page.locator('#results-screen').isHidden(),true);
+  if (process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/six-field-london.png',fullPage:true});
+  await page.locator('#clarify-area').selectOption(catalogue.places.find(p=>p.name==='Greater London').id);
+  await page.getByLabel('What food will you serve?',{exact:true}).selectOption('Thai');
+  await page.getByLabel('How are your menu prices?',{exact:true}).selectOption('$$');
+  await page.getByLabel('How much rent can you take on?',{exact:true}).selectOption('any');
+  await page.getByRole('button',{name:'No other requirements',exact:true}).click();
+  await page.getByRole('button',{name:'Show districts',exact:true}).click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Thai.*Greater London/);
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Restaurant.*Mid-range/);
+  assert.deepEqual(page.errors,[]);
+});
+
+test('absent area means England and a missing restaurant type is explicitly requested', async t => {
+  const {page}=await openPage(t);
+  await submit(page,'Thai food',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.equal(await page.locator('#clarify-area').count(),0);
+  assert.equal(await page.locator('#clarify-cuisine').count(),0);
+  await page.getByLabel('What kind of place is it?',{exact:true}).selectOption('Restaurant');
+  await page.locator('#clarify-price').selectOption('unknown');
+  await page.locator('#clarify-rent').selectOption('any');
+  await page.locator('#clarify-other').fill('vegan options, live music');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/England/);
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Vegan options: Yes/);
+  assert.match(await page.locator('#unused-details').innerText(),/live music/);
+});
+
+test('a malformed model reply offers all missing inputs and can be completed without another model call', async t => {
+  const {page}=await openPage(t);
+  await submit(page,'A broken restaurant in london',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.equal(await page.locator('#clarify-venue').count(),1);
+  await page.locator('#clarify-area').selectOption(catalogue.places.find(p=>p.name==='Greater London').id);
+  await page.locator('#clarify-cuisine').selectOption('Thai');
+  await page.locator('#clarify-venue').selectOption('Restaurant');
+  await page.locator('#clarify-price').selectOption('$$');
+  await page.locator('#clarify-rent').selectOption('any');
+  await page.locator('#clarify-other').fill('None');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Thai.*Greater London/);
+});
 
 test('one description goes straight to scoped results, with no questions, pickers or review', async t => {
   const { page, sent } = await openPage(t);
@@ -46,7 +104,7 @@ test('one description goes straight to scoped results, with no questions, picker
   await page.locator('#results-screen').waitFor();
   assert.match(await page.locator('#results-heading').innerText(), /Thai.*SE1/);
   assert.match(await page.locator('#confirmed-profile').innerText(), /Vegan options: Yes/);
-  assert.match(await page.locator('#query-notes').innerText(), /Not specified: Price band/);
+  assert.match(await page.locator('#query-notes').innerText(), /Rent band: any/);
   assert.equal(await page.locator('#clarification').isHidden(), true);
   assert.equal(await page.locator('#profile-panel, #chips, #answer-options, #review').count(), 0);
   assert.deepEqual(await page.locator('.district-code').allInnerTexts(), ['SE1']);
@@ -55,7 +113,7 @@ test('one description goes straight to scoped results, with no questions, picker
   assert.equal(new URL(page.url()).search, '');
   const confirmed = await page.locator('#confirmed-profile').innerText();
   await page.getByRole('button', { name:'Edit description', exact:true }).click();
-  assert.equal(await page.locator('#description').inputValue(), 'A Thai restaurant in SE1 with vegan options.');
+  assert.equal(await page.locator('#description').inputValue(), completeText('A Thai restaurant in SE1 with vegan options.'));
   assert.equal(await page.locator('#confirmed-profile').innerText(), confirmed);
   assert.equal(await page.locator('#description').evaluate(e=>e===document.activeElement), true);
   assert.deepEqual(page.errors, []);
@@ -66,7 +124,7 @@ test('London and conflicting cuisine prompt only their unresolved fields before 
   await submit(page, 'A Thai or Italian restaurant in London.');
   await page.locator('#clarification').waitFor();
   assert.equal(await page.locator('#results-screen').isHidden(), true);
-  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)), ['clarify-cuisine','clarify-area']);
+  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)), ['clarify-area','clarify-cuisine']);
   await page.locator('#clarify-cuisine').selectOption('Thai');
   const greater = catalogue.places.find(p=>p.name==='Greater London');
   await page.locator('#clarify-area').selectOption(greater.id);
@@ -110,13 +168,24 @@ test('an invalid price prediction asks only for price and place, without replaci
 
 test('a numeric rent budget prompts only its relative band', async t => {
   const { page } = await openPage(t);
-  await submit(page, 'A Thai restaurant in SE1, rent GBP 2000 per month.');
+  await submit(page, 'A Thai restaurant in SE1, rent GBP 2000 per month.',{omit:['rent']});
   await page.locator('#clarification').waitFor();
   assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)), ['clarify-rent']);
   await page.locator('#clarify-rent').selectOption('any');
   await page.getByRole('button', { name:'Show districts', exact:true }).click();
   await page.locator('#results-screen').waitFor();
   assert.match(await page.locator('#query-notes').innerText(), /24,000 per year/);
+});
+
+test('an invalid numeric rent asks for a budget correction alongside the rent band', async t => {
+  const {page}=await openPage(t);
+  await submit(page,'A Thai restaurant in SE1, bad budget rent GBP 2000 per month.');
+  await page.locator('#clarify-budget').waitFor();
+  await page.locator('#clarify-budget').fill('2000');
+  await page.locator('#clarify-rent').selectOption('any');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#query-notes').innerText(),/24,000 per year/);
 });
 
 test('explicit miles use local centroid filtering without a routine clarification', async t => {
@@ -136,12 +205,21 @@ test('invalid replies have three attempts, preserve results and allow an edited 
   await page.locator('#description').fill('A broken Thai restaurant in SE1.');
   for (let i=0;i<3;i++) {
     await page.locator('#interpret').click();
-    await page.locator('#description-error').waitFor();
+    await page.locator('#clarification').waitFor();
     await page.waitForFunction(()=>document.querySelector('#description-form').getAttribute('aria-busy')==='false');
   }
   assert.equal(await page.locator('#interpret').isDisabled(), true);
-  assert.match(await page.locator('#description-error').innerText(), /Three attempts/);
+  assert.match(await page.locator('#interpret-status').innerText(), /Three attempts/);
   assert.equal(await page.locator('#ranked').textContent(), results);
+  await page.locator('#clarify-area').selectOption('SE1');
+  await page.locator('#clarify-cuisine').selectOption('Thai');
+  await page.locator('#clarify-venue').selectOption('Restaurant');
+  await page.locator('#clarify-price').selectOption('$$');
+  await page.locator('#clarify-rent').selectOption('any');
+  await page.locator('#clarify-other').fill('None');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  await page.getByRole('button',{name:'Edit description',exact:true}).click();
   await page.locator('#description').fill('A Thai restaurant in SE1.');
   assert.equal(await page.locator('#interpret').isEnabled(), true);
 });
@@ -170,8 +248,8 @@ test('download cancellation, unsupported devices and over-limit text recover wit
   assert.equal(await page.locator('#model-progress').isHidden(), true);
   const { page:unsupported } = await openPage(t, { gpu:false });
   await submit(unsupported, 'A Thai restaurant.');
-  await unsupported.locator('#description-error').waitFor();
-  assert.match(await unsupported.locator('#description-error').innerText(), /WebGPU/);
+  await unsupported.locator('#clarification').waitFor();
+  assert.match(await unsupported.locator('#interpret-status').innerText(), /WebGPU/);
   assert.equal(await unsupported.locator('#results-screen').isHidden(), true);
   await submit(unsupported, 'x'.repeat(1001));
   assert.match(await unsupported.locator('#description-error').innerText(), /1,000 characters/);

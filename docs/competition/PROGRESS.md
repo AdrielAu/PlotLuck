@@ -27,8 +27,8 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 ## Now
 
-- **Latest NN2 interface amendment**: NN2 reads the one description and pre-fills the review card's pickers; the user can correct any wrong value manually and confirms before scoring. The code still opens results directly until the card is wired in.
-- **Earlier NN2 interface amendment**: one description replaces the six-question flow and results pickers. Clear valid interpretations go straight to results; only unclear/invalid details require clarification. Download starts on submission, with progress and cancellation. This supersedes the older review-card behavior described below; historical experiment results and all release gates remain unchanged. The current UI uses the focused candidate from #139. It has not passed the final quality gate, particularly explicit menu-price/rent extraction.
+- **Latest NN2 interface amendment**: one description replaces the routine six-question flow and results pickers. All six inputs must be accounted for before scoring: area/range, cuisine, menu prices, rent, restaurant type and other requirements. Only absent area defaults to England. Missing/defaulted or invalid inputs prompt Erica's original questions, including after failed inference; complete descriptions go directly to results. The product extends the focused candidate with literal requirements and per-field recovery; historical five-field proof results do not establish this path's quality. Download starts on submission with cancellation. All quality/release gates remain open.
+- **Planned review card**: preserve main's documented plan for NN2 to pre-fill editable pickers and require confirmation. That wiring remains separate from this six-field completion fix; current code opens results after completion.
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
