@@ -32,6 +32,8 @@ On 2026-10-17 the team fixed the data schemas for the `restaurants` table, the `
 
 Amended 2026-10-17: [ADR 0005](0005-district-demographics-and-tourism-context.md) adds average age, five ethnicity shares, two Census sex shares, separate attraction/hotel counts and most-common-category summaries. Bundle version 2 declares the expanded numeric input order; summaries are not neural-network inputs.
 
+Amended 2026-10-17 ([#130](https://github.com/AdrielAu/PlotLuck/issues/130)): `radius_km` is appended as the last column, a positive float giving the radius of the map circle that roughly covers the district. It is the distance from the centroid within which 90% of the district's ONSPD postcode points lie, on a flat map local to the district, and at least 0.3 km. It is a display value, not an NN1 input, so the model and scores are unchanged, and the bundle version stays 2 (the site ignores extra CSV columns). No district polygons are shipped. No permitted OS/ONS postcode-district boundary exists (OS Code-Point with Polygons is a licensed product), so the radius comes from ONSPD points already used for the centroid.
+
 Cuisine supply per district is aggregated from `restaurants.csv` on LinuxONE and published as `district_cuisine_supply.csv` (`postcode_district`, `cuisine_group`, `restaurants`), because the browser cannot read `restaurants.csv`. [ADR 0003](0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md) allows publishing these counts and `total_restaurants`.
 
 ### 4. Model export interface: `model.json`
