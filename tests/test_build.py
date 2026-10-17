@@ -954,7 +954,7 @@ def test_location_is_checked_before_duplicates_and_duplicates_before_chains():
     rows = [
         source_row("a", "Far", 10, far), source_row("a", "Far", 20, far),  # counted once, as far
         *[source_row("d", "Triple", 10 * n) for n in (1, 2, 3)],  # one place, not a chain of three
-        *[source_row(f"c{i}", name, 10, metres_north(1000 * (i + 1)))
+        *[source_row(f"c{i}", name, 10, metres_north(4 * build.NEAR_DUPLICATE_M * (i + 1)))
           for i, name in enumerate(("Nando's", "Nandos", "NANDO’S"))],
     ]
 
@@ -966,16 +966,12 @@ def test_location_is_checked_before_duplicates_and_duplicates_before_chains():
 
 def test_branch_suffix_removal_is_off_by_default_and_switchable(monkeypatch):
     names = ("Pret", "Pret - Soho", "Pret (Kings Cross)")
-    rows = [source_row(str(i), n, 10, metres_north(1000 * i)) for i, n in enumerate(names)]
+    rows = [source_row(str(i), n, 10, metres_north(4 * build.NEAR_DUPLICATE_M * i)) for i, n in enumerate(names)]
 
     assert build.DROP_BRANCH_SUFFIX is False
     assert [r["is_chain"] for r in build.restaurant_table(rows, POSTCODES, build.load_mapping())[0]] == [0, 0, 0]
     monkeypatch.setattr(build, "DROP_BRANCH_SUFFIX", True)
     assert [r["is_chain"] for r in build.restaurant_table(rows, POSTCODES, build.load_mapping())[0]] == [1, 1, 1]
-
-
-def test_cleaning_thresholds_are_provisional_until_the_audit_runs():
-    assert (build.FAR_FROM_POSTCODE_KM, build.NEAR_DUPLICATE_M, build.DROP_BRANCH_SUFFIX) == (5.0, 50.0, False)
 
 
 def test_run_metrics_accept_the_cleaning_exclusion_reasons(data):

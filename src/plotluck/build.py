@@ -58,12 +58,14 @@ PRICE_BANDS = {"€": "$", "€€-€€€": "$$", "€€€€": "$$$"}
 UNKNOWN_PRICE = "unknown"
 DIET_FLAGS = ("vegetarian_friendly", "vegan_options", "gluten_free")
 CHAIN_MIN_NAMES = 3
-# Cleaning thresholds (issue #150).
-# shortcut: guessed value, not yet measured; set it from the LinuxONE audit run (issue #149, python -m plotluck.audit).
-FAR_FROM_POSTCODE_KM = 5.0  # a row farther than this from any live English postcode is dropped
-# shortcut: guessed value, not yet measured; set it from the LinuxONE audit run.
+# Cleaning thresholds (issue #150), set from the full-data audit in runs/2026-10-17-data-audit/.
+# 99.9% of located rows lie within 0.81 km of a live English postcode; rows beyond 2 km (70)
+# barely thin out by 5 km (66), so they are bad coordinates or outside England.
+FAR_FROM_POSTCODE_KM = 2.0  # a row farther than this from any live English postcode is dropped
+# Same-name groups grow steadily from 25 m to 100 m with no clean break; 50 m covers geocoding
+# scatter around one building while staying below a street block, where branches start.
 NEAR_DUPLICATE_M = 50.0  # same normalised name within this distance is one listing
-# shortcut: off until measured; set it from the LinuxONE audit run.
+# Off: removing the suffix makes 628 merged groups span more than 5 km, so it merges unrelated places.
 DROP_BRANCH_SUFFIX = False  # strip " - Soho" / " (Kings Cross)" before comparing names
 
 # Fine cuisines with fewer label-eligible rows fold into their parent, then Other.
