@@ -26,11 +26,11 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   // does not extract them. Defaults are never presented as model predictions.
   const dietary = makeInterpreter(bundle).interpret({ other: description });
   const names = bundle.vocabulary.cuisines.filter(c => c.cuisine !== 'Unspecified' && mentions(description, c.cuisine));
-  const conflicting = names.length > 1;
+  const conflicting = !extraction.cuisineOptions && names.length > 1;
   if (conflicting) profile.cuisine = null;
   const needs = [];
   if (extraction.priceNeedsReview) needs.push({ field:'price', message:'Which menu price range should we use? The interpreter could not confirm it.', options:bundle.vocabulary.traits.find(t => t.name === 'price_band').values });
-  if (!profile.cuisine || profile.cuisine === 'Unspecified') needs.push({ field: 'cuisine', message: 'Which cuisine should we compare?', options: names.length ? names.map(c => c.cuisine) : bundle.vocabulary.cuisines.filter(c => c.cuisine !== 'Unspecified').map(c => c.cuisine) });
+  if (!profile.cuisine || profile.cuisine === 'Unspecified') needs.push({ field: 'cuisine', message: 'Which cuisine should we compare?', options: extraction.cuisineOptions ?? (names.length ? names.map(c => c.cuisine) : bundle.vocabulary.cuisines.filter(c => c.cuisine !== 'Unspecified').map(c => c.cuisine)) });
   const location = draft.location;
   const placeText = location.text ?? (/\b(?:in|near|around)\s+([^,.;\n]+)/i.exec(description)?.[1]?.trim() ?? '');
   const candidates = reader.areaCandidates(placeText);

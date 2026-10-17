@@ -64,6 +64,28 @@ test('Brighton and Yorkshire offer labelled scopes and county searches reach res
   }
 });
 
+test('food descriptions resolve clear cuisines and shared dishes ask only for cuisine',async t=>{
+  const {page}=await openPage(t);
+  for(const [food,cuisine] of [['dimsum','Chinese'],['Thai curry','Thai']]) {
+    await submit(page,`A mid-range ${food} restaurant in England, any rent, no other requirements.`,{raw:true});
+    await page.locator('#results-screen').waitFor();
+    assert.match(await page.locator('#results-heading').innerText(),new RegExp(cuisine));
+    assert.equal(await page.locator('#clarification').isVisible(),false);
+    assert.deepEqual(page.errors,[]);
+    await page.getByRole('button',{name:'Edit description',exact:true}).click();
+  }
+  await submit(page,'A mid-range kebab restaurant in England, any rent, no other requirements.',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)),['clarify-cuisine']);
+  const options=await page.locator('#clarify-cuisine option').evaluateAll(els=>els.map(e=>e.value).filter(Boolean));
+  assert.deepEqual(options,['Turkish','Middle Eastern','Lebanese','Greek','Persian']);
+  await page.locator('#clarify-cuisine').selectOption('Turkish');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Turkish/);
+  assert.deepEqual(page.errors,[]);
+});
+
 test('the exact mid range Chinese prompt keeps menu prices after either a valid or malformed model reply',async t=>{
   for(const [malformed,gap] of [[false,' '],[true,' '],[true,'\n  ']]) {
     const {page}=await openPage(t,{malformed});
