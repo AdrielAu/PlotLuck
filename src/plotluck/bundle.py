@@ -29,7 +29,7 @@ DISTRICT_COLUMNS = (
     "postcode_district", "centroid_lat", "centroid_lon", "total_restaurants",
     "population", "deprivation_index", "commercial_rent_index",
 )
-FLAGS = ("is_chain", "vegetarian_friendly", "vegan_options", "gluten_free")
+FLAGS = ("chain", "vegetarian_friendly", "vegan_options", "gluten_free")
 # shortcut: only the current sample tags; replace with the mapping file in #68.
 CUISINES = {name: name for name in
             ("British", "Italian", "Indian", "Chinese", "Thai", "Turkish")}
@@ -74,7 +74,7 @@ def _prepare(data: Path) -> tuple[list[dict], list[dict], list[dict], list[dict]
     points = np.array([[float(p["lat"]), float(p["long"])] for p in postcodes])
     if not np.isfinite(points).all():
         raise ValueError("Postcode coordinates must be finite")
-    residents = {r["district"]: _number(r["residents"])
+    residents = {r["district"]: _count(r["residents"])
                  for r in _read_csv(data / "p004_england.csv")}
     raw = _read_csv(data / "tripadvisor_england.csv")
     name_counts = Counter(r["restaurant_name"] for r in raw)
@@ -111,9 +111,11 @@ def _prepare(data: Path) -> tuple[list[dict], list[dict], list[dict], list[dict]
                ("excellent", "very_good", "average", "poor", "terrible")},
             "review_success_label": label,
         })
+        profile_flags = flags.copy()
+        profile_flags["chain"] = profile_flags.pop("is_chain")
         profiles.append({"cuisine_group": cuisine,
                          "venue_type": "Café" if "Cafe" in tags else "Restaurant",
-                         "price_band": price or "unknown", **flags})
+                         "price_band": price or "unknown", **profile_flags})
     if not restaurants:
         raise ValueError("No eligible restaurant rows in the input")
     supply_counts = Counter((r["postcode_district"], p["cuisine_group"])

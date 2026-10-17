@@ -29,6 +29,8 @@ The private run folder contains the prepared 15-column `restaurants.csv` and `me
 
 The browser maps the selected fine `cuisine` to `cuisine_group` using the vocabulary, and gets `same_cuisine_supply` from the district/group table. Missing supply pairs are zero. Restaurant inputs precede district inputs in their declared order.
 
+The public profile uses `chain`; the prepared restaurant CSV retains ADR 0004's `is_chain` column. The other flag names are `vegetarian_friendly`, `vegan_options` and `gluten_free`.
+
 For each input, a key in `transforms.categorical_vocabs` creates a one-hot block in that vocabulary's order. An unseen value gives an all-zero block. `transforms.defaults` holds defaults for absent profile fields. Each remaining input creates one scalar using `transforms.numeric[name]`: impute a missing/nonfinite value with the raw-unit `median`, apply `log1p` when declared, then subtract `mean` and divide by positive `std`. Boolean traits have identity transforms.
 
 For each dense layer, compute `weights @ vector + biases`; weights have one row per output unit. Apply the corresponding activation (`relu`, `relu`, `sigmoid`). Shapes are inputs → 64 → 32 → 1. All numbers are JSON decimals. Use the reference fixture to check the complete encoding and forward pass before integrating with the map.

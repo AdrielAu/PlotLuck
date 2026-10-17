@@ -59,7 +59,7 @@
       "default": "unknown"
     },
     {
-      "name": "is_chain",
+      "name": "chain",
       "kind": "on_off",
       "values": [
         0,

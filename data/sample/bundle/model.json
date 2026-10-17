@@ -5,7 +5,7 @@
       "cuisine_group",
       "venue_type",
       "price_band",
-      "is_chain",
+      "chain",
       "vegetarian_friendly",
       "vegan_options",
       "gluten_free"
@@ -40,7 +40,7 @@
       ]
     },
     "numeric": {
-      "is_chain": {
+      "chain": {
         "log1p": false,
         "median": 0,
         "mean": 0,
@@ -93,7 +93,7 @@
       "venue_type": "Restaurant",
       "price_band": "unknown",
       "cuisine_group": "Unspecified",
-      "is_chain": 0,
+      "chain": 0,
       "vegetarian_friendly": 0,
       "vegan_options": 0,
       "gluten_free": 0

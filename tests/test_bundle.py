@@ -48,6 +48,8 @@ def test_exported_contract_reproduces_torch_reference_scores(tmp_path, monkeypat
               for r in read_csv(output / "district_cuisine_supply.csv")}
     groups = {c["cuisine"]: c["cuisine_group"] for c in vocabulary["cuisines"]}
     features = model["features"]
+    assert {t["name"] for t in vocabulary["traits"]} == {
+        "venue_type", "price_band", "chain", "vegetarian_friendly", "vegan_options", "gluten_free"}
     assert set(features["restaurant_inputs"]) == {
         "cuisine_group", *(t["name"] for t in vocabulary["traits"])}
     assert set(groups.values()) == set(model["transforms"]["categorical_vocabs"]["cuisine_group"])
