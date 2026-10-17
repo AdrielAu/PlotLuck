@@ -15,11 +15,11 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 0 | Repo, workflow and server setup | done | #3, #19 |
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
-| 3 | NN1 | done | #62, #65, #74, #101, #77, #150 |
+| 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150; [ranking revamp](RANKING.md) |
 | 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); latest user amendment replaces #136/#158's questions with one description, direct results and targeted clarification; model/release gates remain open; [plan](../plans/nn2-integration.md) |
-| 5 | NN1 spatial-CV evaluation | done | #74, #77 |
+| 5 | NN1 spatial-CV evaluation | in progress | #74, #77; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
-| 7 | Weight export + x86 load check | done | #65, #67, #101, #77 |
+| 7 | Weight export + x86 load check | in progress | #65, #67, #101, #77; bundle v3 pending full-data export |
 | 8 | Site: district circles, pickers, score threshold, ranked list | done | #67, #75, #76; redesign in [spec #127](https://github.com/AdrielAu/PlotLuck/issues/127): #128 |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | in progress | |
 | 10 | Video | not started | |

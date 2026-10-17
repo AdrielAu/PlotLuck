@@ -2,7 +2,8 @@
 // Pure: no DOM or Leaflet, so it runs in Node tests and in the browser.
 
 // Must match BUNDLE_VERSION in src/plotluck/build.py.
-export const BUNDLE_VERSION = 2;
+export const BUNDLE_VERSION = 3;
+const SUPPORTED_BUNDLE_VERSIONS = [2, BUNDLE_VERSION];
 
 // Load the bundle through `read(name) -> Promise<text>` (fetch in the page, fs in tests).
 export async function loadBundle(read) {
@@ -13,14 +14,19 @@ export async function loadBundle(read) {
     read("model.json").then(JSON.parse),
   ]);
   for (const [name, file] of [["vocabulary.json", vocabulary], ["model.json", model]]) {
-    if (file.version !== BUNDLE_VERSION) {
-      throw new Error(`${name} is bundle version ${file.version}; this site reads version ${BUNDLE_VERSION}`);
+    if (!SUPPORTED_BUNDLE_VERSIONS.includes(file.version)) {
+      throw new Error(`${name} is bundle version ${file.version}; this site reads versions ${SUPPORTED_BUNDLE_VERSIONS.join(", ")}`);
     }
   }
+  if (model.version !== vocabulary.version) throw new Error("model.json and vocabulary.json have different bundle versions");
   for (const d of districts) {
     if (!d.postcode_district || !Number.isFinite(Number(d.centroid_lat)) ||
         !Number.isFinite(Number(d.centroid_lon)) || d.centroid_lat === "" || d.centroid_lon === "") {
       throw new Error("districts.csv has an invalid district code or coordinate");
+    }
+    // Not an NN1 input: the results map draws each district as a circle of this radius.
+    if (!Number.isFinite(Number(d.radius_km)) || !(Number(d.radius_km) > 0)) {
+      throw new Error("districts.csv has a missing or invalid radius_km");
     }
   }
   for (const r of supply) {

@@ -184,8 +184,29 @@ test('map and list stay scoped; the keyboard threshold persists for the same que
   assert.match(await page.locator('#confirmed-profile').innerText(), /Gluten free: Yes/);
   await page.locator('#ranked button').first().focus();
   await page.keyboard.press('Enter');
-  assert.equal(await page.locator('.leaflet-popup').isVisible(), true);
+  assert.equal(await page.locator('.leaflet-tooltip').isVisible(), true);
   if (process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/free-text-results.png'});
+  assert.deepEqual(page.errors, []);
+});
+
+test('district coverage circles and list rows remain linked after free-text interpretation', async t => {
+  const { page } = await openPage(t);
+  await submit(page, 'A Thai restaurant.');
+  await page.locator('#results-screen').waitFor();
+  const third = page.locator('#ranked li button').nth(2);
+  const code = await third.locator('.district-code').innerText();
+  await third.click();
+  assert.match(await third.getAttribute('class'), /is-highlighted/);
+  const tooltip = page.locator('.leaflet-tooltip');
+  assert.match(await tooltip.innerText(), new RegExp(`^#3 · ${code} · \\d\\.\\d{2,4}$`));
+  await page.locator('#map').scrollIntoViewIfNeeded();
+  const box = await page.locator('#map').boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForFunction(() => document.querySelectorAll('.leaflet-tooltip').length === 1);
+  const hovered = (await tooltip.innerText()).split(' · ')[1];
+  assert.equal(await page.locator('#ranked button.is-highlighted .district-code').innerText(), hovered);
+  await page.mouse.move(box.x + box.width + 40, box.y + 10);
+  await page.locator('#ranked button.is-highlighted').waitFor({state:'detached'});
   assert.deepEqual(page.errors, []);
 });
 

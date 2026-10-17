@@ -8,6 +8,10 @@ Plotluck scores English postcode districts for the review-based success of a res
 The outward part of a UK postcode (SE15, E1, W1A). It is the unit Plotluck scores.
 _Avoid_: Postcode, area, neighbourhood, borough, zone
 
+**Cross-border postcode district**:
+A postcode district with active postcodes assigned to England and at least one other UK country. A district entirely in England that touches a national boundary is not cross-border.
+_Avoid_: Border district
+
 **Postcode area**:
 The letter prefix of a postcode (SE, E, W). It groups postcode districts.
 _Avoid_: Area (on its own), region, borough
@@ -25,6 +29,14 @@ _Avoid_: Rent level, budget, price band
 **District context**:
 The population, demographic composition, deprivation, commercial rent and mapped restaurant and tourism supply associated with a postcode district.
 _Avoid_: Customer profile, customer demographics
+
+**Estimated district context**:
+A district context value inferred from comparable nearby postcode districts when its own value is unavailable or unreliable. It is distinct from a recorded value.
+_Avoid_: Actual value, measured value
+
+**Unsupported district**:
+A postcode district whose available and estimated context does not provide enough evidence for a score. It is omitted from the ranked results.
+_Avoid_: Low-scoring district
 
 **District sex composition**:
 The shares of a district's residents recorded as female or male in the Census sex measure. It is distinct from gender identity.

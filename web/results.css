@@ -61,6 +61,8 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #ranked { flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none; overflow-y: auto; scrollbar-color: #bacfa9 var(--surface); }
 #ranked button { display: grid; grid-template-columns: 3ch minmax(0, 1fr) auto; width: 100%; min-height: 44px; align-items: center; gap: 12px; border: 0; padding: 8px; color: var(--ink); background: var(--surface); text-align: left; border-radius: 4px; }
 #ranked button:hover, #ranked button:focus-visible { background: #edf3ec; }
+/* The row of the district highlighted on the map (#133). */
+#ranked button.is-highlighted { background: #dfe9dc; }
 #ranked button:focus-visible { outline-offset: -3px; }
 .district-rank { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; text-align: right; }
 .district-code { font-weight: 600; }
