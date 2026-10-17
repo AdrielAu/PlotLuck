@@ -175,47 +175,54 @@ def pull(name: str, data: Path, fetch=http_fetch) -> Path:
 def _pull_osm(raw: Path, fetch) -> dict:
     """Query each England tile and merge the elements into one file.
 
-    Finished tiles are kept in ``raw/osm_tiles/`` until the merge, so a pull
-    that fails part-way resumes from the first missing tile when run again.
+    Finished tiles are kept in ``raw/osm_tiles/`` with their query and
+    endpoint until the merge, so a pull that fails part-way resumes from the
+    first missing tile when run again. A kept tile from another query is
+    fetched again.
     """
     # shortcut: holds every element in memory (~100k, fine); stream if it grows.
-    elements, snapshots, used = [], [], set()
+    elements, snapshots, endpoints = [], [], set()
     tile_dir = raw.with_name("osm_tiles")
     tile_dir.mkdir(exist_ok=True)
-    attempt_file = tile_dir / "attempt.json"
     for i, tile in enumerate(OSM_TILES, 1):
-        done = tile_dir / f"{tile[0]}_{tile[1]}.json"
-        if not done.exists():
-            used.add(_fetch_osm_tile(tile, attempt_file, fetch))
-            attempt_file.replace(done)  # only a checked tile is kept
-        with done.open(encoding="utf-8") as f:
-            result = json.load(f)
+        query = OSM_QUERY.format(*tile)
+        kept_path = tile_dir / f"{tile[0]}_{tile[1]}.json"
+        result = _read_json(kept_path) if kept_path.exists() else None
+        if result is None or result.get("query") != query:
+            result = _fetch_osm_tile(tile, query, tile_dir / "incoming.json", fetch)
+            kept_path.write_text(json.dumps(result), encoding="utf-8")
         elements += result["elements"]
-        print(f"tile {i}/{len(OSM_TILES)}: {len(result['elements'])} elements")
+        endpoints.add(result["endpoint"])
         snapshots.append(result["osm3s"]["timestamp_osm_base"])
+        print(f"tile {i}/{len(OSM_TILES)}: {len(result['elements'])} elements")
     raw.write_text(json.dumps({"elements": elements}), encoding="utf-8")
     shutil.rmtree(tile_dir)
-    # The oldest tile bounds the snapshot; a resumed pull widens the spread.
+    # Tiles come minutes apart, or further when resumed or from a lagging mirror.
     return {
         "snapshot": min(snapshots),
+        "snapshot_latest": max(snapshots),
         "query": OSM_QUERY,
         "tiles": len(OSM_TILES),
-        "endpoints": sorted(used),  # this run's only, when resumed
+        "endpoints": sorted(endpoints),
     }
 
 
-def _fetch_osm_tile(tile, dest: Path, fetch) -> str:
-    """Fetch one tile to ``dest``, retrying on alternate endpoints; return the one used."""
-    query = OSM_QUERY.format(*tile)
+def _read_json(path: Path):
+    with path.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _fetch_osm_tile(tile, query: str, dest: Path, fetch) -> dict:
+    """Fetch one tile, retrying on alternate endpoints; tag it with query and endpoint."""
     for attempt in range(OSM_RETRIES):
         url = OSM_ENDPOINTS[attempt % len(OSM_ENDPOINTS)]
         try:
             fetch(url, dest, post=query)
-            with dest.open(encoding="utf-8") as f:
-                result = json.load(f)
+            result = _read_json(dest)
             if "remark" in result:  # Overpass reports timeouts in-band
                 raise RuntimeError(result["remark"])
-            return url
+            dest.unlink()
+            return {**result, "query": query, "endpoint": url}
         except (OSError, ValueError, RuntimeError) as err:
             if attempt == OSM_RETRIES - 1:
                 raise RuntimeError(
@@ -224,6 +231,7 @@ def _fetch_osm_tile(tile, dest: Path, fetch) -> str:
             wait = 10 * 2**attempt  # Overpass asks for exponential backoff
             print(f"tile {tile}: {err} from {url}; retrying in {wait}s")
             time.sleep(wait)
+    raise AssertionError("unreachable: the last attempt raises")
 
 
 def _sha256(path: Path) -> str:
