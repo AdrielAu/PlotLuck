@@ -177,6 +177,32 @@ test("with NN2 ready, one call reads the joined answers and its marks and unused
   assert.equal(scoreDistricts(bundle, draft.profile).length, 13);
 });
 
+test("the review recovers explicit dietary traits omitted by NN2 for user confirmation", async () => {
+  const answers = { ...blank, location: "SE1", food: "Thai", other: "vegan options, live music" };
+  const { interpreter } = withModel({
+    fields: {
+      cuisine: field("Thai", "explicit", "Thai"),
+      rent_band: field("any", "default", null),
+    },
+    location: { text: "SE1", near: false, distance: null, unit: null },
+    unused: ["vegan options", "live music"],
+    clarifications: [],
+  });
+  const positive = await interpreter.interpret(answers);
+  assert.equal(positive.profile.vegan_options, true);
+  assert.equal(positive.marks.vegan_options, "explicit");
+  assert.deepEqual(positive.unused, ["live music"]);
+  const negativeAnswers = { ...answers, other: "no vegan options" };
+  const negative = withModel({
+    fields: { cuisine: field("Thai", "explicit", "Thai"), rent_band: field("any", "default", null) },
+    location: { text: "SE1", near: false, distance: null, unit: null },
+    unused: [], clarifications: [],
+  });
+  const negated = await negative.interpreter.interpret(negativeAnswers);
+  assert.equal(negated.profile.vegan_options, false);
+  assert.equal(negated.marks.vegan_options, "explicit");
+});
+
 test("an NN2 cuisine that needs a choice reaches the review unresolved", async () => {
   const { interpreter } = withModel({
     fields: { cuisine: field(null, "default", null) },

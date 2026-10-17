@@ -160,7 +160,7 @@ export function makeInterpreter(bundle, nn2, catalogue) {
     return best;
   }
 
-  function readTraits(text, draft) {
+  function readTraits(text, draft, matchedClauses) {
     const unused = [];
     if (NOTHING.has(norm(text))) return unused;
     for (const clause of text.split(/[,;.\n&+/]| and | or /i).map(norm).filter(Boolean)) {
@@ -170,6 +170,7 @@ export function makeInterpreter(bundle, nn2, catalogue) {
         const at = cues.map((cue) => ` ${clause} `.indexOf(` ${cue} `)).filter((i) => i >= 0)[0];
         if (at === undefined) continue;
         matched = true;
+        matchedClauses?.add(clause);
         // A trait clause is short, so a negator anywhere before the cue turns it off.
         draft.profile[t.name] = !clause.slice(0, at).split(" ").some((w) => NEGATORS.has(w));
         draft.marks[t.name] = "explicit";
@@ -188,10 +189,17 @@ export function makeInterpreter(bundle, nn2, catalogue) {
       marks: { area: answers.location?.trim() ? "explicit" : "default" },
       area: readArea(answers.location ?? ""),
       rentBand: rentCuts ? reply.fields.rent_band.value : "any",
-      unused: [...reply.unused],
+      unused: [],
     };
+    const explicitClauses = new Set();
     if (!draft.area) draft.marks.area = "unresolved";
     for (const [name, f] of Object.entries(reply.fields)) draft.marks[name] = f.provenance;
+    // Explicit user statements outrank model defaults or omissions and remain editable in review.
+    readTraits(answers.other ?? "", draft, explicitClauses);
+    draft.unused = reply.unused.flatMap(detail => detail
+      .split(/[,;.\n&+/]| and | or /i)
+      .map(clause => clause.trim())
+      .filter(clause => clause && !explicitClauses.has(norm(clause))));
     if (!draft.profile.cuisine) draft.marks.cuisine = "unresolved";
     if (!rentCuts) draft.marks.rent_band = "default";
     return draft;

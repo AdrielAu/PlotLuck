@@ -72,6 +72,27 @@ test("an NN2 draft with London waits for a confirmed catalogue boundary", async 
   assert.deepEqual(page.errors, []);
 });
 
+test("dietary traits NN2 omits stay editable for confirmation when the user states them", async (t) => {
+  const omittedTraitReply = {
+    ...reply,
+    fields: Object.fromEntries(Object.entries(reply.fields).filter(([name]) => name !== "vegan_options")),
+    unused: ["vegan options"],
+  };
+  const page = await openPage(t, { gpu: true, modelReply: omittedTraitReply });
+  await page.getByRole("button", { name: "Download" }).click();
+  await page.waitForFunction(() => /ready/.test(document.querySelector("#model-status").textContent));
+  await answerQuestions(page, ["SE", "Thai", "", "", "", "vegan options"]);
+  const vegan = page.locator("#draft-vegan_options");
+  assert.equal(await vegan.isChecked(), true);
+  assert.equal(await page.locator("#unused-list li").count(), 0);
+  await vegan.uncheck();
+  await vegan.check();
+  await page.getByRole("button", { name: "Compare districts", exact: true }).click();
+  await page.locator("#results-screen").waitFor();
+  assert.match(await page.locator("#confirmed-profile").innerText(), /Vegan options: Yes/);
+  assert.deepEqual(page.errors, []);
+});
+
 test("the downloaded model reads the answers into a review that compares districts", async (t) => {
   const page = await openPage(t, { gpu: true });
 
