@@ -156,19 +156,35 @@ test("six questions lead through a review card to scoped results", async (t) => 
   assert.deepEqual(page.errors, []);
 });
 
-test("under reduced motion the kitchen is a still frame and dishes appear in place", async (t) => {
+test("under reduced motion the day still turns but dishes appear in place", async (t) => {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser, { reducedMotion: "reduce" });
   await page.goto(url);
   await page.locator("#answer:not([disabled])").waitFor();
   await page.locator("#kitchen[data-kitchen]").waitFor();
   assert.equal(await page.locator("#kitchen").getAttribute("data-kitchen"), "still");
+  // The clock, sky and light keep moving (#159), so frames are still drawn.
   const still = await frames(page);
   await page.waitForTimeout(400);
-  assert.equal(await frames(page), still);
+  assert.ok(await frames(page) > still);
   await answerQuestions(page, ["anywhere", "Thai", "", "", "", ""]);
   assert.equal(await page.locator("#kitchen").getAttribute("data-dishes"), "6");
-  // One frame per dish, drawn at once: nothing flies.
-  assert.equal(await frames(page), still + 6);
+  assert.equal(await page.locator("#kitchen").getAttribute("data-flying"), "0");
+  assert.deepEqual(page.errors, []);
+});
+
+test("the address can force the kitchen's sky, and the ceiling light is on only at night", async (t) => {
+  const { browser, url } = await openSite(t);
+  const page = await newPage(browser);
+  const kitchen = page.locator("#kitchen");
+  for (const [sky, weather, light] of [["night", "snow", "on"], ["sunset", "rain", "off"], ["day", "hail", "off"]]) {
+    await page.goto(`${url}?sky=${sky}&weather=${weather}`);
+    await page.locator("#kitchen[data-sky]").waitFor({ state: "attached" });
+    assert.equal(await kitchen.getAttribute("data-sky"), sky);
+    assert.equal(await kitchen.getAttribute("data-light"), light);
+    // An unknown weather is ignored: the kitchen draws its own.
+    if (weather !== "hail") assert.equal(await kitchen.getAttribute("data-weather"), weather);
+    else assert.match(await kitchen.getAttribute("data-weather"), /^(sun|cloud|rain|snow)$/);
+  }
   assert.deepEqual(page.errors, []);
 });
