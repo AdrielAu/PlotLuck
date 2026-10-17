@@ -75,16 +75,16 @@ test("an NN2 draft with London waits for a confirmed catalogue boundary", async 
 test("dietary traits NN2 omits stay editable for confirmation when the user states them", async (t) => {
   const omittedTraitReply = {
     ...reply,
-    fields: Object.fromEntries(Object.entries(reply.fields).filter(([name]) => name !== "vegan_options")),
-    unused: ["vegan options"],
+    fields: { cuisine: field("Thai", "explicit", "Thai") },
+    unused: ["vegan options with live music"],
   };
   const page = await openPage(t, { gpu: true, modelReply: omittedTraitReply });
   await page.getByRole("button", { name: "Download" }).click();
   await page.waitForFunction(() => /ready/.test(document.querySelector("#model-status").textContent));
-  await answerQuestions(page, ["SE", "Thai", "", "", "", "vegan options"]);
+  await answerQuestions(page, ["SE", "Thai", "", "", "", "vegan options with live music"]);
   const vegan = page.locator("#draft-vegan_options");
   assert.equal(await vegan.isChecked(), true);
-  assert.equal(await page.locator("#unused-list li").count(), 0);
+  assert.match(await page.locator("#unused-list").innerText(), /live music/i);
   await vegan.uncheck();
   await vegan.check();
   await page.getByRole("button", { name: "Compare districts", exact: true }).click();

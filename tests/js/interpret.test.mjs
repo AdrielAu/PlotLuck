@@ -178,14 +178,14 @@ test("with NN2 ready, one call reads the joined answers and its marks and unused
 });
 
 test("the review recovers explicit dietary traits omitted by NN2 for user confirmation", async () => {
-  const answers = { ...blank, location: "SE1", food: "Thai", other: "vegan options, live music" };
+  const answers = { ...blank, location: "SE1", food: "Thai", other: "vegan options with live music" };
   const { interpreter } = withModel({
     fields: {
       cuisine: field("Thai", "explicit", "Thai"),
       rent_band: field("any", "default", null),
     },
     location: { text: "SE1", near: false, distance: null, unit: null },
-    unused: ["vegan options", "live music"],
+    unused: ["vegan options with live music"],
     clarifications: [],
   });
   const positive = await interpreter.interpret(answers);

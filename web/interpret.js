@@ -160,17 +160,17 @@ export function makeInterpreter(bundle, nn2, catalogue) {
     return best;
   }
 
-  function readTraits(text, draft, matchedClauses) {
+  function readTraits(text, draft, matchedPhrases) {
     const unused = [];
     if (NOTHING.has(norm(text))) return unused;
     for (const clause of text.split(/[,;.\n&+/]| and | or /i).map(norm).filter(Boolean)) {
       let matched = false;
       for (const t of traits.filter((t) => t.kind === "on_off")) {
-        const cues = TRAIT_CUES[t.name] ?? [norm(traitLabel(t.name))];
+        const cues = [...new Set([...(TRAIT_CUES[t.name] ?? []), norm(traitLabel(t.name))])];
         const at = cues.map((cue) => ` ${clause} `.indexOf(` ${cue} `)).filter((i) => i >= 0)[0];
         if (at === undefined) continue;
         matched = true;
-        matchedClauses?.add(clause);
+        matchedPhrases?.add(cues.filter((cue) => ` ${clause} `.includes(` ${cue} `)).sort((a, b) => b.length - a.length)[0]);
         // A trait clause is short, so a negator anywhere before the cue turns it off.
         draft.profile[t.name] = !clause.slice(0, at).split(" ").some((w) => NEGATORS.has(w));
         draft.marks[t.name] = "explicit";
@@ -191,15 +191,24 @@ export function makeInterpreter(bundle, nn2, catalogue) {
       rentBand: rentCuts ? reply.fields.rent_band.value : "any",
       unused: [],
     };
-    const explicitClauses = new Set();
+    const explicitPhrases = new Set();
     if (!draft.area) draft.marks.area = "unresolved";
     for (const [name, f] of Object.entries(reply.fields)) draft.marks[name] = f.provenance;
     // Explicit user statements outrank model defaults or omissions and remain editable in review.
-    readTraits(answers.other ?? "", draft, explicitClauses);
+    readTraits(answers.other ?? "", draft, explicitPhrases);
     draft.unused = reply.unused.flatMap(detail => detail
       .split(/[,;.\n&+/]| and | or /i)
       .map(clause => clause.trim())
-      .filter(clause => clause && !explicitClauses.has(norm(clause))));
+      .map(clause => {
+        const remaining = norm(clause).split(" ");
+        for (const phrase of explicitPhrases) {
+          const words = phrase.split(" ");
+          const at = remaining.findIndex((_, i) => words.every((word, j) => remaining[i + j] === word));
+          if (at >= 0) remaining.splice(at, words.length);
+        }
+        return remaining.filter(word => word && !FILLER.has(word)).join(" ");
+      })
+      .filter(Boolean));
     if (!draft.profile.cuisine) draft.marks.cuisine = "unresolved";
     if (!rentCuts) draft.marks.rent_band = "default";
     return draft;
