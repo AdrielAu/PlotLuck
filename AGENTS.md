@@ -16,8 +16,13 @@ Before writing or changing code (including notebooks), read [`docs/agents/coding
 
 ## Repo map
 
+Keep this map and `CONTRIBUTING.md` in step: change both together.
+
+- `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`.
+- `data/`: `sample/` committed, `full/` server-only; see `data/AGENTS.md`.
 - `docs/competition/`: handover (`PROJECT.md`) and the initial design doc.
-- `docs/setup.md`: one-time clone setup, per agent tool.
+- `docs/setup.md`: one-time clone setup, per agent tool. `docs/server.md`: operator runbook. `docs/evidence/`: evidence checklist.
+- `CONTRIBUTING.md`: layout and workflow for humans; `README.md`: user-facing.
 - `notebooks/`: ingest, training, benchmark and export notebooks; see `notebooks/AGENTS.md`.
 - `runs/`: committed run results; see `runs/README.md`.
 - `web/`: static site deployed to GitHub Pages; see `web/AGENTS.md`.
