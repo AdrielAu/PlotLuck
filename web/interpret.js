@@ -2,6 +2,7 @@
 // NN2 reads the answers when it is loaded; otherwise, or if it fails, a deterministic fallback does.
 // Pure: no DOM, so it runs in Node tests.
 import { RENT_BANDS } from "./interpreter.js";
+import { placeCandidates } from "./grounded-interpreter.js";
 import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
 
 export { RENT_BANDS };
@@ -17,7 +18,7 @@ export const ANSWER_LABELS = {
 };
 export const RENT_LABELS = { low: "Low", mid: "Mid", high: "High", any: "Any" };
 export const REQUIRED = "You must answer this question.";
-export const PLACE_SOON = "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.";
+export const AREA_HELP = "Choose one English place, a postcode district or postcode area, or 'anywhere'. Unrecognised places and area exclusions need correcting before comparison.";
 
 // The six answers joined into one labelled description: NN2's input.
 export function describe(answers) {
@@ -81,20 +82,52 @@ function leftover(text, phrase) {
 }
 
 // `nn2`, when given: { ready() -> boolean, read(description) -> Promise of a validated NN2 draft }.
-export function makeInterpreter(bundle, nn2) {
+export function makeInterpreter(bundle, nn2, catalogue) {
   const { vocabulary } = bundle;
   const districts = new Set(bundle.districts.map((d) => d.postcode_district));
   const areas = new Set(bundle.districts.map((d) => d.postcode_district.match(/^[A-Z]+/)[0]));
   const traits = vocabulary.traits;
   const rentCuts = rentTertiles(bundle.districts);
+  let places = new Map(catalogue?.places.map(p => [p.id, p]) ?? []);
+  function setCatalogue(readyCatalogue) {
+    catalogue = readyCatalogue;
+    places = new Map(catalogue.places.map(p => [p.id, p]));
+  }
+
+  const placeText = text => text.trim().replace(/^in\s+/i, "");
+  const placeLabel = p => `${p.name} (${p.type.replaceAll("_", " ")}, ${p.context})`;
+  // Offer one-character spelling corrections, including transposed letters, only for review.
+  function similarName(left, right) {
+    const a = left.normalize("NFKC").toLowerCase();
+    const b = right.normalize("NFKC").toLowerCase();
+    if (a.length < 5 || Math.abs(a.length - b.length) > 1) return false;
+    if (a.length !== b.length) {
+      const [longer, shorter] = a.length > b.length ? [a, b] : [b, a];
+      return [...longer].some((_, i) => longer.slice(0, i) + longer.slice(i + 1) === shorter);
+    }
+    const differences = [...a].map((c, i) => c === b[i] ? -1 : i).filter(i => i >= 0);
+    return differences.length === 1 || (differences.length === 2 && differences[1] === differences[0] + 1 &&
+      a[differences[0]] === b[differences[1]] && a[differences[1]] === b[differences[0]]);
+  }
+  function areaCandidates(text) {
+    if (!catalogue) return [];
+    const needle = placeText(text);
+    const exact = placeCandidates(needle, catalogue);
+    const matches = exact.length ? exact : catalogue.places.filter(p => [p.name, ...p.aliases].some(name => similarName(needle, name)));
+    return matches.map(p => ({ kind: "place", code: p.id, label: placeLabel(p) }));
+  }
 
   function readArea(text) {
     const ws = words(text);
+    if (!text.trim()) return { kind: "england", code: "", label: "England" };
     if (!ws.length) return null;
     if (ws.some((w) => ENGLAND.has(w)) && ws.every((w) => ENGLAND.has(w) || ENGLAND_FILLER.has(w))) return { kind: "england", code: "", label: "England" };
     const code = text.toUpperCase().replace(/\s+/g, "");
     if (districts.has(code)) return { kind: "district", code, label: code };
     if (areas.has(code)) return { kind: "postcode_area", code, label: `${code} postcode area` };
+    const matches = areaCandidates(text);
+    // Aliases and ambiguous names are proposals: the review card requires a labelled choice.
+    if (matches.length === 1 && norm(places.get(matches[0].code).name) === norm(placeText(text))) return matches[0];
     return null;
   }
 
@@ -127,16 +160,17 @@ export function makeInterpreter(bundle, nn2) {
     return best;
   }
 
-  function readTraits(text, draft) {
+  function readTraits(text, draft, matchedPhrases) {
     const unused = [];
     if (NOTHING.has(norm(text))) return unused;
     for (const clause of text.split(/[,;.\n&+/]| and | or /i).map(norm).filter(Boolean)) {
       let matched = false;
       for (const t of traits.filter((t) => t.kind === "on_off")) {
-        const cues = TRAIT_CUES[t.name] ?? [norm(traitLabel(t.name))];
+        const cues = [...new Set([...(TRAIT_CUES[t.name] ?? []), norm(traitLabel(t.name))])];
         const at = cues.map((cue) => ` ${clause} `.indexOf(` ${cue} `)).filter((i) => i >= 0)[0];
         if (at === undefined) continue;
         matched = true;
+        matchedPhrases?.add(cues.filter((cue) => ` ${clause} `.includes(` ${cue} `)).sort((a, b) => b.length - a.length)[0]);
         // A trait clause is short, so a negator anywhere before the cue turns it off.
         draft.profile[t.name] = !clause.slice(0, at).split(" ").some((w) => NEGATORS.has(w));
         draft.marks[t.name] = "explicit";
@@ -147,17 +181,34 @@ export function makeInterpreter(bundle, nn2) {
   }
 
   // NN2's validated draft in the questions screen's shape. The area is read locally, never from the model.
-  // shortcut: NN2's location text, distance and clarifications are unused until the place catalogue (#117/#118).
+  // The dedicated location answer is authoritative; NN2 cannot discard a restriction or invent geometry.
+  // shortcut: near searches still need #118's radius review rather than becoming boundary searches.
   function fromModel(reply, answers) {
     const draft = {
       profile: { ...reply.profile, cuisine: reply.profile.cuisine ?? undefined },
-      marks: { area: "explicit" },
+      marks: { area: answers.location?.trim() ? "explicit" : "default" },
       area: readArea(answers.location ?? ""),
       rentBand: rentCuts ? reply.fields.rent_band.value : "any",
-      unused: [...reply.unused],
+      unused: [],
     };
+    const explicitPhrases = new Set();
     if (!draft.area) draft.marks.area = "unresolved";
     for (const [name, f] of Object.entries(reply.fields)) draft.marks[name] = f.provenance;
+    // Explicit user statements outrank model defaults or omissions and remain editable in review.
+    readTraits(answers.other ?? "", draft, explicitPhrases);
+    draft.unused = reply.unused.flatMap(detail => detail
+      .split(/[,;.\n&+/]| and | or /i)
+      .map(clause => clause.trim())
+      .map(clause => {
+        const remaining = norm(clause).split(" ");
+        for (const phrase of explicitPhrases) {
+          const words = phrase.split(" ");
+          const at = remaining.findIndex((_, i) => words.every((word, j) => remaining[i + j] === word));
+          if (at >= 0) remaining.splice(at, words.length);
+        }
+        return remaining.filter(word => word && !FILLER.has(word)).join(" ");
+      })
+      .filter(Boolean));
     if (!draft.profile.cuisine) draft.marks.cuisine = "unresolved";
     if (!rentCuts) draft.marks.rent_band = "default";
     return draft;
@@ -177,7 +228,7 @@ export function makeInterpreter(bundle, nn2) {
   function readAnswers(answers) {
     const draft = {
       profile: defaultProfile(vocabulary, undefined),
-      marks: { area: "explicit", cuisine: "explicit" },
+      marks: { area: answers.location?.trim() ? "explicit" : "default", cuisine: "explicit" },
       area: readArea(answers.location ?? ""),
       rentBand: "any",
       unused: [],
@@ -212,7 +263,7 @@ export function makeInterpreter(bundle, nn2) {
 
   // The error a question shows for this answer, or null when it can move on.
   function check(key, text) {
-    if (key === "location") return !norm(text) ? REQUIRED : readArea(text) ? null : PLACE_SOON;
+    if (key === "location") return readArea(text) || areaCandidates(text).length ? null : AREA_HELP;
     // NN2 reads food the fallback cannot ("neapolitan pizza"); the review card asks if it cannot either.
     if (key === "food") return (nn2?.ready() ? norm(text) : readCuisine(text)) ? null : REQUIRED;
     return null;
@@ -220,14 +271,16 @@ export function makeInterpreter(bundle, nn2) {
 
   // The district codes inside the search area and rent band, in bundle order.
   function districtsInScope(area, rentBand) {
+    const members = area?.kind === "place" ? new Set(places.get(area.code)?.districts ?? []) : null;
     return new Set(bundle.districts.filter((d) => {
       const code = d.postcode_district;
-      const inArea = area.kind === "england" || (area.kind === "district" ? code === area.code : new RegExp(`^${area.code}\\d`).test(code));
+      const inArea = members ? members.has(code) : area?.kind === "england" ||
+        (area?.kind === "district" ? code === area.code : area?.kind === "postcode_area" && new RegExp(`^${area.code}\\d`).test(code));
       return inArea && (rentBand === "any" || rentBandOf(d, rentCuts) === rentBand);
     }).map((d) => d.postcode_district));
   }
 
-  return { interpret, check, readArea, districtsInScope, hasRent: Boolean(rentCuts) };
+  return { interpret, check, readArea, areaCandidates, districtsInScope, setCatalogue, hasRent: Boolean(rentCuts) };
 }
 
 // The highest rent in England's lowest and middle thirds of districts, or null with no rent values.

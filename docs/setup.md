@@ -42,6 +42,7 @@ $env:PLOTLUCK_PLAYWRIGHT = 'file:///' + $env:TEMP.Replace('\', '/') + '/plotluck
 $env:PLOTLUCK_BROWSER = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 node tests/browser/questions-flow.mjs
 node tests/browser/profile-flow.mjs
+node tests/browser/named-areas.mjs
 node tests/browser/nn2-flow.mjs
 ```
 
