@@ -1,5 +1,5 @@
 // The questions screen: six questions one at a time in one prompt box, then a review card.
-// Answers reach a draft only through interpreter.interpret (the #135 seam NN2 takes over in #136).
+// Answers reach a draft only through interpreter.interpret, which NN2 or its fallback serves.
 import { setUpCombobox } from "./combobox.js";
 import { ANSWER_LABELS, PLACE_SOON, RENT_BANDS, RENT_LABELS, REQUIRED } from "./interpret.js";
 import { matchCuisines, traitLabel, valueLabel } from "./pickers.js";
@@ -76,6 +76,8 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   const box = $("prompt");
   let index = 0;
   let draft = null;
+  // True while the answers are being read, so a second submit cannot start a second reading.
+  let reading = false;
   // Questions that have sent their dish; answering again sends no more.
   const served = new Set();
 
@@ -161,6 +163,7 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   }
 
   async function submit() {
+    if (reading) return;
     const q = questions[index];
     const text = input.value.trim();
     const error = interpreter.check(q.key, text);
@@ -171,7 +174,12 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
       serveDish(questions.length);
     }
     if (index < questions.length - 1) return show(index + 1);
-    draft = await interpreter.interpret({ ...answers });
+    reading = true;
+    try {
+      draft = await interpreter.interpret({ ...answers });
+    } finally {
+      reading = false;
+    }
     showReview();
   }
 

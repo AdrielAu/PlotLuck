@@ -1,0 +1,953 @@
+{
+  "hardware": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+    "adapter": {
+      "vendor": "intel",
+      "architecture": "gen-12lp",
+      "device": "",
+      "description": ""
+    }
+  },
+  "cold_load_seconds": 26.04510000000894,
+  "catalogue_load_seconds": 0.018299999997019766,
+  "catalogue_response_body_bytes": 1325270,
+  "results": [
+    {
+      "id": "clear-001",
+      "description": "A Thai restaurant within 3 km of London with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"London\",\"near\":true,\"distance\":3,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"London\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000001",
+          "name": "City of London",
+          "type": "city",
+          "context": "England"
+        },
+        {
+          "id": "E12000007",
+          "name": "Greater London",
+          "type": "region",
+          "context": "England"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 268,
+        "total_tokens": 293,
+        "extra": {
+          "e2e_latency_s": 2.289,
+          "prefill_tokens_per_s": 396.86065452566675,
+          "decode_tokens_per_s": 14.943960149578256,
+          "time_to_first_token_s": 0.6752999999970197,
+          "time_per_output_token_s": 0.0669166666660458,
+          "grammar_init_s": 0.00009999999403953553,
+          "grammar_per_token_s": 0.0001079999983310699
+        }
+      },
+      "seconds": 2.2965999999940396
+    },
+    {
+      "id": "clear-002",
+      "description": "A Thai restaurant in Camden.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Camden\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Camden\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000007",
+          "name": "Camden",
+          "type": "borough",
+          "context": "England"
+        },
+        {
+          "id": "E63004858",
+          "name": "Camden",
+          "type": "settlement",
+          "context": "Camden (E09000007)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 2.035,
+          "prefill_tokens_per_s": 406.3521718841834,
+          "decode_tokens_per_s": 18.02581296389354,
+          "time_to_first_token_s": 0.6422999999970198,
+          "time_per_output_token_s": 0.05547600000083447,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00012692307394284464
+        }
+      },
+      "seconds": 2.038
+    },
+    {
+      "id": "clear-003",
+      "description": "A Thai restaurant in Manchester.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Manchester\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Manchester\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000003",
+          "name": "Manchester",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63001295",
+          "name": "Manchester",
+          "type": "settlement",
+          "context": "Manchester (E08000003)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 261,
+        "total_tokens": 286,
+        "extra": {
+          "e2e_latency_s": 1.967,
+          "prefill_tokens_per_s": 414.35148435867643,
+          "decode_tokens_per_s": 18.004501125683852,
+          "time_to_first_token_s": 0.6299000000059605,
+          "time_per_output_token_s": 0.055541666665424906,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011999999821186062
+        }
+      },
+      "seconds": 1.969300000011921
+    },
+    {
+      "id": "clear-004",
+      "description": "A Thai restaurant in Leeds with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Leeds\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Leeds\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000035",
+          "name": "Leeds",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63000784",
+          "name": "Leeds",
+          "type": "settlement",
+          "context": "Leeds (E08000035)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 264,
+        "total_tokens": 290,
+        "extra": {
+          "e2e_latency_s": 1.982,
+          "prefill_tokens_per_s": 414.31261770051043,
+          "decode_tokens_per_s": 18.646975460538847,
+          "time_to_first_token_s": 0.6372000000029803,
+          "time_per_output_token_s": 0.053628000000119205,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.0001230769249109121
+        }
+      },
+      "seconds": 1.9859000000059606
+    },
+    {
+      "id": "clear-005",
+      "description": "A Thai restaurant within 3 km of Bristol.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Bristol\",\"near\":true,\"distance\":3,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Bristol\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E63005057",
+          "name": "Bristol",
+          "type": "settlement",
+          "context": "Bristol, City of (E06000023)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 265,
+        "total_tokens": 291,
+        "extra": {
+          "e2e_latency_s": 2,
+          "prefill_tokens_per_s": 418.5091598309997,
+          "decode_tokens_per_s": 18.352664807492094,
+          "time_to_first_token_s": 0.6331999999880791,
+          "time_per_output_token_s": 0.05448799999833107,
+          "grammar_init_s": 0.00009999999403953553,
+          "grammar_per_token_s": 0.00011538461710398012
+        }
+      },
+      "seconds": 2.004199999988079
+    },
+    {
+      "id": "clear-006",
+      "description": "A Thai restaurant in York.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"York\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"York\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E06000014",
+          "name": "York",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63000615",
+          "name": "York",
+          "type": "settlement",
+          "context": "York (E06000014)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 261,
+        "total_tokens": 286,
+        "extra": {
+          "e2e_latency_s": 1.959,
+          "prefill_tokens_per_s": 405.46838589217276,
+          "decode_tokens_per_s": 18.316416087543857,
+          "time_to_first_token_s": 0.6437000000029802,
+          "time_per_output_token_s": 0.05459583333445092,
+          "grammar_init_s": 0.00010000000894069671,
+          "grammar_per_token_s": 0.00011600000083446501
+        }
+      },
+      "seconds": 1.9617000000029803
+    },
+    {
+      "id": "clear-007",
+      "description": "A Thai restaurant in Birmingham with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Birmingham\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Birmingham\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000025",
+          "name": "Birmingham",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63002904",
+          "name": "Birmingham",
+          "type": "settlement",
+          "context": "Birmingham (E08000025)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 264,
+        "total_tokens": 290,
+        "extra": {
+          "e2e_latency_s": 1.946,
+          "prefill_tokens_per_s": 418.3172238987377,
+          "decode_tokens_per_s": 19.079600090757555,
+          "time_to_first_token_s": 0.6310999999940395,
+          "time_per_output_token_s": 0.05241200000226499,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00009230769253694094
+        }
+      },
+      "seconds": 1.9475
+    },
+    {
+      "id": "clear-008",
+      "description": "A Thai restaurant in Westminster.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Westminster\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Westminster\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000033",
+          "name": "Westminster",
+          "type": "borough",
+          "context": "England"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.925,
+          "prefill_tokens_per_s": 414.614773629865,
+          "decode_tokens_per_s": 19.3573364307305,
+          "time_to_first_token_s": 0.6295,
+          "time_per_output_token_s": 0.051659999999403974,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011153846119458857
+        }
+      },
+      "seconds": 1.9259000000059605
+    },
+    {
+      "id": "clear-009",
+      "description": "A Thai restaurant within 3 km of Liverpool.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Liverpool\",\"near\":true,\"distance\":3,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Liverpool\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000012",
+          "name": "Liverpool",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63001374",
+          "name": "Liverpool",
+          "type": "settlement",
+          "context": "Liverpool (E08000012)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 265,
+        "total_tokens": 290,
+        "extra": {
+          "e2e_latency_s": 1.927,
+          "prefill_tokens_per_s": 433.71522094926354,
+          "decode_tokens_per_s": 18.320610686397714,
+          "time_to_first_token_s": 0.611,
+          "time_per_output_token_s": 0.05458333333519597,
+          "grammar_init_s": 0.00010000000894069671,
+          "grammar_per_token_s": 0.00013199999928474422
+        }
+      },
+      "seconds": 1.9297999999970197
+    },
+    {
+      "id": "clear-010",
+      "description": "A Thai restaurant in Oxford with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Oxford\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Oxford\",\"cuisine\":\"Thai\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E07000178",
+          "name": "Oxford",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63004458",
+          "name": "Oxford",
+          "type": "settlement",
+          "context": "Oxford (E07000178)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 264,
+        "total_tokens": 290,
+        "extra": {
+          "e2e_latency_s": 1.912,
+          "prefill_tokens_per_s": 425.7377842324425,
+          "decode_tokens_per_s": 19.41747572882954,
+          "time_to_first_token_s": 0.6200999999940395,
+          "time_per_output_token_s": 0.05149999999821185,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011538461710398012
+        }
+      },
+      "seconds": 1.913
+    },
+    {
+      "id": "clear-011",
+      "description": "A Italian restaurant in London.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"London\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"London\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000001",
+          "name": "City of London",
+          "type": "city",
+          "context": "England"
+        },
+        {
+          "id": "E12000007",
+          "name": "Greater London",
+          "type": "region",
+          "context": "England"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 261,
+        "total_tokens": 286,
+        "extra": {
+          "e2e_latency_s": 1.879,
+          "prefill_tokens_per_s": 431.6903738051159,
+          "decode_tokens_per_s": 18.89317484018991,
+          "time_to_first_token_s": 0.6045999999940396,
+          "time_per_output_token_s": 0.052929166667784265,
+          "grammar_init_s": 0.00009999999403953553,
+          "grammar_per_token_s": 0.00012799999952316278
+        }
+      },
+      "seconds": 1.8841000000089407
+    },
+    {
+      "id": "clear-012",
+      "description": "A Italian restaurant in Camden.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Camden\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Camden\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000007",
+          "name": "Camden",
+          "type": "borough",
+          "context": "England"
+        },
+        {
+          "id": "E63004858",
+          "name": "Camden",
+          "type": "settlement",
+          "context": "Camden (E09000007)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.892,
+          "prefill_tokens_per_s": 431.5476190497456,
+          "decode_tokens_per_s": 19.493177387687744,
+          "time_to_first_token_s": 0.6047999999970197,
+          "time_per_output_token_s": 0.051300000000596035,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00010384615682638605
+        }
+      },
+      "seconds": 1.8950999999940394
+    },
+    {
+      "id": "clear-013",
+      "description": "A Italian restaurant within 3 km of Manchester with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Manchester\",\"near\":true,\"distance\":3,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Manchester\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000003",
+          "name": "Manchester",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63001295",
+          "name": "Manchester",
+          "type": "settlement",
+          "context": "Manchester (E08000003)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 268,
+        "total_tokens": 293,
+        "extra": {
+          "e2e_latency_s": 1.852,
+          "prefill_tokens_per_s": 441.44292537646714,
+          "decode_tokens_per_s": 19.32367149804822,
+          "time_to_first_token_s": 0.6071000000089407,
+          "time_per_output_token_s": 0.051749999998758234,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00009599999845027924
+        }
+      },
+      "seconds": 1.8545
+    },
+    {
+      "id": "clear-014",
+      "description": "A Italian restaurant in Leeds.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Leeds\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Leeds\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000035",
+          "name": "Leeds",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63000784",
+          "name": "Leeds",
+          "type": "settlement",
+          "context": "Leeds (E08000035)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.96,
+          "prefill_tokens_per_s": 428.8531054817052,
+          "decode_tokens_per_s": 18.577691906899126,
+          "time_to_first_token_s": 0.6086000000089407,
+          "time_per_output_token_s": 0.05382800000190733,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00012692307738157416
+        }
+      },
+      "seconds": 1.9622999999970199
+    },
+    {
+      "id": "clear-015",
+      "description": "A Italian restaurant in Bristol.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Bristol\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Bristol\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E63005057",
+          "name": "Bristol",
+          "type": "settlement",
+          "context": "Bristol, City of (E06000023)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.973,
+          "prefill_tokens_per_s": 427.79872151479293,
+          "decode_tokens_per_s": 18.41756298838891,
+          "time_to_first_token_s": 0.6101000000089407,
+          "time_per_output_token_s": 0.054295999999046336,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00012692307623533099
+        }
+      },
+      "seconds": 1.9744000000059605
+    },
+    {
+      "id": "clear-016",
+      "description": "A Italian restaurant in York with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"York\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"York\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E06000014",
+          "name": "York",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63000615",
+          "name": "York",
+          "type": "settlement",
+          "context": "York (E06000014)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 264,
+        "total_tokens": 289,
+        "extra": {
+          "e2e_latency_s": 1.915,
+          "prefill_tokens_per_s": 433.9963833655982,
+          "decode_tokens_per_s": 18.436011675760874,
+          "time_to_first_token_s": 0.6082999999970198,
+          "time_per_output_token_s": 0.05424166666778426,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011600000083446498
+        }
+      },
+      "seconds": 1.9158999999910593
+    },
+    {
+      "id": "clear-017",
+      "description": "A Italian restaurant within 3 km of Birmingham.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Birmingham\",\"near\":true,\"distance\":3,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Birmingham\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000025",
+          "name": "Birmingham",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63002904",
+          "name": "Birmingham",
+          "type": "settlement",
+          "context": "Birmingham (E08000025)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 265,
+        "total_tokens": 291,
+        "extra": {
+          "e2e_latency_s": 1.983,
+          "prefill_tokens_per_s": 436.50140010311605,
+          "decode_tokens_per_s": 18.244180106585688,
+          "time_to_first_token_s": 0.6070999999940395,
+          "time_per_output_token_s": 0.0548119999998808,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00010769230700456177
+        }
+      },
+      "seconds": 1.9872999999970198
+    },
+    {
+      "id": "clear-018",
+      "description": "A Italian restaurant in Westminster.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Westminster\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Westminster\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E09000033",
+          "name": "Westminster",
+          "type": "borough",
+          "context": "England"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.953,
+          "prefill_tokens_per_s": 429.2763157894737,
+          "decode_tokens_per_s": 18.658108812970106,
+          "time_to_first_token_s": 0.608,
+          "time_per_output_token_s": 0.053596000003218666,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00010769230757768335
+        }
+      },
+      "seconds": 1.9551000000089407
+    },
+    {
+      "id": "clear-019",
+      "description": "A Italian restaurant in Liverpool with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Liverpool\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Liverpool\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E08000012",
+          "name": "Liverpool",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63001374",
+          "name": "Liverpool",
+          "type": "settlement",
+          "context": "Liverpool (E08000012)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 264,
+        "total_tokens": 289,
+        "extra": {
+          "e2e_latency_s": 1.893,
+          "prefill_tokens_per_s": 433.4263667748866,
+          "decode_tokens_per_s": 18.75146495723928,
+          "time_to_first_token_s": 0.6090999999940395,
+          "time_per_output_token_s": 0.053329166669398555,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011600000143051143
+        }
+      },
+      "seconds": 1.8969000000059604
+    },
+    {
+      "id": "clear-020",
+      "description": "A Italian restaurant in Oxford.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Italian\",\"provenance\":\"explicit\",\"evidence\":\"Italian\"},\"price_band\":{\"value\":\"unknown\",\"provenance\":\"default\",\"evidence\":null},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"chain\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegetarian_friendly\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"vegan_options\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null},\"gluten_free\":{\"value\":false,\"provenance\":\"default\",\"evidence\":null}},\"location\":{\"text\":\"Oxford\",\"near\":false,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[]}",
+      "raw_reply": "{\"region\":\"Oxford\",\"cuisine\":\"Italian\",\"price_band\":\"unknown\",\"venue_type\":\"Restaurant\",\"rent\":null}",
+      "rentBudget": null,
+      "rentNeedsReview": false,
+      "place_candidates": [
+        {
+          "id": "E07000178",
+          "name": "Oxford",
+          "type": "local_authority",
+          "context": "England"
+        },
+        {
+          "id": "E63004458",
+          "name": "Oxford",
+          "type": "settlement",
+          "context": "Oxford (E07000178)"
+        }
+      ],
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 261,
+        "total_tokens": 287,
+        "extra": {
+          "e2e_latency_s": 1.97,
+          "prefill_tokens_per_s": 428.29012142672656,
+          "decode_tokens_per_s": 18.439297831173786,
+          "time_to_first_token_s": 0.6094000000059605,
+          "time_per_output_token_s": 0.05423200000107289,
+          "grammar_init_s": 0,
+          "grammar_per_token_s": 0.00011538461595773693
+        }
+      },
+      "seconds": 1.9725999999940396
+    }
+  ],
+  "browser_version": "155.0.4283.45",
+  "transfers": [
+    {
+      "url": "https://esm.run/@mlc-ai/web-llm@0.2.86",
+      "body_bytes": 90,
+      "started_at_ms": 1792260000927.8472,
+      "finished_at_ms": 1792260001053.2131
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.86/+esm",
+      "body_bytes": 1851626,
+      "started_at_ms": 1792260001049.8481,
+      "finished_at_ms": 1792260001199.6682
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/mlc-chat-config.json",
+      "body_bytes": 338,
+      "started_at_ms": 1792260001246.217,
+      "finished_at_ms": 1792260001390.916
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/mlc-chat-config.json",
+      "body_bytes": 1686,
+      "started_at_ms": 1792260001389.88,
+      "finished_at_ms": 1792260001495.368
+    },
+    {
+      "url": "https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0/web-llm-models/v0_2_86/base/Qwen2-0.5B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      "body_bytes": 5556042,
+      "started_at_ms": 1792260001502.522,
+      "finished_at_ms": 1792260001761.559
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tokenizer.json",
+      "body_bytes": 326,
+      "started_at_ms": 1792260001835.105,
+      "finished_at_ms": 1792260001932.04
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tokenizer.json",
+      "body_bytes": 2072139,
+      "started_at_ms": 1792260001932.256,
+      "finished_at_ms": 1792260002379.5762
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tensor-cache.json",
+      "body_bytes": 332,
+      "started_at_ms": 1792260002759.6,
+      "finished_at_ms": 1792260002859.028
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tensor-cache.json",
+      "body_bytes": 3961,
+      "started_at_ms": 1792260002859.149,
+      "finished_at_ms": 1792260002961.417
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_4.bin",
+      "body_bytes": 1159,
+      "started_at_ms": 1792260002966.5461,
+      "finished_at_ms": 1792260003065.915
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_2.bin",
+      "body_bytes": 1157,
+      "started_at_ms": 1792260002966.4353,
+      "finished_at_ms": 1792260003066.3223
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_6.bin",
+      "body_bytes": 1159,
+      "started_at_ms": 1792260002966.6082,
+      "finished_at_ms": 1792260003067.509
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_0.bin",
+      "body_bytes": 1159,
+      "started_at_ms": 1792260002965.8489,
+      "finished_at_ms": 1792260003068.826
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/5eb1735022a6fe453b7938a7a6089a9609540335f50c16ab7afb7daf38ab191e",
+      "body_bytes": 33039678,
+      "started_at_ms": 1792260003064.966,
+      "finished_at_ms": 1792260007685.3071
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/8ce36d635b3ff4296b03dd78665f337e4c52fe3ca599996cf001c2c121b6a847",
+      "body_bytes": 33316330,
+      "started_at_ms": 1792260003066.606,
+      "finished_at_ms": 1792260007713.1719
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_5.bin",
+      "body_bytes": 1161,
+      "started_at_ms": 1792260007777.8972,
+      "finished_at_ms": 1792260007933.2073
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_7.bin",
+      "body_bytes": 1159,
+      "started_at_ms": 1792260007778.289,
+      "finished_at_ms": 1792260007933.585
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/b61c01cb6f5236fe942666ef8d5614d09e4203bbac88b46b418ecea95319d5c2",
+      "body_bytes": 33524309,
+      "started_at_ms": 1792260003066.254,
+      "finished_at_ms": 1792260007966.031
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_3.bin",
+      "body_bytes": 1161,
+      "started_at_ms": 1792260008016.048,
+      "finished_at_ms": 1792260008173.126
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/63ec929bcbcf31798e63a3ceb1173bbe90d840ef5ff185e30b25a8d5de6dfff4",
+      "body_bytes": 14614476,
+      "started_at_ms": 1792260007933.4878,
+      "finished_at_ms": 1792260010131.692
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/68d32f9562a2535636b4751bf921abb38c077c0a81d2f32a8821d1c5688745a4",
+      "body_bytes": 68105401,
+      "started_at_ms": 1792260003068.143,
+      "finished_at_ms": 1792260011361.9321
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/ed05da83010e17613707ee457b0a7b61bcdae0547e2c1f30968cd0f934514978",
+      "body_bytes": 29228508,
+      "started_at_ms": 1792260007932.885,
+      "finished_at_ms": 1792260011554.246
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_1.bin",
+      "body_bytes": 1157,
+      "started_at_ms": 1792260011463.407,
+      "finished_at_ms": 1792260011641.446
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/1527f55874a63dd7115659cef065a32b850e75fff1cf82054c0e4692dbebd610",
+      "body_bytes": 33072545,
+      "started_at_ms": 1792260008173.552,
+      "finished_at_ms": 1792260011842.603
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/5a3d97ca8f5cc89422599816a258bacbd794318d43d29a3682b00172ef125901",
+      "body_bytes": 33253133,
+      "started_at_ms": 1792260011641.442,
+      "finished_at_ms": 1792260013071.668
+    }
+  ],
+  "transfer_failures": [],
+  "download_measurement_complete": true,
+  "external_download_span_seconds": 12.14382080078125,
+  "total_transfer_body_bytes": 287650192,
+  "model_transfer_body_bytes": 285798476,
+  "supporting_transfer_body_bytes": 1851716,
+  "within_download_budget": true,
+  "download_note": "Fresh browser context. Measured external response bodies, including redirects and runtime; not shard manifest sizes, wire bytes, or GPU memory. Download span overlaps initialization. Local geography response-body bytes are reported separately.",
+  "mode": "focused",
+  "candidate": {
+    "runtime": "0.2.86",
+    "runtimeUrl": "https://esm.run/@mlc-ai/web-llm@0.2.86",
+    "modelId": "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+    "model": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/",
+    "modelLib": "https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0/web-llm-models/v0_2_86/base/Qwen2-0.5B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+    "nativeModel": "Qwen/Qwen2.5-0.5B-Instruct",
+    "nativeRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "downloadBudget": 400000000
+  },
+  "source_sha256": {
+    "web/interpreter.js": "c6f657b439f43da87ef01a9a29a9a03e0c024af29120a65afa5127c5f43ffcf0",
+    "web/grounded-interpreter.js": "4c879a1d8f7094d5bcf3d542ccaba956447f697496d6e39c96fd853bc63d3d46",
+    "web/profile-extraction.js": "d9df386101381032122e9066642073c0cff8fa5a1fc33ea1c61687602d4c26cf",
+    "web/models/geography.json": "b3eddbe77ace8a873a34d3e3ecbe1bb728af22fc45ae6932fc5a58e208477047",
+    "web/nn2-worker.js": "8e2b0148e2ac62a5d6fb8100f57dd21d0b46edc50c6f877b27ff5cb252371bc0",
+    "web/nn2-runtime.js": "d6a83feb05c305665d3a0c03189375c34dc29f737327dbb586166401f43804af",
+    "web/models/vocabulary.json": "bb3bc729251203e7034ec8c796c7d2a5b21fad8c852e066d43a94bd4c9cf9c2e",
+    "tests/fixtures/nn2-benchmark.json": "70014f9901c6305fb3cefcba40963002e573e793fef2b404e1533f865d2c50ba",
+    "scripts/prove-nn2-browser.mjs": "fb824e126e89de8e2f3ba739cc3679465ea8d34dde6795179e54410e75c2643e",
+    "scripts/score-nn2.mjs": "7edf94c98453fdd275173c0a80ec71fe0f3f37e3e927630aaebda285a5754f2a"
+  },
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "split": "development",
+  "planned_cases": [
+    "clear-001",
+    "clear-002",
+    "clear-003",
+    "clear-004",
+    "clear-005",
+    "clear-006",
+    "clear-007",
+    "clear-008",
+    "clear-009",
+    "clear-010",
+    "clear-011",
+    "clear-012",
+    "clear-013",
+    "clear-014",
+    "clear-015",
+    "clear-016",
+    "clear-017",
+    "clear-018",
+    "clear-019",
+    "clear-020"
+  ],
+  "unexecuted_cases": [],
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "os_release": "10.0.26300",
+    "cpu": "12th Gen Intel(R) Core(TM) i9-12900H",
+    "logical_cpus": 20,
+    "memory_bytes": 34035830784,
+    "node": "v24.22.0",
+    "headless": true,
+    "fresh_context": true
+  },
+  "recorded_at": "2026-10-17T18:01:06.801Z"
+}

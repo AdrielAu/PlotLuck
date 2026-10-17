@@ -610,6 +610,45 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
     assert "commercial_rent_index" not in metrics.get("inputs_left_out", {})
 
 
+def test_district_radius_covers_its_postcodes_with_a_minimum_for_tiny_districts():
+    km_per_degree = build.EARTH_RADIUS_KM * np.pi / 180
+    lat, lon = 51.5, -0.1
+    # RING: 20 postcodes on a 1 km circle. ONE: a single-postcode district (a PO box).
+    postcodes = [
+        {"district": "RING1", "doterm": "", "imd25ind": "",
+         "lat": str(lat + np.sin(t) / km_per_degree),
+         "long": str(lon + np.cos(t) / (km_per_degree * np.cos(np.radians(lat))))}
+        for t in np.linspace(0, 2 * np.pi, 20, endpoint=False)
+    ] + [{"district": "ONE1", "doterm": "", "imd25ind": "", "lat": str(lat), "long": str(lon)}]
+
+    rows = {d["postcode_district"]: d for d in build.district_table(postcodes, [], [], [], {}, [])}
+
+    assert rows["RING1"]["radius_km"] == pytest.approx(1.0, abs=0.01)
+    assert rows["ONE1"]["radius_km"] == build.MIN_RADIUS_KM
+
+
+def test_every_sample_district_has_a_positive_radius_and_the_build_names_the_tiny_ones(tmp_path, capsys):
+    data = copy_sources(tmp_path / "data")
+    build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    radii = {d["postcode_district"]: float(d["radius_km"]) for d in read_csv(data / "bundle" / "districts.csv")}
+
+    assert all(r >= build.MIN_RADIUS_KM for r in radii.values())
+    assert radii["SE1"] > build.MIN_RADIUS_KM  # 1,724 sample postcodes: a real spread, not the floor
+    # EC3N has a single sample postcode.
+    assert "EC3N" in capsys.readouterr().out.split("km radius")[1].splitlines()[0]
+
+
+@pytest.mark.parametrize("radius", ["", "0", "-1"])
+def test_publish_rejects_a_missing_or_non_positive_radius(built, tmp_path, radius):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    bundle["districts.csv"][0]["radius_km"] = radius
+    with pytest.raises(ValueError, match="radius_km"):
+        build.publish_bundle(tmp_path / "public", bundle)
+
+
 def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
     copy_sources(tmp_path)
     rows = read_csv(tmp_path / "tripadvisor_england.csv")

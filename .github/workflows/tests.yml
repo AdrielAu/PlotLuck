@@ -51,6 +51,6 @@ jobs:
       - name: Install Chromium
         run: '"$RUNNER_TEMP/plotluck-browser-tools/node_modules/.bin/playwright" install --with-deps chromium'
       - name: Test the questions screen and profile confirmation in Chromium
-        run: node tests/browser/questions-flow.mjs && node tests/browser/profile-flow.mjs
+        run: node tests/browser/questions-flow.mjs && node tests/browser/profile-flow.mjs && node tests/browser/nn2-recovery.mjs && node tests/browser/nn2-flow.mjs
         env:
           PLOTLUCK_PLAYWRIGHT: file://${{ runner.temp }}/plotluck-browser-tools/node_modules/playwright/index.mjs
