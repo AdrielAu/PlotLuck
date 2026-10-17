@@ -1,3 +1,6 @@
 # Local link to .agents/skills, created per clone (see docs/setup.md)
 .claude/skills
 .claude/settings.local.json
+
+# Agent worktrees: disposable, per clone
+.claude/worktrees/
