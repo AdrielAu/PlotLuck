@@ -1,0 +1,46 @@
+{
+ "source_rows": 144681,
+ "exact_duplicates": {
+  "links_repeated": 0,
+  "extra_rows": 0
+ },
+ "near_duplicates": {
+  "within_25m": {
+   "groups": 484,
+   "extra_rows": 490
+  },
+  "within_50m": {
+   "groups": 611,
+   "extra_rows": 620
+  },
+  "within_100m": {
+   "groups": 730,
+   "extra_rows": 746
+  },
+  "within_250m": {
+   "groups": 1094,
+   "extra_rows": 1275
+  }
+ },
+ "nearest_postcode_km": {
+  "located_rows": 143504,
+  "p50": 0.027,
+  "p90": 0.075,
+  "p99": 0.299,
+  "p99_9": 0.809,
+  "max": 376.966,
+  "beyond_0_5km": 484,
+  "beyond_1km": 104,
+  "beyond_2km": 70,
+  "beyond_5km": 66
+ },
+ "names": {
+  "distinct_exact": 104844,
+  "distinct_normalised": 102226,
+  "distinct_without_suffix": 100033,
+  "chain_rows_exact": 38516,
+  "chain_rows_normalised": 41076,
+  "chain_rows_without_suffix": 43310,
+  "suffix_merge_groups_over_5km": 628
+ }
+}
