@@ -17,13 +17,13 @@ def data_dir(root: Path | None = None) -> Path:
     when ``data/full/`` exists, else sample. ``root`` overrides the repo root
     (for tests).
     """
-    data = (Path(root) if root is not None else _REPO_ROOT) / "data"
+    parent = (Path(root) if root is not None else _REPO_ROOT) / "data"
     choice = os.environ.get(ENV_VAR)
     if choice is None:
-        return data / ("full" if (data / "full").is_dir() else "sample")
+        return parent / ("full" if (parent / "full").is_dir() else "sample")
     if choice not in ALLOWED:
         raise ValueError(
             f"{ENV_VAR}={choice!r} is invalid; allowed values: "
             + ", ".join(ALLOWED)
         )
-    return data / choice
+    return parent / choice

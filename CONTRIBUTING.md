@@ -25,6 +25,10 @@ Plotluck scores London postcode districts for restaurant survival. This page is 
 
 Development is on Windows; the code runs on Linux s390x. Use `pathlib` for paths, keep LF line endings and consistent filename case.
 
+## File size
+
+Keep every committed file under 5 MB: samples, run results and evidence screenshots.
+
 ## Where results land
 
 - `runs/<yyyy-mm-dd>-<step>/`: metrics, loss curves and benchmark timings ([runs/README.md](runs/README.md)).

@@ -6,7 +6,7 @@ Screenshots prove the judged steps. Anyone on the team can capture one: take the
 
 - **Redact before committing** (the repo is public). Blur the VM IP, the Jupyter token and key fingerprints. Keep `linux1`@hostname and `s390x` visible, since they are the proof.
 - **Naming**: `NN-<step>[-<n>].png`, numbered in judged order. Use `-2`, `-3` for extra shots of one step. No dates. A re-capture overwrites the old file; git keeps the history.
-- **Size**: keep each file under 5 MB.
+- **Size**: keep each file under the [size cap](../../CONTRIBUTING.md#file-size).
 - **Run folders**: `runs/<yyyy-mm-dd>-<step>/` holds machine output only (metrics JSON, loss PNGs, timings). Screenshots live here, not there. `<yyyy-mm-dd>` is the date of the run you are linking to.
 
 ## Shots

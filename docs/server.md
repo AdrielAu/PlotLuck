@@ -1,6 +1,6 @@
 # Server runbook (LinuxONE operator)
 
-For the current **server operator**, one person at a time. Everything runs on the shared clone at `/home/linux1/shared/PlotLuck` on the VM (inside the Jupyter container: `/home/ibm-user/shared/PlotLuck`). Replace `<VM_IP>` with the VM address from the team chat. Never commit the IP, the Jupyter token or key fingerprints.
+For the current **server operator**, one person at a time. Everything runs on the shared clone on the VM, `REPO=/home/linux1/shared/PlotLuck` (inside the Jupyter container: `~/shared/PlotLuck`). Set `REPO` in your SSH shell with `REPO=/home/linux1/shared/PlotLuck`; the other sections reuse it. Replace `<VM_IP>` with the VM address from the team chat. Never commit the IP, the Jupyter token or key fingerprints.
 
 ## Rules of the shared clone
 
@@ -46,7 +46,7 @@ Use the extension's "Add as Workspace Folder" on `linux1`.
 
 ```bash
 ssh linux1@<VM_IP>
-cd /home/linux1/shared/PlotLuck
+cd "$REPO"
 git status
 git pull
 ```
@@ -75,7 +75,7 @@ Host github.com
   IdentityFile ~/.ssh/plotluck_deploy
   IdentitiesOnly yes
 CONF
-cd /home/linux1/shared/PlotLuck
+cd "$REPO"
 git remote set-url origin git@github.com:AdrielAu/PlotLuck.git
 ssh -T git@github.com
 ```
@@ -101,7 +101,7 @@ Check it worked: `python -c "import plotluck; print(plotluck.__file__)"` should 
 
 ## 6. Where `data/full/` comes from
 
-`data/full/` is git-ignored and exists only on the VM. Each dataset's source URL, licence and retrieval date are in `data/SOURCES.md`. Download them on the server into `/home/linux1/shared/PlotLuck/data/full/` (the VM has outbound HTTPS). Unverified: `data.london.gov.uk` returned 403 to a plain Python client, probably the default User-Agent; retry with `curl -A "Mozilla/5.0" -O <URL>`, or download on a laptop and `scp` it over. Code picks the folder through `plotluck.data_dir()`; do not hard-code either path.
+`data/full/` is git-ignored and exists only on the VM. Each dataset's source URL, licence and retrieval date are in `data/SOURCES.md`. Download them on the server into `$REPO/data/full/` (the VM has outbound HTTPS). Unverified: `data.london.gov.uk` returned 403 to a plain Python client, probably the default User-Agent; retry with `curl -A "Mozilla/5.0" -O <URL>`, or download on a laptop and `scp` it over. Code picks the folder through `plotluck.data_dir()`; do not hard-code either path.
 
 ## Branches and PRs
 

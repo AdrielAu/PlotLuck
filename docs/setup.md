@@ -83,7 +83,7 @@ Re-syncing a skill from `skills-lock.json` overwrites local edits, so each one i
 
 - `unslop` (`cursor/plugins`, `pstack/skills/unslop`, pinned content at `bc697d0`, MIT; `pstack/LICENSE` kept). The lock entry points at the repo's current `harness/pstack/claude-code/skills/unslop` copy, whose `SKILL.md` is byte-identical to `bc697d0`; `npx skills add` cannot pin a commit. Two changes:
   - `description` in `SKILL.md` is "Manual only: use only when the user types /unslop. Cuts AI tells from writing."
-  - Added `agents/openai.yaml` with `policy.allow_implicit_invocation: false`, the same shape as the other vendored skills, so Codex does not pick it up unasked.
+  - Added `agents/openai.yaml` with `policy.allow_implicit_invocation: false`, the same `policy.allow_implicit_invocation` shape as the other manual-only vendored skills (e.g. `handoff`, `grill-me`; shape not verified against Codex docs), so Codex does not pick it up unasked.
 
 ### Optional: git-guardrails (Claude Code only)
 
@@ -95,5 +95,7 @@ Re-syncing a skill from `skills-lock.json` overwrites local edits, so each one i
 - Codex and Antigravity have no such hook. They rely on the `AGENTS.md` never-line and the `main` ruleset.
 
 ### Handoff
+
+A handoff compacts the current conversation into a note so a fresh agent session can continue the work. Use it when a session gets long or you switch tools.
 
 `claude-handoff` is for Claude Code. Codex/Antigravity: use `handoff`.
