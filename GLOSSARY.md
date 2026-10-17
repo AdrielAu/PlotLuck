@@ -83,7 +83,7 @@ What Plotluck would submit if the build stopped now: a cuisine and traits picked
 _Avoid_: Demo, v1, vertical slice
 
 **Sample data**:
-A small subset of the data that teammates use to test on their laptops.
+Small data with the full data's schema that teammates use to test on their laptops. It is cut from the full data, or made up when a dataset's licence forbids sharing its rows.
 _Avoid_: Test data, dev data, toy data
 
 **Full data**:
