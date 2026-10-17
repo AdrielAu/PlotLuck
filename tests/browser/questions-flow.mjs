@@ -87,10 +87,6 @@ test("six questions lead through a review card to scoped results", async (t) => 
   await t.test("results show the draft, filter by area and rent band, and go back with answers kept", async () => {
     assert.match(await page.locator("#results-heading").innerText(), /^Vietnamese.* · SE postcode area$/);
     assert.match(await page.locator("#confirmed-profile").innerText(), /^Venue type: Café; Price band: Budget \(\$\);.*Vegan options: Yes;.*Rent band: High\.$/);
-    // The pickers panel starts collapsed, so the map fills the window.
-    assert.equal(await page.locator("#profile-panel").evaluate((el) => el.open), false);
-    assert.equal(await page.getByRole("button", { name: "Compare districts" }).isVisible(), false);
-    await page.getByText("Edit your restaurant", { exact: true }).click();
     // Filtering itself is pinned on sample data in tests/js; here, only SE districts, fewer at high rent.
     const shown = async () => Number((await page.locator("#count").innerText()).match(/of (\d+) districts/)[1]);
     const high = await shown();

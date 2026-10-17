@@ -31,8 +31,8 @@ button { cursor: pointer; }
 ::selection { background: #bacfa9; color: var(--ink); }
 input { accent-color: var(--green); caret-color: var(--green); }
 :disabled { cursor: wait; opacity: 0.6; }
-/* The map fills the window between the top line, the collapsed restaurant pickers and slim notes; opening the pickers scrolls the page. Desktop Chrome/Edge only (#127). */
-#results-screen { display: grid; grid-template-rows: auto auto minmax(480px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
+/* The map fills the window below the top line and the restaurant pickers, above slim notes. Desktop Chrome/Edge only (#127). */
+#results-screen { display: grid; grid-template-rows: auto auto minmax(560px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }
 .wordmark { font: 500 18px/1.2 Georgia, serif; letter-spacing: -0.02em; }

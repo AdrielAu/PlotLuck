@@ -18,8 +18,6 @@ test("a profile needs confirmation before its district results appear", async (t
   assert.equal(await page.locator("#questions-screen").isVisible(), false);
   assert.equal(await page.evaluate(() => document.activeElement.id), "results-heading");
   const cuisine = page.getByRole("combobox", { name: "Cuisine", exact: true });
-  assert.equal(await cuisine.isVisible(), false);
-  await page.getByText("Edit your restaurant", { exact: true }).click();
   assert.equal(await cuisine.inputValue(), "Thai");
   assert.equal(await page.locator("#results-heading").innerText(), "Thai · England");
   assert.match(await page.locator("#confirmed-profile").innerText(), /Vegan options: Yes/);

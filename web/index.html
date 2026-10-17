@@ -78,31 +78,27 @@
     </div>
     <button id="change-answers" class="text-button" type="button">Change answers</button>
   </header>
-  <!-- Collapsed by default, so the map fills the window; open it to edit and compare again. -->
-  <details id="profile-panel">
-    <summary>Edit your restaurant</summary>
-    <fieldset id="profile-controls" disabled>
-      <legend>Your restaurant</legend>
-      <div class="cuisine-field">
-        <label for="cuisine">Cuisine</label>
-        <div class="combobox">
-          <input id="cuisine" type="text" role="combobox" autocomplete="off" spellcheck="false"
-            aria-autocomplete="list" aria-expanded="false" aria-controls="cuisine-options" aria-describedby="cuisine-help">
-          <ul id="cuisine-options" role="listbox" aria-label="Cuisines" hidden></ul>
-        </div>
-        <p id="cuisine-help">Type part of a name, such as “viet”. Rare cuisines show the broader group they are scored as.</p>
-        <p id="cuisine-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  <fieldset id="profile-controls" disabled>
+    <legend>Your restaurant</legend>
+    <div class="cuisine-field">
+      <label for="cuisine">Cuisine</label>
+      <div class="combobox">
+        <input id="cuisine" type="text" role="combobox" autocomplete="off" spellcheck="false"
+          aria-autocomplete="list" aria-expanded="false" aria-controls="cuisine-options" aria-describedby="cuisine-help">
+        <ul id="cuisine-options" role="listbox" aria-label="Cuisines" hidden></ul>
       </div>
-      <div id="trait-pickers"></div>
-      <div class="profile-confirmation">
-        <div id="rent-picker"></div>
-        <p>Search area: <span id="area-label">England</span> · <button id="change-area" type="button" class="link">Change</button></p>
-        <p id="profile-status" role="status" aria-live="polite" aria-atomic="true"></p>
-        <p id="profile-error" role="alert" hidden></p>
-        <button id="compare" type="button" aria-describedby="profile-status">Compare districts</button>
-      </div>
-    </fieldset>
-  </details>
+      <p id="cuisine-help">Type part of a name, such as “viet”. Rare cuisines show the broader group they are scored as.</p>
+      <p id="cuisine-status" class="visually-hidden" role="status" aria-live="polite"></p>
+    </div>
+    <div id="trait-pickers"></div>
+    <div class="profile-confirmation">
+      <div id="rent-picker"></div>
+      <p>Search area: <span id="area-label">England</span> · <button id="change-area" type="button" class="link">Change</button></p>
+      <p id="profile-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <p id="profile-error" role="alert" hidden></p>
+      <button id="compare" type="button" aria-describedby="profile-status">Compare districts</button>
+    </div>
+  </fieldset>
   <div class="results-body">
     <section class="map-panel" aria-label="District map">
       <div id="map" role="region" aria-label="Map of district scores; the ranked list has the same districts"></div>
