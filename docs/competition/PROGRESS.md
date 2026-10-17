@@ -27,7 +27,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 ## Now
 
-- **Server operator**: unassigned
+- **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #43 pull
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
 - **Blockers**: none. The [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed: formats ([ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)), sources ([ADR 0003](../adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md)), [cuisine taxonomy](https://github.com/AdrielAu/PlotLuck/issues/53) and [NN1 architecture](https://github.com/AdrielAu/PlotLuck/issues/62) are all decided.
 - **Next**:
