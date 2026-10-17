@@ -63,21 +63,37 @@
   {
    "name": "chain",
    "kind": "on_off",
+   "values": [
+    false,
+    true
+   ],
    "default": false
   },
   {
    "name": "vegetarian_friendly",
    "kind": "on_off",
+   "values": [
+    false,
+    true
+   ],
    "default": false
   },
   {
    "name": "vegan_options",
    "kind": "on_off",
+   "values": [
+    false,
+    true
+   ],
    "default": false
   },
   {
    "name": "gluten_free",
    "kind": "on_off",
+   "values": [
+    false,
+    true
+   ],
    "default": false
   }
  ]

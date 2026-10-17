@@ -3,6 +3,9 @@
  "excluded": {},
  "restaurants": 200,
  "labelled": 200,
+ "inputs_left_out": {
+  "commercial_rent_index": "no VOA source yet (issue #72)"
+ },
  "epochs": 20,
  "train_loss": [
   0.10440638661384583,

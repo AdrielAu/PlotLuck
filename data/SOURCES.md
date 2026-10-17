@@ -11,7 +11,7 @@ One row per dataset, added in the same PR as the data (see [`AGENTS.md`](AGENTS.
 | Census 2021 P004, usual residents by postcode district | `p004_england.csv` | [Nomis](https://www.nomisweb.co.uk/sources/census_2021_pc) | OGL v3.0 | Districts in the ONSPD sample |
 | OpenStreetMap restaurants and fast food, England | `osm_england.csv` | [Overpass API](https://overpass-api.de/) | ODbL 1.0 | Sample box |
 
-**Built files**: `python -m plotluck.build` (`src/plotluck/build.py`) turns the extracts into `restaurants.csv` (private on full data), the site bundle (`districts.csv`, `district_cuisine_supply.csv`, `vocabulary.json`, `model.json`, `reference_scores.json`) and `run/metrics.json`. In `sample/` these are built from the sample files above, seed 0; rerun the command with `PLOTLUCK_DATA=sample` after changing the build.
+**Built files**: `python -m plotluck.build` (`src/plotluck/build.py`) writes the site bundle (`districts.csv`, `district_cuisine_supply.csv`, `vocabulary.json`, `model.json`, `reference_scores.json`) to `--out` (default: the data folder), and always writes the private `restaurants.csv` and `run/metrics.json` to the data folder, never to `--out`. In `sample/` these are built from the sample files above, seed 0; rerun the command with `PLOTLUCK_DATA=sample` after changing the build.
 
 **Sample box**: every row with coordinates inside latitude 51.49–51.51, longitude −0.12 to −0.08 (Southwark, the City and around; constant `SAMPLE_BBOX`). It has no randomness, so the files still join on district and location. Retrieval date for ONSPD, P004 and the OSM sample box: 2026-10-17, by a laptop run of the same code; the server pull will replace these values.
 

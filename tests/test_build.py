@@ -18,18 +18,46 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv")
+
+
+def copy_sources(dest):
+    """A data folder holding only the sample sources, so builds never touch data/sample."""
+    dest.mkdir(parents=True, exist_ok=True)
+    for name in SOURCES:
+        shutil.copyfile(data_dir(choice="sample") / name, dest / name)
+    return dest
+
+
 @pytest.fixture(scope="module")
-def built(tmp_path_factory):
-    out = tmp_path_factory.mktemp("bundle")
-    build.build(data_dir(choice="sample"), out, group_threshold=build.SAMPLE_GROUP_THRESHOLD)
-    return out
+def data(tmp_path_factory):
+    data = copy_sources(tmp_path_factory.mktemp("data"))
+    build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
+    return data
 
 
-def test_districts_cover_every_sample_district_with_supply_that_adds_up(built):
-    onspd = read_csv(data_dir(choice="sample") / "onspd_england.csv")
+@pytest.fixture(scope="module")
+def built(data):
+    return data / "bundle"
+
+
+def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data, built):
+    assert sorted(p.name for p in built.iterdir()) == [
+        "district_cuisine_supply.csv",
+        "districts.csv",
+        "model.json",
+        "reference_scores.json",
+        "vocabulary.json",
+    ]
+    assert (data / "restaurants.csv").is_file()
+    assert read_json(data / "run" / "metrics.json")["restaurants"] == 200
+
+
+def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, built):
+    onspd = read_csv(data / "onspd_england.csv")
     districts = read_csv(built / "districts.csv")
     supply = read_csv(built / "district_cuisine_supply.csv")
-    restaurants = read_csv(built / "restaurants.csv")
+    restaurants = read_csv(data / "restaurants.csv")
 
     assert {d["postcode_district"] for d in districts} == {r["district"] for r in onspd}
     per_district = Counter()
@@ -56,11 +84,12 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
     )
     for name, trait in traits.items():
         transform = model["transforms"][name]
+        assert trait["default"] in trait["values"]
         if trait["kind"] == "single_choice":
             assert transform["values"] == trait["values"]
-            assert trait["default"] in trait["values"]
         else:
-            assert trait["kind"] == "on_off" and transform["kind"] == "flag"
+            assert trait["kind"] == "on_off" and trait["values"] == [False, True]
+            assert transform["kind"] == "flag"
 
 
 def test_model_layers_are_inputs_64_32_1(built):
@@ -79,10 +108,8 @@ def test_model_layers_are_inputs_64_32_1(built):
 
 
 def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
-    sample = data_dir(choice="sample")
-    for name in ("onspd_england.csv", "p004_england.csv"):
-        shutil.copyfile(sample / name, tmp_path / name)
-    rows = read_csv(sample / "tripadvisor_england.csv")
+    copy_sources(tmp_path)
+    rows = read_csv(tmp_path / "tripadvisor_england.csv")
     rows[0]["cuisines"] = "Eritrean, Cafe"
     with (tmp_path / "tripadvisor_england.csv").open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, list(rows[0]))

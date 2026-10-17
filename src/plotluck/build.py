@@ -2,11 +2,12 @@
 
 One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
 
-- ``restaurants.csv``: the 15-column restaurant table of ADR 0004. It holds
-  ratings and review counts, so it is private: on full data it stays on
-  LinuxONE and is never part of the bundle.
-- the bundle (``BUNDLE_FILES``), the only thing the site reads;
-- ``run/metrics.json``: row counts, exclusions by reason and loss per epoch.
+- to ``out``, only the bundle (``BUNDLE_FILES``), the only thing the site reads;
+- to ``data``, ``restaurants.csv``: the 15-column restaurant table of ADR 0004.
+  It holds ratings and review counts, so it is private and stays beside the
+  sources, on LinuxONE for full data (ADR 0003);
+- to ``data``, ``run/metrics.json``: row counts, exclusions by reason, inputs
+  left out and loss per epoch.
 
 This is the tracer of the spec in issue #64: every stage is crude, but the
 file shapes are the contract the site builds against.
@@ -36,6 +37,7 @@ BUNDLE_FILES = (
 )
 TRACER_EPOCHS = 20
 REFERENCE_TOLERANCE = 1e-6
+PRIOR_REVIEWS = 20
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
 UNSPECIFIED = "Unspecified"
@@ -97,16 +99,17 @@ def build(
     data, out = Path(data), Path(out)
     out.mkdir(parents=True, exist_ok=True)
     postcodes = _read_csv(data / "onspd_england.csv")
+    mapping = load_mapping()
     restaurants, metrics = restaurant_table(
-        _read_csv(data / "tripadvisor_england.csv"), postcodes, load_mapping()
+        _read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
     )
-    groups = cuisine_groups(restaurants, load_mapping(), group_threshold)
+    groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
     districts = district_table(postcodes, _read_csv(data / "p004_england.csv"), restaurants)
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
-    _write_csv(out / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
     _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
     _write_csv(
         out / "district_cuisine_supply.csv",
@@ -120,15 +123,19 @@ def build(
     vocab = vocabulary(groups)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
     by_code = {d["postcode_district"]: d for d in districts}
-    numeric = np.array([
+    district_raw = np.array([
         # In training a row's own restaurant is not part of its district's supply.
-        _district_raw(by_code[r["postcode_district"]], supply[(r["postcode_district"], r["cuisine_group"])] - 1, own=1)
+        _district_raw(
+            by_code[r["postcode_district"]],
+            supply[(r["postcode_district"], r["cuisine_group"])] - 1,
+            exclude_from_total=1,
+        )
         for r in labelled
     ])
-    model = model_spec(vocab, numeric)
+    model = model_spec(vocab, district_raw)
     x = np.vstack([
         inputs(model, _restaurant_values(r), row[None, :])
-        for r, row in zip(labelled, numeric)
+        for r, row in zip(labelled, district_raw)
     ])
     y = np.array([r["review_success_label"] for r in labelled], dtype=float)
     model["layers"], losses = nn1.train(x, y, epochs=epochs, seed=seed)
@@ -145,9 +152,15 @@ def build(
     _write_json(out / "vocabulary.json", vocab)
     _write_json(out / "model.json", model, indent=None)
     _write_json(out / "reference_scores.json", reference)
-    metrics.update(restaurants=len(restaurants), labelled=len(labelled), epochs=epochs, train_loss=losses)
-    (out / "run").mkdir(exist_ok=True)
-    _write_json(out / "run" / "metrics.json", metrics)
+    metrics.update(
+        restaurants=len(restaurants),
+        labelled=len(labelled),
+        inputs_left_out={"commercial_rent_index": "no VOA source yet (issue #72)"},
+        epochs=epochs,
+        train_loss=losses,
+    )
+    (data / "run").mkdir(exist_ok=True)
+    _write_json(data / "run" / "metrics.json", metrics)
     return metrics
 
 
@@ -168,15 +181,18 @@ def vocabulary(groups: dict[str, str]) -> dict:
                 "values": [*PRICE_BANDS.values(), UNKNOWN_PRICE],
                 "default": UNKNOWN_PRICE,
             },
-            *({"name": f, "kind": "on_off", "default": False} for f in ("chain", *DIET_FLAGS)),
+            *(
+                {"name": f, "kind": "on_off", "values": [False, True], "default": False}
+                for f in ("chain", *DIET_FLAGS)
+            ),
         ],
     }
 
 
-def model_spec(vocab: dict, numeric: np.ndarray) -> dict:
-    """``model.json`` without layers: input order and transforms fitted on ``numeric``.
+def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
+    """``model.json`` without layers: input order and transforms fitted on ``district_raw``.
 
-    ``numeric`` holds raw district inputs (NaN when missing), one column per
+    ``district_raw`` holds raw district inputs (NaN when missing), one column per
     ``DISTRICT_INPUTS`` entry. ``median`` is in raw units and fills a missing
     value before ``log1p`` and standardising.
     """
@@ -185,11 +201,9 @@ def model_spec(vocab: dict, numeric: np.ndarray) -> dict:
         transforms[trait["name"]] = (
             {"kind": "one_hot", "values": trait["values"]} if trait["kind"] == "single_choice" else {"kind": "flag"}
         )
-    for name, column in zip(DISTRICT_INPUTS, numeric.T):
+    for name, column in zip(DISTRICT_INPUTS, district_raw.T):
         median = float(np.nanmedian(column)) if not np.isnan(column).all() else 0.0
-        values = np.where(np.isnan(column), median, column)
-        if name in LOG1P:
-            values = np.log1p(values)
+        values = _fill_log1p(column, median, name in LOG1P)
         std = float(values.std())
         transforms[name] = {
             "kind": "numeric",
@@ -208,8 +222,8 @@ def model_spec(vocab: dict, numeric: np.ndarray) -> dict:
     }
 
 
-def inputs(model: dict, restaurant: dict, numeric: np.ndarray) -> np.ndarray:
-    """Input matrix: the restaurant's encoded inputs beside each row of raw ``numeric``.
+def inputs(model: dict, restaurant: dict, district_raw: np.ndarray) -> np.ndarray:
+    """Input matrix: the restaurant's encoded inputs beside each row of ``district_raw``.
 
     A one-hot value outside the vocabulary (an unseen cuisine) encodes as all zeros.
     """
@@ -222,28 +236,31 @@ def inputs(model: dict, restaurant: dict, numeric: np.ndarray) -> np.ndarray:
         else:
             head.append(float(bool(restaurant[name])))
     columns = []
-    for name, column in zip(model["features"]["district_inputs"], numeric.T):
+    for name, column in zip(model["features"]["district_inputs"], district_raw.T):
         t = transforms[name]
-        values = np.where(np.isnan(column), t["median"], column)
-        if t["log1p"]:
-            values = np.log1p(values)
-        columns.append((values - t["mean"]) / t["std"])
-    return np.column_stack([np.tile(head, (len(numeric), 1)), *columns])
+        columns.append((_fill_log1p(column, t["median"], t["log1p"]) - t["mean"]) / t["std"])
+    return np.column_stack([np.tile(head, (len(district_raw), 1)), *columns])
+
+
+def _fill_log1p(column: np.ndarray, median: float, log1p: bool) -> np.ndarray:
+    """Fill NaN with the raw-unit median, then apply log1p if asked."""
+    values = np.where(np.isnan(column), median, column)
+    return np.log1p(values) if log1p else values
 
 
 def score_districts(model: dict, vocab: dict, districts: list[dict], supply: Counter, profile: dict) -> dict[str, float]:
     """Score ``profile`` in every district with the exported weights."""
     group = {c["cuisine"]: c["cuisine_group"] for c in vocab["cuisines"]}.get(profile["cuisine"])
-    numeric = np.array([_district_raw(d, supply[(d["postcode_district"], group)]) for d in districts])
-    scores = nn1.forward(model["layers"], inputs(model, {**profile, "cuisine_group": group}, numeric))
+    district_raw = np.array([_district_raw(d, supply[(d["postcode_district"], group)]) for d in districts])
+    scores = nn1.forward(model["layers"], inputs(model, {**profile, "cuisine_group": group}, district_raw))
     return {d["postcode_district"]: float(s) for d, s in zip(districts, scores)}
 
 
 def reference_profiles(vocab: dict) -> list[dict]:
     """Fixed profiles for the browser parity check: defaults, all traits set, Unspecified."""
     defaults = {t["name"]: t["default"] for t in vocab["traits"]}
-    everything = {t["name"]: t["values"][1] if t["kind"] == "single_choice" else True for t in vocab["traits"]}
-    cuisines = [c["cuisine"] for c in vocab["cuisines"]]
+    everything = {t["name"]: t["values"][1] for t in vocab["traits"]}
+    cuisines = [c["cuisine"] for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
     return [
         {"cuisine": cuisines[0], **defaults},
         {"cuisine": cuisines[-1], **everything},
@@ -251,15 +268,15 @@ def reference_profiles(vocab: dict) -> list[dict]:
     ]
 
 
-def _district_raw(district: dict, same_cuisine: int, own: int = 0) -> list[float]:
-    """Raw ``DISTRICT_INPUTS`` for one district; ``own`` is removed from its total."""
+def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0) -> list[float]:
+    """Raw ``DISTRICT_INPUTS`` for one district, less ``exclude_from_total`` restaurants."""
     def number(value):
         return float(value) if value != "" else np.nan
 
     return [
         number(district["population"]),
         number(district["deprivation_index"]),
-        float(district["total_restaurants"] - own),
+        float(district["total_restaurants"] - exclude_from_total),
         float(same_cuisine),
     ]
 
@@ -332,7 +349,7 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
 
 
 def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
-    """Set ``review_success_label``: a rating smoothed by 20 prior reviews, on 0-1.
+    """Set ``review_success_label``: a rating smoothed by prior reviews, on 0-1.
 
     shortcut: placeholder, not the ADR 0002 formula; issue #69 replaces it
     with the full label and a per-fold label policy.
@@ -350,7 +367,7 @@ def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
     for r in restaurants:
         r["review_success_label"] = ""
     for r, rating, n in eligible:
-        smoothed = (n * rating + 20 * prior) / (n + 20)
+        smoothed = (n * rating + PRIOR_REVIEWS * prior) / (n + PRIOR_REVIEWS)
         r["review_success_label"] = round((smoothed - 1) / 4, 6)
 
 
@@ -371,7 +388,11 @@ def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> di
 
 
 def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:
-    """One row per district with at least one English postcode."""
+    """One row per district with an English postcode that has a grid reference.
+
+    Restaurants come from live postcodes with a grid reference, so no
+    restaurant lands in a district left out here.
+    """
     residents = {r["district"]: int(r["residents"]) for r in p004}
     totals = Counter(r["postcode_district"] for r in restaurants)
     points, ranks = {}, {}
@@ -382,12 +403,12 @@ def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[di
         if _float(p["imd25ind"]) is not None:
             ranks.setdefault(p["district"], []).append(float(p["imd25ind"]))
     rows = []
-    for code in sorted({p["district"] for p in postcodes}):
-        lats, lons = zip(*points[code]) if code in points else ((), ())
+    for code in sorted(points):
+        lats, lons = zip(*points[code])
         rows.append({
             "postcode_district": code,
-            "centroid_lat": round(statistics.fmean(lats), 6) if lats else "",
-            "centroid_lon": round(statistics.fmean(lons), 6) if lons else "",
+            "centroid_lat": round(statistics.fmean(lats), 6),
+            "centroid_lon": round(statistics.fmean(lons), 6),
             "total_restaurants": totals[code],
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
@@ -399,7 +420,10 @@ def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[di
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:
     """District of the nearest live postcode to each (lat, lon)."""
-    live = [p for p in postcodes if not p["doterm"] and float(p["lat"]) <= 90]
+    live = [
+        p for p in postcodes
+        if not p["doterm"] and (_float(p["lat"]) or 99) <= 90 and _float(p["long"]) is not None
+    ]
     if not points:
         return []
     scale = np.cos(np.radians(52.5))  # England's mid-latitude; fine for nearest-neighbour
@@ -446,7 +470,7 @@ def main(argv=None) -> None:
         prog="python -m plotluck.build",
         description="Build the site bundle from the data folder chosen by data_dir().",
     )
-    parser.add_argument("--out", type=Path, help="output folder (default: the data folder)")
+    parser.add_argument("--out", type=Path, help="bundle folder (default: the data folder)")
     parser.add_argument("--epochs", type=int, default=TRACER_EPOCHS)
     args = parser.parse_args(argv)
     data = data_dir()
