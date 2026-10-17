@@ -20,6 +20,7 @@ export function showScreen(id) {
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
   const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));
+  const radiiKm = new Map(bundle.districts.map((d) => [d.postcode_district, Number(d.radius_km)]));
   let map = null;
   let circles = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
@@ -43,8 +44,12 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
+    // Sized in metres, not pixels, so each circle keeps roughly covering its district at every zoom.
     circles = new Map(
-      [...centroids].map(([code, latLng]) => [code, L.circleMarker(latLng, { radius: 8, color: "#284c29", weight: 1, fillOpacity: 0.85 })]),
+      [...centroids].map(([code, latLng]) => [
+        code,
+        L.circle(latLng, { radius: radiiKm.get(code) * 1000, color: "#284c29", weight: 1, fillOpacity: 0.5 }),
+      ]),
     );
   }
 
@@ -55,9 +60,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     const { shown, countLine } = resultsAt(scores, threshold);
     const shownCodes = new Set(shown.map((d) => d.postcode_district));
     for (const [code, circle] of circles) {
-      if (shownCodes.has(code)) circle.addTo(map);
-      else circle.remove();
+      if (!shownCodes.has(code)) circle.remove();
     }
+    // Worst rank first, so each better-ranked circle is drawn over those before it.
+    for (const { postcode_district } of shown.toReversed()) circles.get(postcode_district).addTo(map).bringToFront();
     $("count").textContent = countLine;
     $("empty").hidden = shown.length > 0;
     $("ranked").replaceChildren(
