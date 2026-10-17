@@ -61,7 +61,9 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       map.invalidateSize();
       return;
     }
-    map = L.map("map").fitBounds(ENGLAND);
+    // Quarter-step zoom so a search area is framed closely: with whole steps, an area just too
+    // big for one zoom gets the next one out, showing twice the width (Greater London).
+    map = L.map("map", { zoomSnap: 0.25 }).fitBounds(ENGLAND);
     // Opening or closing the pickers panel resizes the map; Leaflet must re-measure it, or
     // its centre (where a row click glides to) and tiles are off.
     new ResizeObserver(() => map.invalidateSize()).observe($("map"));
@@ -154,15 +156,24 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       return false;
     }
     showScreen("results-screen");
+    // Heading text first: when it wraps, the map below gets shorter, and framing needs its final size.
+    const { heading, summary } = describeProfile(query.profile, answers.searchAreaName ?? (answers.searchArea?.length ? "your search area" : "England"));
+    $("results-heading").textContent = heading;
+    $("confirmed-profile").textContent = summary;
     ensureMap();
     const key = JSON.stringify(query);
-    if (onScreen?.key !== key) {
+    const isNewQuery = onScreen?.key !== key;
+    if (isNewQuery) {
       // Scores change only with the query; the slider just filters them.
       const scores = inSearchArea(scoreDistricts(bundle, query.profile), query);
       onScreen = { key, scores, threshold: defaultThreshold(scores) };
       const { min, max } = thresholdRange(scores);
       Object.assign($("threshold"), { min: String(min), max: String(max) });
       $("threshold").value = String(onScreen.threshold);
+    }
+    // Before framing, so the threshold bar has its legend and final height.
+    render();
+    if (isNewQuery) {
       // Glide to the whole search area's circles, not just the shown ones, so circles the
       // slider reveals land inside the view; clear of the threshold bar.
       const bounds = L.latLngBounds([]);
@@ -171,10 +182,6 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       if (reducedMotion()) map.fitBounds(bounds, { ...framing, animate: false });
       else map.flyToBounds(bounds, { ...framing, duration: 1.5 });
     }
-    const { heading, summary } = describeProfile(query.profile, answers.searchAreaName ?? (answers.searchArea?.length ? "your search area" : "England"));
-    $("results-heading").textContent = heading;
-    $("confirmed-profile").textContent = summary;
-    render();
     $("results-heading").focus();
     return true;
   };
