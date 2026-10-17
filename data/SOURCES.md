@@ -1,5 +1,12 @@
 # Data sources
 
+## Offline search geography
+
+- **Retrieved**: 2026-10-17 from ONS public ArcGIS services. Pinned releases: Built Up Areas December 2022 GB BGG, Local Authority Districts December 2025 UK BGC, Regions December 2025 England BGC. Exact query URLs, content hashes and byte counts are in [the source manifest](../docs/plans/nn2-geography-sources.json).
+- **Permission**: ONS source item licence metadata links to [ONS geography licensing](https://www.ons.gov.uk/methodology/geography/licences). Digital boundaries are supplied under Open Government Licence v3.0. Attribution: Source: Office for National Statistics licensed under the Open Government Licence v.3.0. Contains OS data © Crown copyright and database right 2026.
+- **Preparation**: `python -m plotluck.geography`; [reproduction, coordinate conversion and limitations](../docs/plans/nn2-geography-proof.md). Select E-prefixed GSS feature IDs; preserve each feature's authoritative name/ID/reference point/boundary linkage; precompute scoring district centroid memberships. Browser output contains no polygons or restaurant data.
+- **Sample**: `geography-proof.json` contains four unmodified source features (Manchester BUA E63001295, Camden E09000007, City of London E09000001, London region E12000007) and only code/centroid fields for M1, NW5 and EC4V from the published scoring bundle. Its source features come directly from the pinned acquisition cache. Publisher spatial queries independently verified the expected memberships. Unlike restaurant samples, these public OGL boundaries may be redistributed; retain the attribution above.
+
 One row per dataset, added in the same PR as the data (see [`AGENTS.md`](AGENTS.md)).
 
 `python -m plotluck.sources` pulls each raw file to `data/full/raw/` on the server, writes `raw/<name>.provenance.json` (URL, edition, retrieval time, bytes, SHA-256, licence, attribution), extracts England to `<name>_england.csv` and cuts the sample. The runbook is [`docs/server.md`](../docs/server.md#6-where-datafull-comes-from); the code is `src/plotluck/sources.py`. Each sample folder keeps a copy of the provenance files in `data/sample/raw/`.
