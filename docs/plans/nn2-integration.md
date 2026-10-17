@@ -1,5 +1,13 @@
 # NN2 integration plan
 
+## Food-to-cuisine amendment (#197)
+
+The product may resolve a food description to one supported cuisine when a reviewed association is clear: dimsum/dim sum/dim-sum to Chinese, sushi/ramen to Japanese, pizza to Italian, tacos to Mexican, pad Thai to Thai and pho to Vietnamese. An explicit cuisine qualifier takes priority, so Thai curry stays Thai. Cuisine evidence retains an exact excerpt and food-derived values are marked inferred. Literal cuisine names also survive model omissions or unsupported predictions.
+
+Shared foods require a choice rather than accepting a model guess: kebab offers Turkish, Middle Eastern, Lebanese, Greek and Persian where present in the shipped vocabulary; curry, biryani and dumplings have their own shortlists. Mixed positive food associations offer the combined supported choices. Negated cues do not silently select a cuisine, and explicitly excluded cuisines are not suggested. Unrecognised foods retain the general cuisine question. This small list is a set of menu associations, not an exhaustive food taxonomy or a claim of exclusive cultural origin.
+
+The product prompt, validator and worker carry these choices into the existing cuisine clarification. The strict five-field proof remains unchanged; source recovery and user selections do not count as correct model predictions or meet broader release gates. NN1 weights, training data and scoring inputs are unchanged.
+
 ## Near-city and read-failure amendment (#188)
 
 `Near York` without a distance now means the selected York boundary, with no default 5 km radius or radius question. The same rule applies to other named areas. An explicitly stated distance, such as `within 3 miles of York`, retains the existing straight-line filtering and unit conversion. Ambiguous place names still require a labelled scope choice; missing/unresolved places retain the city-list recovery below.

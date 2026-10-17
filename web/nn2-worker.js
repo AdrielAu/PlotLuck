@@ -41,7 +41,7 @@ self.onmessage = async ({ data }) => {
       }
       self.postMessage({ id, draft, seconds: (performance.now() - start) / 1000,
         ...(grounded ? {candidates:extraction.candidates} : {}),
-        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview,priceNeedsReview:extraction.priceNeedsReview,requirementsText:extraction.requirementsText,unresolvedFields:extraction.unresolvedFields} : {}),
+        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview,priceNeedsReview:extraction.priceNeedsReview,requirementsText:extraction.requirementsText,unresolvedFields:extraction.unresolvedFields,cuisineOptions:extraction.cuisineOptions} : {}),
         ...(data.syntheticProof ? { reply, raw_reply:rawReply, usage: result.usage } : {}) });
     } else throw new Error('Unknown interpreter action.');
   } catch (error) { self.postMessage({ id, error: error.message, seconds: (performance.now()-started)/1000,
