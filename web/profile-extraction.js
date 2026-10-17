@@ -43,7 +43,7 @@ Only these seven keys. No coordinates, IDs or feature vectors.`;
 
 function quote(description, cues) {
   for (const cue of cues) {
-    const escaped = cue.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const escaped = cue.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+');
     const match = new RegExp(`(^|[^\\p{L}\\p{N}$])(${escaped})(?=$|[^\\p{L}\\p{N}$])`,'iu').exec(description);
     if (match) return match[2];
   }
@@ -65,7 +65,10 @@ export function validateProfileExtraction(reply, description, vocabulary, catalo
     const allowed = name==='cuisine' ? vocabulary.cuisines.map(c=>c.cuisine) : definition.values;
     if (selected !== null && !allowed.includes(selected)) throw new Error(`Check the ${name.replaceAll('_',' ')}.`);
     if (selected === null || (name==='price_band' && selected==='unknown')) return {value:fallback,provenance:'default',evidence:null};
-    const evidence = quote(evidenceText,cues);
+    // Scoped text joins clauses. Bind the quote back to the original description
+    // so whitespace is preserved and punctuation cannot invent supporting text.
+    const scoped = quote(evidenceText,cues);
+    const evidence = scoped && quote(description,[scoped]);
     if (!evidence) throw new Error(`Check the ${name.replaceAll('_',' ')}; its value has no supporting text.`);
     return {value:selected,provenance:quote(evidenceText,[selected]) ? 'explicit' : 'inferred',evidence};
   }

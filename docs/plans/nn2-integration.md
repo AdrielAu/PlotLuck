@@ -6,6 +6,8 @@
 
 Failed, malformed or unavailable model reads now reuse the product's existing literal-source grounding. Explicit menu prices (`mid range`, for example), relative rent and no-other-requirements acknowledgements survive recovery; unfilled fields still prompt their original questions. The recovery remains labelled as an unsuccessful model read, not a correct NN2 prediction. Numeric rent validation and manual correction remain unchanged. A fresh live-model run already retained the reported mid-range Chinese prompt; the independently reproduced defect was that failed-read recovery discarded those explicit prices.
 
+Multiword price cues accept repeated spaces, non-breaking spaces and line breaks, while preserving the exact original text as evidence. Scoped clause joins must bind their quote back to the original description: `mid; range` is not accepted as `mid range`, and unsupported evidence prompts a price clarification instead of breaking recovery.
+
 ## Latest place amendment: city choice or a more specific area (#183)
 
 The user confirmed that a city name compares the whole city; a named borough uses a borough boundary. Missing or unresolved intended places now require an English city choice or a description at another resolution, superseding the former missing-location England default. An explicitly requested England-wide scope remains valid. No city-only description forces a borough choice.
