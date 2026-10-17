@@ -48,7 +48,7 @@ test('a model cannot discard a second named location', async () => {
   assert.ok(q.needs.some(n => n.field === 'area'));
 });
 
-test('near searches use a default radius, preserve miles, and reject invalid or empty scopes', async () => {
+test('bare near uses the boundary; explicit distances preserve miles and reject invalid or empty scopes', async () => {
   const text = full('A Thai restaurant within 3 miles of Leeds.');
   const q = await descriptionQuery(text, extraction(text, { region: 'Leeds' }), bundle, catalogue);
   assert.deepEqual(q.needs, []);
@@ -58,7 +58,7 @@ test('near searches use a default radius, preserve miles, and reject invalid or 
   assert.throws(() => confirmedDescription(q, bundle, catalogue), /positive radius/);
   const near = full('A Thai restaurant near Leeds.');
   const d = await descriptionQuery(near, extraction(near, { region: 'Leeds' }), bundle, catalogue);
-  assert.equal(d.radius, 5);
+  assert.equal(d.radius, null);
 });
 
 test('numeric rent requires a band choice and never overwrites district context', async () => {

@@ -4,7 +4,7 @@ import {test} from 'node:test';
 import {loadBundle} from '../../web/scoring.js';
 import {makeInterpreter} from '../../web/interpret.js';
 import {validateProfileExtraction} from '../../web/profile-extraction.js';
-import {descriptionQuery} from '../../web/description-query.js';
+import {descriptionQuery,unreadDescription} from '../../web/description-query.js';
 
 const bundle=await loadBundle(n=>readFile(new URL('../../web/models/'+n,import.meta.url),'utf8'));
 const catalogue=JSON.parse(await readFile(new URL('../../web/models/geography.json',import.meta.url)));
@@ -47,4 +47,19 @@ test('an explicitly requested England-wide search remains valid',async()=>{
   const q=await descriptionQuery(text,extraction(text,'England'),bundle,catalogue);
   assert.equal(q.area.kind,'england');
   assert.ok(!q.needs.some(n=>n.field==='area'));
+});
+
+test('the exact mid range Chinese prompt retains stated prices even after an unreadable model reply',async()=>{
+  const text='A mid range chinese restaurant in hammersmith';
+  const q=await unreadDescription(text,bundle,catalogue);
+  assert.equal(q.profile.price_band,'$$');
+  assert.ok(!q.needs.some(n=>n.field==='price'));
+  assert.ok(q.needs.find(n=>n.field==='area').options.some(p=>p.code==='E09000013'));
+});
+
+test('near a city without a distance uses the city boundary rather than a default radius',async()=>{
+  const text='A mid range Italian pub near York';
+  const q=await descriptionQuery(text,extraction(text,'York'),bundle,catalogue);
+  assert.equal(q.radius,null);
+  assert.ok(q.needs.find(n=>n.field==='area').options.some(p=>p.code==='E06000014'));
 });
