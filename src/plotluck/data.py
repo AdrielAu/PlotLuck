@@ -10,15 +10,16 @@ ALLOWED = ("sample", "full")
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def data_dir(root: Path | None = None) -> Path:
+def data_dir(root: Path | None = None, choice: str | None = None) -> Path:
     """Return the data folder: ``data/sample`` or ``data/full``.
 
-    ``PLOTLUCK_DATA`` (``sample`` or ``full``) wins when set. Otherwise full
-    when ``data/full/`` exists, else sample. ``root`` overrides the repo root
-    (for tests).
+    ``choice`` wins, then ``PLOTLUCK_DATA`` (``sample`` or ``full``). Otherwise
+    full when ``data/full/`` exists, else sample. ``root`` overrides the repo
+    root (for tests).
     """
     parent = (Path(root) if root is not None else _REPO_ROOT) / "data"
-    choice = os.environ.get(ENV_VAR)
+    if choice is None:
+        choice = os.environ.get(ENV_VAR)
     if choice is None:
         return parent / ("full" if (parent / "full").is_dir() else "sample")
     if choice not in ALLOWED:

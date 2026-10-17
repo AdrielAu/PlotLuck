@@ -1,0 +1,13 @@
+{
+  "source": "osm",
+  "url": "https://overpass-api.de/api/interpreter",
+  "edition": "Live OpenStreetMap via Overpass; see snapshot",
+  "licence": "Open Database Licence 1.0",
+  "attribution": "© OpenStreetMap contributors",
+  "retrieved_at": "2026-10-17T11:12:00+00:00",
+  "snapshot": "2026-10-17T11:12:51Z",
+  "query": "[out:json][timeout:300];area[\"ISO3166-2\"=\"GB-ENG\"]->.a;nwr[\"amenity\"~\"^(restaurant|fast_food)$\"]({},{},{},{})(area.a);out center tags;",
+  "tiles": 1,
+  "bytes": 198253,
+  "sha256": "59a49c22561f49527634307e6456af8ad5d029ed2d3af2ff7332878793f5299c"
+}

@@ -1,0 +1,10 @@
+{
+  "source": "tripadvisor",
+  "url": "https://www.kaggle.com/api/v1/datasets/download/stefanoleone992/tripadvisor-european-restaurants",
+  "edition": "Kaggle stefanoleone992/tripadvisor-european-restaurants version 1 (updated 2021-05-18; scraped early May 2021)",
+  "licence": "CC0 1.0 as listed on Kaggle. Scraped from tripadvisor.com, whose terms restrict reuse of its content.",
+  "attribution": "TripAdvisor European restaurants, Stefano Leone (Kaggle)",
+  "retrieved_at": "2026-10-17T10:58:28+00:00",
+  "bytes": 106461522,
+  "sha256": "806e38fb0b7e568ed4f7fbde3766a8b504771603cf0527f3049f8c08b4680b53"
+}
