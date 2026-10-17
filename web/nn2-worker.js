@@ -32,7 +32,7 @@ self.onmessage = async ({ data }) => {
       reply = result.choices[0].message.content;
       rawReply = reply;
       if (result.choices[0].finish_reason === 'length') throw new Error('Interpretation was truncated. Please retry.');
-      const extraction = focused ? validateProfileExtraction(reply, description, vocabulary, data.catalogue) : grounded ? groundInterpretation(reply, description, vocabulary, data.catalogue) : null;
+      const extraction = focused ? validateProfileExtraction(reply, description, vocabulary, data.catalogue, {clarifyInvalidPrice:data.clarifyInvalidPrice === true}) : grounded ? groundInterpretation(reply, description, vocabulary, data.catalogue) : null;
       const draft = extraction?.draft ?? validateInterpretation(reply, description, vocabulary);
       if (grounded) {
         const {profile,...normalized} = draft;
@@ -40,7 +40,7 @@ self.onmessage = async ({ data }) => {
       }
       self.postMessage({ id, draft, seconds: (performance.now() - start) / 1000,
         ...(grounded ? {candidates:extraction.candidates} : {}),
-        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview} : {}),
+        ...(focused ? {rentBudget:extraction.rentBudget,rentBand:extraction.rentBand,rentNeedsReview:extraction.rentNeedsReview,priceNeedsReview:extraction.priceNeedsReview} : {}),
         ...(data.syntheticProof ? { reply, raw_reply:rawReply, usage: result.usage } : {}) });
     } else throw new Error('Unknown interpreter action.');
   } catch (error) { self.postMessage({ id, error: error.message, seconds: (performance.now()-started)/1000,

@@ -34,7 +34,7 @@ function quote(description, cues) {
   return null;
 }
 
-export function validateProfileExtraction(reply, description, vocabulary, catalogue) {
+export function validateProfileExtraction(reply, description, vocabulary, catalogue, {clarifyInvalidPrice = false} = {}) {
   profilePrompt(description);
   const value = typeof reply === 'string' ? JSON.parse(reply) : structuredClone(reply);
   const keys = ['region','cuisine','price_band','venue_type','rent'];
@@ -49,8 +49,17 @@ export function validateProfileExtraction(reply, description, vocabulary, catalo
     return {value:selected,provenance:quote(description,[selected]) ? 'explicit' : 'inferred',evidence};
   }
   fields.cuisine=field('cuisine',value.cuisine,[value.cuisine].filter(v=>typeof v==='string'));
-  const priceCues = {'$':['$','cheap','budget','inexpensive','affordable'],'$$':['$$','mid-range','moderate','medium'],'$$$':['$$$','expensive','premium','upmarket','luxury']};
-  fields.price_band=field('price_band',value.price_band,priceCues[value.price_band] ?? []);
+  const priceCues = {'$':['$','cheap','budget','inexpensive','affordable'],'$$':['$$','mid-range','mid range','midrange','moderate','medium'],'$$$':['$$$','expensive','premium','upmarket','luxury']};
+  let priceNeedsReview = false;
+  try {
+    fields.price_band=field('price_band',value.price_band,priceCues[value.price_band] ?? []);
+  } catch(error) {
+    // Product-only recovery: a rejected price cannot be scored until a human
+    // chooses it. Proof callers stay strict and still count the model failure.
+    if (!clarifyInvalidPrice) throw error;
+    fields.price_band=field('price_band',null,[]);
+    priceNeedsReview = true;
+  }
   const venueCues = {'Restaurant':['restaurant','bistro','brasserie','diner'], 'Pub and bar':['pub','bar','gastropub'],
     'Café':['café','cafe','coffee shop','bakery'], 'Fast food and street food':['fast food','street food','takeaway','food truck']};
   fields.venue_type=field('venue_type',value.venue_type,venueCues[value.venue_type] ?? []);
@@ -78,6 +87,6 @@ export function validateProfileExtraction(reply, description, vocabulary, catalo
     if (!Number.isFinite(annualGBP)) throw new Error('Rent budget is too large.');
     rentBudget={amount:rent.amount,period:rent.period,currency:'GBP',annualGBP};
   }
-  return {draft,candidates:placeCandidates(draft.location.text,catalogue),rentBudget,
+  return {draft,candidates:placeCandidates(draft.location.text,catalogue),rentBudget,priceNeedsReview,
     rentBand:'any',rentNeedsReview:rentBudget!==null};
 }

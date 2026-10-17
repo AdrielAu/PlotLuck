@@ -22,6 +22,29 @@ test('five extracted inputs adapt to the shipped profile and preserve total rent
   assert.deepEqual(Object.keys(profileSchema(vocabulary).properties),['region','cuisine','price_band','venue_type','rent']);
 });
 
+test('the reported mid Range wording preserves literal evidence and reaches London choices',()=>{
+  for (const phrase of ['mid Range', 'mid-range', 'midrange']) {
+    const text=`A ${phrase} thai restaurant in London`;
+    const r={region:'London',cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null};
+    const result=validateProfileExtraction(r,text,vocabulary,catalogue);
+    assert.equal(result.draft.profile.price_band,'$$');
+    assert.equal(result.draft.fields.price_band.evidence,phrase);
+    assert.ok(result.candidates.some(p=>p.name==='Greater London'));
+    assert.ok(result.candidates.some(p=>p.name==='City of London'));
+  }
+});
+
+test('the product can clarify a rejected price without accepting it or weakening proof validation',()=>{
+  const text='A mid Range thai restaurant in London';
+  const r={region:'London',cuisine:'Thai',price_band:'$',venue_type:'Restaurant',rent:null};
+  assert.throws(()=>validateProfileExtraction(r,text,vocabulary,catalogue),/price band/);
+  const result=validateProfileExtraction(r,text,vocabulary,catalogue,{clarifyInvalidPrice:true});
+  assert.equal(result.priceNeedsReview,true);
+  assert.equal(result.draft.profile.price_band,'unknown');
+  assert.equal(result.draft.profile.cuisine,'Thai');
+  assert.equal(result.draft.location.text,'London');
+});
+
 test('unmentioned rent remains absent and extra model features never enter the profile',()=>{
   const r={region:'London',cuisine:'Thai',price_band:'unknown',venue_type:'Restaurant',rent:null};
   const result=validateProfileExtraction(r,'Thai restaurant in London with vegan options.',vocabulary,catalogue);
