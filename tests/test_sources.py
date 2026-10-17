@@ -221,6 +221,38 @@ def test_voa_extract_rejects_a_valuation_with_the_wrong_field_count(tmp_path):
         sources.extract("voa", tmp_path)
 
 
+def failing_voa(data):
+    """Raw VOA pull whose second record raises after the first is extracted."""
+    raw = data / "raw" / "voa.zip"
+    raw.parent.mkdir(parents=True)
+    with zipfile.ZipFile(raw, "w") as zf:
+        zf.writestr("summaryvaluations.csv", voa_valuation("101", "SE1 0AA", "234") + "\n"
+                    + voa_valuation("102", "SE1 0AA", "234") + "extra*\n")
+    (data / "onspd_england.csv").write_text("pcds,district\nSE1 0AA,SE1\n", encoding="utf-8")
+
+
+def test_failed_extract_leaves_no_csv_behind(tmp_path):
+    # An empty or partial extract would look finished and train on missing data.
+    failing_voa(tmp_path)
+
+    with pytest.raises(ValueError, match="line 2"):
+        sources.extract("voa", tmp_path)
+
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["onspd_england.csv", "raw"]
+
+
+def test_failed_extract_keeps_the_previous_csv(tmp_path):
+    failing_voa(tmp_path)
+    previous = b"uarn,postcode\r\n101,SE1 0AA\r\n"
+    (tmp_path / "voa_england.csv").write_bytes(previous)
+
+    with pytest.raises(ValueError, match="line 2"):
+        sources.extract("voa", tmp_path)
+
+    assert (tmp_path / "voa_england.csv").read_bytes() == previous
+    assert not (tmp_path / "voa_england.csv.part").exists()
+
+
 def fake_fetch(body):
     calls = []
 

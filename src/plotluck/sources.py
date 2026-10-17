@@ -613,13 +613,19 @@ def _filter_csv(path: Path, keep):
 def _write_csv(path: Path, rows) -> int:
     """Write a header then data rows; return the number of data rows."""
     rows = iter(rows)
-    with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.writer(f, lineterminator="\n")
-        writer.writerow(next(rows))
-        count = 0
-        for row in rows:
-            writer.writerow(row)
-            count += 1
+    part = path.with_name(path.name + ".part")  # a failed extract must not look finished
+    try:
+        with part.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f, lineterminator="\n")
+            writer.writerow(next(rows))
+            count = 0
+            for row in rows:
+                writer.writerow(row)
+                count += 1
+    except BaseException:
+        part.unlink(missing_ok=True)
+        raise
+    part.replace(path)
     return count
 
 
