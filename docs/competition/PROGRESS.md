@@ -20,7 +20,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 5 | NN1 spatial-CV evaluation | not started | |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | in progress | #65 |
-| 8 | Site: district circles, pickers, score threshold, ranked list | not started | |
+| 8 | Site: district circles, pickers, score threshold, ranked list | in progress | #67 |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | not started | |
 | 10 | Video | not started | |
 | 11 | Submission | not started | |
