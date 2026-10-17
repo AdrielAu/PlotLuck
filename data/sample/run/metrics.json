@@ -12,6 +12,11 @@
  "restaurants": 200,
  "labelled": 197,
  "districts_without_rent": 0,
+ "districts_without_census": {
+  "census_age": 0,
+  "census_ethnicity": 0,
+  "census_sex": 0
+ },
  "cv": {
   "folds": [
    {
