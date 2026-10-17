@@ -22,6 +22,7 @@ function tinyBundle({
   supplyCount = "2",
   radiusKm = "1.2",
   version = BUNDLE_VERSION,
+  includeFineCuisine = false,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
 }) {
@@ -41,9 +42,10 @@ function tinyBundle({
     }),
     "model.json": JSON.stringify({
       version,
-      features: { restaurant_inputs: ["cuisine_group"], district_inputs: districtInputs },
+      features: { restaurant_inputs: includeFineCuisine ? ["cuisine_group", "cuisine"] : ["cuisine_group"], district_inputs: districtInputs },
       transforms: {
         cuisine_group: { kind: "one_hot", values: ["African", "Thai"] },
+        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", "Thai"] } } : {}),
         ...Object.fromEntries(districtInputs.map((name) => [name, numeric])),
         population: { ...numeric, median: 7 },
       },
@@ -56,6 +58,16 @@ function tinyBundle({
 
 test("a bundle version the site does not know raises", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: BUNDLE_VERSION + 1 }), /version/);
+});
+
+test("the current site also loads the published version 2 bundle", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], version: 2 });
+  assert.equal(scoreDistricts(bundle, { cuisine: "Thai" }).length, 1);
+});
+
+test("fine cuisine changes the input even when its group is unchanged", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 1, 0, 0, 0], includeFineCuisine: true });
+  assert.ok(logit(bundle, "Eritrean") > logit(bundle, "Thai"));
 });
 
 test("invalid coordinates and supply counts are rejected while loading", async () => {

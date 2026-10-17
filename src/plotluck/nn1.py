@@ -34,7 +34,7 @@ def group_splits(groups: list[str], folds: int) -> list[dict[str, np.ndarray]]:
     splits = []
     for test in group_folds(list(groups), folds):
         train = np.setdiff1d(np.arange(len(groups)), test)
-        inner = group_folds(list(groups[train]), folds)
+        inner = group_folds(list(groups[train]), min(folds, len(set(groups[train]))))
         early_stop = train[inner[0]]
         splits.append({"fit": np.setdiff1d(train, early_stop), "early_stop": early_stop, "test": test})
     return splits
