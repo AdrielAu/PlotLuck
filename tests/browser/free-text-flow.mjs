@@ -455,6 +455,22 @@ test('dishes fly out on their own under reduced motion while the kitchen day tur
   assert.equal(await page.locator('#kitchen').getAttribute('data-kitchen'), 'paused');
 });
 
+test('a full table clears one dish at a time out of the window, then fills again', async t => {
+  const { browser, url } = await openSite(t);
+  const page = await newPage(browser);
+  await page.goto(url);
+  const kitchen = () => document.querySelector('#kitchen').dataset;
+  // Six dishes 4 s apart, then a 2 s hold: about 25 s before the first one leaves.
+  await page.waitForFunction(() => document.querySelector('#kitchen').dataset.table === 'clearing', null, { timeout:40000 });
+  assert.equal((await page.evaluate(kitchen)).dishes, '6');
+  await page.waitForFunction(() => document.querySelector('#kitchen').dataset.outside !== '0', null, { polling:'raf', timeout:10000 });
+  await page.waitForFunction(() => document.querySelector('#kitchen').dataset.dishes === '0', null, { timeout:15000 });
+  if (process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/kitchen-clearing.png'});
+  await page.waitForFunction(() => document.querySelector('#kitchen').dataset.dishes === '1', null, { timeout:5000 });
+  assert.equal((await page.evaluate(kitchen)).table, 'filling');
+  assert.deepEqual(page.errors, []);
+});
+
 test('sky overrides and the night light remain available on the description screen', async t => {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser);

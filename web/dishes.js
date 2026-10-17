@@ -40,9 +40,27 @@ export const DISHES = [
 ];
 
 // A dish not yet served this round, not on the table and not from the appliance that fired last
-// (the newest dish on `table`), or null when none is left and a new round should start.
-export function nextDish(served, table, random) {
-  const last = table.at(-1)?.appliance;
-  const left = DISHES.filter((d) => !served.includes(d) && !table.includes(d) && d.appliance !== last);
+// (`last`, the dish served before, by default the newest dish on `table`), or null when none is left
+// and a new round should start.
+export function nextDish(served, table, random, last = table.at(-1)) {
+  const left = DISHES.filter((d) => !served.includes(d) && !table.includes(d) && d.appliance !== last?.appliance);
   return left.length ? left[Math.floor(random() * left.length)] : null;
+}
+
+// The table's timing in running ms. A dish comes out every `serve` until all places are set; the full table
+// stays on show for `hold` (the last dish's 1.1 s flight, then 2 s); dishes leave `clear` apart in random order;
+// `beat` after the last take-off, serving starts again.
+export const TABLE_MS = { first: 1500, serve: 4000, hold: 3100, clear: 1000, beat: 1000 };
+
+// The table `dt` ms on from `state` ({ stage: "filling" | "clearing", wait, dishes }, dishes counting those
+// on the table or on their way to it): the next state, and whether a dish should "serve", "clear" or neither now.
+export function tableStep({ stage, wait, dishes }, dt, places) {
+  wait -= dt;
+  if (wait > 0) return [{ stage, wait, dishes }, null];
+  if (stage === "filling") {
+    const full = ++dishes === places;
+    return [{ stage: full ? "clearing" : "filling", wait: full ? TABLE_MS.hold : TABLE_MS.serve, dishes }, "serve"];
+  }
+  const empty = --dishes === 0;
+  return [{ stage: empty ? "filling" : "clearing", wait: empty ? TABLE_MS.beat : TABLE_MS.clear, dishes }, "clear"];
 }
