@@ -14,6 +14,9 @@ Evidence: `docs/evidence/06-nn2-inference.png`.
   `7ae557604adf67be50417f59c2c2f167def9a775`, float32 on CPU.
 - Environment: `s390x`, byte order `big`, Python 3.12.15, torch 2.11.0+cpu,
   Transformers 5.19.0 (the image as shipped; nothing installed or upgraded).
+- Hardware (`lscpu` on the VM): IBM machine type 9175, 3 CPUs at 5508 MHz,
+  1 thread per core, guest of z/VM 7.3.0. The CPU flags include `nnpa`, but this
+  run does not use it: inference is plain PyTorch CPU.
 - Native weight file `model.safetensors`: 988,097,824 bytes, kept in the
   external Hugging Face cache, not committed. Float32 parameter footprint:
   1,976,131,072 bytes.
