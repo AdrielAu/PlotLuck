@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="results.css">
+<link rel="stylesheet" href="pickers.css">
 </head>
 <body>
 <main>
@@ -17,11 +18,22 @@
     <p class="intro">Find a district for your restaurant.</p>
     <p id="score-explanation">Compare expected review-based success: customer satisfaction and accumulated review activity. A score from 0 to 1 is not a probability of survival or profit.</p>
   </header>
-  <section id="profile-controls" aria-label="Restaurant profile">
-    <label for="cuisine">Cuisine</label>
-    <select id="cuisine" disabled></select>
-  </section>
+  <fieldset id="profile-controls" disabled>
+    <legend>Your restaurant</legend>
+    <div class="cuisine-field">
+      <label for="cuisine">Cuisine</label>
+      <div class="combobox">
+        <input id="cuisine" type="text" role="combobox" autocomplete="off" spellcheck="false"
+          aria-autocomplete="list" aria-expanded="false" aria-controls="cuisine-options" aria-describedby="cuisine-help">
+        <ul id="cuisine-options" role="listbox" aria-label="Cuisines" hidden></ul>
+      </div>
+      <p id="cuisine-help">Type part of a name, such as “viet”. Rare cuisines show the broader group they are scored as.</p>
+      <p id="cuisine-status" class="visually-hidden" role="status" aria-live="polite"></p>
+    </div>
+    <div id="trait-pickers"></div>
+  </fieldset>
   <p id="loading" role="status">Loading district scores…</p>
+  <p id="pick-prompt" hidden>Pick a cuisine to see a score for every district.</p>
   <section id="error" role="alert" hidden>
     <h2>District scores could not load</h2>
     <p id="error-detail"></p>

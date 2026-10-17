@@ -26,14 +26,11 @@ p { margin: 0 0 16px; }
 .intro { margin: 12px 0 8px; font-size: 22px; }
 #score-explanation, #threshold-help, #count, .limitations, footer { color: var(--muted); }
 label { font-weight: 600; }
-#profile-controls { margin-bottom: 28px; }
-#profile-controls > label { display: block; margin-bottom: 8px; }
-select, button, input { font: inherit; }
-select { width: min(100%, 420px); min-height: 44px; border: 1px solid var(--muted); border-radius: 4px; background: var(--surface); color: var(--ink); padding: 8px 12px; }
+button, input { font: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 ::selection { background: #bacfa9; color: var(--ink); }
-select, input { accent-color: var(--green); caret-color: var(--green); }
+input { accent-color: var(--green); caret-color: var(--green); }
 :disabled { cursor: wait; opacity: 0.6; }
 .threshold-control { max-width: 680px; margin-bottom: 28px; }
 .threshold-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
