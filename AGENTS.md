@@ -4,7 +4,7 @@ Plotluck's MVP scores English postcode districts (0–1) for the expected review
 
 Current implementation constraints:
 
-- The current implementation uses cuisine-and-trait pickers and NN1. Required competition scope adds browser NN2 interpretation and a confirmed search area. Read the status and contracts in [the NN2 plan](docs/plans/nn2-integration.md) before implementation; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md) and [ADR 0006](docs/adr/0006-nn2-proposes-a-profile-and-search-area.md).
+- The current implementation asks six questions and reads them through one seam, `interpret(answers)` in `web/interpret.js`: browser NN2 once the user downloads it (#136), otherwise, or when its reply is invalid, a deterministic fallback. The user confirms the draft on a review card before NN1 scores; the results screen keeps the cuisine-and-trait pickers. Required competition scope adds browser NN2 interpretation and a confirmed search area. Read the status and contracts in [the NN2 plan](docs/plans/nn2-integration.md) before implementation; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md) and [ADR 0006](docs/adr/0006-nn2-proposes-a-profile-and-search-area.md).
 - Training and accelerated-inference benchmarks run in Jupyter on IBM LinuxONE (s390x, big-endian).
 - The site is static on GitHub Pages and runs the exported weights in the browser, so it stays live after the event.
 - Export uses raw JSON weights and a JavaScript forward pass. Architecture, preprocessing and exact file formats remain open in the [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38).

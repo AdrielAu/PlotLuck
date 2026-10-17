@@ -1,0 +1,187 @@
+{
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "evaluated": 20,
+  "correct": 2,
+  "json_valid": 20,
+  "validated": 4,
+  "components": {
+    "cuisine": 4,
+    "location": 3,
+    "traits": 2
+  },
+  "latency_samples": 20,
+  "warm_p95_seconds": 7.53329999999702,
+  "latency_statistic": "Nearest-rank sample p95, including timed failures; missing timings excluded and counted separately.",
+  "release_evaluation": false,
+  "release_note": "Diagnostic report only. Development cases, repeated cases or a small sample do not establish the 100-case release gates. Inferred-proposal acceptability requires separate human review.",
+  "results": [
+    {
+      "id": "clear-001",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.77690000000596
+    },
+    {
+      "id": "clear-002",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.61829999999702
+    },
+    {
+      "id": "clear-003",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.4605
+    },
+    {
+      "id": "clear-004",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": false,
+      "traits": false,
+      "correct": false,
+      "seconds": 5.57309999999404
+    },
+    {
+      "id": "clear-005",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.342
+    },
+    {
+      "id": "clear-006",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.148100000008941
+    },
+    {
+      "id": "clear-007",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.7465
+    },
+    {
+      "id": "clear-008",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.489899999991059
+    },
+    {
+      "id": "clear-009",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.16279999999702
+    },
+    {
+      "id": "clear-010",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.438700000002981
+    },
+    {
+      "id": "clear-011",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 7.22540000000596
+    },
+    {
+      "id": "clear-012",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.27340000000596
+    },
+    {
+      "id": "clear-013",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": false,
+      "correct": false,
+      "seconds": 5.23309999999404
+    },
+    {
+      "id": "clear-014",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.20329999999702
+    },
+    {
+      "id": "clear-015",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.155599999994039
+    },
+    {
+      "id": "clear-016",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 7.53329999999702
+    },
+    {
+      "id": "clear-017",
+      "json_valid": true,
+      "validated": true,
+      "cuisine": true,
+      "location": true,
+      "traits": true,
+      "correct": true,
+      "seconds": 5.13870000000298
+    },
+    {
+      "id": "clear-018",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.6535
+    },
+    {
+      "id": "clear-019",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 7.749
+    },
+    {
+      "id": "clear-020",
+      "json_valid": true,
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.25929999999702
+    }
+  ]
+}
