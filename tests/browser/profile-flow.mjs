@@ -28,6 +28,25 @@ test("a profile needs confirmation before its district results appear", async (t
   const slider = page.getByRole("slider", { name: "Score threshold", exact: true });
   const compare = page.getByRole("button", { name: "Compare districts", exact: true });
 
+  await t.test("the map and the ranked list are linked", async () => {
+    const third = page.locator("#ranked li button").nth(2);
+    const code = await third.locator(".district-code").innerText();
+    await third.click();
+    assert.match(await third.getAttribute("class"), /is-highlighted/);
+    const tooltip = page.locator(".leaflet-tooltip");
+    assert.match(await tooltip.innerText(), new RegExp(`^#3 · ${code} · \\d\\.\\d{2,4}$`));
+    // Hovering the circle at the map's centre, where the click glided to, highlights that circle's row.
+    await page.waitForTimeout(1500);
+    const box = await page.locator("#map").boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    // Leaflet fades a closed tooltip out for 200 ms before removing it.
+    await page.waitForFunction(() => document.querySelectorAll(".leaflet-tooltip").length === 1);
+    const hovered = (await tooltip.innerText()).split(" · ")[1];
+    assert.equal(await page.locator("#ranked button.is-highlighted .district-code").innerText(), hovered);
+    await page.mouse.move(box.x + box.width + 40, box.y + 10);
+    assert.equal(await page.locator("#ranked button.is-highlighted").count(), 0);
+  });
+
   await t.test("a moved threshold is kept for the same answers and reset for new ones", async () => {
     // Home moves the slider to the search area's lowest score, showing every district.
     await slider.press("Home");

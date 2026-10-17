@@ -70,3 +70,8 @@ export function resultsAt(scores, threshold) {
   const countLine = `${shown.length} of ${scores.length} ${scores.length === 1 ? "district" : "districts"} in your search area`;
   return { shown, countLine, legend, decimals: decimalsFor(values) };
 }
+
+// A shown district's hover text on the map, such as "#3 · M14 · 0.62".
+export function circleLabel({ rank, postcode_district, score }, decimals) {
+  return `#${rank} · ${postcode_district} · ${score.toFixed(decimals)}`;
+}

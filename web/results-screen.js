@@ -1,9 +1,11 @@
 // The results screen: a Leaflet map, the score threshold and the ranked list for one confirmed query.
 import { scoreDistricts } from "./scoring.js";
-import { defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "./results.js";
+import { circleLabel, defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "./results.js";
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// The map's first view, before it glides to the search area.
+const ENGLAND = [[49.9, -5.8], [55.8, 1.8]];
 
 // Show one of the page's three screens and hide the others.
 export function showScreen(id) {
@@ -20,10 +22,31 @@ export function showScreen(id) {
 // runs after the questions screen is shown again, with its state untouched.
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
-  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));  let map = null;
+  const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));
+  let map = null;
   let circles = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
   let onScreen = null;
+  // The shown districts' list buttons by code, and the district highlighted on both map and list.
+  let rows = new Map();
+  let highlighted = null;
+  let ring = null;
+
+  // Highlight one district's circle and list row, or none (`null`). The ring is a separate
+  // layer on top, so the circles keep their best-rank-on-top order.
+  function highlight(code) {
+    // A tooltip a row click opened stays up until closed here.
+    if (highlighted !== code) circles.get(highlighted)?.closeTooltip();
+    rows.get(highlighted)?.classList.remove("is-highlighted");
+    ring.remove();
+    highlighted = code;
+    if (!code) return;
+    const circle = circles.get(code);
+    ring.setLatLng(circle.getLatLng()).setRadius(circle.getRadius()).addTo(map);
+    const row = rows.get(code);
+    row?.classList.add("is-highlighted");
+    row?.scrollIntoView({ block: "nearest" });
+  }
 
   function backToQuestions() {
     showScreen("questions-screen");
@@ -38,18 +61,23 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       map.invalidateSize();
       return;
     }
-    map = L.map("map");
+    map = L.map("map").fitBounds(ENGLAND);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
     // Sized in metres, not pixels, so each circle keeps roughly covering its district at every zoom.
     circles = new Map(
-      bundle.districts.map((d) => [
-        d.postcode_district,
-        L.circle(centroids.get(d.postcode_district), { radius: Number(d.radius_km) * 1000, color: "#2f3437", weight: 1, fillOpacity: 0.5 }),
-      ]),
+      bundle.districts.map((d) => {
+        const code = d.postcode_district;
+        const circle = L.circle(centroids.get(code), { radius: Number(d.radius_km) * 1000, color: "#2f3437", weight: 1, fillOpacity: 0.5 })
+          .bindTooltip("", { direction: "top" })
+          .on("mouseover", () => highlight(code))
+          .on("mouseout", () => highlight(null));
+        return [code, circle];
+      }),
     );
+    ring = L.circle(ENGLAND[0], { color: "#2f3437", weight: 3, fill: false, interactive: false });
   }
 
   function render() {
@@ -62,10 +90,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       if (!shownByCode.has(code)) circle.remove();
     }
     // Worst rank first, so each better-ranked circle is drawn over those before it.
-    for (const { postcode_district, score, colour } of shown.toReversed()) {
-      circles.get(postcode_district)
-        .setStyle({ fillColor: colour })
-        .setPopupContent(`${postcode_district}: ${score.toFixed(decimals)}`)
+    for (const district of shown.toReversed()) {
+      circles.get(district.postcode_district)
+        .setStyle({ fillColor: district.colour })
+        .setTooltipContent(circleLabel(district, decimals))
         .addTo(map)
         .bringToFront();
     }
@@ -78,6 +106,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     }
     $("count").textContent = countLine;
     $("empty").hidden = shown.length > 0;
+    rows = new Map();
     $("ranked").replaceChildren(
       ...shown.map(({ rank, postcode_district, score }) => {
         const button = document.createElement("button");
@@ -91,14 +120,19 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
           return span;
         }));
         button.addEventListener("click", () => {
-          map.panTo(circles.get(postcode_district).getLatLng(), { animate: !reducedMotion() });
-          circles.get(postcode_district).openPopup();
+          const circle = circles.get(postcode_district);
+          map.flyTo(circle.getLatLng(), map.getZoom(), { animate: !reducedMotion(), duration: 1 });
+          highlight(postcode_district);
+          circle.openTooltip();
         });
+        rows.set(postcode_district, button);
         const item = document.createElement("li");
         item.append(button);
         return item;
       }),
     );
+    // Keep a highlight across slider moves while its district is still shown.
+    highlight(shownByCode.has(highlighted) ? highlighted : null);
   }
 
   $("threshold").addEventListener("input", () => {
@@ -120,17 +154,16 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       // Scores change only with the query; the slider just filters them.
       const scores = inSearchArea(scoreDistricts(bundle, query.profile), query);
       onScreen = { key, scores, threshold: defaultThreshold(scores) };
-      // Colour and popup text follow the shown districts, so render fills them in.
-      for (const { postcode_district } of scores) circles.get(postcode_district).bindPopup("");
       const { min, max } = thresholdRange(scores);
       Object.assign($("threshold"), { min: String(min), max: String(max) });
       $("threshold").value = String(onScreen.threshold);
-      // Frame the whole search area, not just the shown districts, clear of the threshold bar.
-      map.fitBounds(L.latLngBounds(query.searchArea.map((code) => centroids.get(code))), {
-        paddingTopLeft: [32, 32],
-        paddingBottomRight: [32, document.querySelector(".map-bar").offsetHeight + 24],
-        maxZoom: 13,
-      });
+      // Glide to the whole search area's circles, not just the shown ones, so circles the
+      // slider reveals land inside the view; clear of the threshold bar.
+      const bounds = L.latLngBounds([]);
+      for (const code of query.searchArea) bounds.extend(circles.get(code).getLatLng().toBounds(circles.get(code).getRadius() * 2));
+      const framing = { paddingTopLeft: [32, 32], paddingBottomRight: [32, document.querySelector(".map-bar").offsetHeight + 24], maxZoom: 13 };
+      if (reducedMotion()) map.fitBounds(bounds, { ...framing, animate: false });
+      else map.flyToBounds(bounds, { ...framing, duration: 1.5 });
     }
     const { heading, summary } = describeProfile(query.profile, answers.searchAreaName ?? (answers.searchArea?.length ? "your search area" : "England"));
     $("results-heading").textContent = heading;
