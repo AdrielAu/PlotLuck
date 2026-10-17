@@ -115,3 +115,12 @@ def test_cross_border_check_rejects_missing_country_evidence(tmp_path):
 
     with pytest.raises(ValueError, match="country code"):
         cross_border_districts(archive)
+
+
+def test_cross_border_check_rejects_an_empty_active_postcode_directory(tmp_path):
+    archive = tmp_path / "onspd.zip"
+    with ZipFile(archive, "w") as file:
+        file.writestr("Data/ONSPD_OCT_2026_UK.csv", "pcds,doterm,ctry24cd\n")
+
+    with pytest.raises(ValueError, match="active UK postcodes"):
+        cross_border_districts(archive)

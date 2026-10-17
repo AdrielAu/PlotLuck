@@ -57,6 +57,8 @@ def cross_border_districts(archive_path: Path) -> set[str]:
                         raise ValueError("active ONSPD postcode lacks district or country code")
                     district = row["pcds"].split()[0]
                     countries.setdefault(district, set()).add(row[country_field])
+    if not countries:
+        raise ValueError("ONSPD archive has no active UK postcodes")
     return {district for district, codes in countries.items() if "E92000001" in codes and len(codes) > 1}
 
 
