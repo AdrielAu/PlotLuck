@@ -31,7 +31,7 @@ EXCLUSION_REASONS = (
     "no_restaurants", "commercial_core_without_footfall", "too_many_missing_groups", "no_comparable_peers",
 )
 MIN_PEERS = 3
-# Provisional donor screens, like the peer limits; check them against the full-data audit.
+# shortcut: provisional donor screens, like the peer limits; upgrade from the full-data audit.
 OUTLIER_FACTOR = 4
 OUTLIER_SHARE_DISTANCE = 0.5
 MAX_DISTANCE_KM = 30

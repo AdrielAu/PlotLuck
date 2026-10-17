@@ -94,22 +94,22 @@ test('a price rejected by NN2 validation blocks scoring until explicitly clarifi
 
 test('districts the build withheld are absent from every search area and rent band', async () => {
   // EC4R and SE1P are tiny-population commercial cores and EC3M has no restaurants, so the sample bundle omits them.
+  // The bundle carries accepted estimates as ordinary values (see test_build.py), so SE17 stands for either kind.
   const withheld = ['EC4R', 'SE1P', 'EC3M'];
   const borough = { ...place, id: 'borough', name: 'Borough', districts: ['SE1', 'SE17', ...withheld] };
   const text = full('A Thai restaurant in Borough.');
-  for (const rentBand of ['low', 'mid', 'high', 'any']) {
+  // Sample rent tertiles put SE1 in the low band and SE17 in the mid band; no Borough district is high.
+  const expected = { low: ['SE1'], mid: ['SE17'], high: null, any: ['SE1', 'SE17'] };
+  for (const [rentBand, districts] of Object.entries(expected)) {
     const q = await descriptionQuery(text, extraction(text, { region: 'Borough' }), bundle, { places: [borough] });
     q.rentBand = rentBand;
-    let area;
-    try { area = confirmedDescription(q, bundle, { places: [borough] }).searchArea; } catch (e) {
-      if (rentBand === 'any') throw e;
-      assert.match(e.message, /No district centres/);
+    if (districts === null) {
+      assert.throws(() => confirmedDescription(q, bundle, { places: [borough] }), /No district centres/);
       continue;
     }
-    assert.ok(area.every(code => ['SE1', 'SE17'].includes(code)), `${rentBand}: ${area}`);
-    if (rentBand !== 'any') continue;
-    assert.deepEqual(area.sort(), ['SE1', 'SE17']);
-    const scored = scoreDistricts(bundle, q.profile).map(s => s.postcode_district);
-    for (const code of withheld) assert.equal(scored.includes(code), false, code);
+    const confirmed = confirmedDescription(q, bundle, { places: [borough] });
+    assert.deepEqual(confirmed.searchArea.sort(), districts, rentBand);
+    const scored = scoreDistricts(bundle, confirmed.profile);
+    for (const code of withheld) assert.equal(scored.some(s => s.postcode_district === code), false, code);
   }
 });

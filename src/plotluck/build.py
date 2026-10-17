@@ -104,7 +104,7 @@ DISTRICT_COLUMNS = (
     *context.SUMMARIES,
     "radius_km",
 )
-# The private district audit adds these to the source values.
+# The private district audit adds these to the source values; a build without the quality stage marks every district "unchecked".
 AUDIT_COLUMNS = ("context_status", "context_reasons")
 # Register each approved public economic or demographic extension here before
 # adding it to district_table. Unknown fields must never pass through by default.
@@ -176,7 +176,7 @@ def build(
     districts, reliable_codes, excluded, estimated, audit = (
         quality.prepare_districts(raw_districts) if apply_quality else
         (raw_districts, {d["postcode_district"] for d in raw_districts}, Counter(), Counter(),
-         {d["postcode_district"]: ("recorded", "") for d in raw_districts})
+         {d["postcode_district"]: ("unchecked", "") for d in raw_districts})
     )
     scored_codes = {d["postcode_district"] for d in districts}
     policy = label_restaurants(restaurants, reliable_codes)
