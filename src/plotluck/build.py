@@ -801,20 +801,30 @@ def rent_index(voa: list[dict]) -> dict[str, float]:
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:
     """District of the nearest live postcode to each (lat, lon)."""
+    return nearest_postcodes(postcodes, points)[0]
+
+
+def nearest_postcodes(postcodes: list[dict], points: list[tuple[float, float]]) -> tuple[list[str], list[float]]:
+    """District of the nearest live postcode to each (lat, lon), and the great-circle distance to it in km."""
     live = [
         p for p in postcodes
         if not p["doterm"] and (_float(p["lat"]) or 99) <= 90 and _float(p["long"]) is not None
     ]
     if not points:
-        return []
+        return [], []
     scale = np.cos(np.radians(52.5))  # England's mid-latitude; fine for nearest-neighbour
 
     def xy(pairs):
         a = np.asarray(pairs, dtype=float)
         return np.column_stack((a[:, 1] * scale, a[:, 0]))
 
-    _, idx = cKDTree(xy([(float(p["lat"]), float(p["long"])) for p in live])).query(xy(points))
-    return [live[i]["district"] for i in idx]
+    coords = np.array([(float(p["lat"]), float(p["long"])) for p in live])
+    _, idx = cKDTree(xy(coords)).query(xy(points))
+    lat1, lon1 = np.radians(np.asarray(points, dtype=float)).T
+    lat2, lon2 = np.radians(coords[idx]).T
+    h = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    km = 2 * EARTH_RADIUS_KM * np.arcsin(np.sqrt(h))
+    return [live[i]["district"] for i in idx], km.tolist()
 
 
 def _float(value: str) -> float | None:
