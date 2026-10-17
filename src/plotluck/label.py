@@ -14,6 +14,10 @@ PRIOR_REVIEWS = 20
 # Category utility for the distribution term D, in source column order.
 UTILITY = {"excellent": 1.0, "very_good": 0.8, "average": 0.4, "poor": 0.1, "terrible": 0.0}
 CATEGORIES = tuple(UTILITY)
+# Audit-only thresholds: the counts cover default-language reviews, so allow a full star of drift.
+ANOMALY_STARS = 1.0
+ANOMALY_MIN_COUNTS = 10
+ANOMALIES = ("rating_disagrees_with_counts", "rating_off_half_step")
 
 
 def review_fields(row: dict, fixes: Counter) -> dict:
@@ -57,6 +61,28 @@ def exclusion(r: dict) -> str | None:
     if n_total <= 0:
         return "n_total_zero"
     return None
+
+
+def anomalies(r: dict) -> list[str]:
+    """Audit flags for a labelled row whose review source looks suspect; never changes its label.
+
+    ``rating_disagrees_with_counts``: the rating is more than ``ANOMALY_STARS``
+    from the star mean of at least ``ANOMALY_MIN_COUNTS`` default-language
+    reviews. ``rating_off_half_step``: Tripadvisor shows ratings in half stars.
+    """
+    if exclusion(r):
+        return []
+    flags = []
+    rating = _number(r["avg_rating"])
+    counts = [_number(r[f"count_{c}"]) for c in CATEGORIES]
+    n_default = _n_default(counts)
+    if n_default and n_default >= ANOMALY_MIN_COUNTS:
+        star_mean = sum(n * stars for n, stars in zip(counts, (5, 4, 3, 2, 1))) / n_default
+        if abs(rating - star_mean) > ANOMALY_STARS:
+            flags.append("rating_disagrees_with_counts")
+    if abs(rating * 2 - round(rating * 2)) > 1e-9:
+        flags.append("rating_off_half_step")
+    return flags
 
 
 def fit_policy(restaurants: list[dict]) -> dict:
