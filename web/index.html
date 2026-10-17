@@ -144,10 +144,10 @@
         </div>
         <input id="threshold" type="range" min="0" max="1" step="any" value="0" aria-describedby="threshold-help">
         <p id="threshold-help">Starts at your top 10 districts. Lower it to show more; districts tied at the threshold stay together.</p>
-        <div class="legend" aria-label="Score colour scale: pale green is 0, dark green is 1">
-          <span>Lower score · 0</span>
-          <span class="legend-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-          <span>1 · Higher score</span>
+        <div id="legend" class="legend" role="img">
+          <span id="legend-low"></span>
+          <span class="legend-scale" aria-hidden="true"></span>
+          <span id="legend-high"></span>
         </div>
       </div>
     </section>

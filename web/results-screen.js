@@ -45,7 +45,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
     circles = new Map(
-      [...centroids].map(([code, latLng]) => [code, L.circleMarker(latLng, { radius: 8, color: "#284c29", weight: 1, fillOpacity: 0.85 })]),
+      [...centroids].map(([code, latLng]) => [code, L.circleMarker(latLng, { radius: 8, color: "#2f3437", weight: 1, fillOpacity: 0.85 })]),
     );
   }
 
@@ -53,11 +53,22 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     const { scores, threshold } = onScreen;
     $("threshold-value").value = threshold.toFixed(4);
     $("threshold").setAttribute("aria-valuetext", `${threshold.toFixed(4)} review-based success score`);
-    const { shown, countLine } = resultsAt(scores, threshold);
-    const shownCodes = new Set(shown.map((d) => d.postcode_district));
+    const { shown, countLine, legend, decimals } = resultsAt(scores, threshold);
+    const shownByCode = new Map(shown.map((d) => [d.postcode_district, d]));
     for (const [code, circle] of circles) {
-      if (shownCodes.has(code)) circle.addTo(map);
-      else circle.remove();
+      const district = shownByCode.get(code);
+      if (!district) {
+        circle.remove();
+        continue;
+      }
+      circle.setStyle({ fillColor: district.colour }).setPopupContent(`${code}: ${district.score.toFixed(decimals)}`).addTo(map);
+    }
+    $("legend").hidden = !legend;
+    if (legend) {
+      const [low, high] = [legend.low.toFixed(decimals), legend.high.toFixed(decimals)];
+      $("legend-low").textContent = low;
+      $("legend-high").textContent = high;
+      $("legend").setAttribute("aria-label", `Score colours: blue is the lowest shown score, ${low}; red is the highest, ${high}`);
     }
     $("count").textContent = countLine;
     $("empty").hidden = shown.length > 0;
@@ -65,8 +76,8 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       ...shown.map(({ rank, postcode_district, score }) => {
         const button = document.createElement("button");
         button.type = "button";
-        button.setAttribute("aria-label", `Rank ${rank}: ${postcode_district}, score ${score.toFixed(4)}. Show on map.`);
-        const parts = [["district-rank", String(rank)], ["district-code", postcode_district], ["district-score", score.toFixed(4)]];
+        button.setAttribute("aria-label", `Rank ${rank}: ${postcode_district}, score ${score.toFixed(decimals)}. Show on map.`);
+        const parts = [["district-rank", String(rank)], ["district-code", postcode_district], ["district-score", score.toFixed(decimals)]];
         button.append(...parts.map(([className, text]) => {
           const span = document.createElement("span");
           span.className = className;
@@ -103,13 +114,8 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       // Scores change only with the query; the slider just filters them.
       const scores = inSearchArea(scoreDistricts(bundle, query.profile), query);
       onScreen = { key, scores, threshold: defaultThreshold(scores) };
-      for (const { postcode_district, score } of scores) {
-        const pale = [224, 237, 215], dark = [40, 76, 41];
-        const fill = pale.map((channel, i) => Math.round(channel + (dark[i] - channel) * score));
-        const popup = document.createElement("p");
-        popup.textContent = `${postcode_district}: ${score.toFixed(4)}`;
-        circles.get(postcode_district).setStyle({ fillColor: `rgb(${fill.join(",")})` }).bindPopup(popup);
-      }
+      // Colour and popup text follow the shown districts, so render fills them in.
+      for (const { postcode_district } of scores) circles.get(postcode_district).bindPopup("");
       const { min, max } = thresholdRange(scores);
       Object.assign($("threshold"), { min: String(min), max: String(max) });
       $("threshold").value = String(onScreen.threshold);
