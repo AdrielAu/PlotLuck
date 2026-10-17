@@ -35,7 +35,8 @@ export function defaultThreshold(scores) {
 // the top sits just past the best score so the slider can show none.
 export function thresholdRange(scores) {
   const values = scores.map((d) => d.score);
-  const min = Math.min(...values);
+  // Keep the range's low endpoint below every score despite browser rounding.
+  const min = Math.min(...values) - 0.000001;
   const best = Math.max(...values);
   return { min, max: best + Math.max((best - min) / 50, 0.0001) };
 }
