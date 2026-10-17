@@ -123,7 +123,6 @@ def build(
     """
     data, out = Path(data), Path(out)
     run = Path(run) if run is not None else data / "run"
-    out.mkdir(parents=True, exist_ok=True)
     if data.resolve() == out.resolve():
         raise ValueError("bundle output must be separate from private data")
     postcodes = _read_csv(data / "onspd_england.csv")
@@ -172,6 +171,17 @@ def build(
         cv=cv,
         shipped={"epochs": epochs, "train_loss": losses},
     )
+    bundle = {
+        "districts.csv": districts,
+        "district_cuisine_supply.csv": supply_rows,
+        "vocabulary.json": vocab,
+        "model.json": model,
+        "reference_scores.json": reference,
+    }
+    validate_run_metrics(metrics)
+    publish_bundle(out, bundle)
+    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
     run.mkdir(parents=True, exist_ok=True)
     _write_json(run / "metrics.json", metrics)
     return metrics
@@ -218,20 +228,6 @@ def cross_validate(
 
 def _mae_rmse(error: np.ndarray) -> tuple[float, float]:
     return float(np.abs(error).mean()), float(np.sqrt((error**2).mean()))
-    bundle = {
-        "districts.csv": districts,
-        "district_cuisine_supply.csv": supply_rows,
-        "vocabulary.json": vocab,
-        "model.json": model,
-        "reference_scores.json": reference,
-    }
-    validate_run_metrics(metrics)
-    publish_bundle(out, bundle)
-    _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
-    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
-    (data / "run").mkdir(exist_ok=True)
-    _write_json(data / "run" / "metrics.json", metrics)
-    return metrics
 
 
 def _only_keys(value: dict, keys, where: str) -> None:
@@ -247,11 +243,11 @@ def validate_run_metrics(metrics: dict) -> None:
     """Keep server run output to counts, losses and evaluation metrics."""
     allowed = {
         "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
-        "districts_without_rent", "epochs", "train_loss",
+        "districts_without_rent", "cv", "shipped",
     }
     if not isinstance(metrics, dict) or set(metrics) - allowed:
         raise ValueError("run metrics have private or unexpected fields")
-    for name in ("source_rows", "restaurants", "labelled", "districts_without_rent", "epochs"):
+    for name in ("source_rows", "restaurants", "labelled", "districts_without_rent"):
         if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
             raise ValueError(f"run metrics {name} must be a count")
     reasons = {
@@ -263,10 +259,38 @@ def validate_run_metrics(metrics: dict) -> None:
             not isinstance(count, int) or count < 0 for count in metrics[name].values()
         ) or set(metrics[name]) - allowed_reasons:
             raise ValueError(f"run metrics {name} must contain counts only")
-    if not isinstance(metrics.get("train_loss"), list) or not all(
-        _finite_number(loss) for loss in metrics["train_loss"]
+    scores = ("mae", "rmse", "baseline_mae", "baseline_rmse")
+    cv = metrics.get("cv")
+    _only_keys(cv, ("folds", "summary"), "run metrics cv")
+    if not isinstance(cv["folds"], list):
+        raise ValueError("run metrics folds have private or unexpected shape")
+    for fold in cv["folds"]:
+        _only_keys(
+            fold, ("rows", "best_epoch", *scores, "train_loss", "early_stop_loss"),
+            "run metrics fold",
+        )
+        _only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics fold rows")
+        if any(type(n) is not int or n < 0 for n in fold["rows"].values()) or (
+            type(fold["best_epoch"]) is not int or fold["best_epoch"] < 1
+        ):
+            raise ValueError("run metrics fold has invalid counts")
+        if any(not _finite_number(fold[name]) for name in scores):
+            raise ValueError("run metrics fold has invalid scores")
+        for name in ("train_loss", "early_stop_loss"):
+            if not isinstance(fold[name], list) or not all(_finite_number(v) for v in fold[name]):
+                raise ValueError("run metrics fold has invalid loss curve")
+    _only_keys(cv["summary"], scores, "run metrics summary")
+    for name in scores:
+        _only_keys(cv["summary"][name], ("mean", "std"), "run metrics summary score")
+        if any(not _finite_number(v) for v in cv["summary"][name].values()):
+            raise ValueError("run metrics summary has invalid scores")
+    shipped = metrics.get("shipped")
+    _only_keys(shipped, ("epochs", "train_loss"), "run metrics shipped")
+    if type(shipped["epochs"]) is not int or shipped["epochs"] < 1 or (
+        not isinstance(shipped["train_loss"], list)
+        or not all(_finite_number(v) for v in shipped["train_loss"])
     ):
-        raise ValueError("run metrics loss curve must contain numbers only")
+        raise ValueError("run metrics shipped has invalid epochs or loss curve")
 
 
 def publish_bundle(out: Path, bundle: dict) -> None:
@@ -722,12 +746,10 @@ def main(argv=None) -> None:
         prog="python -m plotluck.build",
         description="Build the site bundle from the data folder chosen by data_dir().",
     )
-    parser.add_argument("--out", type=Path, help="bundle folder (default: the data folder)")
+    parser.add_argument("--out", type=Path, help="bundle folder (default: <data folder>/bundle)")
     parser.add_argument("--run", type=Path, help="run-results folder (default: <data folder>/run)")
     parser.add_argument("--max-epochs", type=int, default=MAX_EPOCHS)
     parser.add_argument("--patience", type=int, default=PATIENCE)
-    parser.add_argument("--out", type=Path, help="bundle folder (default: data/bundle)")
-    parser.add_argument("--epochs", type=int, default=TRACER_EPOCHS)
     args = parser.parse_args(argv)
     data = data_dir()
     full = data == data_dir(choice="full")

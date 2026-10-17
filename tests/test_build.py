@@ -106,7 +106,7 @@ def test_build_rejects_private_fields_before_writing(tmp_path, monkeypatch, file
 
     monkeypatch.setattr(build, "publish_bundle", leaking_publisher)
     with pytest.raises(ValueError, match="private|unexpected"):
-        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
 
     assert not out.exists()
     assert not (data / "restaurants.csv").exists()
@@ -136,6 +136,18 @@ def test_committed_sample_run_metrics_pass_privacy_guard():
 def test_private_metadata_cannot_enter_run_metrics(data, field, value):
     metrics = read_json(data / "run" / "metrics.json")
     metrics[field] = value
+    with pytest.raises(ValueError, match="private|unexpected"):
+        build.validate_run_metrics(metrics)
+
+
+@pytest.mark.parametrize("section", ["fold", "summary", "shipped"])
+def test_private_metadata_cannot_hide_in_nested_run_metrics(data, section):
+    metrics = read_json(data / "run" / "metrics.json")
+    target = (
+        metrics["cv"]["folds"][0] if section == "fold" else
+        metrics["cv"]["summary"] if section == "summary" else metrics["shipped"]
+    )
+    target["R0"] = 3.5
     with pytest.raises(ValueError, match="private|unexpected"):
         build.validate_run_metrics(metrics)
 
