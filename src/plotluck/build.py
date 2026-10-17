@@ -188,7 +188,8 @@ def build(
         {"postcode_district": d, "cuisine_group": g, "restaurants": n}
         for (d, g), n in sorted(supply.items()) if d in scored_codes
     ]
-    vocab = vocabulary(groups, traits)
+    fine_cuisines = model["transforms"]["cuisine"]["values"]
+    vocab = vocabulary(groups, traits, fine_cuisines)
     district_raw = training_district_inputs(labelled, districts, supply)
     # Without the quality stage (tests only) every district trains and a missing value takes the median.
     if apply_quality and np.isnan(district_raw).any():
@@ -208,7 +209,7 @@ def build(
         "tolerance": REFERENCE_TOLERANCE,
         "cases": [
             {"profile": profile, "scores": score_districts(model, vocab, districts, supply, profile)}
-            for profile in reference_profiles(vocab)
+            for profile in reference_profiles(vocab, fine_cuisines)
         ],
     }
     metrics.update(
@@ -452,8 +453,6 @@ def publish_bundle(out: Path, bundle: dict) -> None:
         fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
         if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
             raise ValueError("vocabulary has a private or unexpected cuisine")
-        if cuisine["label"] != (fine if fine == group else f"{fine} (scored as {group})"):
-            raise ValueError("vocabulary has a private or unexpected label")
         groups.add(group)
     trait_names = []
     allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
@@ -512,6 +511,11 @@ def publish_bundle(out: Path, bundle: dict) -> None:
                 set(transform["values"]) - {c["cuisine"] for c in vocab["cuisines"]}
             ):
                 raise ValueError("model has private or unexpected fine cuisines")
+            if name == "cuisine" and any(
+                c["label"] != cuisine_label(c["cuisine"], c["cuisine_group"], transform["values"])
+                for c in vocab["cuisines"]
+            ):
+                raise ValueError("vocabulary has a private or unexpected label")
         else:
             only_keys(transform, ("kind",), "flag transform")
             if transform["kind"] != "flag":
@@ -549,16 +553,24 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     _write_json(out / "reference_scores.json", reference)
 
 
-def vocabulary(groups: dict[str, str], traits: list[dict]) -> dict:
-    """``vocabulary.json``: every cuisine with its group, and the shipped ``traits``."""
+def vocabulary(groups: dict[str, str], traits: list[dict], fine_cuisines=()) -> dict:
+    """``vocabulary.json``: every cuisine with its group, and the shipped ``traits``.
+
+    A cuisine in ``fine_cuisines`` has its own model input, so only the others
+    are labelled as scored as their group.
+    """
     return {
         "version": BUNDLE_VERSION,
         "cuisines": [
-            {"cuisine": c, "cuisine_group": g, "label": c if c == g else f"{c} (scored as {g})"}
+            {"cuisine": c, "cuisine_group": g, "label": cuisine_label(c, g, fine_cuisines)}
             for c, g in sorted(groups.items())
         ],
         "traits": traits,
     }
+
+
+def cuisine_label(cuisine: str, group: str, fine_cuisines) -> str:
+    return cuisine if cuisine == group or cuisine in fine_cuisines else f"{cuisine} (scored as {group})"
 
 
 def trait_vocabulary(restaurants: list[dict]) -> list[dict]:
@@ -722,14 +734,22 @@ def score_districts(model: dict, vocab: dict, districts: list[dict], supply: Cou
     return {d["postcode_district"]: float(s) for d, s in zip(districts, scores)}
 
 
-def reference_profiles(vocab: dict) -> list[dict]:
-    """Fixed profiles for the browser parity check: defaults, all traits set, Unspecified."""
+def reference_profiles(vocab: dict, fine_cuisines) -> list[dict]:
+    """Fixed profiles for the browser parity check.
+
+    A supported fine cuisine with defaults (one scored apart from its group
+    where any is), a fallback cuisine with all traits set, and Unspecified.
+    """
     defaults = {t["name"]: t["default"] for t in vocab["traits"]}
     everything = {t["name"]: t["values"][1] for t in vocab["traits"]}
-    cuisines = [c["cuisine"] for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
+    cuisines = [c for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
+    # Stable sort: a supported cuisine outside its own-named group comes first.
+    supported = sorted((c for c in cuisines if c["cuisine"] in fine_cuisines),
+                       key=lambda c: c["cuisine"] == c["cuisine_group"])
+    fallback = [c for c in cuisines if c["cuisine"] not in fine_cuisines]
     return [
-        {"cuisine": cuisines[0], **defaults},
-        {"cuisine": cuisines[-1], **everything},
+        {"cuisine": (supported or cuisines)[0]["cuisine"], **defaults},
+        {"cuisine": (fallback or cuisines)[-1]["cuisine"], **everything},
         {"cuisine": UNSPECIFIED, **defaults},
     ]
 

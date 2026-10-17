@@ -33,6 +33,14 @@ validated full-data export is available. The synthetic sample verifies the
 new input path and export; its ranking metrics cannot establish real-world
 quality.
 
+A supported fine cuisine is labelled by its own name; only a fallback cuisine
+reads "(scored as <group>)". The reference scores include a supported fine
+cuisine (one outside its own-named group where any exists) and a fallback
+cuisine, so the browser parity check covers both input paths. The committed
+`data/sample/` bundle is version 3, rebuilt with the quality stage above, so 5
+of its 13 synthetic districts remain; `web/models/` stays version 2 until the
+full-data export passes (#164).
+
 The LinuxONE operator should retrain from the full private rows, then run
 `python -m plotluck.ranking_audit <new-bundle-dir>` and compare the result with
 the published baseline above. Check held-out error, rank changes across

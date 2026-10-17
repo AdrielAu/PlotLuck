@@ -16,8 +16,8 @@ const blank = { location: "", food: "", place: "", prices: "", rent: "", other: 
 
 test("named areas use catalogue membership and ambiguous London requires a choice", async () => {
   const catalogue = { places: [
-    { id: "city", name: "City of London", aliases: ["London"], type: "city", context: "England", districts: ["EC4R"] },
-    { id: "region", name: "Greater London", aliases: ["London"], type: "region", context: "England", districts: ["EC4R", "SE1"] },
+    { id: "city", name: "City of London", aliases: ["London"], type: "city", context: "England", districts: ["EC3R"] },
+    { id: "region", name: "Greater London", aliases: ["London"], type: "region", context: "England", districts: ["EC3R", "SE1"] },
   ] };
   const reader = makeInterpreter(bundle, undefined, catalogue);
   const draft = await reader.interpret({ ...blank, location: "London", food: "Thai" });
@@ -26,7 +26,7 @@ test("named areas use catalogue membership and ambiguous London requires a choic
   assert.equal(draft.marks.area, "unresolved");
   assert.deepEqual(reader.areaCandidates("London").map(a => a.label), ["City of London (city, England)", "Greater London (region, England)"]);
   const area = reader.areaCandidates("London")[0];
-  assert.deepEqual([...reader.districtsInScope(area, "any")], ["EC4R"]);
+  assert.deepEqual([...reader.districtsInScope(area, "any")], ["EC3R"]);
   assert.deepEqual([...reader.districtsInScope({ ...area, code: "invented" }, "any")], []);
   assert.equal(reader.readArea("Greater London").code, "region");
   assert.equal(reader.readArea("London or Leeds"), null);
@@ -52,7 +52,7 @@ test("clear answers become an explicit draft that the scorer accepts", async () 
     rentBand: "low",
     unused: [],
   });
-  assert.equal(scoreDistricts(bundle, draft.profile).length, 13);
+  assert.equal(scoreDistricts(bundle, draft.profile).length, 5);
 });
 
 test("required answers stop on empty or unreadable text; areas accept England, districts and postcode areas", async () => {
@@ -106,11 +106,11 @@ test("an unreadable optional answer keeps the default and is listed as unused", 
 
 test("rent bands are thirds of the districts by commercial rent, and filter the search area", () => {
   const england = { kind: "england", code: "", label: "England" };
-  assert.deepEqual([...districtsInScope(england, "low")], ["EC4R", "EC4V", "SE1", "SE11", "SE1P"]);
-  assert.deepEqual([...districtsInScope(england, "mid")], ["EC3M", "EC3P", "EC3R", "EC4P"]);
-  assert.deepEqual([...districtsInScope(england, "high")], ["EC3N", "SE16", "SE17", "WC2R"]);
-  assert.equal(districtsInScope(england, "any").size, 13);
-  assert.deepEqual([...districtsInScope({ kind: "postcode_area", code: "SE", label: "SE postcode area" }, "low")], ["SE1", "SE11", "SE1P"]);
+  assert.deepEqual([...districtsInScope(england, "low")], ["SE1", "SE11"]);
+  assert.deepEqual([...districtsInScope(england, "mid")], ["EC3R", "SE17"]);
+  assert.deepEqual([...districtsInScope(england, "high")], ["WC2R"]);
+  assert.equal(districtsInScope(england, "any").size, 5);
+  assert.deepEqual([...districtsInScope({ kind: "postcode_area", code: "SE", label: "SE postcode area" }, "low")], ["SE1", "SE11"]);
   assert.deepEqual([...districtsInScope({ kind: "district", code: "SE1", label: "SE1" }, "high")], []);
 });
 
@@ -120,7 +120,7 @@ test("without rent values the rent answer is not asked and every district stays 
   const draft = await noRent.interpret({ ...blank, location: "anywhere", food: "Thai", rent: "low" });
   assert.equal(draft.rentBand, "any");
   assert.equal(draft.marks.rent_band, "default");
-  assert.equal(noRent.districtsInScope(draft.area, draft.rentBand).size, 13);
+  assert.equal(noRent.districtsInScope(draft.area, draft.rentBand).size, 5);
   assert.equal(makeInterpreter(bundle).hasRent, true);
 });
 
@@ -174,7 +174,7 @@ test("with NN2 ready, one call reads the joined answers and its marks and unused
     rentBand: "mid",
     unused: ["live music"],
   });
-  assert.equal(scoreDistricts(bundle, draft.profile).length, 13);
+  assert.equal(scoreDistricts(bundle, draft.profile).length, 5);
 });
 
 test("the review recovers explicit dietary traits omitted by NN2 for user confirmation", async () => {
