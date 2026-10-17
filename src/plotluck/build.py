@@ -6,8 +6,10 @@ One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
 - to ``data``, ``restaurants.csv``: the 15-column restaurant table of ADR 0004.
   It holds ratings and review counts, so it is private and stays beside the
   sources, on LinuxONE for full data (ADR 0003);
-- to ``data``, ``run/metrics.json``: row counts, exclusions by reason, inputs
-  left out and loss per epoch.
+- to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref).
+  It derives from ratings, so it is private like ``restaurants.csv``;
+- to ``data``, ``run/metrics.json``: row counts, label exclusions and fixes by
+  reason, inputs left out and loss per epoch.
 
 This is the tracer of the spec in issue #64: every stage is crude, but the
 file shapes are the contract the site builds against.
@@ -23,7 +25,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from plotluck import nn1
+from plotluck import label, nn1
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
@@ -37,7 +39,6 @@ BUNDLE_FILES = (
 )
 TRACER_EPOCHS = 20
 REFERENCE_TOLERANCE = 1e-6
-PRIOR_REVIEWS = 20
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
 UNSPECIFIED = "Unspecified"
@@ -79,12 +80,19 @@ DISTRICT_COLUMNS = (
     "deprivation_index",
     "commercial_rent_index",
 )
-_CATEGORIES = ("excellent", "very_good", "average", "poor", "terrible")
 
 # NN1's district inputs, in input-vector order, and which get log1p first.
-# shortcut: commercial_rent_index is left out until VOA lands (issue #72).
-DISTRICT_INPUTS = ("population", "deprivation_index", "total_restaurants", "same_cuisine_supply")
-LOG1P = {"population", "total_restaurants", "same_cuisine_supply"}
+DISTRICT_INPUTS = (
+    "population",
+    "deprivation_index",
+    "commercial_rent_index",
+    "total_restaurants",
+    "same_cuisine_supply",
+)
+LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply"}
+# VOA measuring standards the rent index divides by, in order of preference:
+# net internal area, then gross internal area where a district has no NIA.
+VOA_AREA_UNITS = ("NIA", "GIA")
 
 
 def build(
@@ -103,13 +111,17 @@ def build(
     restaurants, metrics = restaurant_table(
         _read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
     )
+    policy = label_restaurants(restaurants)
     groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
-    districts = district_table(postcodes, _read_csv(data / "p004_england.csv"), restaurants)
+    districts = district_table(
+        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv")
+    )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
     _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
     _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
     _write_csv(
         out / "district_cuisine_supply.csv",
@@ -155,7 +167,7 @@ def build(
     metrics.update(
         restaurants=len(restaurants),
         labelled=len(labelled),
-        inputs_left_out={"commercial_rent_index": "no VOA source yet (issue #72)"},
+        districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
         epochs=epochs,
         train_loss=losses,
     )
@@ -276,6 +288,7 @@ def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0
     return [
         number(district["population"]),
         number(district["deprivation_index"]),
+        number(district["commercial_rent_index"]),
         float(district["total_restaurants"] - exclude_from_total),
         float(same_cuisine),
     ]
@@ -325,75 +338,63 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
         postcodes, [(float(r["latitude"]), float(r["longitude"])) for r in located]
     )
     excluded = Counter({"no_location": len(rows) - len(located)})
+    fixes = Counter()
     restaurants = []
     for row, code in zip(located, district):
         cuisine, venue = classify(row["cuisines"], mapping)
-        counts = [_int(row[c]) for c in _CATEGORIES]
-        total = _int(row["total_reviews_count"])
-        if None not in counts and total is not None:
-            total = max(total, sum(counts))  # issue #47: n_total = max(total, n_default)
         restaurants.append({
             "postcode_district": code,
             "cuisines": row["cuisines"],
             "price_band": PRICE_BANDS.get(row["price_level"], ""),
             "is_chain": int(names[row["restaurant_name"]] >= CHAIN_MIN_NAMES),
             **{f: {"Y": 1, "N": 0}.get(row[f], "") for f in DIET_FLAGS},
-            "avg_rating": row["avg_rating"],
-            "total_reviews": "" if total is None else total,
-            **{f"count_{c}": "" if n is None else n for c, n in zip(_CATEGORIES, counts)},
+            **label.review_fields(row, fixes),
             "cuisine": cuisine,
             "venue_type": venue,
         })
-    _placeholder_label(restaurants, excluded)
-    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded)}
+    excluded.update(filter(None, map(label.exclusion, restaurants)))
+    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
 
 
-def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
-    """Set ``review_success_label``: a rating smoothed by prior reviews, on 0-1.
+def label_restaurants(restaurants: list[dict]) -> dict:
+    """Set ``review_success_label`` under a policy fitted on every row; return it.
 
-    shortcut: placeholder, not the ADR 0002 formula; issue #69 replaces it
-    with the full label and a per-fold label policy.
+    The shipped model trains on every row; CV refits the policy per fold (issue #71).
     """
-    eligible = []
-    for r in restaurants:
-        rating = _float(r["avg_rating"])
-        if rating is None or not 1 <= rating <= 5:
-            excluded["rating"] += 1
-        elif not r["total_reviews"]:
-            excluded["reviews"] += 1
-        else:
-            eligible.append((r, rating, r["total_reviews"]))
-    prior = statistics.fmean(rating for _, rating, _ in eligible) if eligible else 3.0
-    for r in restaurants:
-        r["review_success_label"] = ""
-    for r, rating, n in eligible:
-        smoothed = (n * rating + PRIOR_REVIEWS * prior) / (n + PRIOR_REVIEWS)
-        r["review_success_label"] = round((smoothed - 1) / 4, 6)
+    policy = label.fit_policy(restaurants)
+    for r, value in zip(restaurants, label.labels(restaurants, policy)):
+        r["review_success_label"] = "" if value is None else round(value, 6)
+    return policy
 
 
 def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> dict[str, str]:
-    """Fine cuisine -> cuisine_group, for every fine cuisine in the mapping."""
+    """Fine cuisine -> cuisine_group, for every fine cuisine in the mapping.
+
+    A cuisine with fewer than ``threshold`` label-eligible rows folds into its
+    parent. A parent's pool is its own rows plus those of its folded children;
+    a pool still under ``threshold`` folds into Other. Parents are one level
+    deep: a parent never has a parent of its own (checked in the tests).
+    """
     parent = {m["cuisine"]: m["parent"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella")}
     parent.setdefault(UNSPECIFIED, "")
     counts = Counter(r["cuisine"] for r in restaurants if r["review_success_label"] != "")
-    small = [c for c in parent if counts[c] < threshold]
-    parent_counts = Counter()
-    for c in small:
-        parent_counts[parent[c]] += counts[c]
-    groups = {c: c for c in parent}
-    for c in small:
-        p = parent[c]
-        groups[c] = p if p and parent_counts[p] >= threshold else OTHER
-    return groups
+    root = {c: parent[c] if parent[c] and counts[c] < threshold else c for c in parent}
+    pool = Counter()
+    for c, group in root.items():
+        pool[group] += counts[c]
+    return {c: group if pool[group] >= threshold else OTHER for c, group in root.items()}
 
 
-def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:
+def district_table(
+    postcodes: list[dict], p004: list[dict], restaurants: list[dict], voa: list[dict]
+) -> list[dict]:
     """One row per district with an English postcode that has a grid reference.
 
     Restaurants come from live postcodes with a grid reference, so no
     restaurant lands in a district left out here.
     """
     residents = {r["district"]: int(r["residents"]) for r in p004}
+    rent = rent_index(voa)
     totals = Counter(r["postcode_district"] for r in restaurants)
     points, ranks = {}, {}
     for p in postcodes:
@@ -412,10 +413,28 @@ def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[di
             "total_restaurants": totals[code],
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
-            # shortcut: no VOA source yet; issue #72 fills commercial_rent_index.
-            "commercial_rent_index": "",
+            "commercial_rent_index": rent.get(code, ""),
         })
     return rows
+
+
+def rent_index(voa: list[dict]) -> dict[str, float]:
+    """Median rateable value per square metre of each district's VOA valuations.
+
+    £/m² only compares within one measuring standard, so a district uses its
+    NIA valuations, or its GIA ones when it has no NIA. Valuations without a
+    positive area have no valid denominator; a district with none is left
+    out, not filled.
+    """
+    per_m2 = {}
+    for v in voa:
+        area, rv = _float(v["total_area"]), _float(v["adopted_rv"])
+        if v["unit"] in VOA_AREA_UNITS and area and area > 0 and rv is not None:
+            per_m2.setdefault(v["district"], {}).setdefault(v["unit"], []).append(rv / area)
+    return {
+        d: round(statistics.median(next(by_unit[u] for u in VOA_AREA_UNITS if u in by_unit)), 1)
+        for d, by_unit in per_m2.items()
+    }
 
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:
@@ -441,11 +460,6 @@ def _float(value: str) -> float | None:
         return float(value)
     except ValueError:
         return None
-
-
-def _int(value: str) -> int | None:
-    number = _float(value)
-    return None if number is None else int(number)  # source counts look like "347.0"
 
 
 def _read_csv(path: Path) -> list[dict]:

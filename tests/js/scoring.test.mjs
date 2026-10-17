@@ -18,13 +18,15 @@ function readFrom(dir) {
 function tinyBundle({
   weights,
   population = "100",
+  centroidLat = "51.5",
+  supplyCount = "2",
   version = 1,
   districtInputs = ["population", "same_cuisine_supply"],
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
   const files = {
-    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index\nAB1,51.5,-0.1,3,${population},10\n`,
-    "district_cuisine_supply.csv": "postcode_district,cuisine_group,restaurants\nAB1,Thai,2\n",
+    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index\nAB1,${centroidLat},-0.1,3,${population},10\n`,
+    "district_cuisine_supply.csv": `postcode_district,cuisine_group,restaurants\nAB1,Thai,${supplyCount}\n`,
     "vocabulary.json": JSON.stringify({
       version,
       cuisines: [
@@ -50,6 +52,18 @@ function tinyBundle({
 
 test("a bundle version the site does not know raises", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: 2 }), /version/);
+});
+
+test("invalid coordinates and supply counts are rejected while loading", async () => {
+  await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], centroidLat: "missing" }), /coordinate/i);
+  await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], supplyCount: "missing" }), /supply/i);
+});
+
+test("invalid numeric inputs and model shapes raise instead of returning NaN", async () => {
+  const badNumeric = await tinyBundle({ weights: [0, 0, 1, 0], population: "missing" });
+  assert.throws(() => scoreDistricts(badNumeric, { cuisine: "Thai" }), /numeric|population/i);
+  const badShape = await tinyBundle({ weights: [0, 0, 0] });
+  assert.throws(() => scoreDistricts(badShape, { cuisine: "Thai" }), /layer|shape/i);
 });
 
 function logit(bundle, cuisine) {

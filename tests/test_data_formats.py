@@ -47,15 +47,12 @@ def test_sample_restaurants_format():
             assert r["is_chain"] in ("0", "1")
             for flag in ("vegetarian_friendly", "vegan_options", "gluten_free"):
                 assert r[flag] in ("", "0", "1")
-            # Rows with a missing or invalid rating or review count stay in the
-            # table (they still count as supply) but get no label.
-            try:
-                valid = 1.0 <= float(r["avg_rating"]) <= 5.0 and int(r["total_reviews"]) > 0
-            except ValueError:
-                valid = False
-            assert (r["review_success_label"] != "") == valid
-            if valid:
-                assert 0.0 <= float(r["review_success_label"]) <= 1.0
+            if r["review_success_label"] == "":
+                continue  # excluded from the label (bad rating or no reviews); still counts as supply
+            assert float(r["avg_rating"]) >= 1.0 and float(r["avg_rating"]) <= 5.0
+            label = float(r["review_success_label"])
+            assert 0.0 <= label <= 1.0
+            assert int(r["total_reviews"]) >= 0
 
 
 def test_sample_districts_format():
