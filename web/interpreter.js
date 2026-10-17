@@ -72,5 +72,5 @@ export function validateInterpretation(reply, description, vocabulary) {
       (l.distance !== null && (typeof l.distance !== 'number' || !Number.isFinite(l.distance) || l.distance <= 0)) ||
       (l.distance === null) !== (l.unit === null) || (l.distance !== null && !l.near) ||
       (l.text === null && (l.near || l.distance !== null))) throw new Error('Invalid location distance.');
-  return { profile, rentBand: draft.fields.rent_band.value, ...draft };
+  return { profile, ...draft };
 }

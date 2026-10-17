@@ -52,11 +52,11 @@ test('the rent band is a validated filter: never an NN1 input, any by default, i
   r.fields.vegan_options = { value: true, provenance: 'inferred', evidence: 'Thai' };
   r.location = { text: null, near: false, distance: null, unit: null };
   const sparse = validateInterpretation(r, rentDescription, vocabulary);
-  assert.equal(sparse.rentBand, 'any');
+  assert.equal(sparse.fields.rent_band.value, 'any');
   assert.equal(sparse.fields.rent_band.provenance, 'default');
   assert.equal('rent_band' in sparse.profile, false);
   r.fields.rent_band = { value: 'low', provenance: 'inferred', evidence: 'as cheap as possible' };
-  assert.equal(validateInterpretation(r, rentDescription, vocabulary).rentBand, 'low');
+  assert.equal(validateInterpretation(r, rentDescription, vocabulary).fields.rent_band.value, 'low');
   for (const value of ['cheap', 'Low', null, true]) {
     r.fields.rent_band.value = value;
     assert.throws(() => validateInterpretation(r, rentDescription, vocabulary), String(value));
@@ -72,5 +72,9 @@ test('in labelled answers, rent band evidence must come from the Rent line', () 
   r.fields.rent_band = { value: 'low', provenance: 'inferred', evidence: 'cheap' };
   assert.throws(() => validateInterpretation(r, answers, vocabulary), /rent/i);
   r.fields.rent_band = { value: 'any', provenance: 'explicit', evidence: 'whatever works' };
-  assert.equal(validateInterpretation(r, answers, vocabulary).rentBand, 'any');
+  assert.equal(validateInterpretation(r, answers, vocabulary).fields.rent_band.value, 'any');
+});
+test('a validated draft without its profile validates again unchanged, as proof scoring replays it', () => {
+  const { profile, ...normalized } = validateInterpretation(reply(), description, vocabulary);
+  assert.deepEqual(validateInterpretation(JSON.stringify(normalized), description, vocabulary), { profile, ...normalized });
 });

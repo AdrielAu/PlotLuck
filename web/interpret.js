@@ -153,7 +153,7 @@ export function makeInterpreter(bundle, nn2) {
       profile: { ...reply.profile, cuisine: reply.profile.cuisine ?? undefined },
       marks: { area: "explicit" },
       area: readArea(answers.location ?? ""),
-      rentBand: rentCuts ? reply.rentBand : "any",
+      rentBand: rentCuts ? reply.fields.rent_band.value : "any",
       unused: [...reply.unused],
     };
     if (!draft.area) draft.marks.area = "unresolved";

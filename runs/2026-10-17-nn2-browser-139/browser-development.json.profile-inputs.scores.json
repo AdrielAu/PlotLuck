@@ -1,0 +1,172 @@
+{
+  "contract": "User clarification: search area, cuisine, menu price band, restaurant type, total rent budget.",
+  "evaluated": 20,
+  "correct": 3,
+  "coverage": "Approved cases have no explicit menu prices or rent budgets. Those two inputs are tested for absence/defaults only; explicit extraction quality remains unmeasured. Dietary flags are outside this narrowed metric.",
+  "components": {
+    "cuisine": 4,
+    "region": 3,
+    "venue_type": 4,
+    "price_default": 4,
+    "rent_absence": 4
+  },
+  "release_evaluation": false,
+  "results": [
+    {
+      "id": "clear-001",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.77690000000596
+    },
+    {
+      "id": "clear-002",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.61829999999702
+    },
+    {
+      "id": "clear-003",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.4605
+    },
+    {
+      "id": "clear-004",
+      "validated": true,
+      "cuisine": true,
+      "region": false,
+      "venue_type": true,
+      "price_default": true,
+      "rent_absence": true,
+      "correct": false,
+      "seconds": 5.57309999999404
+    },
+    {
+      "id": "clear-005",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.342
+    },
+    {
+      "id": "clear-006",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.148100000008941
+    },
+    {
+      "id": "clear-007",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.7465
+    },
+    {
+      "id": "clear-008",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.489899999991059
+    },
+    {
+      "id": "clear-009",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.16279999999702
+    },
+    {
+      "id": "clear-010",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.438700000002981
+    },
+    {
+      "id": "clear-011",
+      "validated": true,
+      "cuisine": true,
+      "region": true,
+      "venue_type": true,
+      "price_default": true,
+      "rent_absence": true,
+      "correct": true,
+      "seconds": 7.22540000000596
+    },
+    {
+      "id": "clear-012",
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.27340000000596
+    },
+    {
+      "id": "clear-013",
+      "validated": true,
+      "cuisine": true,
+      "region": true,
+      "venue_type": true,
+      "price_default": true,
+      "rent_absence": true,
+      "correct": true,
+      "seconds": 5.23309999999404
+    },
+    {
+      "id": "clear-014",
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.20329999999702
+    },
+    {
+      "id": "clear-015",
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.155599999994039
+    },
+    {
+      "id": "clear-016",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 7.53329999999702
+    },
+    {
+      "id": "clear-017",
+      "validated": true,
+      "cuisine": true,
+      "region": true,
+      "venue_type": true,
+      "price_default": true,
+      "rent_absence": true,
+      "correct": true,
+      "seconds": 5.13870000000298
+    },
+    {
+      "id": "clear-018",
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.6535
+    },
+    {
+      "id": "clear-019",
+      "validated": false,
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 7.749
+    },
+    {
+      "id": "clear-020",
+      "validated": false,
+      "correct": false,
+      "error": "Invalid location distance.",
+      "seconds": 5.25929999999702
+    }
+  ]
+}
