@@ -32,9 +32,13 @@ export async function loadBundle(read) {
       throw new Error("districts.csv has a missing or invalid radius_km");
     }
   }
-  const outlines = model.version >= OUTLINES_VERSION
-    ? decodeOutlines(JSON.parse(await read("district_outlines.json")), new Set(districts.map((d) => d.postcode_district)))
-    : new Map();
+  // Version 4 bundles must carry outlines; an older one may have them added beside it, built from ONSPD alone.
+  const outlineText = model.version >= OUTLINES_VERSION
+    ? await read("district_outlines.json")
+    : await read("district_outlines.json").catch(() => null);
+  const outlines = outlineText === null
+    ? new Map()
+    : decodeOutlines(JSON.parse(outlineText), new Set(districts.map((d) => d.postcode_district)));
   for (const r of supply) {
     if (!r.postcode_district || !r.cuisine_group || r.restaurants === "" ||
         !Number.isFinite(Number(r.restaurants)) || Number(r.restaurants) < 0) {
