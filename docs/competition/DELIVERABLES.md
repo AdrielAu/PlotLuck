@@ -1,6 +1,6 @@
 # Deliverables
 
-What the team plans to submit, and our own cut-offs before the deadline. `TBD (guidebook)` marks submission details not yet reconciled with the current rules. Mandatory NN2 is the team's product requirement, not a verified organizer rule. The [eligibility investigation](nn2-eligibility.md) recovered readable current official rules; pretrained-weight permission remains unresolved. Build status is in [PROGRESS.md](PROGRESS.md).
+What the team plans to submit, and our own cut-offs before the deadline. `TBD (guidebook)` marks submission details not yet reconciled with the current rules. Mandatory NN2 is the team's product requirement, not a verified organizer rule. The [eligibility investigation](nn2-eligibility.md) recovered readable current official rules; pretrained-weight permission is settled by the team's 2026-10-17 confirmation, distinct from independently verified organizer evidence. Final licences/notices still require review. Build status is in [PROGRESS.md](PROGRESS.md).
 
 ## Submission
 
