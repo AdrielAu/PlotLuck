@@ -51,14 +51,9 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #threshold-value { font-size: 20px; font-variant-numeric: tabular-nums; }
 #threshold { width: 100%; margin: 0; min-height: 36px; cursor: pointer; }
 #threshold-help { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
-.legend { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 12px; }
-.legend-swatches { display: flex; }
-.legend-swatches i { display: block; width: 22px; height: 12px; }
-.legend-swatches i:nth-child(1) { background: #e0edd7; }
-.legend-swatches i:nth-child(2) { background: #b2c5ac; }
-.legend-swatches i:nth-child(3) { background: #849c80; }
-.legend-swatches i:nth-child(4) { background: #567455; }
-.legend-swatches i:nth-child(5) { background: var(--green); }
+.legend { display: flex; align-items: center; gap: 10px; font-size: 12px; font-variant-numeric: tabular-nums; }
+/* The one gradient allowed (#132): the same RdYlBu stops as results.js. */
+.legend-scale { flex: 1; height: 12px; border-radius: 2px; background: linear-gradient(to right, rgb(69,117,180), rgb(255,255,191), rgb(215,48,39)); }
 .list-panel { display: flex; flex-direction: column; padding: 20px 16px 8px; }
 .list-panel > h2, .list-panel > p { padding-inline: 8px; }
 #count { font-size: 14px; margin-bottom: 12px; }
