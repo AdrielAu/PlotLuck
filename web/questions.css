@@ -1,0 +1,107 @@
+/* Questions screen and review card. Tokens come from results.css.
+   One motif: the kitchen's voxel. Boxes, chips and buttons are square, with a flat
+   green side face (an offset filled block, not a shadow) that presses in when used. */
+:root { --scrim: rgba(247, 246, 243, 0.92); --tint: #edf3ec; --leaf: #bacfa9; --face: 6px; }
+body { background: var(--canvas); }
+#kitchen { position: fixed; inset: 0; z-index: 0; background: #eef0e8; }
+#kitchen canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+main, footer { position: relative; z-index: 1; }
+footer { background: var(--canvas); }
+body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(32px, calc((100vw - 1280px) / 2 + 32px)); }
+
+#questions-screen { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 40px 64px; }
+.intro-scrim { width: min(100%, 720px); padding: 24px 32px; background: var(--scrim); text-align: center; }
+#title { font: 500 clamp(64px, 9vw, 128px)/0.95 Georgia, serif; letter-spacing: -0.04em; }
+.lede { margin: 16px auto 12px; max-width: 34ch; font-size: clamp(19px, 1.6vw, 22px); line-height: 1.45; }
+.model-line { margin: 0; font-size: 15px; }
+#model-status:empty { display: none; }
+#model-status { margin-top: 8px; }
+
+/* The flat side face: ::before is the surface, ::after a filled block offset down and
+   right behind it. Each element is its own stacking context, so both stay behind its text. */
+.prompt, .review, .chip, #next, .primary { position: relative; z-index: 0; background: none; }
+.prompt::before, .review::before, .chip::before, #next::before, .primary::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--fill); }
+.prompt::after, .review::after, .chip::after, #next::after, .primary::after {
+  content: ""; position: absolute; inset: var(--face) calc(var(--face) * -1) calc(var(--face) * -1) var(--face); z-index: -2; background: var(--green);
+}
+.prompt, .review { --fill: var(--surface); width: min(100%, 720px); padding: 24px; }
+.review { width: min(100%, 880px); }
+
+#question { display: block; margin-bottom: 16px; font: 500 clamp(24px, 2.2vw, 30px)/1.2 Georgia, serif; letter-spacing: -0.02em; }
+.prompt-row { display: flex; gap: 12px; align-items: stretch; }
+.prompt-row .combobox { flex: 1; min-width: 0; }
+#answer { width: 100%; min-height: 56px; padding: 12px 16px; border: 0; border-radius: 0; background: var(--canvas); color: var(--ink); font-size: 20px; }
+#answer[aria-invalid="true"] { background: var(--error-surface); }
+#answer-options { position: absolute; z-index: 1100; inset: calc(100% + 4px) 0 auto; max-height: 300px; overflow-y: auto; margin: 0; padding: 4px; list-style: none; background: var(--surface); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12); } /* taste-skill-ignore: a floating menu */
+#answer-options li { min-height: 44px; display: flex; align-items: center; padding: 8px 12px; cursor: pointer; }
+#answer-options li:hover, #answer-options li[aria-selected="true"] { background: var(--tint); }
+#next { --face: 4px; --fill: var(--focus); flex: none; width: 56px; border: 0; border-radius: 0; color: var(--surface); display: grid; place-items: center; transition: transform 120ms ease-out; }
+#next:hover { --fill: var(--green); }
+#answer-error { margin: 12px 0 0; color: var(--error-ink); font-weight: 600; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 12px 14px; margin-top: 20px; }
+.chip { --face: 3px; --fill: var(--tint); min-height: 44px; padding: 8px 14px; border: 0; border-radius: 0; color: var(--ink); font-size: 16px; transition: transform 120ms ease-out; }
+.chip:hover { --fill: var(--leaf); }
+.chip[aria-pressed="true"] { --fill: var(--focus); color: var(--surface); }
+/* Pressing pushes the voxel down onto its side face. */
+.chip:active, #next:active, .primary:active { transform: translate(3px, 3px); }
+.chip:active::after, #next:active::after, .primary:active::after { inset: 0; }
+
+.prompt-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; margin-top: 16px; }
+.pips { display: flex; gap: 6px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.pips li { width: 14px; height: 14px; background: var(--line); }
+.pips li.current { background: var(--leaf); }
+.pips li.done { background: var(--green); }
+#loading { margin: 12px 0 0; }
+
+.link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--focus); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.link:hover { color: var(--green); }
+.model-line .link { min-height: 0; font-size: inherit; }
+
+.shake { animation: shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+@keyframes shake {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.review h2 { font: 500 clamp(24px, 2.2vw, 30px)/1.2 Georgia, serif; letter-spacing: -0.02em; }
+.review h2:focus { outline: none; }
+.review h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+.draft-chips { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.draft-chip { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 14px; background: var(--tint); }
+.draft-chip label { font-size: 14px; }
+.draft-chip select, .draft-chip input[type="text"] { min-height: 44px; max-width: 100%; padding: 6px 8px; border: 0; border-radius: 0; background: var(--surface); color: var(--ink); font-size: 16px; }
+.draft-chip input[aria-invalid="true"] { background: var(--error-surface); }
+.draft-flag { flex-direction: row; align-items: center; gap: 10px; min-height: 64px; }
+.draft-flag input { order: -1; width: 20px; height: 20px; margin: 0; }
+.draft-flag label { font-size: 16px; font-weight: 400; }
+.mark { align-self: flex-start; padding: 0 6px; font-size: 13px; font-weight: 600; background: var(--surface); color: var(--focus); }
+.draft-flag .mark { align-self: center; }
+.mark-default { color: var(--muted); }
+#review-error { color: var(--error-ink); font-weight: 600; }
+#unused { margin-bottom: 20px; padding: 14px 16px; background: var(--canvas); }
+#unused ul { margin: 0; padding-left: 20px; }
+.review-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.primary { --face: 4px; --fill: var(--green); min-height: 48px; padding: 8px 22px; border: 0; border-radius: 0; color: var(--surface); font-weight: 600; transition: transform 120ms ease-out; }
+.primary:hover { --fill: var(--focus); }
+#next::after, .primary::after { background: var(--ink); }
+
+/* Wide screens keep the table in view: the column sits left, kitchen.js frames the table right. */
+@media (min-width: 1100px) {
+  #questions-screen { align-items: flex-start; }
+  .intro-scrim { text-align: left; }
+  .lede { margin-inline: 0; }
+}
+
+@media (max-width: 760px) {
+  #questions-screen { justify-content: flex-start; gap: 20px; padding-block: 20px 40px; }
+  .intro-scrim { padding: 20px 16px; }
+  .prompt, .review { padding: 18px 16px; }
+  #answer { font-size: 18px; }
+  .draft-chip { flex: 1 1 100%; }
+  body:has(#kitchen:not([hidden])) footer { padding-inline: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shake { animation: none; }
+  .chip, #next, .primary { transition: none; }
+}

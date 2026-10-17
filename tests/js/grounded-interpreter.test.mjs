@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { groundInterpretation, placeCandidates, retryAdvice } from '../../web/grounded-interpreter.js';
-import { areaDistricts, rentBandDistricts } from '../../web/description-controls.js';
+import { areaDistricts } from '../../web/description-controls.js';
 const vocabulary = JSON.parse(await readFile(new URL('../../web/models/vocabulary.json', import.meta.url)));
 const catalogue = JSON.parse(await readFile(new URL('../../web/models/geography.json', import.meta.url)));
 const description = 'A Thai restaurant within 3 km of London with vegan options.';
@@ -47,14 +47,4 @@ test('confirmed areas filter district centres and unresolved areas block compari
   assert.equal(areaDistricts({place:null,radius:null},districts),null);
   assert.throws(()=>areaDistricts(null,districts));
   assert.throws(()=>areaDistricts({place,radius:0},districts));
-});
-
-test('confirmed rent bands use the MVP district thirds and keep missing rents only for any',()=>{
-  const districts=[...Array.from({length:6},(_,i)=>({postcode_district:`D${i+1}`,commercial_rent_index:String((i+1)*100)})),
-    {postcode_district:'MISSING',commercial_rent_index:''}];
-  assert.deepEqual([...rentBandDistricts(districts,'low')],['D1','D2']);
-  assert.deepEqual([...rentBandDistricts(districts,'mid')],['D3','D4']);
-  assert.deepEqual([...rentBandDistricts(districts,'high')],['D5','D6']);
-  assert.equal(rentBandDistricts(districts,'any'),null);
-  assert.throws(()=>rentBandDistricts(districts,''));
 });

@@ -119,3 +119,26 @@ checks passed. JavaScript syntax checks pass; no typechecker is configured.
 Desktop/mobile renders were inspected and the design detector reported no
 findings. Review's rent-evidence and failed-worker-retry findings were fixed with
 failing-then-passing regressions; both review axes report no remaining findings.
+
+## Integration with the current MVP
+
+Before publishing, this branch integrated main's questions/results screens and
+LinuxONE evidence. The experimental `?nn2=1` panel is now in the results screen's
+existing profile editor, after the normal questions/review flow. The ordinary
+questions reader and results entry point stay intact. The preview calls the
+actual MVP `interpreter.districtsInScope` for rent filtering and combines it with
+catalogue area membership; it no longer carries a second rent-band implementation.
+Entering a total rent budget clears the existing Rent band radio selection and
+requires explicit confirmation there. Empty scopes preserve the previous results
+and show the MVP's existing recovery message.
+
+Original questions/results browser tests are preserved; preview tests moved to
+`tests/browser/nn2-recovery.mjs`, which CI also runs. Main's LinuxONE native CPU
+evidence (#140) reports 0/3 correct despite request times within 60 seconds; that
+is distinct from the focused browser runs and does not validate this new prompt
+on LinuxONE. Historical test counts above refer to the pre-integration checkpoint.
+
+Integration validation: 50 Node tests, 183 Python tests and 23 browser checks
+(questions 10, results 5, NN2 recovery 8) pass. Merge review found and fixed late
+model/lookup updates during manual area navigation; both races have failing-then-
+passing browser regressions. Both review axes report no remaining findings.

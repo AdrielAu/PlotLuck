@@ -40,6 +40,7 @@ DISTRICT_COLUMNS = [
     "hotels_count",
     "most_common_ethnicity",
     "most_common_sex",
+    "radius_km",
 ]
 
 
@@ -83,6 +84,7 @@ def test_sample_districts_format():
             assert -180.0 <= float(r["centroid_lon"]) <= 180.0
             assert int(r["total_restaurants"]) >= 0
             assert r["population"] == "" or int(r["population"]) >= 0
+            assert float(r["radius_km"]) > 0
 
 
 def test_sample_model_json_format():

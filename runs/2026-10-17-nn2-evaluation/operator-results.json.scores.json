@@ -1,0 +1,26 @@
+{
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "evaluated": 3,
+  "correct": 0,
+  "warm_p95_seconds": 35.75266503299645,
+  "results": [
+    {
+      "id": "clear-001",
+      "correct": false,
+      "error": "Expected ',' or '}' after property value in JSON at position 249 (line 1 column 250)",
+      "seconds": 35.75266503299645
+    },
+    {
+      "id": "clear-002",
+      "correct": false,
+      "error": "Expected ',' or '}' after property value in JSON at position 181 (line 1 column 182)",
+      "seconds": 31.81957208699896
+    },
+    {
+      "id": "clear-003",
+      "correct": false,
+      "error": "Invalid interpretation shape.",
+      "seconds": 26.14178317099868
+    }
+  ]
+}

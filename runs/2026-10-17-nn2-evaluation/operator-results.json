@@ -1,0 +1,45 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "execution": "CPU pretrained inference; not training or NNPA acceleration",
+  "environment": {
+    "machine": "s390x",
+    "byteorder": "big",
+    "python": "3.12.15",
+    "torch": "2.11.0+cpu",
+    "transformers": "5.19.0"
+  },
+  "benchmark_sha256": "70014f9901c6305fb3cefcba40963002e573e793fef2b404e1533f865d2c50ba",
+  "contract_sha256": "a7d451e8ab19fd538c31df28cbbc1a8cf92e00525e2854b38afb79d1efd186c5",
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "cold_load_seconds": 16.455384190005134,
+  "native_parameter_bytes": 1976131072,
+  "native_weight_file_bytes": 988097824,
+  "quality_gate": "NOT EVALUATED: validate replies and score frozen expected labels separately",
+  "results": [
+    {
+      "id": "clear-001",
+      "description": "A Thai restaurant within 3 km of London with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"inferred\",\"evidence\":\"Thai\"},\"location\":{\"text\":\"London\",\"near\":true,\"distance\":3,\"unit\":\"km\",\"unused\":[\"venue_type\"]},\"unused\":[\"vegetarian_friendly\"],\"clarifications\":[\"Vegan options available.\"]}",
+      "seconds": 35.75266503299645,
+      "within_latency_gate": true,
+      "generated_tokens": 63
+    },
+    {
+      "id": "clear-002",
+      "description": "A Thai restaurant in Camden.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"location\":{\"text\":\"Camden\",\"near\":true,\"distance\":null,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "seconds": 31.81957208699896,
+      "within_latency_gate": true,
+      "generated_tokens": 50
+    },
+    {
+      "id": "clear-003",
+      "description": "A Thai restaurant in Manchester.",
+      "reply": "{\"fields\":{\"cuisine\":\"Thai\",\"location\":{\"text\":\"Manchester\",\"near\":true,\"distance\":null,\"unit\":\"km\"},\"unused\":[]}}",
+      "seconds": 26.14178317099868,
+      "within_latency_gate": true,
+      "generated_tokens": 31
+    }
+  ]
+}

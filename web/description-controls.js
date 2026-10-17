@@ -5,6 +5,7 @@ export function setUpDescription({vocabulary, onDraft, onArea, onBusy, onRent}) 
   const $ = id => document.getElementById(id);
   const preview = new URLSearchParams(window.location.search).get('nn2') === '1';
   $('description-panel').hidden = !preview;
+  $('nn2-area-controls').hidden = !preview;
   let worker, pending, loaded = false, catalogue, attempts = 0, sequence = 0, operation = 0, busy = false;
   const manuallyEdited = new Set();
   const allFields = ['cuisine', 'price_band', 'venue_type', 'search area', 'rent budget'];
@@ -158,7 +159,10 @@ export function setUpDescription({vocabulary, onDraft, onArea, onBusy, onRent}) 
   });
   if (!navigator.gpu) status('Description interpretation needs desktop Chrome or Edge with WebGPU. Use the manual fields below.');
   refresh();
-  return {manualEdit(name) {cancel();manuallyEdited.add(name);$('interpret-provenance').textContent='Manual changes take priority over the previous interpretation.';}};
+  return {
+    manualEdit(name) {locationSequence++;cancel();manuallyEdited.add(name);$('interpret-provenance').textContent='Manual changes take priority over the previous interpretation.';},
+    setRentBand(band) {$('rent-band').value=band;},
+  };
 }
 
 export function areaDistricts(area, districts) {
@@ -170,19 +174,5 @@ export function areaDistricts(area, districts) {
   return new Set(districts.filter(d=>{
     const a = Math.sin(rad(Number(d.centroid_lat)-area.place.lat)/2)**2 + Math.cos(rad(area.place.lat))*Math.cos(rad(Number(d.centroid_lat)))*Math.sin(rad(Number(d.centroid_lon)-area.place.lon)/2)**2;
     return 6371.0088 * 2 * Math.asin(Math.sqrt(Math.min(1,a))) <= area.radius;
-  }).map(d=>d.postcode_district));
-}
-
-// Same England-wide thirds and missing-value policy as MVP #135's rentTertiles/rentBandOf.
-export function rentBandDistricts(districts,band) {
-  if (!['low','mid','high','any'].includes(band)) throw new Error('Confirm a rent band.');
-  if (band==='any') return null;
-  const rents=districts.map(d=>d.commercial_rent_index).filter(r=>r!=='' && r!=null).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
-  if (!rents.length) return new Set();
-  const low=rents[Math.ceil(rents.length/3)-1],mid=rents[Math.ceil(2*rents.length/3)-1];
-  return new Set(districts.filter(d=>{
-    if (d.commercial_rent_index==='' || d.commercial_rent_index==null) return false;
-    const rent=Number(d.commercial_rent_index);
-    return Number.isFinite(rent) && (band==='low' ? rent<=low : band==='mid' ? rent>low && rent<=mid : rent>mid);
   }).map(d=>d.postcode_district));
 }
