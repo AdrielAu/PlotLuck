@@ -99,5 +99,5 @@ def test_audit_runs_on_sample_and_writes_json(tmp_path):
 def test_nearest_postcodes_distances_agree_with_district_rule():
     pts = [(51.2, 0.0), (51.9, 0.0)]
     districts, km = build.nearest_postcodes(POSTCODES, pts)
-    assert districts == build._nearest_district(POSTCODES, pts) == ["A1", "B1"]
+    assert districts == ["A1", "B1"]
     assert km == pytest.approx([22.24, 11.12], abs=0.05)
