@@ -4,3 +4,7 @@
 
 # Agent worktrees: disposable, per clone
 .claude/worktrees/
+
+# Server-only full data, virtualenv
+data/full/
+.venv/
