@@ -10,7 +10,7 @@ Plotluck scores London postcode districts for restaurant survival. This page is 
 - `notebooks/`: ingest, training, benchmark and export notebooks.
 - `runs/`: committed run results.
 - `web/`: the static site deployed to GitHub Pages; exported weights go in `web/models/`.
-- `docs/`: [PROJECT.md](docs/competition/PROJECT.md) (plan, open questions, platform facts), [server.md](docs/server.md) (operator runbook), `evidence/` (datathon evidence checklist), `adr/` (decisions; created with the first one), `agents/` (agent conventions).
+- `docs/`: [PROJECT.md](docs/competition/PROJECT.md) (plan, open questions, platform facts), [PROGRESS.md](docs/competition/PROGRESS.md) (build status per phase), [DELIVERABLES.md](docs/competition/DELIVERABLES.md) (what we submit and when), [server.md](docs/server.md) (operator runbook), `evidence/` (datathon evidence checklist), `adr/` (decisions; created with the first one), `agents/` (agent conventions).
 - [GLOSSARY.md](GLOSSARY.md): domain terms.
 - `.agents/skills/`: shared agent skills.
 

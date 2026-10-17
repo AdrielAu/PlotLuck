@@ -10,6 +10,8 @@ Hard limits, fixed by the brief:
 
 Read [`docs/competition/PROJECT.md`](docs/competition/PROJECT.md) before planning any feature, model or data work: it holds the current plan, open questions and platform facts. Everything in it is a starting point, not a commitment.
 
+Read [`docs/competition/PROGRESS.md`](docs/competition/PROGRESS.md) at session start: it shows which build phase is where. When your PR changes a phase's status, update its row in the same PR. What we submit, and when, is in [`docs/competition/DELIVERABLES.md`](docs/competition/DELIVERABLES.md).
+
 ## Writing code
 
 Before writing or changing code (including notebooks), read [`docs/agents/coding-guidelines.md`](docs/agents/coding-guidelines.md) and follow it.
@@ -20,7 +22,7 @@ Keep this map and `CONTRIBUTING.md` in step: change both together.
 
 - `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`.
 - `data/`: `sample/` committed, `full/` server-only; see `data/AGENTS.md`.
-- `docs/competition/`: handover (`PROJECT.md`) and the initial design doc.
+- `docs/competition/`: handover (`PROJECT.md`), build status (`PROGRESS.md`), submission list (`DELIVERABLES.md`) and the initial design doc.
 - `docs/setup.md`: one-time clone setup, per agent tool. `docs/server.md`: operator runbook. `docs/evidence/`: evidence checklist.
 - `CONTRIBUTING.md`: layout and workflow for humans; `README.md`: user-facing.
 - `notebooks/`: ingest, training, benchmark and export notebooks; see `notebooks/AGENTS.md`.
