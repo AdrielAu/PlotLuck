@@ -1,0 +1,19 @@
+# LF everywhere: code runs on Linux (LinuxONE s390x), teammates edit on Windows.
+* text=auto eol=lf
+
+# Binary: never convert
+*.pdf    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.zip    binary
+*.parquet binary
+*.pkl    binary
+*.pt     binary
+*.pth    binary
+*.h5     binary
+*.keras  binary
+*.onnx   binary
+*.npy    binary
+*.npz    binary
