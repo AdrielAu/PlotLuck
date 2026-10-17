@@ -4,5 +4,5 @@ The early docs set "no LLM" and "a hybrid of 2 neural networks" as hard limits. 
 
 ## Consequences
 
-- `AGENTS.md`, `README.md`, `web/AGENTS.md`, PROJECT, PROGRESS, DELIVERABLES and the evidence checklist still say "no LLM" or "hybrid". They need updating.
-- The site downloads model weights of hundreds of MB and needs WebGPU. The MVP uses a cuisine-and-traits picker until the LLM is integrated.
+- The early `AGENTS.md`, `README.md`, `web/AGENTS.md`, PROJECT, PROGRESS, DELIVERABLES and evidence checklist described the earlier constraints. Their current descriptions are aligned with this decision; the handover retains clearly marked historical concept text.
+- The later LLM integration downloads model weights of hundreds of MB and needs WebGPU for the selected browser runtime. The MVP uses a cuisine-and-traits picker until the LLM is integrated.
