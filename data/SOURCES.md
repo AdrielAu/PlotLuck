@@ -34,14 +34,14 @@ One row per dataset, added in the same PR as the data (see [`AGENTS.md`](AGENTS.
 
 ## Census 2021 P004
 
-- **Edition**: Census 2021, census day 2021-03-21, postcode-district geography as published by Nomis. Raw: `raw/p004.csv` (`pcdd_p004.csv`, England and Wales).
+- **Edition**: Census 2021, census day 2021-03-21, postcode-district geography as published by Nomis. Raw: `raw/p004.csv` (`pcdd_p004.csv`, England and Wales): 23,636 bytes, 2,302 districts, one `Count` each, summing to 59,597,557 residents (the England and Wales census total), so the small file is complete.
 - **England filter**: districts with at least one English postcode in the ONSPD extract, giving 2,116 districts; 11 in the sample (EC3P and SE1P have no residents row). Cross-border districts stay, and their counts include Welsh residents.
 - **Columns**: `district`, `residents`.
 - **Attribution**: Source: Office for National Statistics licensed under the Open Government Licence v.3.0.
 
 ## OpenStreetMap restaurants
 
-- **Edition**: live OSM through the public Overpass API, queried inside the `GB-ENG` area in the 34 one-degree tiles that hold an English postcode. `snapshot` in the provenance is the oldest tile's `timestamp_osm_base`. Raw: `raw/osm.json` (merged tiles).
+- **Edition**: live OSM through the public Overpass API, queried inside the `GB-ENG` area in the 34 one-degree tiles that hold an English postcode. A busy server's tiles are retried on the [maps.mail.ru mirror](https://maps.mail.ru/osm/tools/overpass/api/interpreter), and a failed pull resumes from the tiles it had finished; `endpoints` in the provenance lists the servers the last run used. `snapshot` is the oldest tile's `timestamp_osm_base`. Raw: `raw/osm.json` (merged tiles).
 - **Filter**: `amenity=restaurant` or `amenity=fast_food` (no other district-level OSM counts are agreed yet); nodes, ways and relations, with ways and relations at their centre point. The England row count is set by the first server pull: the public Overpass server was too busy to finish a full pull on 2026-10-17. The sample's 452 rows came from one query of the sample box alone, which gives the same rows as filtering the full pull (its provenance says `"tiles": 1`).
 - **Columns**: `osm_type`, `osm_id`, `amenity`, `cuisine` (blank when untagged), `name`, `lat`, `lon`.
 - **Attribution** (required): © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright).
