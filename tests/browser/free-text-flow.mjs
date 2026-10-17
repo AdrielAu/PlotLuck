@@ -93,7 +93,7 @@ test('the exact mid range Chinese prompt keeps menu prices after either a valid 
     await page.locator('#clarification').waitFor();
     assert.equal(await page.locator('#clarify-price').count(),0);
     if(malformed) {
-      await page.locator('#clarify-cuisine').selectOption('Chinese');
+      assert.equal(await page.locator('#clarify-cuisine').count(),0);
       await page.locator('#clarify-venue').selectOption('Restaurant');
       assert.match(await page.locator('#interpret-status').innerText(),/could not read/);
     }
@@ -350,7 +350,7 @@ test('invalid replies have three attempts, preserve results and allow an edited 
   assert.match(await page.locator('#interpret-status').innerText(), /Three attempts/);
   assert.equal(await page.locator('#ranked').textContent(), results);
   await page.locator('#clarify-area').selectOption('SE1');
-  await page.locator('#clarify-cuisine').selectOption('Thai');
+  assert.equal(await page.locator('#clarify-cuisine').count(),0);
   await page.locator('#clarify-venue').selectOption('Restaurant');
   await page.locator('#clarify-price').selectOption('$$');
   await page.locator('#clarify-rent').selectOption('any');
