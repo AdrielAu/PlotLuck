@@ -1,12 +1,13 @@
 import csv
 import json
 import shutil
+import statistics
 from collections import Counter
 
 import numpy as np
 import pytest
 
-from plotluck import build, data_dir, sources
+from plotluck import build, data_dir, nn1, sources
 
 
 def read_csv(path):
@@ -63,6 +64,41 @@ def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
     assert metrics["labelled"] == 197
 
 
+def test_run_metrics_report_cv_against_the_baseline_and_ship_the_median_best_epoch(data):
+    metrics = read_json(data / "run" / "metrics.json")
+    folds = metrics["cv"]["folds"]
+
+    assert len(folds) == 5
+    assert sum(f["rows"]["test"] for f in folds) == metrics["labelled"]
+    for f in folds:
+        assert set(f["rows"]) == {"fit", "early_stop", "test"}
+        losses = f["early_stop_loss"]
+        assert len(f["train_loss"]) == len(losses)
+        # Early stopping: best is the lowest early-stop loss; training ran on
+        # for the patience, or to the epoch limit.
+        assert f["best_epoch"] == 1 + int(np.argmin(losses))
+        assert len(losses) == min(f["best_epoch"] + build.PATIENCE, build.MAX_EPOCHS)
+        for name in ("mae", "rmse", "baseline_mae", "baseline_rmse"):
+            assert 0 < f[name] < 1, name
+        assert f["mae"] <= f["rmse"] and f["baseline_mae"] <= f["baseline_rmse"]
+    summary = metrics["cv"]["summary"]
+    assert set(summary) == {"mae", "rmse", "baseline_mae", "baseline_rmse"}
+    assert all(set(s) == {"mean", "std"} for s in summary.values())
+
+    shipped = metrics["shipped"]
+    # Exactly the median for the odd fold count the spec sets.
+    assert shipped["epochs"] == statistics.median(f["best_epoch"] for f in folds)
+    assert len(shipped["train_loss"]) == shipped["epochs"]
+
+
+def test_two_builds_with_seed_0_write_identical_models(data, built, tmp_path):
+    again = copy_sources(tmp_path / "data")
+    build.build(again, again / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
+
+    assert (again / "bundle" / "model.json").read_bytes() == (built / "model.json").read_bytes()
+    assert read_json(again / "run" / "metrics.json") == read_json(data / "run" / "metrics.json")
+
+
 def test_label_policy_stays_private_and_out_of_the_bundle(data, built):
     policy = read_json(data / "label_policy.json")
 
@@ -117,6 +153,24 @@ def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
     assert np.isnan(thai["commercial_rent_index"])  # missing stays missing until the median fill
 
 
+def test_cv_folds_never_share_a_district_across_fit_early_stop_and_test(data):
+    # The rows CV runs on: those with a label.
+    codes = [r["postcode_district"] for r in read_csv(data / "restaurants.csv") if r["review_success_label"]]
+
+    splits = nn1.group_splits(codes, folds=5)
+
+    assert len(splits) == 5
+    tested = []
+    for split in splits:
+        sides = [{codes[i] for i in split[side]} for side in ("fit", "early_stop", "test")]
+        assert all(sides), "every side holds at least one district"
+        fit, early_stop, test = sides
+        assert not (fit & early_stop or fit & test or early_stop & test)
+        assert sorted(np.concatenate(list(split.values()))) == list(range(len(codes)))
+        tested += list(split["test"])
+    assert sorted(tested) == list(range(len(codes)))  # each row is tested exactly once
+
+
 def test_transforms_fitted_on_a_subset_use_only_that_subset():
     vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
     nan = np.nan
@@ -137,6 +191,19 @@ def test_transforms_fitted_on_a_subset_use_only_that_subset():
     assert t["deprivation_index"]["std"] == pytest.approx(8.164966)  # population std of 10, 20, 30
     # No training row has rent, so the held-out row's 5 must not leak into the fill.
     assert t["commercial_rent_index"] == {"kind": "numeric", "log1p": True, "mean": 0, "std": 1, "median": 0}
+
+
+def test_a_column_constant_on_the_training_rows_keeps_held_out_values_finite():
+    vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
+    # A fold whose only rented district is SE11 at £400/m²: log1p(400) repeated
+    # has a float std of about 1e-15, not 0.
+    train = np.array([[1000, 10, 400, 3, 1]] * 170, dtype=float)
+
+    model = build.model_spec(vocab, train)
+
+    assert model["transforms"]["commercial_rent_index"]["std"] == 1
+    x = build.inputs(model,{"cuisine_group": "Thai"}, np.array([[1000, 10, 150, 3, 1]], dtype=float))
+    assert np.abs(x).max() < 10
 
 
 def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
@@ -206,7 +273,7 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
             writer.writerow([f"synthetic-{i}", f"{district} 1AA", district, "234",
                              "Restaurant And Premises", unit, area, rv])
 
-    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
 
     rent = {d["postcode_district"]: d["commercial_rent_index"]
             for d in read_csv(data / "bundle" / "districts.csv")}

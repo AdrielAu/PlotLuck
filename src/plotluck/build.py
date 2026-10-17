@@ -8,8 +8,10 @@ One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
   sources, on LinuxONE for full data (ADR 0003);
 - to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref).
   It derives from ratings, so it is private like ``restaurants.csv``;
-- to ``data``, ``run/metrics.json``: row counts, label exclusions and fixes by
-  reason, inputs left out and loss per epoch.
+- to ``run`` (default ``<data>/run``), ``metrics.json``: row counts, label
+  exclusions and fixes by reason, the district-grouped CV of NN1 against a
+  training-mean baseline, and loss per epoch. It holds no restaurant rows or
+  fitted label policy, so a run folder can be committed (``runs/README.md``).
 
 This is the tracer of the spec in issue #64: every stage is crude, but the
 file shapes are the contract the site builds against.
@@ -37,7 +39,10 @@ BUNDLE_FILES = (
     "model.json",
     "reference_scores.json",
 )
-TRACER_EPOCHS = 20
+# NN1 training procedure (issue #62): district-grouped CV with early stopping.
+FOLDS = 5
+MAX_EPOCHS = 100
+PATIENCE = 10
 REFERENCE_TOLERANCE = 1e-6
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
@@ -100,11 +105,19 @@ def build(
     out: Path,
     *,
     group_threshold: int = FULL_GROUP_THRESHOLD,
-    epochs: int = TRACER_EPOCHS,
+    run: Path | None = None,
+    folds: int = FOLDS,
+    max_epochs: int = MAX_EPOCHS,
+    patience: int = PATIENCE,
     seed: int = 0,
 ) -> dict:
-    """Run every stage on ``data`` and write the bundle to ``out``; return run metrics."""
+    """Run every stage on ``data`` and write the bundle to ``out``; return run metrics.
+
+    NN1 is cross-validated in ``folds`` district-grouped folds, then the
+    shipped model trains on every labelled row for the median best epoch.
+    """
     data, out = Path(data), Path(out)
+    run = Path(run) if run is not None else data / "run"
     out.mkdir(parents=True, exist_ok=True)
     postcodes = _read_csv(data / "onspd_england.csv")
     mapping = load_mapping()
@@ -135,13 +148,14 @@ def build(
     vocab = vocabulary(groups)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
     district_raw = training_district_inputs(labelled, districts, supply)
+    cv = cross_validate(
+        labelled, district_raw, vocab, folds=folds, max_epochs=max_epochs, patience=patience, seed=seed
+    )
+    # median_low: an epoch some fold actually chose; the plain median for an odd fold count.
+    epochs = statistics.median_low(f["best_epoch"] for f in cv["folds"])
     model = model_spec(vocab, district_raw)
-    x = np.vstack([
-        inputs(model, _restaurant_values(r), row[None, :])
-        for r, row in zip(labelled, district_raw)
-    ])
     y = np.array([r["review_success_label"] for r in labelled], dtype=float)
-    model["layers"], losses = nn1.train(x, y, epochs=epochs, seed=seed)
+    model["layers"], losses = nn1.train(_design(model, labelled, district_raw), y, epochs=epochs, seed=seed)
     model["activations"] = list(nn1.ACTIVATIONS)
 
     reference = {
@@ -159,12 +173,55 @@ def build(
         restaurants=len(restaurants),
         labelled=len(labelled),
         districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
-        epochs=epochs,
-        train_loss=losses,
+        cv=cv,
+        shipped={"epochs": epochs, "train_loss": losses},
     )
-    (data / "run").mkdir(exist_ok=True)
-    _write_json(data / "run" / "metrics.json", metrics)
+    run.mkdir(parents=True, exist_ok=True)
+    _write_json(run / "metrics.json", metrics)
     return metrics
+
+
+def cross_validate(
+    labelled: list[dict], district_raw: np.ndarray, vocab: dict, *, folds: int, max_epochs: int, patience: int, seed: int
+) -> dict:
+    """District-grouped CV of NN1: per-fold and summary MAE and RMSE, with loss curves.
+
+    Each fold refits the label policy and the input transforms on its
+    training rows (the fit rows and the early-stopping slice), so nothing
+    from the test districts leaks in. The baseline predicts the training
+    mean; only its errors are reported, as the mean itself derives from ratings.
+    """
+    results = []
+    for split in nn1.group_splits([r["postcode_district"] for r in labelled], folds):
+        train = np.concatenate([split["fit"], split["early_stop"]])
+        policy = label.fit_policy([labelled[i] for i in train])
+        y = np.array(label.labels(labelled, policy), dtype=float)
+        x = _design(model_spec(vocab, district_raw[train]), labelled, district_raw)
+        fit, stop, test = split["fit"], split["early_stop"], split["test"]
+        layers, best, train_loss, stop_loss = nn1.train_early_stopping(
+            x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed
+        )
+        model_mae, model_rmse = _mae_rmse(nn1.forward(layers, x[test]) - y[test])
+        baseline_mae, baseline_rmse = _mae_rmse(y[train].mean() - y[test])
+        results.append({
+            "rows": {side: len(rows) for side, rows in split.items()},
+            "best_epoch": best,
+            "mae": model_mae,
+            "rmse": model_rmse,
+            "baseline_mae": baseline_mae,
+            "baseline_rmse": baseline_rmse,
+            "train_loss": train_loss,
+            "early_stop_loss": stop_loss,
+        })
+    summary = {
+        name: {"mean": statistics.fmean(f[name] for f in results), "std": statistics.pstdev(f[name] for f in results)}
+        for name in ("mae", "rmse", "baseline_mae", "baseline_rmse")
+    }
+    return {"folds": results, "summary": summary}
+
+
+def _mae_rmse(error: np.ndarray) -> tuple[float, float]:
+    return float(np.abs(error).mean()), float(np.sqrt((error**2).mean()))
 
 
 def vocabulary(groups: dict[str, str]) -> dict:
@@ -225,7 +282,7 @@ def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
     for name, column in zip(DISTRICT_INPUTS, district_raw.T):
         median = float(np.nanmedian(column)) if not np.isnan(column).all() else 0.0
         values = _fill_log1p(column, median, name in LOG1P)
-        std = float(values.std())
+        std = float(values.std()) if np.ptp(values) > 0 else 0.0  # a constant column's std is float noise
         transforms[name] = {
             "kind": "numeric",
             "log1p": name in LOG1P,
@@ -241,6 +298,13 @@ def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:
         },
         "transforms": transforms,
     }
+
+
+def _design(model: dict, restaurants: list[dict], district_raw: np.ndarray) -> np.ndarray:
+    """Input matrix with one row per restaurant, beside its own row of ``district_raw``."""
+    return np.vstack([
+        inputs(model, _restaurant_values(r), row[None, :]) for r, row in zip(restaurants, district_raw)
+    ])
 
 
 def inputs(model: dict, restaurant: dict, district_raw: np.ndarray) -> np.ndarray:
@@ -368,7 +432,7 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
 def label_restaurants(restaurants: list[dict]) -> dict:
     """Set ``review_success_label`` under a policy fitted on every row; return it.
 
-    The shipped model trains on every row; CV refits the policy per fold (issue #71).
+    The shipped model trains on every row; ``cross_validate`` refits it per fold.
     """
     policy = label.fit_policy(restaurants)
     for r, value in zip(restaurants, label.labels(restaurants, policy)):
@@ -494,7 +558,9 @@ def main(argv=None) -> None:
         description="Build the site bundle from the data folder chosen by data_dir().",
     )
     parser.add_argument("--out", type=Path, help="bundle folder (default: the data folder)")
-    parser.add_argument("--epochs", type=int, default=TRACER_EPOCHS)
+    parser.add_argument("--run", type=Path, help="run-results folder (default: <data folder>/run)")
+    parser.add_argument("--max-epochs", type=int, default=MAX_EPOCHS)
+    parser.add_argument("--patience", type=int, default=PATIENCE)
     args = parser.parse_args(argv)
     data = data_dir()
     full = data == data_dir(choice="full")
@@ -502,9 +568,11 @@ def main(argv=None) -> None:
         data,
         args.out or data,
         group_threshold=FULL_GROUP_THRESHOLD if full else SAMPLE_GROUP_THRESHOLD,
-        epochs=args.epochs,
+        run=args.run,
+        max_epochs=args.max_epochs,
+        patience=args.patience,
     )
-    print(json.dumps({k: v for k, v in metrics.items() if k != "train_loss"}))
+    print(json.dumps({**metrics, "cv": metrics["cv"]["summary"], "shipped": {"epochs": metrics["shipped"]["epochs"]}}))
 
 
 if __name__ == "__main__":
