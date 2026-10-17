@@ -283,6 +283,53 @@ def test_pull_osm_merges_tiles_and_records_snapshot(tmp_path):
     assert "(area.a)" in fetch.calls[0][1]
 
 
+def osm_tile(element_id):
+    return json.dumps({
+        "osm3s": {"timestamp_osm_base": "2026-10-17T10:52:28Z"},
+        "elements": [{"type": "node", "id": element_id, "lat": 51.5, "lon": -0.1,
+                      "tags": {"amenity": "restaurant"}}],
+    }).encode()
+
+
+def test_pull_osm_resumes_after_a_failed_tile(tmp_path, monkeypatch):
+    monkeypatch.setattr(sources.time, "sleep", lambda s: None)
+    calls = []
+
+    def flaky(url, dest, post=None):
+        calls.append(post)
+        if len(calls) > 3:  # the server gives up for good on the fourth tile
+            raise OSError("HTTP Error 504: Gateway Timeout")
+        dest.write_bytes(osm_tile(len(calls)))
+
+    with pytest.raises(RuntimeError, match="failed"):
+        sources.pull("osm", tmp_path, fetch=flaky)
+    rerun = fake_fetch(osm_tile(99))
+
+    sources.pull("osm", tmp_path, fetch=rerun)
+
+    merged = json.loads((tmp_path / "raw" / "osm.json").read_text())
+    assert len(rerun.calls) == len(sources.OSM_TILES) - 3
+    assert [el["id"] for el in merged["elements"][:3]] == [1, 2, 3]
+    assert len(merged["elements"]) == len(sources.OSM_TILES)
+    assert not (tmp_path / "raw" / "osm_tiles").exists()
+
+
+def test_pull_osm_retries_a_busy_server_on_a_mirror(tmp_path, monkeypatch):
+    monkeypatch.setattr(sources.time, "sleep", lambda s: None)
+    urls = []
+
+    def busy_main(url, dest, post=None):
+        urls.append(url)
+        if url == sources.SOURCES["osm"]["url"]:
+            raise OSError("HTTP Error 504: Gateway Timeout")
+        dest.write_bytes(osm_tile(len(urls)))
+
+    sources.pull("osm", tmp_path, fetch=busy_main)
+
+    assert urls[0] == sources.SOURCES["osm"]["url"]
+    assert urls[1] != urls[0]
+
+
 def write_csv(path, rows):
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))

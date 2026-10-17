@@ -102,6 +102,12 @@ OSM_QUERY = (
     "out center tags;"
 )
 OSM_RETRIES = 6
+# Retries alternate between these. The mirror kept up with live OSM on
+# 2026-10-17 (overpass.private.coffee lagged by months; kumi.systems was down).
+OSM_ENDPOINTS = (
+    SOURCES["osm"]["url"],
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+)
 
 TRIPADVISOR_COLUMNS = (
     "restaurant_link",
@@ -167,33 +173,57 @@ def pull(name: str, data: Path, fetch=http_fetch) -> Path:
 
 
 def _pull_osm(raw: Path, fetch) -> dict:
-    """Query each England tile and merge the elements into one file."""
+    """Query each England tile and merge the elements into one file.
+
+    Finished tiles are kept in ``raw/osm_tiles/`` until the merge, so a pull
+    that fails part-way resumes from the first missing tile when run again.
+    """
     # shortcut: holds every element in memory (~100k, fine); stream if it grows.
-    elements, snapshots = [], []
-    tile_file = raw.with_name("osm_tile.json")
+    elements, snapshots, used = [], [], set()
+    tile_dir = raw.with_name("osm_tiles")
+    tile_dir.mkdir(exist_ok=True)
+    attempt_file = tile_dir / "attempt.json"
     for i, tile in enumerate(OSM_TILES, 1):
-        query = OSM_QUERY.format(*tile)
-        for attempt in range(OSM_RETRIES):
-            try:
-                fetch(SOURCES["osm"]["url"], tile_file, post=query)
-                with tile_file.open(encoding="utf-8") as f:
-                    result = json.load(f)
-                if "remark" in result:  # Overpass reports timeouts in-band
-                    raise RuntimeError(result["remark"])
-                break
-            except (OSError, ValueError, RuntimeError) as err:
-                if attempt == OSM_RETRIES - 1:
-                    raise RuntimeError(f"Overpass tile {tile} failed") from err
-                wait = 10 * 2**attempt  # Overpass asks for exponential backoff
-                print(f"tile {tile}: {err}; retrying in {wait}s")
-                time.sleep(wait)
+        done = tile_dir / f"{tile[0]}_{tile[1]}.json"
+        if not done.exists():
+            used.add(_fetch_osm_tile(tile, attempt_file, fetch))
+            attempt_file.replace(done)  # only a checked tile is kept
+        with done.open(encoding="utf-8") as f:
+            result = json.load(f)
         elements += result["elements"]
         print(f"tile {i}/{len(OSM_TILES)}: {len(result['elements'])} elements")
         snapshots.append(result["osm3s"]["timestamp_osm_base"])
-    tile_file.unlink()
     raw.write_text(json.dumps({"elements": elements}), encoding="utf-8")
-    # The oldest tile bounds the snapshot; tiles are minutes apart.
-    return {"snapshot": min(snapshots), "query": OSM_QUERY, "tiles": len(OSM_TILES)}
+    shutil.rmtree(tile_dir)
+    # The oldest tile bounds the snapshot; a resumed pull widens the spread.
+    return {
+        "snapshot": min(snapshots),
+        "query": OSM_QUERY,
+        "tiles": len(OSM_TILES),
+        "endpoints": sorted(used),  # this run's only, when resumed
+    }
+
+
+def _fetch_osm_tile(tile, dest: Path, fetch) -> str:
+    """Fetch one tile to ``dest``, retrying on alternate endpoints; return the one used."""
+    query = OSM_QUERY.format(*tile)
+    for attempt in range(OSM_RETRIES):
+        url = OSM_ENDPOINTS[attempt % len(OSM_ENDPOINTS)]
+        try:
+            fetch(url, dest, post=query)
+            with dest.open(encoding="utf-8") as f:
+                result = json.load(f)
+            if "remark" in result:  # Overpass reports timeouts in-band
+                raise RuntimeError(result["remark"])
+            return url
+        except (OSError, ValueError, RuntimeError) as err:
+            if attempt == OSM_RETRIES - 1:
+                raise RuntimeError(
+                    f"Overpass tile {tile} failed; rerun to resume from it"
+                ) from err
+            wait = 10 * 2**attempt  # Overpass asks for exponential backoff
+            print(f"tile {tile}: {err} from {url}; retrying in {wait}s")
+            time.sleep(wait)
 
 
 def _sha256(path: Path) -> str:
