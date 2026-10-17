@@ -18,6 +18,11 @@ try {
     load('model.json'), load('vocabulary.json'), load('districts.csv'), load('district_cuisine_supply.csv'),
   ]);
   const bundle = { model, vocabulary, districts, supply };
+  if (districts.some(({ centroid_lat, centroid_lon }) =>
+    !Number.isFinite(Number(centroid_lat)) || !Number.isFinite(Number(centroid_lon)) ||
+    centroid_lat === '' || centroid_lon === '')) {
+    throw new Error('Invalid district coordinates');
+  }
   for (const { cuisine, label } of vocabulary.cuisines) {
     const option = document.createElement('option');
     option.value = cuisine;

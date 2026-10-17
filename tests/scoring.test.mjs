@@ -34,10 +34,35 @@ test('deployed sample bundle matches independently exported reference scores', a
 test('unseen cuisine, absent supply, and missing numeric input are scored', async () => {
   const data = await bundle();
   const profile = { cuisine: 'Unseen', venue_type: 'Restaurant', price_band: 'unknown' };
-  const scores = scoreDistricts({ ...data, supply: [] }, profile);
+  const scores = scoreDistricts(data, profile);
+  const withExplicitDefaults = {
+    ...data,
+    districts: data.districts.map((district) => district.postcode_district === 'EC3P'
+      ? { ...district, population: String(data.model.transforms.population.median) } : district),
+    supply: [...data.supply, { postcode_district: 'EC3P', cuisine_group: 'Unseen', restaurants: '0' }],
+  };
+  const expected = scoreDistricts(withExplicitDefaults, profile);
+  assert.deepEqual(scores, expected);
+  const withUnmappedCuisine = {
+    ...data,
+    vocabulary: {
+      ...data.vocabulary,
+      cuisines: [...data.vocabulary.cuisines, { cuisine: 'Out-of-model', cuisine_group: 'Out-of-model' }],
+    },
+  };
+  assert.deepEqual(scores, scoreDistricts(withUnmappedCuisine, { ...profile, cuisine: 'Out-of-model' }));
   assert.equal(scores.length, data.districts.length);
   assert.ok(scores.every(({ score }) => Number.isFinite(score) && score >= 0 && score <= 1));
-  assert.ok(Number.isFinite(scores.find(({ postcode_district }) => postcode_district === 'EC3P').score));
+});
+
+test('invalid numeric data or model shape raises instead of showing NaN', async () => {
+  const data = await bundle();
+  const profile = { cuisine: 'British' };
+  const brokenDistricts = data.districts.map((district) => district.postcode_district === 'SE1'
+    ? { ...district, population: 'unknown' } : district);
+  assert.throws(() => scoreDistricts({ ...data, districts: brokenDistricts }, profile), /invalid|finite/i);
+  const brokenModel = { ...data.model, layers: [{ ...data.model.layers[0], weights: [[1]] }, ...data.model.layers.slice(1)] };
+  assert.throws(() => scoreDistricts({ ...data, model: brokenModel }, profile), /invalid|finite/i);
 });
 
 test('ranking includes the threshold and breaks ties by district code', () => {
@@ -53,6 +78,7 @@ test('ranking includes the threshold and breaks ties by district code', () => {
 test('wrong bundle version raises before scoring', async () => {
   const data = await bundle();
   assert.throws(() => scoreDistricts({ ...data, model: { ...data.model, version: 2 } }, { cuisine: 'British' }), /version/i);
+  assert.throws(() => scoreDistricts({ ...data, vocabulary: { ...data.vocabulary, version: 2 } }, { cuisine: 'British' }), /version/i);
 });
 
 test('CSV parser preserves quoted commas', () => {
