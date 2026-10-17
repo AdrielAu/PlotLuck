@@ -227,7 +227,7 @@ test('unknown locations can be clarified, while empty boundaries preserve the pr
   assert.equal(await page.locator('#ranked').textContent(), before);
 });
 
-test('reduced motion keeps the kitchen still and hidden tabs pause it', async t => {
+test('reduced motion keeps dishes still while the kitchen day turns, and hidden tabs pause it', async t => {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser, { reducedMotion:'reduce' });
   await page.goto(url);
@@ -235,10 +235,26 @@ test('reduced motion keeps the kitchen still and hidden tabs pause it', async t 
   assert.equal(await page.locator('#kitchen').getAttribute('data-kitchen'), 'still');
   const frames = await page.locator('#kitchen').getAttribute('data-frames');
   await page.waitForTimeout(150);
-  assert.equal(await page.locator('#kitchen').getAttribute('data-frames'), frames);
+  assert.ok(Number(await page.locator('#kitchen').getAttribute('data-frames')) > Number(frames));
+  assert.equal(await page.locator('#kitchen').getAttribute('data-flying'), '0');
   await page.evaluate(()=>{
     Object.defineProperty(document,'visibilityState',{configurable:true,get:()=> 'hidden'});
     document.dispatchEvent(new Event('visibilitychange'));
   });
   assert.equal(await page.locator('#kitchen').getAttribute('data-kitchen'), 'paused');
+});
+
+test('sky overrides and the night light remain available on the description screen', async t => {
+  const { browser, url } = await openSite(t);
+  const page = await newPage(browser);
+  const kitchen = page.locator('#kitchen');
+  for (const [sky, weather, light] of [['night','snow','on'], ['sunset','rain','off'], ['day','hail','off']]) {
+    await page.goto(`${url}?sky=${sky}&weather=${weather}`);
+    await page.locator('#kitchen[data-sky]').waitFor({state:'attached'});
+    assert.equal(await kitchen.getAttribute('data-sky'), sky);
+    assert.equal(await kitchen.getAttribute('data-light'), light);
+    if (weather !== 'hail') assert.equal(await kitchen.getAttribute('data-weather'), weather);
+    else assert.match(await kitchen.getAttribute('data-weather'), /^(sun|cloud|rain|snow)$/);
+  }
+  assert.deepEqual(page.errors, []);
 });
