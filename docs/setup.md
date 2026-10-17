@@ -40,10 +40,7 @@ To run it on Windows with an installed Edge browser:
 npm.cmd install --prefix "$env:TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4 three@0.160.0
 $env:PLOTLUCK_PLAYWRIGHT = 'file:///' + $env:TEMP.Replace('\', '/') + '/plotluck-browser-tools/node_modules/playwright/index.mjs'
 $env:PLOTLUCK_BROWSER = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
-node tests/browser/questions-flow.mjs
-node tests/browser/profile-flow.mjs
-node tests/browser/named-areas.mjs
-node tests/browser/nn2-flow.mjs
+node tests/browser/free-text-flow.mjs
 ```
 
 Without an installed browser, install Chromium with the isolated Playwright executable and omit `PLOTLUCK_BROWSER`. On other platforms, use a `file://` URL pointing to the isolated Playwright module. These tools are test-only; the deployed site has no new package dependency.

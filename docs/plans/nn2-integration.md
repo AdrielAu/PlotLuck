@@ -1,5 +1,34 @@
 # NN2 integration plan
 
+## Latest user amendment: one description fills the review card (2026-10-17)
+
+The user confirmed: **"The user can prompt the NN2, it will then fill in the review card."** The single free-text description from the amendment below stays; the six questions do not return. Instead of going straight to results, NN2's validated interpretation fills the review card, and the user confirms it before NN1 scores. This supersedes the amendment below's "directly to NN1 results" and "no routine review card".
+
+- One free-text description, up to 1,000 characters, makes one NN2 call.
+- The review card shows the cuisine, venue type, price band, traits, search area and rent band with explicit/inferred/default marks and unused details. Each value is a picker that NN2 pre-fills, so the user can manually pick the right value if NN2 got it wrong, then confirm (ADR 0006, Q5/Q9); **Compare districts** runs NN1. From results, **Edit** reopens the card with the last choices, and manual picks stay until the description is reinterpreted.
+- Unclear or invalid details (ambiguous places, conflicting cuisines, a rent budget without a band, a rejected price) appear on the review card as needing a choice and block comparison.
+- Everything else in the amendment below still applies: download on submission with size, progress and Cancel; strict validation; offline geography; never widening empty areas; retry limits; no silent fallback; preserving previous results. The model quality and release gates remain open.
+- The code still opens results directly (`web/free-text.js`, #169) until the review card is wired in.
+
+## Current six-field completion slice (2026-10-17)
+
+**Six-field completion clarification (2026-10-17):** the user requires search area/range, cuisine, menu prices, rent, restaurant type and other requirements before scoring. Missing area alone defaults to England. Every other missing, defaulted or invalid input prompts the corresponding original question from Erica's screen: "What food will you serve?", "What kind of place is it?", "How are your menu prices?", "How much rent can you take on?", and "Anything else diners should know?" An explicit unresolved place uses "Where would you like to open?" and labelled place choices. Explicit "Not sure", "Any rent" and "No other requirements" answers are allowed; silent defaults are not completion. This slice keeps the existing results handoff after completion; the planned review card above remains separate work.
+
+## Superseded user amendment: one description, then results (2026-10-17)
+
+The user replaced the six-question journey and confirmed: **"Show results immediately; ask only when clarification is needed."** This supersedes #158's six free-text questions, Q5/Q9's routine review-before-scoring, and #127's picker-based editing. The older requirements below remain historical context where they conflict with this amendment.
+
+- One free-text description, up to 1,000 characters, is the product entry point. No chips, autocomplete, six-question sequence, manual-input panel or second experimental description panel.
+- Submitting **Find districts** starts the pinned browser NN2 download/load if needed, with the measured size disclosed next to the action, progress and Cancel. Model assets can be reused; descriptions remain in tab memory.
+- The product extends the focused candidate with a sixth `requirements` field containing a literal excerpt or null. Per-field validation keeps independently valid inputs and asks for the rest. The original five-input proof/schema/prompt remains available unchanged by default, so historical benchmark results are not relabelled as six-field quality evidence. Resolve places locally, and score only after all six inputs are accounted for. **Edit description** preserves the text for explicit reinterpretation.
+- Ask only for unresolved cuisine/place choices, unsupported restrictions or invalid details. Ambiguous places, conflicting cuisines and a numeric rent budget without a relative band cannot silently become defaults. Near searches use the stated distance or 5 km, converting miles to kilometres.
+- Price validation accepts literal `mid range`, `mid-range` and `midrange` cues, irrespective of case. In the product, a rejected price prediction requires a targeted menu-price choice while independently valid cuisine and location values remain available. Scoring is blocked until that choice is made. Benchmark/proof calls remain strict: human recovery is not a correct model prediction.
+- Failed or malformed inference and unsupported devices offer the unanswered original questions, alongside retry/edit recovery. At most three model attempts per unchanged description; cancellation counts and editing resets the allowance. Manual completion stays available after the allowance is exhausted. This is labelled recovery, never a successful NN2 interpretation. A numeric rent budget that could not be validated must be re-entered with its period or explicitly cleared; it is never converted to a relative band.
+- New, failed, cancelled or superseded work preserves previous results. Never widen empty areas. Retain explicit dietary statements omitted by the focused model.
+- This interface change does not improve or validate model quality. The 95/100 quality, latency, download-size, notice and privacy gates remain open, as does separate LinuxONE evaluation.
+
+Implementation: `web/free-text.js` owns the browser flow; `description-query.js` adapts validated extraction to a query or targeted clarifications; `geography.js` owns catalogue validation and radius membership. `interpret.js` retains deterministic area/rent/dietary helpers and legacy test contracts, not a user-facing fallback.
+
 Status: product interview complete. At the user's request, this plan has been synthesized and published as [specification #110](https://github.com/AdrielAu/PlotLuck/issues/110), the implementation contract. Implementation has started with #115's manual draft/confirmation foundation. #136 connects the questions screen to browser NN2 behind `interpret(answers)`, with the deterministic fallback when NN2 is not loaded or replies invalidly; NN2 location text and clarifications await the place catalogue (#117/#118). NN2 interpretation and its feasibility/release gates remain open.
 
 ## Agreed requirements

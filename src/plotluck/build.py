@@ -171,9 +171,9 @@ def build(
     tiny = [d["postcode_district"] for d in districts if d["radius_km"] == MIN_RADIUS_KM]
     print(f"Districts at the minimum {MIN_RADIUS_KM} km radius ({len(tiny)}): {' '.join(tiny)}")
     raw_districts = districts
-    districts, reliable_codes, excluded = (
+    districts, reliable_codes, excluded, estimated = (
         quality.prepare_districts(raw_districts) if apply_quality else
-        (raw_districts, {d["postcode_district"] for d in raw_districts}, Counter())
+        (raw_districts, {d["postcode_district"] for d in raw_districts}, Counter(), Counter())
     )
     scored_codes = {d["postcode_district"] for d in districts}
     # Every postcode, cross-border ones too, so a neighbour's outline stops where theirs starts.
@@ -184,28 +184,29 @@ def build(
             # whose points scatter across other districts. A dot, not a spread circle.
             d["radius_km"] = MIN_RADIUS_KM
     policy = label_restaurants(restaurants, reliable_codes)
-    groups = cuisine_groups(
-        [r for r in restaurants if r["postcode_district"] in reliable_codes],
-        mapping, group_threshold,
-    )
+    labelled = [r for r in restaurants if r["review_success_label"] != "" and r["postcode_district"] in reliable_codes]
+    fine_threshold = min(MAX_FINE_CUISINE_THRESHOLD, max(3, group_threshold // 6))
+    traits = trait_vocabulary(restaurants)
+    thresholds = {"group_threshold": group_threshold, "fine_threshold": fine_threshold}
+    model, groups, supply = fit_inputs(labelled, restaurants, districts, traits, mapping, **thresholds)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
-    supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
     supply_rows = [
         {"postcode_district": d, "cuisine_group": g, "restaurants": n}
         for (d, g), n in sorted(supply.items()) if d in scored_codes
     ]
-    vocab = vocabulary(groups, restaurants)
-    labelled = [r for r in restaurants if r["review_success_label"] != "" and r["postcode_district"] in reliable_codes]
-    fine_threshold = min(MAX_FINE_CUISINE_THRESHOLD, max(3, group_threshold // 6))
+    fine_cuisines = model["transforms"]["cuisine"]["values"]
+    vocab = vocabulary(groups, traits, fine_cuisines)
     district_raw = training_district_inputs(labelled, districts, supply)
+    # Without the quality stage (tests only) every district trains and a missing value takes the median.
+    if apply_quality and np.isnan(district_raw).any():
+        raise ValueError("a training district lacks recorded context; it must not be filled with a training median")
     cv = cross_validate(
-        labelled, district_raw, vocab, fine_threshold=fine_threshold,
+        labelled, restaurants, districts, traits, mapping, **thresholds,
         folds=folds, max_epochs=max_epochs, patience=patience, seed=seed
     )
     # median_low: an epoch some fold actually chose; the plain median for an odd fold count.
     epochs = statistics.median_low(f["best_epoch"] for f in cv["folds"])
-    model = model_spec(vocab, district_raw, fine_cuisines=_supported_cuisines(labelled, fine_threshold))
     y = np.array([r["review_success_label"] for r in labelled], dtype=float)
     model["layers"], losses = nn1.train(_design(model, labelled, district_raw), y, epochs=epochs, seed=seed)
     model["activations"] = list(nn1.ACTIVATIONS)
@@ -215,7 +216,7 @@ def build(
         "tolerance": REFERENCE_TOLERANCE,
         "cases": [
             {"profile": profile, "scores": score_districts(model, vocab, districts, supply, profile)}
-            for profile in reference_profiles(vocab)
+            for profile in reference_profiles(vocab, fine_cuisines)
         ],
     }
     metrics.update(
@@ -228,8 +229,10 @@ def build(
         },
         quality={
             "districts": len(raw_districts), "scored": len(districts),
-            "training": len(reliable_codes), "estimated": len(districts) - len(reliable_codes),
-            "cross_border": len(cross_border), "excluded": dict(excluded),
+            "training": len(reliable_codes),
+            "training_with_labels": len({r["postcode_district"] for r in labelled}),
+            "estimated": len(districts) - len(reliable_codes),
+            "cross_border": len(cross_border), "estimated_reasons": dict(estimated), "excluded": dict(excluded),
         },
         cv=cv,
         shipped={"epochs": epochs, "train_loss": losses},
@@ -252,26 +255,28 @@ def build(
 
 
 def cross_validate(
-    labelled: list[dict], district_raw: np.ndarray, vocab: dict, *,
-    fine_threshold: int, folds: int, max_epochs: int, patience: int, seed: int
+    labelled: list[dict], restaurants: list[dict], districts: list[dict], traits: list[dict], mapping: dict, *,
+    group_threshold: int, fine_threshold: int, folds: int, max_epochs: int, patience: int, seed: int
 ) -> dict:
     """District-grouped CV of NN1: per-fold and summary MAE and RMSE, with loss curves.
 
-    Each fold refits the label policy and the input transforms on its
-    training rows (the fit rows and the early-stopping slice), so nothing
-    from the test districts leaks in. The baseline predicts the training
-    mean; only its errors are reported, as the mean itself derives from ratings.
+    Each fold refits the label policy, cuisine groups, fine-cuisine support
+    and input transforms on its training rows (the fit rows and the
+    early-stopping slice), so nothing from the test districts leaks in. The
+    baseline predicts the training mean; only its errors are reported, as the
+    mean itself derives from ratings.
     """
     results = []
     for split in nn1.group_splits([r["postcode_district"] for r in labelled], folds):
         train = np.concatenate([split["fit"], split["early_stop"]])
-        policy = label.fit_policy([labelled[i] for i in train])
+        train_rows = [labelled[i] for i in train]
+        policy = label.fit_policy(train_rows)
         y = np.array(label.labels(labelled, policy), dtype=float)
-        model = model_spec(
-            vocab, district_raw[train],
-            fine_cuisines=_supported_cuisines([labelled[i] for i in train], fine_threshold),
+        model, groups, supply = fit_inputs(
+            train_rows, restaurants, districts, traits, mapping,
+            group_threshold=group_threshold, fine_threshold=fine_threshold,
         )
-        x = _design(model, labelled, district_raw)
+        x = fold_design(model, groups, supply, labelled, districts)
         fit, stop, test = split["fit"], split["early_stop"], split["test"]
         layers, best, train_loss, stop_loss = nn1.train_early_stopping(
             x[fit], y[fit], x[stop], y[stop], max_epochs=max_epochs, patience=patience, seed=seed
@@ -311,10 +316,11 @@ def _finite_number(value) -> bool:
 def validate_run_metrics(metrics: dict) -> None:
     """Keep server run output to counts, losses and evaluation metrics."""
     allowed = {
-        "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
+        "source_rows", "excluded", "label_fixes", "label_anomalies", "restaurants", "labelled",
         "districts_without_rent", "districts_without_census", "cv", "shipped", "quality",
     }
-    if set(metrics) not in (allowed, allowed - {"quality"}):
+    # Runs committed before the quality stage and the anomaly audit lack those keys.
+    if not allowed - {"quality", "label_anomalies"} <= set(metrics) <= allowed:
         raise ValueError("run metrics have private or unexpected fields")
 
     def count(value):
@@ -335,19 +341,29 @@ def validate_run_metrics(metrics: dict) -> None:
         count(metrics[name])
     if "quality" in metrics:
         quality_metrics = metrics["quality"]
-        only_keys(quality_metrics, ("districts", "scored", "training", "estimated", "cross_border", "excluded"), "quality metrics")
-        for name in ("districts", "scored", "training", "estimated", "cross_border"):
+        only_keys(quality_metrics, (
+            "districts", "scored", "training", "training_with_labels", "estimated", "cross_border",
+            "estimated_reasons", "excluded",
+        ), "quality metrics")
+        for name in ("districts", "scored", "training", "training_with_labels", "estimated", "cross_border"):
             count(quality_metrics[name])
-        if quality_metrics["scored"] != quality_metrics["training"] + quality_metrics["estimated"]:
+        if quality_metrics["scored"] != quality_metrics["training"] + quality_metrics["estimated"] or (
+            quality_metrics["training_with_labels"] > quality_metrics["training"]
+        ):
             raise ValueError("quality metrics counts are inconsistent")
-        if not isinstance(quality_metrics["excluded"], dict) or set(quality_metrics["excluded"]) - {
-            "no_restaurants", "commercial_core_without_footfall", "too_many_missing_groups", "no_comparable_peers"
-        }:
-            raise ValueError("quality metrics have unexpected exclusion reasons")
-        for value in quality_metrics["excluded"].values():
-            count(value)
+        for name, allowed_reasons in (
+            ("excluded", set(quality.EXCLUSION_REASONS)), ("estimated_reasons", quality.estimate_reasons())
+        ):
+            if not isinstance(quality_metrics[name], dict) or set(quality_metrics[name]) - allowed_reasons:
+                raise ValueError(f"quality metrics have unexpected {name}")
+            for value in quality_metrics[name].values():
+                count(value)
         if quality_metrics["districts"] != quality_metrics["scored"] + sum(quality_metrics["excluded"].values()):
             raise ValueError("quality metrics exclusions do not add up")
+        # Each estimated district repairs one or more groups, up to the limit.
+        repairs, estimated = sum(quality_metrics["estimated_reasons"].values()), quality_metrics["estimated"]
+        if not estimated <= repairs <= quality.MAX_REPAIRED_GROUPS * estimated:
+            raise ValueError("quality metrics estimate reasons do not add up")
     only_keys(metrics["districts_without_census"], context.SOURCE_COLUMNS, "run metrics districts_without_census")
     for value in metrics["districts_without_census"].values():
         count(value)
@@ -357,8 +373,11 @@ def validate_run_metrics(metrics: dict) -> None:
             "rating_missing", "rating_out_of_range", "n_total_zero",
         },
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
+        "label_anomalies": set(label.ANOMALIES),
     }
     for name, allowed_reasons in reasons.items():
+        if name == "label_anomalies" and name not in metrics:
+            continue
         if not isinstance(metrics.get(name), dict) or any(
             type(value) is not int or value < 0 for value in metrics[name].values()
         ) or set(metrics[name]) - allowed_reasons:
@@ -443,8 +462,6 @@ def publish_bundle(out: Path, bundle: dict) -> None:
         fine, group = cuisine["cuisine"], cuisine["cuisine_group"]
         if fine not in allowed_cuisines or group not in allowed_cuisines | {OTHER}:
             raise ValueError("vocabulary has a private or unexpected cuisine")
-        if cuisine["label"] != (fine if fine == group else f"{fine} (scored as {group})"):
-            raise ValueError("vocabulary has a private or unexpected label")
         groups.add(group)
     trait_names = []
     allowed_traits = {"venue_type", "price_band", "chain", *DIET_FLAGS}
@@ -503,6 +520,11 @@ def publish_bundle(out: Path, bundle: dict) -> None:
                 set(transform["values"]) - {c["cuisine"] for c in vocab["cuisines"]}
             ):
                 raise ValueError("model has private or unexpected fine cuisines")
+            if name == "cuisine" and any(
+                c["label"] != cuisine_label(c["cuisine"], c["cuisine_group"], transform["values"])
+                for c in vocab["cuisines"]
+            ):
+                raise ValueError("vocabulary has a private or unexpected label")
         else:
             only_keys(transform, ("kind",), "flag transform")
             if transform["kind"] != "flag":
@@ -543,29 +565,28 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     _write_json(out / "reference_scores.json", reference)
 
 
-def _validate_outlines(file: dict, district_codes: set[str]) -> None:
-    """Outlines hold only integer arcs and arc references for published districts."""
-    only_keys(file, ("version", "quantum", "arcs", "districts"), "district_outlines.json")
-    if file["version"] != BUNDLE_VERSION or file["quantum"] != outlines.QUANTUM_DEG:
-        raise ValueError("district_outlines.json has unexpected metadata")
-    arcs = file["arcs"]
-    if not isinstance(arcs, list) or not all(
-        isinstance(arc, list) and len(arc) >= 4 and len(arc) % 2 == 0
-        and all(type(value) is int for value in arc) for arc in arcs
-    ):
-        raise ValueError("district_outlines.json has an invalid arc")
-    if not isinstance(file["districts"], dict) or set(file["districts"]) - district_codes:
-        raise ValueError("district_outlines.json has an unexpected district")
-    for rings in file["districts"].values():
-        if not isinstance(rings, list) or not rings or not all(
-            isinstance(ring, list) and ring and all(type(k) is int and -len(arcs) <= k < len(arcs) for k in ring)
-            for ring in rings
-        ):
-            raise ValueError("district_outlines.json has an invalid arc reference")
+def vocabulary(groups: dict[str, str], traits: list[dict], fine_cuisines=()) -> dict:
+    """``vocabulary.json``: every cuisine with its group, and the shipped ``traits``.
+
+    A cuisine in ``fine_cuisines`` has its own model input, so only the others
+    are labelled as scored as their group.
+    """
+    return {
+        "version": BUNDLE_VERSION,
+        "cuisines": [
+            {"cuisine": c, "cuisine_group": g, "label": cuisine_label(c, g, fine_cuisines)}
+            for c, g in sorted(groups.items())
+        ],
+        "traits": traits,
+    }
 
 
-def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
-    """Cuisines and traits filled on at least half the prepared England rows.
+def cuisine_label(cuisine: str, group: str, fine_cuisines) -> str:
+    return cuisine if cuisine == group or cuisine in fine_cuisines else f"{cuisine} (scored as {group})"
+
+
+def trait_vocabulary(restaurants: list[dict]) -> list[dict]:
+    """Traits filled on at least half the prepared England rows.
 
     Venue type always ships. Rates include label-ineligible rows; diagnostics
     are printed only, so they stay on the server for full-data builds.
@@ -589,14 +610,36 @@ def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
             for f in ("chain", *DIET_FLAGS)
         ),
     ]
-    return {
-        "version": BUNDLE_VERSION,
-        "cuisines": [
-            {"cuisine": c, "cuisine_group": g, "label": c if c == g else f"{c} (scored as {g})"}
-            for c, g in sorted(groups.items())
-        ],
-        "traits": [t for t in traits if t["name"] == "venue_type" or filled[t["name"]] >= 0.5],
-    }
+    return [t for t in traits if t["name"] == "venue_type" or filled[t["name"]] >= 0.5]
+
+
+def fit_inputs(
+    train: list[dict], restaurants: list[dict], districts: list[dict], traits: list[dict], mapping: dict, *,
+    group_threshold: int, fine_threshold: int,
+) -> tuple[dict, dict[str, str], Counter]:
+    """(model without layers, cuisine groups, supply) fitted on the labelled ``train`` rows alone.
+
+    Cuisine groups, fine-cuisine support and input transforms see only
+    ``train``. Supply counts every row of ``restaurants`` under those groups,
+    as it is an observed input, not a fitted value.
+    """
+    groups = cuisine_groups(train, mapping, group_threshold)
+    supply = Counter((r["postcode_district"], groups[r["cuisine"]]) for r in restaurants)
+    district_raw = training_district_inputs(_grouped(train, groups), districts, supply)
+    model = model_spec(
+        vocabulary(groups, traits), district_raw, fine_cuisines=_supported_cuisines(train, fine_threshold)
+    )
+    return model, groups, supply
+
+
+def fold_design(model: dict, groups: dict[str, str], supply: Counter, rows: list[dict], districts: list[dict]) -> np.ndarray:
+    """Input matrix for ``rows`` under one ``fit_inputs`` result."""
+    rows = _grouped(rows, groups)
+    return _design(model, rows, training_district_inputs(rows, districts, supply))
+
+
+def _grouped(rows: list[dict], groups: dict[str, str]) -> list[dict]:
+    return [{**r, "cuisine_group": groups[r["cuisine"]]} for r in rows]
 
 
 def training_district_inputs(restaurants: list[dict], districts: list[dict], supply: Counter) -> np.ndarray:
@@ -703,14 +746,22 @@ def score_districts(model: dict, vocab: dict, districts: list[dict], supply: Cou
     return {d["postcode_district"]: float(s) for d, s in zip(districts, scores)}
 
 
-def reference_profiles(vocab: dict) -> list[dict]:
-    """Fixed profiles for the browser parity check: defaults, all traits set, Unspecified."""
+def reference_profiles(vocab: dict, fine_cuisines) -> list[dict]:
+    """Fixed profiles for the browser parity check.
+
+    A supported fine cuisine with defaults (one scored apart from its group
+    where any is), a fallback cuisine with all traits set, and Unspecified.
+    """
     defaults = {t["name"]: t["default"] for t in vocab["traits"]}
     everything = {t["name"]: t["values"][1] for t in vocab["traits"]}
-    cuisines = [c["cuisine"] for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
+    cuisines = [c for c in vocab["cuisines"] if c["cuisine"] != UNSPECIFIED]
+    # Stable sort: a supported cuisine outside its own-named group comes first.
+    supported = sorted((c for c in cuisines if c["cuisine"] in fine_cuisines),
+                       key=lambda c: c["cuisine"] == c["cuisine_group"])
+    fallback = [c for c in cuisines if c["cuisine"] not in fine_cuisines]
     return [
-        {"cuisine": cuisines[0], **defaults},
-        {"cuisine": cuisines[-1], **everything},
+        {"cuisine": (supported or cuisines)[0]["cuisine"], **defaults},
+        {"cuisine": (fallback or cuisines)[-1]["cuisine"], **everything},
         {"cuisine": UNSPECIFIED, **defaults},
     ]
 
@@ -803,7 +854,11 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
             "venue_type": venue,
         })
     excluded.update(filter(None, map(label.exclusion, restaurants)))
-    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
+    anomalies = Counter(flag for r in restaurants for flag in label.anomalies(r))
+    return restaurants, {
+        "source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes),
+        "label_anomalies": dict(anomalies),
+    }
 
 
 def _without_duplicate_listings(rows: list[dict], points: list[tuple[float, float]]) -> list[int]:
