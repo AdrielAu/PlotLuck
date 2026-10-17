@@ -3,7 +3,9 @@
 Status: the initial [browser experiment](../../runs/2026-10-17-nn2-evaluation/)
 failed quality and latency. The latest compact-output run completed three warm
 requests in 5.53–5.76 seconds, but scored 0/3 correct; three requests do not
-establish the release p95 gate. LinuxONE execution remains pending. This is
+establish the release p95 gate. The [LinuxONE native CPU run](../../runs/2026-10-17-nn2-evaluation/)
+completed three warm requests in 26.14–35.75 seconds, within the 60-second
+limit, but also scored 0/3: replies were malformed or wrongly shaped JSON. This is
 pretrained inference, not training or NNPA acceleration. NN2 remains mandatory.
 
 The candidate is Qwen2.5-0.5B-Instruct. Native revision
