@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { loadBundle } from '../../web/scoring.js';
+import { loadBundle, scoreDistricts } from '../../web/scoring.js';
 import { validateProfileExtraction } from '../../web/profile-extraction.js';
 import { descriptionQuery, confirmedDescription } from '../../web/description-query.js';
 
@@ -90,4 +90,26 @@ test('a price rejected by NN2 validation blocks scoring until explicitly clarifi
   assert.throws(()=>confirmedDescription(q,bundle,catalogue),/menu prices/);
   q.profile.price_band='$$';q.priceNeedsReview=false;q.completion.price=true;
   assert.equal(confirmedDescription(q,bundle,catalogue).profile.price_band,'$$');
+});
+
+test('districts the build withheld are absent from every search area and rent band', async () => {
+  // EC4R and SE1P are tiny-population commercial cores and EC3M has no restaurants, so the sample bundle omits them.
+  const withheld = ['EC4R', 'SE1P', 'EC3M'];
+  const borough = { ...place, id: 'borough', name: 'Borough', districts: ['SE1', 'SE17', ...withheld] };
+  const text = full('A Thai restaurant in Borough.');
+  for (const rentBand of ['low', 'mid', 'high', 'any']) {
+    const q = await descriptionQuery(text, extraction(text, { region: 'Borough' }), bundle, { places: [borough] });
+    q.rentBand = rentBand;
+    let area;
+    try { area = confirmedDescription(q, bundle, { places: [borough] }).searchArea; } catch (e) {
+      if (rentBand === 'any') throw e;
+      assert.match(e.message, /No district centres/);
+      continue;
+    }
+    assert.ok(area.every(code => ['SE1', 'SE17'].includes(code)), `${rentBand}: ${area}`);
+    if (rentBand !== 'any') continue;
+    assert.deepEqual(area.sort(), ['SE1', 'SE17']);
+    const scored = scoreDistricts(bundle, q.profile).map(s => s.postcode_district);
+    for (const code of withheld) assert.equal(scored.includes(code), false, code);
+  }
 });

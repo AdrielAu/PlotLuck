@@ -104,6 +104,8 @@ DISTRICT_COLUMNS = (
     *context.SUMMARIES,
     "radius_km",
 )
+# The private district audit adds these to the source values.
+AUDIT_COLUMNS = ("context_status", "context_reasons")
 # Register each approved public economic or demographic extension here before
 # adding it to district_table. Unknown fields must never pass through by default.
 DISTRICT_PUBLIC_EXTENSIONS = ()
@@ -171,9 +173,10 @@ def build(
     tiny = [d["postcode_district"] for d in districts if d["radius_km"] == MIN_RADIUS_KM]
     print(f"Districts at the minimum {MIN_RADIUS_KM} km radius ({len(tiny)}): {' '.join(tiny)}")
     raw_districts = districts
-    districts, reliable_codes, excluded, estimated = (
+    districts, reliable_codes, excluded, estimated, audit = (
         quality.prepare_districts(raw_districts) if apply_quality else
-        (raw_districts, {d["postcode_district"] for d in raw_districts}, Counter(), Counter())
+        (raw_districts, {d["postcode_district"] for d in raw_districts}, Counter(), Counter(),
+         {d["postcode_district"]: ("recorded", "") for d in raw_districts})
     )
     scored_codes = {d["postcode_district"] for d in districts}
     policy = label_restaurants(restaurants, reliable_codes)
@@ -240,6 +243,10 @@ def build(
     validate_run_metrics(metrics)
     publish_bundle(out, bundle)
     _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    # Source values beside each district's status; the bundle holds the accepted estimates.
+    _write_csv(data / "district_context.csv", (*DISTRICT_COLUMNS, *DISTRICT_PUBLIC_EXTENSIONS, *AUDIT_COLUMNS), [
+        {**d, **dict(zip(AUDIT_COLUMNS, audit[d["postcode_district"]]))} for d in raw_districts
+    ])
     _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
     run.mkdir(parents=True, exist_ok=True)
     _write_json(run / "metrics.json", metrics)

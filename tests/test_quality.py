@@ -22,7 +22,7 @@ def test_missing_and_suspect_low_rent_use_nearby_comparable_values():
     donors = [district(f"A{i}", i * .01, rent=100 + i) for i in range(1, 6)]
     rows = [*donors, district("M1", .025, rent=""), district("L1", .035, rent=1),
             district("H1", .045, rent=900)]
-    prepared, reliable, excluded, _ = prepare_districts(rows)
+    prepared, reliable, excluded, _, _ = prepare_districts(rows)
     by_code = {d["postcode_district"]: d for d in prepared}
 
     assert 100 <= by_code["M1"]["commercial_rent_index"] <= 105
@@ -41,7 +41,7 @@ def test_invalid_recorded_context_is_estimated_not_treated_as_reliable():
     bad_deprivation = district("D1", .045)
     bad_deprivation["deprivation_index"] = 0
 
-    prepared, reliable, excluded, estimated = prepare_districts([*donors, bad_age, bad_shares, bad_deprivation])
+    prepared, reliable, excluded, estimated, _ = prepare_districts([*donors, bad_age, bad_shares, bad_deprivation])
     by_code = {d["postcode_district"]: d for d in prepared}
 
     assert reliable == {"A1", "A2", "A3", "A4"}
@@ -56,7 +56,7 @@ def test_estimate_reasons_distinguish_missing_from_suspect_low_rent():
     rows = [district(f"A{i}", i * .01, rent=99 + i) for i in range(1, 4)]
     rows += [district("L1", .04, rent=1), district("M1", .05, rent="", population="")]
 
-    _, _, _, estimated = prepare_districts(rows)
+    _, _, _, estimated, _ = prepare_districts(rows)
 
     assert estimated == {"commercial_rent_index_low": 1, "commercial_rent_index_missing": 1, "population_missing": 1}
 
@@ -65,7 +65,7 @@ def test_suspect_low_rent_is_not_used_as_an_estimation_donor():
     rows = [district(f"A{i}", i * .01, rent=99 + i) for i in range(1, 4)]
     rows += [district("L1", .04, rent=1), district("M1", .05, rent="")]
 
-    prepared, reliable, excluded, _ = prepare_districts(rows)
+    prepared, reliable, excluded, _, _ = prepare_districts(rows)
     by_code = {row["postcode_district"]: row for row in prepared}
 
     assert by_code["M1"]["commercial_rent_index"] == 101
@@ -73,10 +73,32 @@ def test_suspect_low_rent_is_not_used_as_an_estimation_donor():
     assert not excluded
 
 
+def test_donors_outlying_for_the_estimated_field_do_not_contribute():
+    # Unscreened medians would be rent 101, population 11000 and a white share of 0.55.
+    rows = [district(f"A{i}", i * .01, rent=99 + i, population=9000 + 1000 * i) for i in range(1, 4)]
+    rows += [district("H1", .04, rent=2000, population=10500), district("P1", .05, rent=99, population=900000),
+             district("M1", .025, rent="", population="")]
+    # A second cluster about 70 km east, for the ethnicity mix.
+    rows += [district("B1", 1.01), district("B2", 1.02), district("B3", 1.03)]
+    rows[-1].update(ethnicity_asian_share=.2, ethnicity_white_share=.5)
+    rows += [district("E1", 1.04), district("E2", 1.025)]
+    rows[-2].update(ethnicity_asian_share=.9, ethnicity_black_share=0, ethnicity_white_share=0, ethnicity_other_share=0)
+    rows[-1]["ethnicity_white_share"] = ""
+
+    prepared, reliable, excluded, _, _ = prepare_districts(rows)
+    by_code = {row["postcode_district"]: row for row in prepared}
+
+    assert by_code["M1"]["commercial_rent_index"] == 100.5
+    assert by_code["M1"]["population"] == 10750
+    assert by_code["E2"]["ethnicity_white_share"] == .6
+    assert by_code["H1"]["commercial_rent_index"] == 2000 and "H1" in reliable  # valid high rent stays recorded
+    assert not excluded
+
+
 def test_unestimable_district_is_not_published():
     rows = [district("A1", 0), district("X1", 3, rent=""),
             district("L1", 4, rent=1), district("Z1", .02, restaurants=0)]
-    prepared, reliable, excluded, _ = prepare_districts(rows)
+    prepared, reliable, excluded, _, _ = prepare_districts(rows)
 
     assert {d["postcode_district"] for d in prepared} == {"A1"}
     assert reliable == {"A1"}
@@ -84,10 +106,26 @@ def test_unestimable_district_is_not_published():
     assert excluded["no_restaurants"] == 1
 
 
+def test_audit_records_each_districts_status_and_reasons():
+    rows = [district(f"A{i}", i * .01, rent=99 + i) for i in range(1, 4)]
+    rows += [district("L1", .04, rent=1), district("M1", .05, rent="", population=""),
+             district("X1", 3, rent=""), district("Z1", .02, restaurants=0)]
+
+    *_, audit = prepare_districts(rows)
+
+    assert audit == {
+        "A1": ("recorded", ""), "A2": ("recorded", ""), "A3": ("recorded", ""),
+        "L1": ("estimated", "commercial_rent_index_low"),
+        "M1": ("estimated", "population_missing;commercial_rent_index_missing"),
+        "X1": ("excluded", "no_comparable_peers;commercial_rent_index_missing"),
+        "Z1": ("excluded", "no_restaurants"),
+    }
+
+
 def test_commercial_core_with_tiny_resident_population_needs_visitor_evidence():
     rows = [district("C1", 0, population=2, restaurants=60),
             district("R1", .02, population=9000, restaurants=20)]
-    prepared, reliable, excluded, _ = prepare_districts(rows)
+    prepared, reliable, excluded, _, _ = prepare_districts(rows)
 
     assert [row["postcode_district"] for row in prepared] == ["R1"]
     assert reliable == {"R1"}

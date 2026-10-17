@@ -450,6 +450,15 @@ def test_estimated_and_unsupported_districts_never_train_and_metrics_say_why(tmp
         "excluded": {"no_restaurants": 6, "commercial_core_without_footfall": 2},
     }
     assert {name: (data / name).read_bytes() for name in SOURCES} == sources_before
+    # The private audit keeps SE17's source value; only the bundle carries the estimate.
+    audit = {d["postcode_district"]: d for d in read_csv(data / "district_context.csv")}
+    assert len(audit) == 13
+    assert (audit["SE17"]["commercial_rent_index"], audit["SE17"]["context_status"],
+            audit["SE17"]["context_reasons"]) == ("", "estimated", "commercial_rent_index_missing")
+    assert (audit["SE1"]["context_status"], audit["SE1"]["context_reasons"]) == ("recorded", "")
+    assert (audit["EC4R"]["context_status"], audit["EC4R"]["context_reasons"]) == (
+        "excluded", "commercial_core_without_footfall")
+    assert "context_status" not in read_csv(tmp_path / "bundle" / "districts.csv")[0]
 
 
 def test_training_refuses_to_fill_missing_context_with_a_median(tmp_path, monkeypatch):
@@ -462,7 +471,8 @@ def test_training_refuses_to_fill_missing_context_with_a_median(tmp_path, monkey
     # A faulty quality stage that calls every district with restaurants reliable.
     def everything_reliable(rows):
         kept = [r for r in rows if r["total_restaurants"]]
-        return kept, {r["postcode_district"] for r in kept}, Counter(no_restaurants=len(rows) - len(kept)), Counter()
+        reliable = {r["postcode_district"] for r in kept}
+        return kept, reliable, Counter(no_restaurants=len(rows) - len(kept)), Counter(), {}
     monkeypatch.setattr(build.quality, "prepare_districts", everything_reliable)
 
     with pytest.raises(ValueError, match="median"):
