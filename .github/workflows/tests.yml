@@ -1,5 +1,7 @@
 name: Tests
 
+# pytest on data/sample and the site's Node tests, so a broken bundle
+# contract fails the PR before merge. Pages deploys from pages.yml.
 on:
   pull_request:
   workflow_dispatch:
@@ -14,13 +16,15 @@ concurrency:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    env:
+      PLOTLUCK_DATA: sample
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      # Same install as docs/setup.md: the extra index gives CPU-only PyTorch.
+      # Same install as docs/setup.md: CPU-only torch from the extra index.
       - run: pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
       - run: pip install -e ".[test]"
       - run: pytest
@@ -32,4 +36,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      # No install: the tests use only node: built-ins.
       - run: node --test
