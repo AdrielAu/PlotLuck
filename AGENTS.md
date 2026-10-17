@@ -18,6 +18,7 @@ Before writing or changing code (including notebooks), read [`docs/agents/coding
 
 - `docs/competition/`: handover (`PROJECT.md`) and the initial design doc.
 - `docs/setup.md`: one-time clone setup, per agent tool.
+- `web/`: static site deployed to GitHub Pages; see `web/AGENTS.md`.
 - `.agents/skills/`: shared agent skills, the single copy every tool reads. Sources are pinned in `skills-lock.json`.
 
 ## Team workflow
