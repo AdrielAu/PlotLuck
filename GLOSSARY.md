@@ -19,7 +19,7 @@ A real food business in the source data that serves a cuisine. Cafés, takeaways
 _Avoid_: Venue, outlet, business
 
 **Restaurant profile**:
-The restaurant a user describes to Plotluck: a cuisine plus traits. It is scored in every postcode district.
+The user's free-text description of the restaurant they want to open. Plotluck reads a cuisine and traits from it and scores it in every postcode district.
 _Avoid_: Hypothetical restaurant, query, concept
 
 **Cuisine**:
@@ -69,6 +69,10 @@ The display of a postcode district's drivers.
 _Avoid_: Explanation panel, breakdown
 
 ## Workflow
+
+**MVP**:
+What Plotluck would submit if the build stopped now: a cuisine and traits picked from lists, scored by NN1 trained on LinuxONE and run in the browser to colour postcode districts above the score threshold. No free-text restaurant profile, clusters, driver chart or cultural demand gap.
+_Avoid_: Demo, v1, vertical slice
 
 **Sample data**:
 A small subset of the data that teammates use to test on their laptops.
