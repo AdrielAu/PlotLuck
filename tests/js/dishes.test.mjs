@@ -1,4 +1,4 @@
-// The kitchen's dish draw (#135): no dish twice, never the same appliance twice in a row.
+// The kitchen's dish draw (#135): no dish twice a round, none already on the table, never the same appliance twice in a row.
 // Run from the repo root with `node --test`.
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -16,19 +16,49 @@ test("the roster pairs 31 dishes with the nine appliances", () => {
   assert.deepEqual(DISHES.filter((d) => d.appliance === "tandoor").map((d) => d.name), ["Chicken tikka with naan", "Seekh kebab"]);
 });
 
-test("a whole service never repeats a dish or fires one appliance twice in a row", () => {
+// The kitchen's loop: six places, the oldest dish leaving for each new one, a new round when the draw runs dry.
+function service(random, count) {
+  const out = [];
+  let served = [];
+  const table = [];
+  while (out.length < count) {
+    let dish = nextDish(served, table, random);
+    if (!dish) {
+      served = [];
+      dish = nextDish(served, table, random);
+    }
+    assert.ok(dish, "a new round always has a dish");
+    assert.ok(!table.includes(dish), `${dish.name} is already on the table`);
+    if (table.length === 6) table.shift();
+    served.push(dish);
+    table.push(dish);
+    out.push({ dish, round: served.length === 1 });
+  }
+  return out;
+}
+
+test("a round never repeats a dish, and no appliance fires twice in a row", () => {
   for (let seed = 1; seed <= 50; seed++) {
-    const random = seeded(seed);
-    const served = [];
-    for (let dish; (dish = nextDish(served, random)); ) served.push(dish);
-    assert.equal(new Set(served).size, served.length);
-    for (let i = 1; i < served.length; i++) assert.notEqual(served[i].appliance, served[i - 1].appliance);
-    // Six answers fill the table; a random draw may strand the last few dishes.
-    assert.ok(served.length >= 6, `seed ${seed} served only ${served.length}`);
+    const out = service(seeded(seed), 200);
+    for (let i = 1; i < out.length; i++) assert.notEqual(out[i].dish.appliance, out[i - 1].dish.appliance);
+    let round = [];
+    for (const { dish, round: fresh } of out) {
+      if (fresh) round = [];
+      assert.ok(!round.includes(dish), `seed ${seed} repeated ${dish.name} within a round`);
+      round.push(dish);
+    }
+    // Rounds start again, so the kitchen never runs out; a random draw may strand a round's last few dishes.
+    assert.ok(out.filter((o) => o.round).length > 1, `seed ${seed} never started a new round`);
   }
 });
 
 test("with only the last appliance's dishes left, no dish comes out", () => {
-  const served = DISHES.filter((d) => d.appliance !== "tandoor").concat(DISHES.find((d) => d.name === "Seekh kebab"));
-  assert.equal(nextDish(served, Math.random), null);
+  const served = DISHES.filter((d) => d.appliance !== "tandoor");
+  const table = [DISHES.find((d) => d.name === "Seekh kebab")];
+  assert.equal(nextDish(served, table, Math.random), null);
+});
+
+test("a dish on the table is not drawn again, even in a new round", () => {
+  const table = DISHES.filter((d) => d.appliance !== "fridge").slice(0, 6);
+  for (let seed = 1; seed <= 20; seed++) assert.ok(!table.includes(nextDish([], table, seeded(seed))));
 });

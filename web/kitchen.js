@@ -1,4 +1,4 @@
-// The questions screen's voxel kitchen: nine appliances round a table, one dish served per answer,
+// The questions screen's voxel kitchen: nine appliances round a table, a dish served every few seconds,
 // a window on the back wall and a clock on the right one, both running a make-believe day (#159).
 // Purely decorative. Rendered small and scaled up without smoothing for a pixel-art look.
 // State for tests and styles sits on the container: data-kitchen (running, paused, still),
@@ -20,13 +20,13 @@ const PALETTE = {
 };
 const FRAME_MS = 1000 / 30;
 const FLIGHT_MS = 1100;
+// The first dish comes out shortly after the kitchen appears, then one every SERVE_MS of running time.
+const FIRST_SERVE_MS = 1500;
+const SERVE_MS = 4000;
 // How fast the room's light follows a new phase or weather: settled in about two seconds.
 const LIGHT_EASE_MS = 500;
-// Places on the table top, one per question (five when the rent question is skipped), filled in order.
-const SLOTS = {
-  6: [[-3, -1.4], [0, -1.4], [3, -1.4], [-3, 1.4], [0, 1.4], [3, 1.4]],
-  5: [[-3, -1.4], [0, -1.4], [3, -1.4], [-1.5, 1.4], [1.5, 1.4]],
-};
+// Places on the table top, filled in order; once all are set, each new dish takes the oldest one's place.
+const SLOTS = [[-3, -1.4], [0, -1.4], [3, -1.4], [-3, 1.4], [0, 1.4], [3, 1.4]];
 // The table top's surface, where plates rest.
 const TABLE_Y = 2.5;
 
@@ -470,8 +470,11 @@ export function startKitchen(container) {
   const forced = readOverrides(location.search);
   const startHour = Math.random() * 24;
   const weathers = [];
+  // This round's dishes, and the dishes on the table oldest first, as { dish, mesh, slot }.
   const served = [];
+  const table = [];
   const flights = [];
+  let toServe = FIRST_SERVE_MS;
   let mode = reduced.matches ? "still" : "running";
   let frames = 0;
   let raf = 0;
@@ -583,10 +586,17 @@ export function startKitchen(container) {
     container.dataset.flying = String(flights.length);
   }
 
-  // The day keeps turning in every mode; still only drops the travel (sway, flights, falling weather).
+  // The day keeps turning and dishes keep flying in every mode; still only drops the sway and falling weather.
   function loop(t) {
     raf = requestAnimationFrame(loop);
     if (t - last < FRAME_MS) return;
+    // Counts running time only: a pause (hidden tab, results screen) neither brings the next dish closer
+    // nor sends a burst of missed ones on return.
+    toServe -= Math.min(250, t - (last || t));
+    if (toServe <= 0) {
+      serve();
+      toServe = SERVE_MS;
+    }
     step(t);
     draw(t);
     last = t;
@@ -605,25 +615,33 @@ export function startKitchen(container) {
     setMode(reduced.matches ? "still" : "running");
   }
 
-  // One dish, from its appliance to the next free place of a table set for `places` dishes.
-  function serve(places) {
-    const slots = SLOTS[places] ?? SLOTS[6];
-    if (served.length >= slots.length) return;
-    const dish = nextDish(served, Math.random);
-    if (!dish) return;
+  // One dish, from its appliance to the next free place, or to the oldest dish's place, which clears at take-off.
+  function serve() {
+    const onTable = table.map((p) => p.dish);
+    let dish = nextDish(served, onTable, Math.random);
+    if (!dish) {
+      // Every dish has been out this round: start another.
+      served.length = 0;
+      dish = nextDish(served, onTable, Math.random);
+    }
     served.push(dish);
-    const [sx, sz] = slots[served.length - 1];
+    let slot = table.length;
+    if (table.length === SLOTS.length) {
+      const oldest = table.shift();
+      scene.remove(oldest.mesh);
+      oldest.mesh.geometry.dispose();
+      oldest.mesh.material.dispose();
+      slot = oldest.slot;
+    }
+    const [sx, sz] = SLOTS[slot];
     const mesh = voxelMesh(dishVoxels(dish), 0.25);
     const to = new THREE.Vector3(sx, TABLE_Y + 0.125, sz);
     const { group, mouth } = appliances.get(dish.appliance);
+    table.push({ dish, mesh, slot });
     scene.add(mesh);
-    container.dataset.dishes = String(served.length);
-    if (mode === "running" && !paused) {
-      mesh.position.copy(mouth);
-      flights.push({ mesh, from: mouth.clone(), to, appliance: group });
-    } else {
-      mesh.position.copy(to);
-    }
+    container.dataset.dishes = String(table.length);
+    mesh.position.copy(mouth);
+    flights.push({ mesh, from: mouth.clone(), to, appliance: group });
   }
 
   born = performance.now();
@@ -634,5 +652,5 @@ export function startKitchen(container) {
   Object.assign(container.dataset, { dishes: "0", flying: "0" });
   update();
   // Paused while the results screen shows; resumed when the questions come back.
-  return { serve, update };
+  return { update };
 }
