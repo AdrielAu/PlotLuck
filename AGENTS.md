@@ -22,7 +22,7 @@ Before writing or changing code (including notebooks), read [`docs/agents/coding
 
 Keep this map and `CONTRIBUTING.md` in step: change both together.
 
-- `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`; `tests/js/`: `node --test` for `web/scoring.js` and `web/pickers.js`.
+- `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`; `tests/js/`: `node --test` for `web/scoring.js`, `web/pickers.js` and `web/results.js`.
 - `tests/browser/`: real-browser confirmation flows; see [browser test setup](docs/setup.md#browser-flow-tests).
 - `data/`: `sample/` committed, `full/` server-only; see `data/AGENTS.md`.
 - `docs/competition/`: handover (`PROJECT.md`), build status (`PROGRESS.md`), submission list (`DELIVERABLES.md`) and the initial design doc.
