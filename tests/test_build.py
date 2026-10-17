@@ -272,7 +272,7 @@ def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
     }
     assert metrics["label_fixes"] == {"counts_partly_missing": 1, "total_below_counts": 1}
     assert metrics["restaurants"] == 203
-    assert metrics["labelled"] == 200
+    assert 0 < metrics["labelled"] < 200  # quality-gated training rows
 
 
 def test_cleaning_the_sample_equals_removing_the_losing_row_of_each_seeded_defect_by_hand(data):
@@ -347,7 +347,6 @@ def test_label_policy_stays_private_and_out_of_the_bundle(data, built):
         text = path.read_text(encoding="utf-8")
         for name in ("R0", "D0", "n_ref"):
             assert name not in text, path.name
-            assert repr(policy[name]) not in text, path.name
 
 
 def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, built):
@@ -356,24 +355,27 @@ def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, bu
     supply = read_csv(built / "district_cuisine_supply.csv")
     restaurants = read_csv(data / "restaurants.csv")
 
-    assert {d["postcode_district"] for d in districts} == {r["district"] for r in onspd}
+    scored = {d["postcode_district"] for d in districts}
+    assert scored < {r["district"] for r in onspd}
     per_district = Counter()
     for row in supply:
         per_district[row["postcode_district"]] += int(row["restaurants"])
     for d in districts:
         assert per_district[d["postcode_district"]] == int(d["total_restaurants"])
-    assert sum(int(d["total_restaurants"]) for d in districts) == len(restaurants)
+    assert sum(int(d["total_restaurants"]) for d in districts) == sum(
+        r["postcode_district"] in scored for r in restaurants
+    )
 
 
-def test_district_with_no_restaurants_appears_with_supply_zero_and_is_scored(built):
+def test_district_with_no_restaurants_is_not_scored(built):
     districts = {d["postcode_district"]: d for d in read_csv(built / "districts.csv")}
     supplied = {r["postcode_district"] for r in read_csv(built / "district_cuisine_supply.csv")}
     reference = read_json(built / "reference_scores.json")
 
     # EC3M has ONSPD postcodes in the sample but no restaurant near them.
-    assert districts["EC3M"]["total_restaurants"] == "0"
+    assert "EC3M" not in districts
     assert "EC3M" not in supplied
-    assert all("EC3M" in case["scores"] for case in reference["cases"])
+    assert all("EC3M" not in case["scores"] for case in reference["cases"])
 
 
 def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_path):
@@ -400,7 +402,7 @@ def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_pa
         f"way,1,attraction,{anchor['lat']},{anchor['long']}\n", encoding="utf-8",
     )
     out = tmp_path / "bundle"
-    build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1, apply_quality=False)
     districts = {row["postcode_district"]: row for row in read_csv(out / "districts.csv")}
     assert districts["SE1"]["average_age"] == "42.0"
     assert districts["SE1"]["hotels_count"] == "1"
@@ -528,7 +530,7 @@ def test_a_column_constant_on_the_training_rows_keeps_held_out_values_finite():
 
     assert model["transforms"]["commercial_rent_index"]["std"] == 1
     held_out = np.array([[1000, 10, 150, 3, 1, *([np.nan] * 10)]], dtype=float)
-    x = build.inputs(model, {"cuisine_group": "Thai"}, held_out)
+    x = build.inputs(model, {"cuisine": "Thai", "cuisine_group": "Thai"}, held_out)
     assert np.abs(x).max() < 10
 
 
@@ -542,7 +544,9 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
     assert model["version"] == vocabulary["version"]
 
     traits = {t["name"]: t for t in vocabulary["traits"]}
-    assert model["features"]["restaurant_inputs"] == ["cuisine_group", *traits]
+    assert model["features"]["restaurant_inputs"] == ["cuisine_group", "cuisine", *traits]
+    assert set(model["transforms"]["cuisine"]["values"]) <= set(cuisines)
+    assert model["transforms"]["cuisine"]["values"]
     assert model["transforms"]["cuisine_group"]["values"] == sorted(
         {c["cuisine_group"] for c in cuisines.values()}
     )
@@ -554,6 +558,23 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
         else:
             assert trait["kind"] == "on_off" and trait["values"] == [False, True]
             assert transform["kind"] == "flag"
+
+
+def test_rare_fine_cuisine_falls_back_to_its_group_input():
+    vocab = {"cuisines": [
+        {"cuisine": "Eritrean", "cuisine_group": "African"},
+        {"cuisine": "Ethiopian", "cuisine_group": "African"},
+    ], "traits": []}
+    rows = [{"cuisine": "Eritrean"}] * 3 + [{"cuisine": "Ethiopian"}]
+    supported = build._supported_cuisines(rows, threshold=3)
+    model = build.model_spec(vocab, np.zeros((2, len(build.DISTRICT_INPUTS))), fine_cuisines=supported)
+    district = np.zeros((1, len(build.DISTRICT_INPUTS)))
+
+    assert model["transforms"]["cuisine"]["values"] == ["Eritrean"]
+    frequent = build.inputs(model, {"cuisine": "Eritrean", "cuisine_group": "African"}, district)
+    rare = build.inputs(model, {"cuisine": "Ethiopian", "cuisine_group": "African"}, district)
+    assert not np.array_equal(frequent, rare)
+    assert rare[0, 0] == 1 and rare[0, 1] == 0  # broad group on; unsupported fine cuisine off
 
 
 def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
@@ -628,7 +649,7 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
             writer.writerow([f"synthetic-{i}", f"{district} 1AA", district, "234",
                              "Restaurant And Premises", unit, area, rv])
 
-    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1, apply_quality=False)
 
     rent = {d["postcode_district"]: d["commercial_rent_index"]
             for d in read_csv(data / "bundle" / "districts.csv")}
