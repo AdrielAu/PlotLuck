@@ -18,8 +18,8 @@ test("six questions lead through a review card to scoped results", async (t) => 
     assert.equal(await page.getByRole("heading", { level: 1 }).innerText(), "Plotluck");
     assert.match(await page.locator(".lede").innerText(), /^Tell us about your restaurant idea and we will help you find the ideal location for your restaurant\.$/);
     assert.match(await page.locator(".model-line").first().innerText(), /on-device model \(≈300 MB\) · Download/);
-    assert.match(await page.locator("footer").innerText(), /Not affiliated with or endorsed by Tripadvisor.*Non-commercial use only/s);
-    assert.equal(await page.getByRole("region", { name: "District results" }).isVisible(), false);
+    assert.match(await page.locator("body > footer").innerText(), /Not affiliated with or endorsed by Tripadvisor.*Non-commercial use only/s);
+    assert.equal(await page.locator("#results-screen").isVisible(), false);
   });
 
   await t.test("a required question shakes and will not move on without a readable answer", async () => {
@@ -81,11 +81,12 @@ test("six questions lead through a review card to scoped results", async (t) => 
     await page.getByLabel("Search area").press("Tab");
     await page.getByLabel("Rent band").selectOption("high");
     await page.getByRole("button", { name: "Compare districts" }).click();
-    await page.getByRole("region", { name: "District results" }).waitFor();
+    await page.locator("#results-screen").waitFor();
   });
 
   await t.test("results show the draft, filter by area and rent band, and go back with answers kept", async () => {
-    assert.match(await page.locator("#confirmed-profile").innerText(), /^Vietnamese.*SE postcode area\. Venue type: Café; Price band: Budget \(\$\);.*Vegan options: Yes;.*Rent band: High\.$/);
+    assert.match(await page.locator("#results-heading").innerText(), /^Vietnamese.* · SE postcode area$/);
+    assert.match(await page.locator("#confirmed-profile").innerText(), /^Venue type: Café; Price band: Budget \(\$\);.*Vegan options: Yes;.*Rent band: High\.$/);
     // Filtering itself is pinned on sample data in tests/js; here, only SE districts, fewer at high rent.
     const shown = async () => Number((await page.locator("#count").innerText()).match(/of (\d+) districts/)[1]);
     const high = await shown();

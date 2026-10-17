@@ -1,5 +1,8 @@
-// The questions screen: restaurant pickers whose confirmed answers open the results screen.
-import { defaultProfile, matchCuisines } from "./pickers.js";
+// Questions, then the results screen for the confirmed draft, which keeps the cuisine-and-trait pickers.
+import { setUpCombobox } from "./combobox.js";
+import { makeInterpreter, RENT_BANDS, RENT_LABELS } from "./interpret.js";
+import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
+import { setUpQuestions } from "./questions.js";
 import { setUpResultsScreen, showScreen } from "./results-screen.js";
 import { loadBundle } from "./scoring.js";
 
@@ -12,9 +15,8 @@ const kitchen = import("./kitchen.js").then((m) => m.startKitchen($("kitchen")))
 });
 
 function showError(error) {
-  showScreen("questions-screen");
+  showQuestions();
   $("loading").hidden = true;
-  $("pick-prompt").hidden = true;
   $("profile-controls").disabled = true;
   $("error-detail").textContent = `${error.message}. Check your connection and try loading again. If this continues, the site's model files may need updating.`;
   $("error").hidden = false;
@@ -93,12 +95,16 @@ function setUpCuisinePicker(cuisines, onPick) {
   return { set: (cuisine) => choose(cuisines.find((c) => c.cuisine === cuisine) ?? null) };
 }
 
-function showScreen(name) {
-  $("questions-screen").hidden = name !== "questions";
-  $("results-screen").hidden = name !== "results";
-  $("kitchen").hidden = name !== "questions";
+// results-screen.js swaps the screens; the kitchen runs only behind the questions.
+function syncKitchen() {
+  $("kitchen").hidden = $("questions-screen").hidden;
   kitchen.then((k) => k?.update());
   window.scrollTo(0, 0);
+}
+
+function showQuestions() {
+  showScreen("questions-screen");
+  syncKitchen();
 }
 
 async function main() {
@@ -111,68 +117,85 @@ async function main() {
   const traitKinds = new Map(bundle.vocabulary.traits.map((t) => [t.name, t.kind]));
   // The results panel's draft: the profile, the rent band, and the read-only search area.
   let draft = defaultProfile(bundle.vocabulary, undefined);
-  let confirmed = null;
+  let rentBand = "any";
+  let area = null;
+  let confirmedQuery = null;
+  let questions = null;
 
   function describeProfile(profile, searchAreaName) {
     const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === profile.cuisine);
     const traits = bundle.vocabulary.traits.map((t) => {
       let value = profile[t.name];
-      if (typeof value === "boolean") value = value ? "Yes" : "No";
-      else value = VALUE_LABELS[value] ?? value;
+      value = typeof value === "boolean" ? (value ? "Yes" : "No") : valueLabel(value);
       return `${traitLabel(t.name)}: ${value}`;
     });
+    if (interpreter.hasRent) traits.push(`Rent band: ${RENT_LABELS[rentBand]}`);
     return { heading: `${cuisine.label} · ${searchAreaName}`, summary: `${traits.join("; ")}.` };
   }
 
   const openResults = setUpResultsScreen(bundle, {
     describeProfile,
     onChangeAnswers: () => {
-      updateDraft();
-      $("cuisine").focus();
+      syncKitchen();
+      questions.open();
     },
   });
 
   function updateDraft() {
-    const pending = !confirmed || Object.keys(draft).some((name) => draft[name] !== confirmed[name]);
-    let message = "Review your choices, then compare districts across England.";
-    if (confirmed) {
+    const pending = !confirmedQuery || rentBand !== confirmedQuery.rentBand ||
+      Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+    const where = area?.label ?? "England";
+    let message = `Review your choices, then compare districts in ${where}.`;
+    if (confirmedQuery) {
       message = pending
-        ? "Your results show your last confirmed answers. Select Compare districts to update them."
-        : "These answers match your results. Select Compare districts to see them again.";
+        ? `Edits are not applied. Results still show your last confirmed restaurant in ${confirmedQuery.area.label}.`
+        : `Results match your confirmed restaurant in ${confirmedQuery.area.label}.`;
     }
     $("profile-status").textContent = message;
     $("profile-error").hidden = true;
     $("cuisine").removeAttribute("aria-invalid");
   }
 
+  // Why the draft cannot be compared, or "" when it can. `scope` is its districts.
+  function problemWith(scope) {
+    if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.cuisine)) return "Choose a cuisine from the list before comparing districts.";
+    if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
+      return "Choose a supported value for every trait before comparing districts.";
+    }
+    if (!area || !RENT_BANDS.includes(rentBand)) return "Choose a search area and rent band before comparing districts.";
+    if (!scope.size) return "No district in this search area falls in this rent band. Change the rent band or the search area.";
+    return "";
+  }
+
+  // Opens results for the draft, or returns why it cannot.
   function confirm() {
-    let message = "";
-    if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.cuisine)) {
-      message = "Choose a cuisine from the list before comparing districts.";
-      $("cuisine").setAttribute("aria-invalid", "true");
-    } else if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
-      message = "Choose a supported value for every trait before comparing districts.";
-    } else if (!area || !RENT_BANDS.includes(rentBand)) {
-      message = "Choose a search area and rent band before comparing districts.";
-    }
-    if (message) {
-      $("profile-error").textContent = message;
-      $("profile-error").hidden = false;
-      if ($("cuisine").getAttribute("aria-invalid") === "true") $("cuisine").focus();
-      return;
-    }
+    // The search area and rent band filter districts; they are not NN1 inputs.
+    const scope = area && RENT_BANDS.includes(rentBand) ? interpreter.districtsInScope(area, rentBand) : new Set();
+    const message = problemWith(scope);
+    if (message) return message;
     try {
-      // shortcut: the pickers only offer England, upgrade when NN2 proposes a search area (#110).
-      if (!openResults({ profile: { ...draft }, searchArea: [] })) return;
-      confirmed = { ...draft };
-      $("pick-prompt").hidden = true;
+      const query = { profile: { ...draft }, area, rentBand };
+      const opened = openResults({ profile: query.profile, searchArea: [...scope], searchAreaName: area.label });
+      syncKitchen();
+      if (!opened) return "";
+      confirmedQuery = query;
       updateDraft();
     } catch (error) {
       showError(error);
     }
+    return "";
   }
 
-  $("compare").addEventListener("click", confirm);
+  $("compare").addEventListener("click", () => {
+    const message = confirm();
+    if (!message) return;
+    $("profile-error").textContent = message;
+    $("profile-error").hidden = false;
+    if (message.startsWith("Choose a cuisine")) {
+      $("cuisine").setAttribute("aria-invalid", "true");
+      $("cuisine").focus();
+    }
+  });
 
   const cuisinePicker = setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
     draft = { ...draft, cuisine };
@@ -191,6 +214,7 @@ async function main() {
   });
 
   // The review card's Compare districts: prefill the results panel, then confirm it.
+  // Returns why the draft cannot be compared, for the review card to show.
   function compareDraft(next) {
     draft = { ...next.profile };
     rentBand = next.rentBand;
@@ -201,18 +225,16 @@ async function main() {
       input.checked = input.type === "checkbox" ? value === true : input.value === value;
     }
     $("area-label").textContent = area.label;
-    showScreen("results");
-    confirm();
+    return confirm();
   }
 
-  const questions = setUpQuestions({
+  questions = setUpQuestions({
     bundle,
     interpreter,
     serveDish: (places) => kitchen.then((k) => k?.serve(places)),
     onCompare: compareDraft,
   });
-  $("change-answers").addEventListener("click", () => { showScreen("questions"); questions.open(); });
-  $("change-area").addEventListener("click", () => { showScreen("questions"); questions.open("location"); });
+  $("change-area").addEventListener("click", () => { showQuestions(); questions.open("location"); });
   $("model-download").addEventListener("click", () => {
     // shortcut: no on-device model yet; #136 connects NN2's explicit download (size, progress, cancel) here.
     $("model-status").textContent = "The on-device model is not available yet, so Plotluck's built-in reader reads your answers.";

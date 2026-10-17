@@ -86,9 +86,6 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 .primary:hover { --fill: var(--focus); }
 #next::after, .primary::after { background: var(--ink); }
 
-#results-screen { padding-top: 8px; }
-.results-title { font-size: 40px; }
-
 /* Wide screens keep the table in view: the column sits left, kitchen.js frames the table right. */
 @media (min-width: 1100px) {
   #questions-screen { align-items: flex-start; }

@@ -284,7 +284,9 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
   $("review-compare").addEventListener("click", () => {
     if (!draft.area) return showAreaError();
     if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.profile.cuisine)) return showReviewError("Choose a cuisine before comparing districts.", $("draft-cuisine"));
-    onCompare(structuredClone(draft));
+    // onCompare returns why the draft cannot be compared, such as a rent band with no district in the area.
+    const problem = onCompare(structuredClone(draft));
+    if (problem) showReviewError(problem, $("draft-rent_band") ?? $("draft-area"));
   });
 
   $("pips").replaceChildren(...questions.map(() => document.createElement("li")));
