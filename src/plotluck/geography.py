@@ -22,6 +22,7 @@ SOURCES = {
     "settlement": ("BUA_2022_GB", "BUA22CD", "BUA22NM", "OBJECTID"),
     "local_authority": ("Local_Authority_Districts_DEC_2025_Boundaries_UK_BGC", "LAD25CD", "LAD25NM", "FID"),
     "region": ("Regions_December_2025_Boundaries_EN_BGC", "RGN25CD", "RGN25NM", "FID"),
+    "metropolitan_county": ("Upper_Tier_Local_Authorities_December_2022_Boundaries_UK_BGC", "UTLA22CD", "UTLA22NM", "FID"),
 }
 ATTRIBUTION = ("Source: Office for National Statistics licensed under the Open Government Licence v.3.0. "
                "Contains OS data © Crown copyright and database right 2026.")
@@ -86,6 +87,10 @@ def prepare_catalogue(sources: dict[str, dict], districts: list[dict[str, Any]])
             code = props[code_key]
             if not code.startswith("E"):
                 continue
+            # Unitary authorities already have their own LAD feature. This source
+            # adds only the six metropolitan counties, including Greater Manchester.
+            if kind == "metropolitan_county" and not code.startswith("E11"):
+                continue
             if code in ids:
                 raise ValueError(f"Duplicate geography ID: {code}")
             ids.add(code)
@@ -111,6 +116,8 @@ def prepare_catalogue(sources: dict[str, dict], districts: list[dict[str, Any]])
             name = props[name_key].strip()
             aliases = []
             place_type = "borough" if code.startswith("E09") else kind
+            if kind == "metropolitan_county":
+                place_type = "county"
             if code == "E12000007":
                 name, aliases = "Greater London", ["London"]
             if code == "E09000001":
@@ -139,7 +146,8 @@ def acquire(cache: Path, offline: bool = False) -> tuple[dict, list[dict]]:
         features = []
         offset = 0
         while True:
-            params = {"where": f"{code} LIKE 'E%'", "outFields": f"{code},{name},LAT,LONG",
+            prefix = "E11" if kind == "metropolitan_county" else "E"
+            params = {"where": f"{code} LIKE '{prefix}%'", "outFields": f"{code},{name},LAT,LONG",
                       "returnGeometry": "true", "outSR": 4326, "f": "geojson",
                       "orderByFields": order, "resultOffset": offset, "resultRecordCount": 100}
             url = BASE + service + "/FeatureServer/0/query?" + urlencode(params)

@@ -35,7 +35,7 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   const candidates = reader.areaCandidates(placeText);
   const direct = reader.readArea(placeText);
   if (direct && placeText && !candidates.some(p=>p.code === direct.code)) candidates.push(direct);
-  let area = location.text === null && placeText ? null : reader.readArea(placeText);
+  let area = !placeText.trim() || location.text === null ? null : reader.readArea(placeText);
   // A missing model location is unsafe when the description explicitly requests one.
   const restriction = /\b(?:in|near|within|around|outside|except|excluding)\s+\S/i.test(description);
   if ((!placeText && restriction) || extraction.unresolvedFields?.includes('area')) area = null;
@@ -48,7 +48,7 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
     return joined.test(description) && namedPlaces.some(other => other !== name && mentions(description.split(/\bor\b|\band\b|[/+]/i)[0], other));
   });
   if (multiplePlaces || /\b(?:except|excluding|outside)\b/i.test(description) || draft.clarifications.some(c => /location|place|area|exclu/i.test(c))) area = null;
-  if (!area) needs.push({ field: 'area', message: 'Choose one intended search area.', options: candidates });
+  if (!area) needs.push({ field: 'area', message: 'Choose one intended search area.', options: candidates.length ? candidates : reader.cityCandidates() });
   let radius = location.near ? (location.distance === null ? 5 : location.distance * (location.unit === 'miles' ? 1.609344 : 1)) : null;
   if (radius !== null && area?.kind !== 'place') {
     area = null;
@@ -56,7 +56,9 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   }
   const band = (/\brent\s*(?:band|budget)?\s*(?:is|of|:)?\s*(low|mid|medium|high|any)\b/i.exec(description)
     ?? /\b(low|mid|medium|high|any)(?:[ -]range)?\s+rent\b/i.exec(description))?.[1]?.toLowerCase();
-  const rentBand = band === 'medium' ? 'mid' : band ?? null;
+  const rentBand = extraction.unresolvedFields?.includes('rent_band') ? null
+    : draft.fields.rent_band.provenance !== 'default' ? draft.fields.rent_band.value
+    : band === 'medium' ? 'mid' : band ?? null;
   if (rentBand === null) needs.push({ field: 'rent', message: 'Which relative rent band should filter districts? A budget in pounds does not determine a band.', options: ['low', 'mid', 'high', 'any'] });
   // Preserve additional model clarifications without asking for every default.
   const messages = draft.clarifications.filter(c => !needs.some(n => n.field === 'cuisine' && /cuisine/i.test(c)));

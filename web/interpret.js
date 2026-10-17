@@ -60,6 +60,23 @@ const ENGLAND = new Set(["anywhere", "everywhere", "england"]);
 const ENGLAND_FILLER = new Set("all of in the whole".split(" "));
 const NOTHING = new Set(["", "none", "nothing", "no", "nope", "n a", "nothing else"]);
 
+// GOV.UK's published England city list (29 August 2022). These are lookup hints,
+// never substitute boundaries: choices retain their checked catalogue IDs/types.
+// https://www.gov.uk/government/publications/list-of-cities/list-of-cities-html
+const CITY_NAMES = new Set([
+  'Bath','Birmingham','Bradford','Brighton and Hove','Bristol','Cambridge','Canterbury',
+  'Carlisle','Chelmsford','Chester','Chichester','Colchester','Coventry','Derby','Doncaster',
+  'Durham','Ely','Exeter','Gloucester','Hereford','Kingston upon Hull','Lancaster','Leeds',
+  'Leicester','Lichfield','Lincoln','Liverpool','London','Manchester','Milton Keynes',
+  'Newcastle upon Tyne','Norwich','Nottingham','Oxford','Peterborough','Plymouth','Portsmouth',
+  'Preston','Ripon','Salford','Salisbury','Sheffield','Southampton','Southend-on-Sea','St Albans',
+  'Stoke on Trent','Sunderland','Truro','Wakefield','Wells','Westminster','Winchester',
+  'Wolverhampton','Worcester','York',
+].map(cityName));
+function cityName(text) {
+  return text.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,' ').trim().replace(/^city of | city of$/g,'');
+}
+
 const norm = (text) => text.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9$]+/g, " ").trim();
 const words = (text) => norm(text).split(" ").filter(Boolean);
 
@@ -94,7 +111,7 @@ export function makeInterpreter(bundle, nn2, catalogue) {
     places = new Map(catalogue.places.map(p => [p.id, p]));
   }
 
-  const placeText = text => text.trim().replace(/^in\s+/i, "");
+  const placeText = text => text.trim().replace(/^in\s+/i, "").replace(/^(?:the\s+)?(?:london\s+borough(?:\s+of)?|borough\s+of)\s+/i,'').replace(/\s+borough$/i,'');
   const placeLabel = p => `${p.name} (${p.type.replaceAll("_", " ")}, ${p.context})`;
   // Offer one-character spelling corrections, including transposed letters, only for review.
   function similarName(left, right) {
@@ -113,8 +130,17 @@ export function makeInterpreter(bundle, nn2, catalogue) {
     if (!catalogue) return [];
     const needle = placeText(text);
     const exact = placeCandidates(needle, catalogue);
-    const matches = exact.length ? exact : catalogue.places.filter(p => [p.name, ...p.aliases].some(name => similarName(needle, name)));
+    const boroughs = catalogue.places.filter(p => p.type === 'borough' && p.name.split(/\s+and\s+/i).some(part=>norm(part)===norm(needle)));
+    const proposed = [...new Map([...exact,...boroughs].map(p=>[p.id,p])).values()];
+    const matches = proposed.length ? proposed : catalogue.places.filter(p => [p.name, ...p.aliases].some(name => similarName(needle, name)));
+    if (/^(?:the\s+)?(?:london\s+borough(?:\s+of)?|borough\s+of)\s+\S|\S\s+borough$/i.test(text)) return matches.filter(p=>p.type==='borough').map(p=>({kind:'place',code:p.id,label:placeLabel(p)}));
     return matches.map(p => ({ kind: "place", code: p.id, label: placeLabel(p) }));
+  }
+
+  function cityCandidates() {
+    return (catalogue?.places ?? []).filter(p=>CITY_NAMES.has(cityName(p.name)) || p.id==='E12000007')
+      .sort((a,b)=>a.name.localeCompare(b.name) || a.type.localeCompare(b.type))
+      .map(p=>({kind:'place',code:p.id,label:placeLabel(p)}));
   }
 
   function readArea(text) {
@@ -280,7 +306,7 @@ export function makeInterpreter(bundle, nn2, catalogue) {
     }).map((d) => d.postcode_district));
   }
 
-  return { interpret, check, readArea, areaCandidates, districtsInScope, setCatalogue, hasRent: Boolean(rentCuts) };
+  return { interpret, check, readArea, areaCandidates, cityCandidates, districtsInScope, setCatalogue, hasRent: Boolean(rentCuts) };
 }
 
 // The highest rent in England's lowest and middle thirds of districts, or null with no rent values.
