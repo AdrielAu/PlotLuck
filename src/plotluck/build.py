@@ -194,7 +194,7 @@ def validate_run_metrics(metrics: dict) -> None:
         if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
             raise ValueError(f"run metrics {name} must be a count")
     reasons = {
-        "excluded": {"rating_missing", "rating_out_of_range", "n_total_zero"},
+        "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
     }
     for name, allowed_reasons in reasons.items():
