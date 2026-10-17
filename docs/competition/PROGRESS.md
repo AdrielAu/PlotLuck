@@ -32,4 +32,4 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 - **Blockers**: none. The [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed: formats ([ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)), sources ([ADR 0003](../adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md)), [cuisine taxonomy](https://github.com/AdrielAu/PlotLuck/issues/53) and [NN1 architecture](https://github.com/AdrielAu/PlotLuck/issues/62) are all decided.
 - **Next**:
   1. Work the [MVP spec](https://github.com/AdrielAu/PlotLuck/issues/64)'s tickets. The tracer bundle (#65) is in `data/sample/`; the site can build against it now.
-  2. Continue [dataset acquisition](https://github.com/AdrielAu/PlotLuck/issues/43) on LinuxONE.
+  2. All five [MVP datasets](https://github.com/AdrielAu/PlotLuck/issues/43) are pulled and extracted on LinuxONE; next is running `python -m plotluck.build` on them there (phase 1 closes when it builds).
