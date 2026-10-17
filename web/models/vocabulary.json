@@ -12,6 +12,11 @@
    "label": "Chinese"
   },
   {
+   "cuisine": "European",
+   "cuisine_group": "European",
+   "label": "European"
+  },
+  {
    "cuisine": "Indian",
    "cuisine_group": "Indian",
    "label": "Indian"
@@ -20,6 +25,11 @@
    "cuisine": "Italian",
    "cuisine_group": "Italian",
    "label": "Italian"
+  },
+  {
+   "cuisine": "Mediterranean",
+   "cuisine_group": "Other",
+   "label": "Mediterranean (scored as Other)"
   },
   {
    "cuisine": "Thai",
@@ -33,8 +43,8 @@
   },
   {
    "cuisine": "Unspecified",
-   "cuisine_group": "Other",
-   "label": "Unspecified (scored as Other)"
+   "cuisine_group": "Unspecified",
+   "label": "Unspecified"
   }
  ],
  "traits": [

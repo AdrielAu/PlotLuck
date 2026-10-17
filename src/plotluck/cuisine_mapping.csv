@@ -1,9 +1,16 @@
 tag,kind,cuisine,parent,venue_type
 British,cuisine,British,European,
 Chinese,cuisine,Chinese,Asian,
+Dim Sum,cuisine,Chinese,Asian,
 Indian,cuisine,Indian,Asian,
 Italian,cuisine,Italian,European,
 Pizza,cuisine,Italian,European,
 Thai,cuisine,Thai,Asian,
 Turkish,cuisine,Turkish,Middle Eastern,
+European,umbrella,European,,
+Mediterranean,umbrella,Mediterranean,,
+Healthy,set_aside,,,
+Bar,venue,,,Pub and bar
 Cafe,venue,,,Café
+Fast Food,venue,,,Fast food and street food
+Pub,venue,,,Pub and bar

@@ -120,6 +120,12 @@ def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
         build.build(tmp_path, tmp_path / "out", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
 
 
+def test_mapping_covers_every_tag_in_the_committed_sample():
+    rows = read_csv(data_dir(choice="sample") / "tripadvisor_england.csv")
+    tags = {t.strip() for r in rows for t in r["cuisines"].split(",") if t.strip()}
+    assert sorted(tags - set(build.load_mapping())) == []
+
+
 def encode(model, profile, group, district, supply):
     """The input vector, built only from model.json and the bundle tables."""
     t = model["transforms"]
