@@ -12,12 +12,17 @@ self.onmessage = async ({ data }) => {
         appConfig: { model_list: [{ model: NN2.model, model_id: NN2.modelId, model_lib: NN2.modelLib, overrides: { context_window_size: 4096 } }] },
         initProgressCallback: progress => self.postMessage({ id, progress }),
       });
+      if (vocabulary) {
+        // Compile the task grammar during cold initialization, before accepting user input.
+        await engine.chat.completions.create({ messages: [{role:'user',content:'Return JSON.'}], temperature: 0, max_tokens: 1,
+          response_format: { type: 'json_object', schema: JSON.stringify(interpretationSchema(vocabulary)) } });
+      }
       self.postMessage({ id, loaded: true });
     } else if (action === 'interpret') {
       if (!engine) throw new Error('Download the interpreter first.');
       const start = performance.now();
       const result = await engine.chat.completions.create({ messages: buildPrompt(description, vocabulary), temperature: 0,
-        max_tokens: 1024, response_format: { type: 'json_object', schema: JSON.stringify(interpretationSchema(vocabulary)) } });
+        max_tokens: 512, response_format: { type: 'json_object', schema: JSON.stringify(interpretationSchema(vocabulary)) } });
       if (result.choices[0].finish_reason === 'length') throw new Error('Interpretation was truncated. Please retry.');
       reply = result.choices[0].message.content;
       const draft = validateInterpretation(reply, description, vocabulary);

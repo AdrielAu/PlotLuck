@@ -27,7 +27,8 @@ def evaluate(root: Path, output: Path, *, split: str = "development", limit: int
 
     benchmark_bytes = (root / "tests/fixtures/nn2-benchmark.json").read_bytes()
     benchmark = json.loads(benchmark_bytes)
-    contract = json.loads((root / "tests/fixtures/nn2-contract.json").read_text(encoding="utf8"))
+    contract_bytes = (root / "tests/fixtures/nn2-contract.json").read_bytes()
+    contract = json.loads(contract_bytes)
     cases = [c for c in benchmark["cases"] if c["split"] == split][:limit]
     if not cases:
         raise ValueError("No benchmark cases selected")
@@ -51,7 +52,7 @@ def evaluate(root: Path, output: Path, *, split: str = "development", limit: int
     report = {"model": MODEL, "revision": REVISION, "execution": "CPU pretrained inference; not training or NNPA acceleration",
               "environment": {"machine": platform.machine(), "byteorder": sys.byteorder, "python": platform.python_version(),
                               "torch": torch.__version__, "transformers": importlib.metadata.version("transformers")},
-              "benchmark_sha256": hashlib.sha256(benchmark_bytes).hexdigest(), "label_status": benchmark["label_status"],
+              "benchmark_sha256": hashlib.sha256(benchmark_bytes).hexdigest(), "contract_sha256": hashlib.sha256(contract_bytes).hexdigest(), "label_status": benchmark["label_status"],
               "cold_load_seconds": cold_seconds, "native_parameter_bytes": sum(p.numel() * p.element_size() for p in model.parameters()),
               "native_weight_file_bytes": Path(cached_file(MODEL, "model.safetensors", revision=REVISION)).stat().st_size,
               "quality_gate": "NOT EVALUATED: validate replies and score frozen expected labels separately", "results": results}

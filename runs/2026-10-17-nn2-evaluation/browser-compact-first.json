@@ -1,0 +1,141 @@
+{
+  "hardware": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+    "adapter": {
+      "vendor": "intel",
+      "architecture": "gen-12lp",
+      "device": "",
+      "description": ""
+    }
+  },
+  "cold_load_seconds": 17.156899999991058,
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "results": [
+    {
+      "id": "clear-001",
+      "description": "A Thai restaurant within 3 km of London with vegan options.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"vegan_options\":{\"value\":true,\"provenance\":\"explicit\",\"evidence\":\"vegan options\"}},\"location\":{\"text\":\"London\",\"near\":false,\"distance\":3000,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[\"Venue type is not specified.\"]}",
+      "error": "Invalid location distance.",
+      "seconds": 21.60569999998808
+    },
+    {
+      "id": "clear-002",
+      "description": "A Thai restaurant in Camden.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"vegan_options\":{\"value\":true,\"provenance\":\"explicit\",\"evidence\":\"vegan options\"}},\"location\":{\"text\":\"Camden\",\"near\":true,\"distance\":null,\"unit\":null},\"unused\":[],\"clarifications\":[\"Venue type is not specified.\"]}",
+      "error": "Evidence must occur in the description.",
+      "seconds": 8.46170000000298
+    },
+    {
+      "id": "clear-003",
+      "description": "A Thai restaurant in Manchester.",
+      "reply": "{\"fields\":{\"cuisine\":{\"value\":\"Thai\",\"provenance\":\"explicit\",\"evidence\":\"Thai\"},\"venue_type\":{\"value\":\"Restaurant\",\"provenance\":\"explicit\",\"evidence\":\"restaurant\"},\"vegan_options\":{\"value\":true,\"provenance\":\"explicit\",\"evidence\":\"vegan options\"}},\"location\":{\"text\":\"Manchester\",\"near\":false,\"distance\":12.34,\"unit\":\"km\"},\"unused\":[],\"clarifications\":[]}",
+      "error": "Evidence must occur in the description.",
+      "seconds": 8.0735
+    }
+  ],
+  "transfers": [
+    {
+      "url": "https://esm.run/@mlc-ai/web-llm@0.2.86",
+      "body_bytes": 90
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.86/+esm",
+      "body_bytes": 1851632
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/mlc-chat-config.json",
+      "body_bytes": 338
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/mlc-chat-config.json",
+      "body_bytes": 1686
+    },
+    {
+      "url": "https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0/web-llm-models/v0_2_86/base/Qwen2-0.5B-Instruct-q4f16_1_cs1k-webgpu.wasm",
+      "body_bytes": 5556051
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tokenizer.json",
+      "body_bytes": 326
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tokenizer.json",
+      "body_bytes": 2069070
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tensor-cache.json",
+      "body_bytes": 332
+    },
+    {
+      "url": "https://huggingface.co/api/resolve-cache/models/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/tensor-cache.json",
+      "body_bytes": 3875
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_0.bin",
+      "body_bytes": 1159
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_2.bin",
+      "body_bytes": 1157
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_4.bin",
+      "body_bytes": 1157
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_6.bin",
+      "body_bytes": 1157
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/5eb1735022a6fe453b7938a7a6089a9609540335f50c16ab7afb7daf38ab191e",
+      "body_bytes": 33039679
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/b61c01cb6f5236fe942666ef8d5614d09e4203bbac88b46b418ecea95319d5c2",
+      "body_bytes": 33524300
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/8ce36d635b3ff4296b03dd78665f337e4c52fe3ca599996cf001c2c121b6a847",
+      "body_bytes": 33316311
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_3.bin",
+      "body_bytes": 1157
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_7.bin",
+      "body_bytes": 1159
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_5.bin",
+      "body_bytes": 1161
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/63ec929bcbcf31798e63a3ceb1173bbe90d840ef5ff185e30b25a8d5de6dfff4",
+      "body_bytes": 14614440
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/68d32f9562a2535636b4751bf921abb38c077c0a81d2f32a8821d1c5688745a4",
+      "body_bytes": 68105374
+    },
+    {
+      "url": "https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC/resolve/32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad/params_shard_1.bin",
+      "body_bytes": 1159
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/ed05da83010e17613707ee457b0a7b61bcdae0547e2c1f30968cd0f934514978",
+      "body_bytes": 29228643
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/1527f55874a63dd7115659cef065a32b850e75fff1cf82054c0e4692dbebd610",
+      "body_bytes": 33072518
+    },
+    {
+      "url": "https://us.aws.cdn.hf.co/xet-bridge-us/66eb2611aed2e0ec969badbb/5a3d97ca8f5cc89422599816a258bacbd794318d43d29a3682b00172ef125901",
+      "body_bytes": 33253259
+    }
+  ],
+  "total_transfer_body_bytes": 287647190,
+  "model_transfer_body_bytes": 285795468,
+  "experiment": "First compact-prompt development experiment (two examples; before example-leakage correction). Experimental prompt was not committed separately; use the pinned baseline and final compact report for reproducibility."
+}
