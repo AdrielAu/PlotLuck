@@ -1,6 +1,7 @@
 """Ranking audit on the committed synthetic sample bundle."""
 
 import json
+from pathlib import Path
 
 from plotluck.data import data_dir
 from plotluck.ranking_audit import audit
@@ -17,3 +18,16 @@ def test_audit_detects_when_grouped_cuisines_have_identical_rankings():
     if "cuisine" not in model["features"]["restaurant_inputs"]:
         assert result["distinct_cuisine_score_vectors"] == result["cuisine_groups"]
         assert result["median_within_group_score_change"] == 0
+
+
+def test_audit_compares_rank_stability_on_shared_districts():
+    sample = data_dir(choice="sample")
+    published = Path(__file__).resolve().parents[1] / "web" / "models"
+
+    same = audit(sample, comparison=sample)["comparison"]
+    changed = audit(sample, comparison=published)["comparison"]
+
+    assert same["median_rank_correlation"] == 1
+    assert same["median_top20_overlap"] == same["shared_districts"]
+    assert changed["shared_districts"] > 1
+    assert changed["median_rank_correlation"] < 1

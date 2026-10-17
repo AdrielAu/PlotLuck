@@ -1,0 +1,1 @@
+{"version":3,"tolerance":1e-6,"cases":[{"profile":{"cuisine":"Eritrean"},"scores":{"AB1":0.740774899182154,"AB2":0.7502601055951177}},{"profile":{"cuisine":"Ethiopian"},"scores":{"AB1":0.5,"AB2":0.5}},{"profile":{"cuisine":"Somali"},"scores":{"AB1":0.5124973964842103,"AB2":0.5249791874789399}}]}

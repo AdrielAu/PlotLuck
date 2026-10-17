@@ -4,6 +4,7 @@ import json
 import shutil
 import statistics
 from collections import Counter
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -343,6 +344,8 @@ def test_label_policy_stays_private_and_out_of_the_bundle(data, built):
     policy = read_json(data / "label_policy.json")
 
     assert set(policy) >= {"R0", "D0", "n_ref"}
+    # Numeric policy values can occur inside legitimate scores; the bundle schema
+    # tests above reject private fields structurally instead of matching substrings.
     for path in built.iterdir():
         text = path.read_text(encoding="utf-8")
         for name in ("R0", "D0", "n_ref"):
@@ -588,21 +591,25 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
             assert transform["kind"] == "flag"
 
 
-def test_rare_fine_cuisine_falls_back_to_its_group_input():
+def test_supported_fine_cuisines_share_a_group_but_rare_cuisine_falls_back():
     vocab = {"cuisines": [
         {"cuisine": "Eritrean", "cuisine_group": "African"},
         {"cuisine": "Ethiopian", "cuisine_group": "African"},
+        {"cuisine": "Somali", "cuisine_group": "African"},
     ], "traits": []}
-    rows = [{"cuisine": "Eritrean"}] * 3 + [{"cuisine": "Ethiopian"}]
+    rows = [{"cuisine": "Eritrean"}] * 3 + [{"cuisine": "Ethiopian"}] * 3 + [{"cuisine": "Somali"}]
     supported = build._supported_cuisines(rows, threshold=3)
     model = build.model_spec(vocab, np.zeros((2, len(build.DISTRICT_INPUTS))), fine_cuisines=supported)
     district = np.zeros((1, len(build.DISTRICT_INPUTS)))
 
-    assert model["transforms"]["cuisine"]["values"] == ["Eritrean"]
-    frequent = build.inputs(model, {"cuisine": "Eritrean", "cuisine_group": "African"}, district)
-    rare = build.inputs(model, {"cuisine": "Ethiopian", "cuisine_group": "African"}, district)
-    assert not np.array_equal(frequent, rare)
-    assert rare[0, 0] == 1 and rare[0, 1] == 0  # broad group on; unsupported fine cuisine off
+    assert model["transforms"]["cuisine"]["values"] == ["Eritrean", "Ethiopian"]
+    eritrean = build.inputs(model, {"cuisine": "Eritrean", "cuisine_group": "African"}, district)
+    ethiopian = build.inputs(model, {"cuisine": "Ethiopian", "cuisine_group": "African"}, district)
+    rare = build.inputs(model, {"cuisine": "Somali", "cuisine_group": "African"}, district)
+    assert not np.array_equal(eritrean, ethiopian)
+    assert eritrean[0, :3].tolist() == [1, 1, 0]
+    assert ethiopian[0, :3].tolist() == [1, 0, 1]
+    assert rare[0, :3].tolist() == [1, 0, 0]
 
 
 def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
@@ -810,6 +817,26 @@ def test_numpy_forward_pass_reproduces_reference_scores(built):
                 x = np.maximum(x, 0) if activation == "relu" else 1 / (1 + np.exp(-x))
             expected = case["scores"][district["postcode_district"]]
             assert abs(x[0] - expected) <= reference["tolerance"]
+
+
+def test_small_version_3_fixture_matches_python_for_supported_and_fallback_cuisines():
+    fixture = Path(__file__).parent / "fixtures" / "nn1-v3"
+    model = read_json(fixture / "model.json")
+    vocab = read_json(fixture / "vocabulary.json")
+    reference = read_json(fixture / "reference_scores.json")
+    districts = [{**row, "total_restaurants": int(row["total_restaurants"])} for row in read_csv(fixture / "districts.csv")]
+    supply = Counter({
+        (row["postcode_district"], row["cuisine_group"]): int(row["restaurants"])
+        for row in read_csv(fixture / "district_cuisine_supply.csv")
+    })
+
+    assert model["version"] == build.BUNDLE_VERSION
+    assert model["transforms"]["cuisine"]["values"] == ["Eritrean", "Ethiopian"]
+    assert [case["profile"]["cuisine"] for case in reference["cases"]] == ["Eritrean", "Ethiopian", "Somali"]
+    for case in reference["cases"]:
+        scores = build.score_districts(model, vocab, districts, supply, case["profile"])
+        assert set(scores) == set(case["scores"])
+        assert all(abs(scores[code] - value) <= reference["tolerance"] for code, value in case["scores"].items())
 
 
 @pytest.mark.parametrize(

@@ -22,6 +22,7 @@ function tinyBundle({
   supplyCount = "2",
   version = BUNDLE_VERSION,
   includeFineCuisine = false,
+  secondAfricanCuisine = false,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
 }) {
@@ -33,6 +34,7 @@ function tinyBundle({
       version,
       cuisines: [
         { cuisine: "Eritrean", cuisine_group: "African", label: "Eritrean (scored as African)" },
+        ...(secondAfricanCuisine ? [{ cuisine: "Ethiopian", cuisine_group: "African", label: "Ethiopian (scored as African)" }] : []),
         { cuisine: "Thai", cuisine_group: "Thai", label: "Thai" },
       ],
       traits: [],
@@ -42,7 +44,7 @@ function tinyBundle({
       features: { restaurant_inputs: includeFineCuisine ? ["cuisine_group", "cuisine"] : ["cuisine_group"], district_inputs: districtInputs },
       transforms: {
         cuisine_group: { kind: "one_hot", values: ["African", "Thai"] },
-        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", "Thai"] } } : {}),
+        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", ...(secondAfricanCuisine ? ["Ethiopian"] : []), "Thai"] } } : {}),
         ...Object.fromEntries(districtInputs.map((name) => [name, numeric])),
         population: { ...numeric, median: 7 },
       },
@@ -63,8 +65,22 @@ test("the current site also loads the published version 2 bundle", async () => {
 });
 
 test("fine cuisine changes the input even when its group is unchanged", async () => {
-  const bundle = await tinyBundle({ weights: [0, 0, 1, 0, 0, 0], includeFineCuisine: true });
-  assert.ok(logit(bundle, "Eritrean") > logit(bundle, "Thai"));
+  const bundle = await tinyBundle({
+    weights: [0, 0, 1, -1, 0, 0, 0], includeFineCuisine: true, secondAfricanCuisine: true,
+  });
+  assert.ok(logit(bundle, "Eritrean") > logit(bundle, "Ethiopian"));
+});
+
+test("version 3 scores match Python references for supported and fallback cuisines", async () => {
+  const bundle = await loadBundle(readFrom("tests/fixtures/nn1-v3"));
+  const reference = JSON.parse(await readFile(new URL("tests/fixtures/nn1-v3/reference_scores.json", ROOT), "utf8"));
+  assert.deepEqual(bundle.model.transforms.cuisine.values, ["Eritrean", "Ethiopian"]);
+  assert.deepEqual(reference.cases.map(({ profile }) => profile.cuisine), ["Eritrean", "Ethiopian", "Somali"]);
+  for (const { profile, scores } of reference.cases) {
+    for (const row of scoreDistricts(bundle, profile)) {
+      assert.ok(Math.abs(row.score - scores[row.postcode_district]) <= reference.tolerance);
+    }
+  }
 });
 
 test("invalid coordinates and supply counts are rejected while loading", async () => {

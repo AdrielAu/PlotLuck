@@ -34,8 +34,12 @@ new input path and export; its ranking metrics cannot establish real-world
 quality.
 
 The LinuxONE operator should retrain from the full private rows, then run
-`python -m plotluck.ranking_audit <new-bundle-dir>` and compare the result with
-the published baseline above. Check held-out error, rank changes across
+`python -m plotluck.ranking_audit <new-bundle-dir> --comparison web/models`
+and compare the result with the published baseline above. The comparison
+reports median rank correlation and top-20 overlap on districts and cuisines
+shared by both bundles. Repeat it between independently seeded candidate
+exports to check rank stability; agreement with the old bundle alone is not
+evidence of quality. Check held-out error, rank changes across
 cuisines and traits, and the top districts for representative urban, rural,
 commercial-core and low-population cases. Omit a district from the map and
 ranked list where its inputs remain unreliable or rank stability is inadequate.
@@ -60,7 +64,10 @@ The current conservative rule needs at least three peers within 30 km with
 similar mapped restaurant supply and map radius. A clearly anomalous low rent
 index can be estimated, while valid high rent values stay recorded and are
 passed to the model normally. Rent donors flagged as anomalously low are not
-used for rent estimation. The low-rent check compares nearby peers; where too
+used for rent estimation. A recorded scalar value less than one tenth or more
+than ten times the median of comparable donors is also left out of an estimate;
+its own recorded value remains available for audit. The low-rent check compares
+nearby peers; where too
 few peers exist, it flags only values below one tenth of the national median
 positive rent index. Districts with
 no mapped restaurants, more than two missing context groups, or no suitable

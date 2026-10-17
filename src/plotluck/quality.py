@@ -13,6 +13,10 @@ import statistics
 import zipfile
 from collections import Counter
 from pathlib import Path
+from typing import cast
+
+from plotluck import context
+from plotluck.geometry import haversine_km
 
 ETHNICITY = (
     "ethnicity_asian_share", "ethnicity_black_share", "ethnicity_mixed_share",
@@ -25,7 +29,6 @@ GROUPS = (
 )
 MIN_PEERS = 3
 MAX_DISTANCE_KM = 30
-EARTH_RADIUS_KM = 6371.0088
 
 
 def cross_border_districts(archive_path: Path) -> set[str]:
@@ -78,12 +81,18 @@ def _peers(target: dict, rows: list[dict]) -> list[dict]:
         supply_ratio = (int(row["total_restaurants"]) + 1) / supply
         if not 1 / 3 <= other_radius / radius <= 3 or not 1 / 4 <= supply_ratio <= 4:
             continue
-        dy = math.radians(float(row["centroid_lat"]) - lat)
-        dx = math.radians(float(row["centroid_lon"]) - lon) * math.cos(math.radians(lat))
-        distance = EARTH_RADIUS_KM * math.hypot(dx, dy)
-        if distance <= MAX_DISTANCE_KM:
-            candidates.append((distance, row["postcode_district"], row))
-    return [row for _, _, row in sorted(candidates)]
+        candidates.append(row)
+    if not candidates:
+        return []
+    distances = haversine_km(
+        [(lat, lon)] * len(candidates),
+        [(row["centroid_lat"], row["centroid_lon"]) for row in candidates],
+    )
+    nearby = [
+        (float(distance), row["postcode_district"], row)
+        for distance, row in zip(distances, candidates) if distance <= MAX_DISTANCE_KM
+    ]
+    return [row for _, _, row in sorted(nearby)]
 
 
 def _valid_group(group: tuple[str, ...], values: list[float | None]) -> bool:
@@ -93,14 +102,22 @@ def _valid_group(group: tuple[str, ...], values: list[float | None]) -> bool:
     if group in (("population",), ("commercial_rent_index",), ("average_age",)):
         return numbers[0] > 0
     if group in (ETHNICITY, SEX):
-        return all(0 <= value <= 1 for value in numbers) and abs(sum(numbers) - 1) <= .02
+        return all(0 <= value <= 1 for value in numbers) and math.isclose(sum(numbers), 1, abs_tol=1e-6)
     return numbers[0] >= 0
 
 
 def _estimate(group: tuple[str, ...], peers: list[dict], suspect_rents: set[str]) -> list[float] | None:
     if group == ("commercial_rent_index",):
         peers = [row for row in peers if row["postcode_district"] not in suspect_rents]
-    donors = [values for row in peers if _valid_group(group, values := [_number(row[name]) for name in group])][:8]
+    donors = [
+        cast(list[float], values) for row in peers
+        if _valid_group(group, values := [_number(row[name]) for name in group])
+    ]
+    if len(group) == 1 and len(donors) >= MIN_PEERS:
+        centre = statistics.median(values[0] for values in donors)
+        if centre > 0:
+            donors = [values for values in donors if centre / 10 <= values[0] <= centre * 10]
+    donors = donors[:8]
     if len(donors) < MIN_PEERS:
         return None
     estimate = [statistics.median(column) for column in zip(*donors)]
@@ -160,6 +177,10 @@ def prepare_districts(districts: list[dict]) -> tuple[list[dict], set[str], Coun
                 break
             for name, value in zip(group, values):
                 row[name] = round(value) if name == "population" else round(value, 8)
+            if group == ETHNICITY and "most_common_ethnicity" in row:
+                row["most_common_ethnicity"] = context.summary(row, ETHNICITY, context.ETHNICITY)
+            if group == SEX and "most_common_sex" in row:
+                row["most_common_sex"] = context.summary(row, SEX, context.SEX)
         else:
             prepared.append(row)
             if not needs:

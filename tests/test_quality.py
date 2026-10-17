@@ -59,14 +59,18 @@ def test_invalid_demographic_shares_are_estimated_and_never_used_as_donors():
     donors = [district(f"A{i}", i * .01) for i in range(1, 4)]
     invalid = district("B1", .04)
     invalid["sex_female_share"] = 1.5
+    invalid["most_common_sex"] = "female"
     missing = district("M1", .05)
     missing["sex_female_share"] = ""
+    missing["most_common_sex"] = "unknown"
 
     prepared, reliable, excluded = prepare_districts([*donors, invalid, missing])
     by_code = {row["postcode_district"]: row for row in prepared}
 
     assert by_code["B1"]["sex_female_share"] == .5
     assert by_code["M1"]["sex_female_share"] == .5
+    assert by_code["B1"]["most_common_sex"] == "tie"
+    assert by_code["M1"]["most_common_sex"] == "tie"
     assert {"B1", "M1"}.isdisjoint(reliable)
     assert not excluded
 
@@ -81,6 +85,19 @@ def test_estimation_checks_valid_peers_beyond_the_nearest_eight():
 
     assert by_code["M1"]["commercial_rent_index"] == 100
     assert "M1" not in reliable
+
+
+def test_extreme_recorded_peer_does_not_determine_an_estimate():
+    donors = [district(f"A{i}", i * .01, population=10000 + i * 1000) for i in range(1, 4)]
+    extreme = district("X1", .005, population=1_000_000_000)
+    target = district("M1", 0, population="")
+
+    prepared, _, excluded = prepare_districts([target, extreme, *donors])
+    by_code = {row["postcode_district"]: row for row in prepared}
+
+    assert by_code["M1"]["population"] == 12000
+    assert by_code["X1"]["population"] == 1_000_000_000
+    assert not excluded
 
 
 def test_commercial_core_with_tiny_resident_population_needs_visitor_evidence():

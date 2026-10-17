@@ -16,8 +16,7 @@ import numpy as np
 from plotluck.build import score_districts
 
 
-def audit(bundle: Path) -> dict:
-    """Summarise score spread and distinct cuisine rankings in a public bundle."""
+def _bundle_inputs(bundle: Path) -> tuple[dict, dict, list[dict], Counter]:
     bundle = Path(bundle)
     model = json.loads((bundle / "model.json").read_text(encoding="utf-8"))
     vocabulary = json.loads((bundle / "vocabulary.json").read_text(encoding="utf-8"))
@@ -28,6 +27,50 @@ def audit(bundle: Path) -> dict:
             (row["postcode_district"], row["cuisine_group"]): int(row["restaurants"])
             for row in csv.DictReader(file)
         })
+    return model, vocabulary, districts, supply
+
+
+def _rank_comparison(candidate: tuple, comparison: tuple) -> dict:
+    model, vocabulary, districts, supply = candidate
+    other_model, other_vocabulary, other_districts, other_supply = comparison
+    shared_codes = {row["postcode_district"] for row in districts} & {
+        row["postcode_district"] for row in other_districts
+    }
+    shared_cuisines = sorted({row["cuisine"] for row in vocabulary["cuisines"]} & {
+        row["cuisine"] for row in other_vocabulary["cuisines"]
+    })
+    if not shared_codes or not shared_cuisines:
+        raise ValueError("ranking comparison needs shared districts and cuisines")
+    defaults = {trait["name"]: trait["default"] for trait in vocabulary["traits"]}
+    other_defaults = {trait["name"]: trait["default"] for trait in other_vocabulary["traits"]}
+    correlations, overlaps = [], []
+    size = len(shared_codes)
+    top_size = min(20, size)
+    for cuisine in shared_cuisines:
+        scores = score_districts(model, vocabulary, districts, supply, {"cuisine": cuisine, **defaults})
+        other_scores = score_districts(
+            other_model, other_vocabulary, other_districts, other_supply,
+            {"cuisine": cuisine, **other_defaults},
+        )
+        ranked = sorted(shared_codes, key=lambda code: (-scores[code], code))
+        other_ranked = sorted(shared_codes, key=lambda code: (-other_scores[code], code))
+        positions = {code: i for i, code in enumerate(ranked)}
+        other_positions = {code: i for i, code in enumerate(other_ranked)}
+        squared_difference = sum((positions[code] - other_positions[code]) ** 2 for code in shared_codes)
+        correlations.append(1 - 6 * squared_difference / (size * (size**2 - 1)) if size > 1 else 1)
+        overlaps.append(len(set(ranked[:top_size]) & set(other_ranked[:top_size])))
+    return {
+        "shared_districts": size,
+        "shared_cuisines": len(shared_cuisines),
+        "median_rank_correlation": statistics.median(correlations),
+        "median_top20_overlap": statistics.median(overlaps),
+    }
+
+
+def audit(bundle: Path, *, comparison: Path | None = None) -> dict:
+    """Summarise score spread and distinct cuisine rankings in a public bundle."""
+    candidate = _bundle_inputs(bundle)
+    model, vocabulary, districts, supply = candidate
     defaults = {trait["name"]: trait["default"] for trait in vocabulary["traits"]}
     profiles = {}
     groups = {}
@@ -39,7 +82,7 @@ def audit(bundle: Path) -> dict:
         # Exact equality reveals profiles that reach the model as identical inputs.
         profiles[cuisine["cuisine"]] = tuple(scores.values())
         groups[cuisine["cuisine"]] = cuisine["cuisine_group"]
-    group_members = {}
+    group_members: dict[str, list[str]] = {}
     for cuisine, group in groups.items():
         group_members.setdefault(group, []).append(cuisine)
     differences, overlaps = [], []
@@ -65,7 +108,7 @@ def audit(bundle: Path) -> dict:
         })
         values = np.array([changed[d["postcode_district"]] for d in districts])
         trait_changes[trait["name"]] = float(np.median(np.abs(values - baseline)))
-    return {
+    result = {
         "districts": len(districts),
         "cuisines": len(profiles),
         "cuisine_groups": len({row["cuisine_group"] for row in vocabulary["cuisines"]}),
@@ -78,13 +121,17 @@ def audit(bundle: Path) -> dict:
         "min_district_p10_p90_spread": min(spreads),
         "max_district_p10_p90_spread": max(spreads),
     }
+    if comparison is not None:
+        result["comparison"] = _rank_comparison(candidate, _bundle_inputs(comparison))
+    return result
 
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path, help="folder containing the public model bundle")
+    parser.add_argument("--comparison", type=Path, help="second bundle for rank stability over shared districts")
     args = parser.parse_args(argv)
-    print(json.dumps(audit(args.bundle), indent=2))
+    print(json.dumps(audit(args.bundle, comparison=args.comparison), indent=2))
 
 
 if __name__ == "__main__":
