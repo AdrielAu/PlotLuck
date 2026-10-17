@@ -10,6 +10,10 @@ Hard limits, fixed by the brief:
 
 Read [`docs/competition/PROJECT.md`](docs/competition/PROJECT.md) before planning any feature, model or data work: it holds the current plan, open questions and platform facts. Everything in it is a starting point, not a commitment.
 
+## Writing code
+
+Before writing or changing code (including notebooks), read [`docs/agents/coding-guidelines.md`](docs/agents/coding-guidelines.md) and follow it.
+
 ## Repo map
 
 - `docs/competition/`: handover (`PROJECT.md`) and the initial design doc.
@@ -21,6 +25,7 @@ Read [`docs/competition/PROJECT.md`](docs/competition/PROJECT.md) before plannin
 1. GitHub issue → branch off `main` → test locally on a **data sample** → PR → merge.
 2. One **server operator** at a time pulls `main` and runs on the full data on LinuxONE.
 3. Code that passes locally but fails on the server gets a `linux-only` issue; the operator fixes it on a `fix/linux-*` branch → PR.
+4. Never run `git push --force`, `git reset --hard`, `git clean -x`, `git checkout -- .` or `git stash drop`, and never push to `main`. If one seems needed, stop and ask.
 
 ## Cross-platform rules
 
