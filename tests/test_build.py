@@ -31,6 +31,40 @@ def copy_sources(dest):
     return dest
 
 
+@pytest.mark.parametrize("filled, ships", [(98, False), (100, True)])
+def test_trait_fill_rule_controls_vocabulary_and_model(tmp_path, capsys, filled, ships):
+    copy_sources(tmp_path)
+    source = tmp_path / "tripadvisor_england.csv"
+    rows = read_csv(source)
+    for i, row in enumerate(rows):
+        row["vegan_options"] = "N" if i < filled else ""
+        row["price_level"] = ""
+    with source.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+    out = tmp_path / "bundle"
+    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    vocab = read_json(out / "vocabulary.json")
+    model = read_json(out / "model.json")
+    traits = {t["name"]: t for t in vocab["traits"]}
+
+    assert ("vegan_options" in traits) is ships
+    assert ("vegan_options" in model["features"]["restaurant_inputs"]) is ships
+    assert ("vegan_options" in model["transforms"]) is ships
+    assert "price_band" not in traits
+    assert "price_band" not in model["features"]["restaurant_inputs"]
+    assert "price_band" not in model["transforms"]
+    assert traits["venue_type"]["default"] == "Restaurant"
+    for case in read_json(out / "reference_scores.json")["cases"]:
+        assert set(case["profile"]) == {"cuisine", *traits}
+    output = capsys.readouterr().out
+    assert f"vegan_options: {filled / 200:.1%}" in output
+    for name in ("chain", "price_band", "vegetarian_friendly", "gluten_free"):
+        assert f"{name}: " in output
+
+
 @pytest.fixture(scope="module")
 def data(tmp_path_factory):
     data = copy_sources(tmp_path_factory.mktemp("data"))
@@ -337,6 +371,34 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
             assert transform["kind"] == "flag"
 
 
+def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
+    copy_sources(tmp_path)
+    source = tmp_path / "tripadvisor_england.csv"
+    rows = read_csv(source)
+    for i, row in enumerate(rows):
+        row["restaurant_name"] = "Three branches" if i < 3 else "Two branches" if i < 5 else f"Independent {i}"
+    rows[0].update(price_level="", vegetarian_friendly="Y", vegan_options="N", gluten_free="")
+    with source.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+    out = tmp_path / "bundle"
+    build.build(tmp_path, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
+    restaurants = read_csv(tmp_path / "restaurants.csv")
+    assert [r["is_chain"] for r in restaurants[:6]] == ["1", "1", "1", "0", "0", "0"]
+    assert restaurants[0]["price_band"] == ""
+    assert restaurants[0]["vegetarian_friendly"] == "1"
+    assert restaurants[0]["vegan_options"] == "0"
+    assert restaurants[0]["gluten_free"] == ""
+    model = read_json(out / "model.json")
+    assert model["transforms"]["price_band"] == {"kind": "one_hot", "values": ["$", "$$", "$$$", "unknown"]}
+    traits = {t["name"]: t for t in read_json(out / "vocabulary.json")["traits"]}
+    assert traits["price_band"]["default"] == "unknown"
+    assert all(traits[name]["default"] is False for name in ("chain", *build.DIET_FLAGS))
+    assert read_json(out / "reference_scores.json")["cases"][0]["profile"]["price_band"] == "unknown"
+    for name in build.BUNDLE_FILES:
+        assert "Three branches" not in (out / name).read_text(encoding="utf-8")
 def test_model_declares_log1p_mean_std_and_median_for_each_district_input(built):
     model = read_json(built / "model.json")
 

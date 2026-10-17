@@ -143,7 +143,7 @@ def build(
         {"postcode_district": d, "cuisine_group": g, "restaurants": n}
         for (d, g), n in sorted(supply.items())
     ]
-    vocab = vocabulary(groups)
+    vocab = vocabulary(groups, restaurants)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
     district_raw = training_district_inputs(labelled, districts, supply)
     cv = cross_validate(
@@ -403,28 +403,38 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     _write_json(out / "reference_scores.json", reference)
 
 
-def vocabulary(groups: dict[str, str]) -> dict:
-    """Cuisines with their group and display label, and the shipped traits."""
+def vocabulary(groups: dict[str, str], restaurants: list[dict]) -> dict:
+    """Cuisines and traits filled on at least half the prepared England rows.
+
+    Venue type always ships. Rates include label-ineligible rows; diagnostics
+    are printed only, so they stay on the server for full-data builds.
+    """
+    filled = {
+        name: sum(r[column] != "" for r in restaurants) / len(restaurants) if restaurants else 0.0
+        for name, column in [("price_band", "price_band"), ("chain", "is_chain"), *((f, f) for f in DIET_FLAGS)]
+    }
+    for name, rate in filled.items():
+        print(f"Trait fill rate {name}: {rate:.1%}")
+    traits: list[dict] = [
+        {"name": "venue_type", "kind": "single_choice", "values": list(VENUE_TYPES), "default": DEFAULT_VENUE},
+        {
+            "name": "price_band",
+            "kind": "single_choice",
+            "values": [*PRICE_BANDS.values(), UNKNOWN_PRICE],
+            "default": UNKNOWN_PRICE,
+        },
+        *(
+            {"name": f, "kind": "on_off", "values": [False, True], "default": False}
+            for f in ("chain", *DIET_FLAGS)
+        ),
+    ]
     return {
         "version": BUNDLE_VERSION,
         "cuisines": [
             {"cuisine": c, "cuisine_group": g, "label": c if c == g else f"{c} (scored as {g})"}
             for c, g in sorted(groups.items())
         ],
-        # shortcut: every trait ships; issue #70 adds the 50% fill-rate rule.
-        "traits": [
-            {"name": "venue_type", "kind": "single_choice", "values": list(VENUE_TYPES), "default": DEFAULT_VENUE},
-            {
-                "name": "price_band",
-                "kind": "single_choice",
-                "values": [*PRICE_BANDS.values(), UNKNOWN_PRICE],
-                "default": UNKNOWN_PRICE,
-            },
-            *(
-                {"name": f, "kind": "on_off", "values": [False, True], "default": False}
-                for f in ("chain", *DIET_FLAGS)
-            ),
-        ],
+        "traits": [t for t in traits if t["name"] == "venue_type" or filled[t["name"]] >= 0.5],
     }
 
 
@@ -553,7 +563,7 @@ def _restaurant_values(r: dict) -> dict:
         "venue_type": r["venue_type"],
         "price_band": r["price_band"] or UNKNOWN_PRICE,
         "chain": r["is_chain"],
-        # shortcut: a missing diet flag counts as 0; revisit with issue #70.
+        # Missing diet flags use the profile default (off).
         **{f: r[f] == 1 for f in DIET_FLAGS},
     }
 
