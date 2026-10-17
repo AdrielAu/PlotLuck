@@ -132,16 +132,7 @@ def build(
     ]
     vocab = vocabulary(groups)
     labelled = [r for r in restaurants if r["review_success_label"] != ""]
-    by_code = {d["postcode_district"]: d for d in districts}
-    district_raw = np.array([
-        # In training a row's own restaurant is not part of its district's supply.
-        _district_raw(
-            by_code[r["postcode_district"]],
-            supply[(r["postcode_district"], r["cuisine_group"])] - 1,
-            exclude_from_total=1,
-        )
-        for r in labelled
-    ])
+    district_raw = training_district_inputs(labelled, districts, supply)
     model = model_spec(vocab, district_raw)
     x = np.vstack([
         inputs(model, _restaurant_values(r), row[None, :])
@@ -360,6 +351,24 @@ def vocabulary(groups: dict[str, str]) -> dict:
             ),
         ],
     }
+
+
+def training_district_inputs(restaurants: list[dict], districts: list[dict], supply: Counter) -> np.ndarray:
+    """Raw ``DISTRICT_INPUTS`` per restaurant row, NaN when missing.
+
+    Each row's own restaurant is left out of both its total and its
+    same-cuisine supply, as a new entrant adds to the existing supply. The
+    published ``supply`` and ``total_restaurants`` stay unadjusted.
+    """
+    by_code = {d["postcode_district"]: d for d in districts}
+    return np.array([
+        _district_raw(
+            by_code[r["postcode_district"]],
+            supply[(r["postcode_district"], r["cuisine_group"])] - 1,
+            exclude_from_total=1,
+        )
+        for r in restaurants
+    ])
 
 
 def model_spec(vocab: dict, district_raw: np.ndarray) -> dict:

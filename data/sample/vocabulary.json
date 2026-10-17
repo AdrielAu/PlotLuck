@@ -292,6 +292,9 @@
    "label": "Italian"
   },
   {
+   "cuisine": "Mediterranean",
+   "cuisine_group": "Other",
+   "label": "Mediterranean (scored as Other)"
    "cuisine": "Jamaican",
    "cuisine_group": "Other",
    "label": "Jamaican (scored as Other)"

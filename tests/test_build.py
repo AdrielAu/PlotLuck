@@ -190,6 +190,56 @@ def test_districts_cover_every_sample_district_with_supply_that_adds_up(data, bu
     assert sum(int(d["total_restaurants"]) for d in districts) == len(restaurants)
 
 
+def test_district_with_no_restaurants_appears_with_supply_zero_and_is_scored(built):
+    districts = {d["postcode_district"]: d for d in read_csv(built / "districts.csv")}
+    supplied = {r["postcode_district"] for r in read_csv(built / "district_cuisine_supply.csv")}
+    reference = read_json(built / "reference_scores.json")
+
+    # EC3M has ONSPD postcodes in the sample but no restaurant near them.
+    assert districts["EC3M"]["total_restaurants"] == "0"
+    assert "EC3M" not in supplied
+    assert all("EC3M" in case["scores"] for case in reference["cases"])
+
+
+def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
+    districts = [{
+        "postcode_district": "AB1", "population": 1000, "deprivation_index": 12.5,
+        "commercial_rent_index": "", "total_restaurants": 3,
+    }]
+    supply = Counter({("AB1", "Thai"): 2, ("AB1", "Italian"): 1})
+    rows = [{"postcode_district": "AB1", "cuisine_group": g} for g in ("Thai", "Italian")]
+
+    raw = build.training_district_inputs(rows, districts, supply)
+
+    thai, italian = (dict(zip(build.DISTRICT_INPUTS, row)) for row in raw)
+    assert (thai["total_restaurants"], thai["same_cuisine_supply"]) == (2, 1)
+    assert (italian["total_restaurants"], italian["same_cuisine_supply"]) == (2, 0)
+    assert thai["population"] == 1000 and thai["deprivation_index"] == 12.5
+    assert np.isnan(thai["commercial_rent_index"])  # missing stays missing until the median fill
+
+
+def test_transforms_fitted_on_a_subset_use_only_that_subset():
+    vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
+    nan = np.nan
+    # Columns follow DISTRICT_INPUTS: population, deprivation, rent, total, same-cuisine.
+    train = np.array([
+        [9, 10, nan, 0, 0],
+        [nan, 20, nan, 0, 0],
+        [99, 30, nan, 0, 0],
+    ])
+    held_out = np.array([[999999, 1000, 5, 7, 7]])
+
+    t = build.model_spec(vocab, train)["transforms"]
+
+    assert build.model_spec(vocab, np.vstack([train, held_out]))["transforms"]["deprivation_index"]["mean"] == 265
+    assert t["population"]["median"] == 54  # of 9 and 99; the missing row is skipped
+    assert t["population"]["log1p"] is True and t["deprivation_index"]["log1p"] is False
+    assert (t["deprivation_index"]["mean"], t["deprivation_index"]["median"]) == (20, 20)
+    assert t["deprivation_index"]["std"] == pytest.approx(8.164966)  # population std of 10, 20, 30
+    # No training row has rent, so the held-out row's 5 must not leak into the fill.
+    assert t["commercial_rent_index"] == {"kind": "numeric", "log1p": True, "mean": 0, "std": 1, "median": 0}
+
+
 def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
     vocabulary = read_json(built / "vocabulary.json")
     model = read_json(built / "model.json")
@@ -212,6 +262,15 @@ def test_vocabulary_groups_every_cuisine_and_matches_model_features(built):
         else:
             assert trait["kind"] == "on_off" and trait["values"] == [False, True]
             assert transform["kind"] == "flag"
+
+
+def test_model_declares_log1p_mean_std_and_median_for_each_district_input(built):
+    model = read_json(built / "model.json")
+
+    for name in model["features"]["district_inputs"]:
+        t = model["transforms"][name]
+        assert t["kind"] == "numeric" and set(t) == {"kind", "log1p", "mean", "std", "median"}, name
+        assert t["log1p"] == (name != "deprivation_index"), name
 
 
 def test_model_layers_are_inputs_64_32_1(built):
@@ -272,6 +331,12 @@ def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
 
     with pytest.raises(ValueError, match="Martian"):
         build.build(tmp_path, tmp_path / "out", group_threshold=build.SAMPLE_GROUP_THRESHOLD)
+
+
+def test_mapping_covers_every_tag_in_the_committed_sample():
+    rows = read_csv(data_dir(choice="sample") / "tripadvisor_england.csv")
+    tags = {t.strip() for r in rows for t in r["cuisines"].split(",") if t.strip()}
+    assert sorted(tags - set(build.load_mapping())) == []
 
 
 def encode(model, profile, group, district, supply):
