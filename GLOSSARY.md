@@ -35,7 +35,7 @@ A number from 0 to 1 that rates the expected review-based success of a restauran
 _Avoid_: Probability, likelihood, chance, rating, rank
 
 **Review-based success**:
-A restaurant's customer satisfaction and accumulated review activity, characterised by its average rating, review distribution and total review count. It does not measure profitability or longevity.
+A restaurant's customer satisfaction and accumulated review activity, characterised by its average rating, review distribution and review counts. It does not measure profitability or longevity.
 _Avoid_: Commercial success, survival, profitability, longevity
 
 **Rating**:
