@@ -317,18 +317,23 @@ def cut_sample(full: Path, sample: Path) -> dict[str, int]:
     """
     full, sample = Path(full), Path(sample)
     (sample / "raw").mkdir(parents=True, exist_ok=True)
-    counts = {
-        "tripadvisor": _write_csv(
-            sample / "tripadvisor_england.csv", _synthetic_tripadvisor_rows()
-        )
-    }
+    counts = {}
     for name, (lat, lon) in _COORDS.items():
         counts[name] = _write_csv(
             sample / f"{name}_england.csv",
             _filter_csv(full / f"{name}_england.csv", lambda r: _in_box(r[lat], r[lon])),
         )
     with (sample / "onspd_england.csv").open(encoding="utf-8", newline="") as f:
-        districts = {row["district"] for row in csv.DictReader(f)}
+        postcodes = list(csv.DictReader(f))
+    if not postcodes:
+        raise ValueError("Sample ONSPD has no postcode districts")
+    districts = {row["district"] for row in postcodes}
+    anchors = {}
+    for row in postcodes:
+        anchors.setdefault(row["district"], (row["lat"], row["long"]))
+    counts["tripadvisor"] = _write_csv(
+        sample / "tripadvisor_england.csv", _synthetic_tripadvisor_rows(anchors)
+    )
     counts["p004"] = _write_csv(
         sample / "p004_england.csv",
         _filter_csv(full / "p004_england.csv", lambda r: r["district"] in districts),
@@ -340,21 +345,32 @@ def cut_sample(full: Path, sample: Path) -> dict[str, int]:
 
 SYNTHETIC_SEED = 43
 SYNTHETIC_ROWS = 200
-_CUISINES = ("British", "Italian", "Indian", "Chinese", "Cafe", "Pizza", "Thai", "Turkish")
+_SAMPLE_CUISINES = (
+    "European, Italian, Pizza",  # a specific tag beats an earlier umbrella
+    "Pizza, Cafe",  # dish-style cuisine plus venue type
+    "European",  # umbrella only
+    "Cafe",  # venue only; cuisine is Unspecified
+    "Pub",  # another venue-only row
+    "Healthy, Indian",  # set-aside tag does not decide cuisine
+    "Thai, Bar, Cafe",  # first venue tag wins
+    "British, Fast Food",
+    "Chinese, Dim Sum",
+    "Turkish, Mediterranean",
+)
 _FEATURES = ("Takeout", "Seating", "Outdoor Seating", "Wheelchair Accessible", "Reservations")
 _PRICE_LEVELS = ("€", "€€-€€€", "€€€€")
 
 
-def _synthetic_tripadvisor_rows():
+def _synthetic_tripadvisor_rows(anchors):
     """Made-up rows in the TripAdvisor extract's schema, inside the sample box.
 
     Values mimic the real formats (counts like ``347.0``, ``€`` price levels,
     ``Y``/``N`` flags); the category counts sum to the default-language count.
-    shortcut: no blank ratings or counts, unlike the real file; add some if
-    code downstream needs to handle them in tests.
+    Public postcode points anchor the locations, not source restaurant rows.
+    A few rows deliberately contain missing or invalid review fields.
     """
     rng = random.Random(SYNTHETIC_SEED)
-    south, west, north, east = SAMPLE_BBOX
+    points = [anchors[district] for district in sorted(anchors)]
     yield TRIPADVISOR_COLUMNS
     for i in range(1, SYNTHETIC_ROWS + 1):
         cats = [rng.randint(0, n) for n in (300, 150, 60, 25, 25)]
@@ -362,14 +378,17 @@ def _synthetic_tripadvisor_rows():
         total = default + rng.choice((0, 0, rng.randint(1, 50)))  # other languages
         stars = sum(s * c for s, c in zip((5, 4, 3, 2, 1), cats)) / max(default, 1)
         diets = {d: rng.choice("YN") for d in ("Vegetarian Friendly", "Vegan Options", "Gluten Free Options")}
+        latitude, longitude = points[(i - 1) % len(points)]
         row = {
             "restaurant_link": f"synthetic-{i:04d}",
-            "restaurant_name": f"Synthetic restaurant {i}",
+            "restaurant_name": (
+                "Synthetic chain" if 8 <= i <= 11 else f"Synthetic restaurant {i}"
+            ),
             "address": "Synthetic address, London",
             "city": "London",
-            "latitude": f"{rng.uniform(south, north):.6f}",
-            "longitude": f"{rng.uniform(west, east):.6f}",
-            "cuisines": ", ".join(rng.sample(_CUISINES, rng.randint(1, 3))),
+            "latitude": latitude,
+            "longitude": longitude,
+            "cuisines": _SAMPLE_CUISINES[(i - 1) % len(_SAMPLE_CUISINES)],
             "avg_rating": f"{max(1.0, round(stars * 2) / 2):.1f}",
             "total_reviews_count": f"{total}.0",
             "reviews_count_in_default_language": f"{default}.0",
@@ -381,6 +400,25 @@ def _synthetic_tripadvisor_rows():
             "vegan_options": diets["Vegan Options"],
             "gluten_free": diets["Gluten Free Options"],
         }
+        if i == 1:
+            row["avg_rating"] = ""
+        elif i == 2:
+            row["avg_rating"] = "5.5"
+        elif i == 3:
+            row["excellent"] = ""
+        elif i == 4:
+            row["total_reviews_count"] = f"{default - 1}.0"
+        elif i == 5:
+            row["total_reviews_count"] = "0.0"
+            row["reviews_count_in_default_language"] = "0.0"
+            for category in ("excellent", "very_good", "average", "poor", "terrible"):
+                row[category] = "0.0"
+        elif i == 6:
+            for flag in ("vegetarian_friendly", "vegan_options", "gluten_free"):
+                row[flag] = ""
+            row["special_diets"] = ""
+        elif i == 7:
+            row["price_level"] = ""
         yield [row[c] for c in TRIPADVISOR_COLUMNS]
 
 

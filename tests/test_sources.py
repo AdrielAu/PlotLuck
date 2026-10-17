@@ -281,9 +281,50 @@ def test_tripadvisor_sample_is_synthetic_with_the_full_schema(tmp_path):
     rows = read_csv(tmp_path / "a" / "tripadvisor_england.csv")
     assert counts["tripadvisor"] == len(rows) > 0
     assert "g1-d1" not in fake and "Cafe" not in {r["restaurant_name"] for r in rows}
-    for r in rows:
-        cats = ["excellent", "very_good", "average", "poor", "terrible"]
-        assert sum(float(r[c]) for c in cats) == float(r["reviews_count_in_default_language"])
-        assert float(r["total_reviews_count"]) >= float(r["reviews_count_in_default_language"])
-        assert 1 <= float(r["avg_rating"]) <= 5
-        assert sources._in_box(r["latitude"], r["longitude"])
+    assert all(sources._in_box(r["latitude"], r["longitude"]) for r in rows)
+
+
+def test_committed_synthetic_sample_covers_cv_districts_and_edge_cases(tmp_path):
+    from plotluck import data_dir
+
+    sample = data_dir(choice="sample")
+    rows = read_csv(sample / "tripadvisor_england.csv")
+    postcodes = read_csv(sample / "onspd_england.csv")
+    districts_by_point = {
+        (r["lat"], r["long"]): r["district"] for r in postcodes
+    }
+    covered = {
+        districts_by_point[(r["latitude"], r["longitude"])] for r in rows
+    }
+    assert len(covered) >= 5
+    tags = {tag.strip() for r in rows for tag in r["cuisines"].split(",")}
+    assert {"Italian", "Pizza", "European", "Cafe", "Pub", "Healthy"} <= tags
+    assert any(r["cuisines"] == "European" for r in rows)
+    assert any(r["cuisines"] in ("Cafe", "Pub") for r in rows)
+    assert any(r["avg_rating"] == "" for r in rows)
+    assert any(r["avg_rating"] and float(r["avg_rating"]) > 5 for r in rows)
+    categories = ("excellent", "very_good", "average", "poor", "terrible")
+    assert any(any(r[c] == "" for c in categories) for r in rows)
+    assert any(
+        r["total_reviews_count"] and all(r[c] for c in categories)
+        and float(r["total_reviews_count"]) < sum(float(r[c]) for c in categories)
+        for r in rows
+    )
+    assert any(r["total_reviews_count"] == "0.0" for r in rows)
+    assert any(r["price_level"] == "" for r in rows)
+    assert any(r["vegetarian_friendly"] == "" for r in rows)
+    assert any(r["vegan_options"] == "" for r in rows)
+    assert any(r["gluten_free"] == "" for r in rows)
+    assert sum(
+        bool(
+            r["restaurant_name"] == "Synthetic chain"
+            and r["avg_rating"] and 1 <= float(r["avg_rating"]) <= 5
+            and r["total_reviews_count"] and float(r["total_reviews_count"]) > 0
+            and all(r[c] for c in categories)
+        )
+        for r in rows
+    ) >= 3
+    sources.cut_sample(sample, tmp_path / "regenerated")
+    assert (tmp_path / "regenerated" / "tripadvisor_england.csv").read_bytes() == (
+        sample / "tripadvisor_england.csv"
+    ).read_bytes()
