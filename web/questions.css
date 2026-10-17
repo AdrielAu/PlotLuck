@@ -11,7 +11,8 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 
 #questions-screen { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 40px 64px; }
 .intro-scrim { width: min(100%, 720px); padding: 24px 32px; background: var(--scrim); text-align: center; }
-#title { font: 500 clamp(64px, 9vw, 128px)/0.95 Georgia, serif; letter-spacing: -0.04em; }
+#title { display: inline-flex; align-items: center; gap: 0.16em; font: 500 clamp(64px, 9vw, 128px)/0.95 var(--display); }
+#title img { width: 0.9em; height: 0.9em; }
 .lede { margin: 16px auto 12px; max-width: 34ch; font-size: clamp(19px, 1.6vw, 22px); line-height: 1.45; }
 .model-line { margin: 0; font-size: 15px; }
 .model-progress { display: block; width: min(320px, 100%); margin: 6px 0; accent-color: var(--green); }
@@ -48,12 +49,12 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 .prompt, .review { --fill: var(--surface); width: min(100%, 720px); padding: 24px; }
 .review { width: min(100%, 880px); }
 
-#question { display: block; margin-bottom: 16px; font: 500 clamp(24px, 2.2vw, 30px)/1.2 Georgia, serif; letter-spacing: -0.02em; }
+#question { display: block; margin-bottom: 16px; font: 500 clamp(24px, 2.2vw, 30px)/1.2 var(--display); }
 .link { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--focus); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .link:hover { color: var(--green); }
 .model-line .link { min-height: 0; font-size: inherit; }
 
-.review h2 { font: 500 clamp(24px, 2.2vw, 30px)/1.2 Georgia, serif; letter-spacing: -0.02em; }
+.review h2 { font: 500 clamp(24px, 2.2vw, 30px)/1.2 var(--display); }
 .review h2:focus { outline: none; }
 .review h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
 .primary { --face: 4px; --fill: var(--green); min-height: 48px; padding: 8px 22px; border: 0; border-radius: 0; color: var(--surface); font-weight: 600; transition: transform 120ms ease-out; }

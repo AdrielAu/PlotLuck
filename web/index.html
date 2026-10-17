@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>Plotluck</title>
+<link rel="icon" href="logo-mark.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/handjet-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
@@ -26,7 +28,7 @@
     <button id="retry" type="button">Try loading again</button>
   </section>
   <div class="intro-scrim">
-    <h1 id="title">Plotluck</h1>
+    <h1 id="title">Plotluck<img src="logo.svg" alt=""></h1>
     <p class="lede">Tell us about your restaurant idea and we will help you find the ideal location for your restaurant.</p>
   </div>
   <form id="description-form" class="prompt" novalidate>
@@ -55,7 +57,7 @@
 <main id="results-screen" aria-labelledby="results-heading" hidden>
   <header class="results-top">
     <div>
-      <p class="wordmark">Plotluck</p>
+      <p class="wordmark"><img src="logo-mark.svg" alt="">Plotluck</p>
       <h1 id="results-heading" tabindex="-1"></h1>
       <p id="confirmed-profile"></p>
     </div>

@@ -1,3 +1,6 @@
+/* Self-hosted variable fonts, latin subset, from @fontsource-variable 5.3.0; licences in fonts/ (#187). */
+@font-face { font-family: Handjet; src: url("fonts/handjet-latin-wght.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: Geist; src: url("fonts/geist-latin-wght.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 :root {
   color-scheme: light;
   --canvas: #f7f6f3;
@@ -9,7 +12,9 @@
   --focus: #346538;
   --error-ink: #9f2f2d;
   --error-surface: #fdebec;
-  font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+  /* Pixel display face for headings and the wordmark, echoing the voxel kitchen; Geist for everything else. */
+  --display: Handjet, Georgia, serif;
+  font-family: Geist, "Segoe UI", sans-serif;
   line-height: 1.6;
   color: var(--ink);
   background: var(--canvas);
@@ -20,7 +25,7 @@ body { margin: 0; }
 #questions-screen, #answers-error, body > footer { max-width: 1280px; margin-inline: auto; padding-inline: 32px; }
 #questions-screen, #answers-error { padding-top: 40px; }
 #questions-screen > header { max-width: 74ch; margin-bottom: 32px; }
-h1 { margin: 0; font: 500 48px/1.1 Georgia, serif; letter-spacing: -0.03em; }
+h1 { margin: 0; font: 500 48px/1.1 var(--display); }
 h2 { margin: 0 0 8px; font-size: 18px; font-weight: 600; line-height: 1.3; }
 p { margin: 0 0 16px; }
 #threshold-help, #count, #confirmed-profile, footer { color: var(--muted); }
@@ -35,8 +40,9 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #results-screen { display: grid; grid-template-rows: auto auto minmax(480px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }
-.wordmark { font: 500 18px/1.2 Georgia, serif; letter-spacing: -0.02em; }
-#results-heading { margin: 4px 0 2px; font: 500 32px/1.1 Georgia, serif; letter-spacing: -0.03em; }
+.wordmark { display: flex; align-items: center; gap: 4px; font: 500 18px/1.2 var(--display); }
+.wordmark img { width: 32px; height: 32px; }
+#results-heading { margin: 4px 0 2px; font: 500 32px/1.1 var(--display); }
 #results-heading:focus { outline: none; }
 #confirmed-profile { font-size: 14px; }
 .text-button { flex: none; min-height: 44px; padding: 8px 4px; border: 0; background: none; color: var(--focus); text-decoration: underline; text-underline-offset: 3px; }
