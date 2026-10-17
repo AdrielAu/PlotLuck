@@ -28,6 +28,8 @@ function tinyBundle({
   contextColumns = {},
   // AB1 as one closed square ring; version 4 bundles carry it, older ones do not.
   outlines = { version, quantum: 1e-4, arcs: [[0, 515000, 10, 0, 0, 10, -10, 0, 0, -10]], districts: { AB1: [[0]] } },
+  // An older bundle with an ONSPD-only outlines file published beside it.
+  outlinesBeside = false,
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
   // `radiusKm: null` leaves the radius_km column out.
@@ -60,7 +62,7 @@ function tinyBundle({
     "district_outlines.json": JSON.stringify(outlines),
   };
   return loadBundle(async (name) => {
-    if (version < 4 && name === "district_outlines.json") throw new Error("an older bundle has no outlines file");
+    if (version < 4 && !outlinesBeside && name === "district_outlines.json") throw new Error("an older bundle has no outlines file");
     return files[name];
   });
 }
@@ -71,6 +73,11 @@ test("a version 4 bundle carries each district's outline as closed [lat, lng] ri
   assert.equal(ring.length, 5);
   assert.deepEqual(ring[0], ring.at(-1));
   assert.ok(Math.abs(ring[0][0] - 51.5) < 1e-9 && Math.abs(ring[1][1] - 0.001) < 1e-9);
+});
+
+test("an older bundle uses an outlines file added beside it", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], version: 2, outlinesBeside: true });
+  assert.equal(bundle.outlines.get("AB1").length, 1);
 });
 
 test("an older bundle loads without outlines, so every district is a circle", async () => {
