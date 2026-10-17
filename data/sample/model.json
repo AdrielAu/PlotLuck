@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "model_name": "nn1_stub",
+    "description": "Minimal stub of NN1 weights and normalization metadata for client-side evaluation"
+  },
+  "features": {
+    "restaurant_inputs": [
+      "canonical_cuisine",
+      "price_band"
+    ],
+    "district_inputs": [
+      "population",
+      "deprivation_index",
+      "commercial_rent_index",
+      "total_restaurants",
+      "same_cuisine_supply"
+    ]
+  },
+  "transforms": {
+    "numeric_means": {
+      "population": 45000.0,
+      "deprivation_index": 13783.6,
+      "commercial_rent_index": 374.1,
+      "total_restaurants": 187.5,
+      "same_cuisine_supply": 15.0
+    },
+    "numeric_stds": {
+      "population": 25000.0,
+      "deprivation_index": 5000.0,
+      "commercial_rent_index": 180.0,
+      "total_restaurants": 75.0,
+      "same_cuisine_supply": 10.0
+    },
+    "categorical_vocabs": {
+      "canonical_cuisine": [
+        "British",
+        "Chinese",
+        "French",
+        "Indian",
+        "Italian",
+        "Other"
+      ],
+      "price_band": [
+        "$",
+        "$$",
+        "$$$",
+        "unknown"
+      ]
+    }
+  },
+  "layers": [
+    {
+      "weights": [
+        [0.1, -0.2, 0.05, 0.3, 0.15, -0.1, 0.2, 0.05, -0.15, 0.1, 0.25, -0.05, 0.12, 0.18, -0.22],
+        [-0.05, 0.15, 0.2, -0.1, 0.05, 0.3, -0.1, 0.25, 0.1, -0.05, 0.18, 0.12, -0.15, 0.08, 0.14]
+      ],
+      "biases": [0.05, -0.02]
+    },
+    {
+      "weights": [
+        [0.45, 0.65]
+      ],
+      "biases": [0.1]
+    }
+  ],
+  "activations": [
+    "relu",
+    "sigmoid"
+  ]
+}

@@ -70,6 +70,7 @@ This text predates the England scope and review-based target; it is not the curr
 
 ## Open
 
-- [Fix the restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38): schemas, inputs, preprocessing, JSON layout and cross-border districts. NN1 architecture remains undecided.
-- [Slice the MVP into independent implementation issues](https://github.com/AdrielAu/PlotLuck/issues/39): finalise handoffs once contracts are agreed.
+- [Slice the MVP into independent implementation issues](https://github.com/AdrielAu/PlotLuck/issues/39): finalise handoffs once contracts are agreed (unblocked by [ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)).
+- Agree the NN1 architecture; [ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md) fixes the formats but not the architecture.
+- Define canonical cuisine taxonomy and raw descriptor mapping (to collapse "pizza", "pasta" into "Italian", etc. before NN vectorization).
 - Assign the server operator in person. Later decisions include the LLM-to-NN1 interface and post-MVP map/driver design.
