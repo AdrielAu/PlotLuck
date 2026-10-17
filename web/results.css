@@ -32,8 +32,7 @@ button { cursor: pointer; }
 ::selection { background: #bacfa9; color: var(--ink); }
 input { accent-color: var(--green); caret-color: var(--green); }
 :disabled { cursor: wait; opacity: 0.6; }
-/* The map fills the viewport between a top line and slim notes.
-   shortcut: desktop Chrome/Edge only, as #127 and #110 support; add a phone layout if that contract widens. */
+/* The map fills the window between a top line and slim notes. Desktop Chrome/Edge only (#127). */
 #results-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 16px; height: 100vh; min-height: 640px; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }
@@ -84,8 +83,3 @@ body > footer p { max-width: 100ch; border-top: 1px solid var(--line); padding-t
 #retry:hover, #answers-error-back:hover { background: #464b4e; }
 .leaflet-control-zoom a { min-width: 44px; min-height: 44px; line-height: 44px !important; }
 .leaflet-container { font-family: inherit; }
-@media (max-width: 760px) {
-  #questions-screen, #answers-error, body > footer { padding-inline: 20px; }
-  #questions-screen, #answers-error { padding-top: 28px; }
-  h1 { font-size: 40px; }
-}

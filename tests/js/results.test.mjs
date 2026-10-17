@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { defaultThreshold, inSearchArea, readAnswers, resultsAt } from "../../web/results.js";
+import { defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "../../web/results.js";
 
 // Districts D01..Dnn scoring the given values in that order.
 const districts = (...values) => values.map((score, i) => ({ postcode_district: `D${String(i + 1).padStart(2, "0")}`, score }));
@@ -80,6 +80,14 @@ test("districts tied at the 10th-best score are all shown, and the count line sa
   assert.equal(countLine, "11 of 13 districts in your search area");
   assert.equal(resultsAt(districts(0.5), 0.5).countLine, "1 of 1 district in your search area");
   assert.equal(resultsAt(districts(0.5, 0.4), 0.9).countLine, "0 of 2 districts in your search area");
+});
+
+test("the slider runs from showing every district to showing none", () => {
+  for (const scores of [districts(0.62, 0.7, 0.64), districts(0.42), districts(0.5, 0.5)]) {
+    const { min, max } = thresholdRange(scores);
+    assert.equal(resultsAt(scores, min).shown.length, scores.length);
+    assert.equal(resultsAt(scores, max).shown.length, 0);
+  }
 });
 
 test("shown districts clear the threshold inclusively, best first, ranked from 1 with ties by district code", () => {

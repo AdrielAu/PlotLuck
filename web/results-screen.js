@@ -1,6 +1,6 @@
 // The results screen: a Leaflet map, the score threshold and the ranked list for one confirmed query.
 import { scoreDistricts } from "./scoring.js";
-import { defaultThreshold, inSearchArea, readAnswers, resultsAt } from "./results.js";
+import { defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "./results.js";
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -109,8 +109,8 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
         popup.textContent = `${postcode_district}: ${score.toFixed(4)}`;
         circles.get(postcode_district).setStyle({ fillColor: `rgb(${fill.join(",")})` }).bindPopup(popup);
       }
-      const values = scores.map((d) => d.score);
-      Object.assign($("threshold"), { min: String(Math.min(...values)), max: String(Math.max(...values)) });
+      const { min, max } = thresholdRange(scores);
+      Object.assign($("threshold"), { min: String(min), max: String(max) });
       $("threshold").value = String(onScreen.threshold);
       // Frame the whole search area, not just the shown districts, clear of the threshold bar.
       map.fitBounds(L.latLngBounds(query.searchArea.map((code) => centroids.get(code))), {

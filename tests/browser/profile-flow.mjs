@@ -64,6 +64,11 @@ test("a picked profile needs confirmation before its district results appear", a
     await slider.press("Home");
     const all = await page.locator("#ranked li").count();
     assert.ok(all > 10);
+    // End goes just past the best score: nothing is shown and the message says why.
+    await slider.press("End");
+    assert.equal(await page.locator("#ranked li").count(), 0);
+    assert.match(await page.locator("#empty").innerText(), /No district reaches this score threshold/);
+    await slider.press("Home");
     await changeAnswers.click();
     assert.equal(await page.getByRole("checkbox", { name: "Vegan options", exact: true }).isChecked(), true);
     assert.equal(await cuisine.inputValue(), "Thai");

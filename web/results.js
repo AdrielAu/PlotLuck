@@ -31,6 +31,15 @@ export function defaultThreshold(scores) {
   return ranked[Math.min(9, ranked.length - 1)].score;
 }
 
+// The score threshold slider's ends: the lowest score shows every district, and
+// the top sits just past the best score so the slider can show none.
+export function thresholdRange(scores) {
+  const values = scores.map((d) => d.score);
+  const min = Math.min(...values);
+  const best = Math.max(...values);
+  return { min, max: best + Math.max((best - min) / 50, 0.0001) };
+}
+
 // The search area's districts at or above `threshold`, best first, each with its rank from 1.
 export function resultsAt(scores, threshold) {
   const shown = rankDistricts(scores, threshold).map((d, i) => ({ rank: i + 1, ...d }));
