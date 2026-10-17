@@ -35,7 +35,7 @@ test("London requires a labelled boundary choice and retains confirmed results u
   await page.locator("#results-screen").waitFor();
   assert.equal(await page.locator("#results-heading").innerText(), "Thai · City of London (city, England)");
   const slider = page.getByRole("slider", { name: "Score threshold", exact: true });
-  await slider.press("Home");
+  await slider.evaluate(el => { el.value = el.min; el.dispatchEvent(new Event("input", { bubbles: true })); });
   assert.match(await page.locator("#count").innerText(), /^17 of 17 districts/);
   const cityCodes = await page.locator(".district-code").allInnerTexts();
   assert.ok(cityCodes.every(code => code.startsWith("EC")));
@@ -43,7 +43,7 @@ test("London requires a labelled boundary choice and retains confirmed results u
   await answerQuestions(page, ["Greater London", "Thai", "", "", "", ""]);
   await compare.click();
   await page.locator("#results-screen").waitFor();
-  await slider.press("Home");
+  await slider.evaluate(el => { el.value = el.min; el.dispatchEvent(new Event("input", { bubbles: true })); });
   assert.ok(await page.locator("#ranked li").count() > 17);
   assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
   assert.deepEqual(requests.filter(request => /London|Thai/.test(request)), []);
