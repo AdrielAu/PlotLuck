@@ -88,6 +88,7 @@ DISTRICT_COLUMNS = (
     "commercial_rent_index",
     *context.INPUTS,
     *context.SUMMARIES,
+    "radius_km",
 )
 # Register each approved public economic or demographic extension here before
 # adding it to district_table. Unknown fields must never pass through by default.
@@ -106,6 +107,12 @@ LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisi
 # VOA measuring standards the rent index divides by, in order of preference:
 # net internal area, then gross internal area where a district has no NIA.
 VOA_AREA_UNITS = ("NIA", "GIA")
+# Map circle radius: the distance from the centroid within which this share of
+# a district's postcodes lie, so one stray postcode does not inflate it. A
+# district with one or two postcodes (a PO box, one building) gets the minimum.
+RADIUS_SHARE = 0.9
+MIN_RADIUS_KM = 0.3
+EARTH_RADIUS_KM = 6371.0088
 
 
 def build(
@@ -328,6 +335,8 @@ def publish_bundle(out: Path, bundle: dict) -> None:
                 continue
             if row[name] != "" and not _finite_number(float(row[name])):
                 raise ValueError(f"districts.csv has an invalid {name}")
+        if row["radius_km"] == "" or not float(row["radius_km"]) > 0:
+            raise ValueError("districts.csv has an invalid radius_km")
         for name in context.DEMOGRAPHIC_INPUTS:
             value = row[name]
             if value != "" and not 0 <= float(value) <= (100 if name == "average_age" else 1):
@@ -736,11 +745,12 @@ def district_table(
     rows = []
     for code in sorted(points):
         lats, lons = zip(*points[code])
+        lat, lon = statistics.fmean(lats), statistics.fmean(lons)
         demographic = {name: demographics.get(code, {}).get(name, "") for name in context.DEMOGRAPHIC_INPUTS}
         rows.append({
             "postcode_district": code,
-            "centroid_lat": round(statistics.fmean(lats), 6),
-            "centroid_lon": round(statistics.fmean(lons), 6),
+            "centroid_lat": round(lat, 6),
+            "centroid_lon": round(lon, 6),
             "total_restaurants": totals[code],
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
@@ -750,8 +760,20 @@ def district_table(
             "hotels_count": tourism_counts[code, "hotel"],
             "most_common_ethnicity": context.summary(demographic, context.ETHNICITY_INPUTS, context.ETHNICITY),
             "most_common_sex": context.summary(demographic, context.SEX_INPUTS, context.SEX),
+            "radius_km": _radius_km(lat, lon, lats, lons),
         })
     return rows
+
+
+def _radius_km(lat: float, lon: float, lats, lons) -> float:
+    """Circle radius around (lat, lon) covering ``RADIUS_SHARE`` of the points, at least ``MIN_RADIUS_KM``.
+
+    Distances are on a flat map local to the district, which is close enough at district scale.
+    """
+    dy = np.radians(np.subtract(lats, lat))
+    dx = np.radians(np.subtract(lons, lon)) * math.cos(math.radians(lat))
+    radius = float(np.quantile(np.hypot(dx, dy), RADIUS_SHARE)) * EARTH_RADIUS_KM
+    return round(max(radius, MIN_RADIUS_KM), 3)
 
 
 def rent_index(voa: list[dict]) -> dict[str, float]:
