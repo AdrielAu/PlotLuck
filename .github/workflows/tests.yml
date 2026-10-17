@@ -1,0 +1,37 @@
+name: PR tests
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python sample tests
+    runs-on: ubuntu-latest
+    env:
+      PLOTLUCK_DATA: sample
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install Python dependencies
+        run: |
+          python -m pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e '.[test]'
+      - name: Run pytest on sample data
+        run: python -m pytest
+
+  node:
+    name: Node scoring tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Node tests
+        run: node --test
