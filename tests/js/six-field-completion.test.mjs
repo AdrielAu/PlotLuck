@@ -18,12 +18,12 @@ test('A restaurant in london asks Erica\'s questions for every missing input',as
   assert.throws(()=>confirmedDescription(q,bundle,catalogue));
 });
 
-test('absent area defaults to England while the other missing fields stay unresolved',async()=>{
+test('absent area now needs a city choice alongside the other missing fields',async()=>{
   const text='A restaurant';
   const result=validateProfileExtraction({region:null,cuisine:null,price_band:'unknown',venue_type:'Restaurant',rent:null},text,bundle.vocabulary,catalogue);
   const q=await descriptionQuery(text,result,bundle,catalogue);
-  assert.equal(q.area.kind,'england');
-  assert.deepEqual(q.needs.map(n=>n.field),['cuisine','price','rent','other']);
+  assert.equal(q.area,null);
+  assert.deepEqual(q.needs.map(n=>n.field),['area','cuisine','price','rent','other']);
 });
 
 test('an invalid cuisine does not discard an independently valid restaurant type or location',()=>{
@@ -35,8 +35,8 @@ test('an invalid cuisine does not discard an independently valid restaurant type
 });
 
 test('a complete description scores directly and every missing completion blocks scoring',async()=>{
-  const text='A mid-range Thai restaurant, any rent, no other requirements.';
-  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null,requirements:'no other requirements'},text,bundle.vocabulary,catalogue,{complete:true});
+  const text='A mid-range Thai restaurant in England, any rent, no other requirements.';
+  const result=validateProfileExtraction({region:'England',cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:null,requirements:'no other requirements'},text,bundle.vocabulary,catalogue,{complete:true});
   const q=await descriptionQuery(text,result,bundle,catalogue);
   assert.deepEqual(q.needs,[]);
   assert.equal(confirmedDescription(q,bundle,catalogue).searchArea.length,bundle.districts.length);
@@ -48,8 +48,8 @@ test('a complete description scores directly and every missing completion blocks
 });
 
 test('invented other requirements and unsupported rent never count as completed inputs',async()=>{
-  const text='A mid-range Thai restaurant, any rent.';
-  const result=validateProfileExtraction({region:null,cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:{amount:500,period:'month',currency:'USD'},requirements:'vegan options'},text,bundle.vocabulary,catalogue,{complete:true});
+  const text='A mid-range Thai restaurant in England, any rent.';
+  const result=validateProfileExtraction({region:'England',cuisine:'Thai',price_band:'$$',venue_type:'Restaurant',rent:{amount:500,period:'month',currency:'USD'},requirements:'vegan options'},text,bundle.vocabulary,catalogue,{complete:true});
   const q=await descriptionQuery(text,result,bundle,catalogue);
   assert.deepEqual(q.needs.map(n=>n.field),['rent','other']);
   assert.equal(q.rentBudget,null);
