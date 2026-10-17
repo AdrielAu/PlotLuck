@@ -92,7 +92,7 @@ def test_audit_runs_on_sample_and_writes_json(tmp_path):
     out = audit.audit(data_dir(choice="sample"), tmp_path)
     raw = (tmp_path / "audit.json").read_bytes()
     assert json.loads(raw) == out
-    assert out["source_rows"] == 200
+    assert out["source_rows"] == 206
     assert raw.endswith(b"}\n") and b"\r" not in raw
 
 

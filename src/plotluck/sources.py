@@ -476,7 +476,7 @@ def cut_sample(full: Path, sample: Path) -> dict[str, int]:
 
 
 SYNTHETIC_SEED = 43
-SYNTHETIC_ROWS = 200
+SYNTHETIC_ROWS = 200  # plus six seeded cleaning defects
 _SAMPLE_CUISINES = (
     "European, Italian, Pizza",  # a specific tag beats an earlier umbrella
     "Pizza, Cafe",  # dish-style cuisine plus venue type
@@ -499,11 +499,14 @@ def _synthetic_tripadvisor_rows(anchors):
     Values mimic the real formats (counts like ``347.0``, ``€`` price levels,
     ``Y``/``N`` flags); the category counts sum to the default-language count.
     Public postcode points anchor the locations, not source restaurant rows.
-    A few rows deliberately contain missing or invalid review fields.
+    A few rows deliberately contain missing or invalid review fields. Six
+    more rows, after the first ``SYNTHETIC_ROWS``, seed the cleaning defects of
+    issue #148 (see ``_seeded_cleaning_defects``).
     """
     rng = random.Random(SYNTHETIC_SEED)
     points = [anchors[district] for district in sorted(anchors)]
     yield TRIPADVISOR_COLUMNS
+    rows = []
     for i in range(1, SYNTHETIC_ROWS + 1):
         cats = [rng.randint(0, n) for n in (300, 150, 60, 25, 25)]
         default = sum(cats)
@@ -551,7 +554,46 @@ def _synthetic_tripadvisor_rows(anchors):
             row["special_diets"] = ""
         elif i == 7:
             row["price_level"] = ""
+        rows.append(row)
         yield [row[c] for c in TRIPADVISOR_COLUMNS]
+    for row in _seeded_cleaning_defects(rows, points):
+        yield [row[c] for c in TRIPADVISOR_COLUMNS]
+
+
+_CATEGORIES = ("excellent", "very_good", "average", "poor", "terrible")
+_FAR_POINT = ("53.480000", "-2.240000")  # central Manchester, hundreds of km from the sample box
+
+
+def _seeded_cleaning_defects(rows, points):
+    """Six defect rows copied from earlier synthetic rows, for the cleaning rules.
+
+    - an exact duplicate of row 20's link with more reviews (the original is dropped);
+    - a near duplicate of row 30: the same name in capitals about 22 m away, with
+      fewer reviews (this copy is dropped);
+    - a point far from every postcode (dropped as ``far_from_postcode``);
+    - three spellings of one chain name at three districts, which count as one
+      chain only once names are normalised.
+    """
+    by_link = {r["restaurant_link"]: r for r in rows}
+    exact = dict(by_link["synthetic-0020"])
+    exact["total_reviews_count"] = f"{float(exact['total_reviews_count']) + 100:.1f}"
+    near = dict(by_link["synthetic-0030"])
+    near.update(
+        restaurant_link="synthetic-near-0030",
+        restaurant_name=near["restaurant_name"].upper(),
+        latitude=f"{float(near['latitude']) + 0.0002:.6f}",
+    )
+    halves = [int(float(near[c])) // 2 for c in _CATEGORIES]
+    near.update({c: f"{n}.0" for c, n in zip(_CATEGORIES, halves)})
+    near["reviews_count_in_default_language"] = near["total_reviews_count"] = f"{sum(halves)}.0"
+    far = dict(rows[39], restaurant_link="synthetic-far-0001", restaurant_name="Synthetic faraway")
+    far["latitude"], far["longitude"] = _FAR_POINT
+    variants = [
+        dict(rows[40 + k], restaurant_link=f"synthetic-variant-{k + 1}", restaurant_name=name,
+             latitude=points[k % len(points)][0], longitude=points[k % len(points)][1])
+        for k, name in enumerate(("Synthetic Dough's", "Synthetic Doughs", "SYNTHETIC DOUGH’S"))
+    ]
+    return [exact, near, far, *variants]
 
 
 SYNTHETIC_VOA_ROWS = 300

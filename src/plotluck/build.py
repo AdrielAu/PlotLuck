@@ -30,6 +30,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from plotluck import context, label, nn1
+from plotluck.names import normalise_name
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
@@ -56,6 +57,11 @@ PRICE_BANDS = {"€": "$", "€€-€€€": "$$", "€€€€": "$$$"}
 UNKNOWN_PRICE = "unknown"
 DIET_FLAGS = ("vegetarian_friendly", "vegan_options", "gluten_free")
 CHAIN_MIN_NAMES = 3
+# Cleaning thresholds (issue #150). Provisional until the LinuxONE audit
+# (issue #149, python -m plotluck.audit) has run on the full data.
+FAR_FROM_POSTCODE_KM = 5.0  # a row farther than this from any live English postcode is dropped
+NEAR_DUPLICATE_M = 50.0  # same normalised name within this distance is one listing
+DROP_BRANCH_SUFFIX = False  # strip " - Soho" / " (Kings Cross)" before comparing names
 
 # Fine cuisines with fewer label-eligible rows fold into their parent, then Other.
 FULL_GROUP_THRESHOLD = 300
@@ -284,7 +290,10 @@ def validate_run_metrics(metrics: dict) -> None:
     for value in metrics["districts_without_census"].values():
         count(value)
     reasons = {
-        "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
+        "excluded": {
+            "no_location", "far_from_postcode", "duplicate_listing",
+            "rating_missing", "rating_out_of_range", "n_total_zero",
+        },
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
     }
     for name, allowed_reasons in reasons.items():
@@ -654,22 +663,33 @@ def classify(cuisines: str, mapping: dict) -> tuple[str, str]:
 
 
 def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
-    """Source rows -> restaurant dicts (ADR 0004 columns plus derived fields)."""
-    names = Counter(r["restaurant_name"] for r in rows)
+    """Source rows -> restaurant dicts (ADR 0004 columns plus derived fields).
+
+    Stages, in order: location check, duplicate listings, chain, label fields.
+    Supply and ``total_restaurants`` are counted from the result, so they see
+    only the cleaned rows.
+    """
     located = [r for r in rows if _float(r["latitude"]) is not None and _float(r["longitude"]) is not None]
-    district = _nearest_district(
-        postcodes, [(float(r["latitude"]), float(r["longitude"])) for r in located]
-    )
+    points = [(float(r["latitude"]), float(r["longitude"])) for r in located]
+    district, km = nearest_postcodes(postcodes, points)
     excluded = Counter({"no_location": len(rows) - len(located)})
+    kept = [i for i, d in enumerate(km) if d <= FAR_FROM_POSTCODE_KM]
+    excluded["far_from_postcode"] = len(located) - len(kept)
+    located, points, district = ([x[i] for i in kept] for x in (located, points, district))
+    kept = _without_duplicate_listings(located, points)
+    excluded["duplicate_listing"] = len(located) - len(kept)
+    located, district = [located[i] for i in kept], [district[i] for i in kept]
+    names = Counter(normalise_name(r["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX) for r in located)
     fixes = Counter()
     restaurants = []
     for row, code in zip(located, district):
+        name = normalise_name(row["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX)
         cuisine, venue = classify(row["cuisines"], mapping)
         restaurants.append({
             "postcode_district": code,
             "cuisines": row["cuisines"],
             "price_band": PRICE_BANDS.get(row["price_level"], ""),
-            "is_chain": int(names[row["restaurant_name"]] >= CHAIN_MIN_NAMES),
+            "is_chain": int(names[name] >= CHAIN_MIN_NAMES),
             **{f: {"Y": 1, "N": 0}.get(row[f], "") for f in DIET_FLAGS},
             **label.review_fields(row, fixes),
             "cuisine": cuisine,
@@ -677,6 +697,50 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
         })
     excluded.update(filter(None, map(label.exclusion, restaurants)))
     return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
+
+
+def _without_duplicate_listings(rows: list[dict], points: list[tuple[float, float]]) -> list[int]:
+    """Indices of the rows left once each duplicate listing set keeps its best row, in source order.
+
+    A set is rows sharing a ``restaurant_link``, then rows with one normalised
+    name within ``NEAR_DUPLICATE_M`` of each other (chained). The kept row has
+    the most reviews; ties go to the first row. Review counts are never merged.
+    """
+    reviews = [label.review_fields(r, Counter())["total_reviews"] for r in rows]
+    reviews = [0 if n == "" else n for n in reviews]
+    best = {}
+    for i, row in enumerate(rows):
+        key = row["restaurant_link"] or f"row {i}"  # a blank link identifies nothing
+        if key not in best or reviews[i] > reviews[best[key]]:
+            best[key] = i
+    survivors = sorted(best.values())
+    by_name = {}
+    for i in survivors:
+        name = normalise_name(rows[i]["restaurant_name"], drop_branch_suffix=DROP_BRANCH_SUFFIX)
+        by_name.setdefault(name, []).append(i)
+    dropped = set()
+    for members in by_name.values():
+        if len(members) < 2:
+            continue
+        lat, lon = np.radians(np.array([points[i] for i in members])).T
+        xy = np.column_stack((lon * np.cos(lat), lat)) * EARTH_RADIUS_KM * 1000
+        parent = list(range(len(members)))
+
+        def find(j):
+            while parent[j] != j:
+                parent[j] = parent[parent[j]]
+                j = parent[j]
+            return j
+
+        for a, b in cKDTree(xy).query_pairs(NEAR_DUPLICATE_M):
+            parent[find(a)] = find(b)
+        winner = {}
+        for k, i in enumerate(members):
+            root = find(k)
+            if root not in winner or reviews[i] > reviews[winner[root]]:
+                winner[root] = i
+        dropped.update(set(members) - set(winner.values()))
+    return [i for i in survivors if i not in dropped]
 
 
 def label_restaurants(restaurants: list[dict]) -> dict:

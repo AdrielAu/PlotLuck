@@ -47,6 +47,11 @@
    "label": "Asian (scored as Other)"
   },
   {
+   "cuisine": "Assyrian",
+   "cuisine_group": "Other",
+   "label": "Assyrian (scored as Other)"
+  },
+  {
    "cuisine": "Australian",
    "cuisine_group": "Other",
    "label": "Australian (scored as Other)"
@@ -338,8 +343,8 @@
   },
   {
    "cuisine": "Mediterranean",
-   "cuisine_group": "European",
-   "label": "Mediterranean (scored as European)"
+   "cuisine_group": "Other",
+   "label": "Mediterranean (scored as Other)"
   },
   {
    "cuisine": "Mexican",
