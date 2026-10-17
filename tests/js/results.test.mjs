@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "../../web/results.js";
+import { circleLabel, defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "../../web/results.js";
 
 // Districts D01..Dnn scoring the given values in that order.
 const districts = (...values) => values.map((score, i) => ({ postcode_district: `D${String(i + 1).padStart(2, "0")}`, score }));
@@ -135,4 +135,9 @@ test("scores use the fewest decimals from 2 to 4 that tell the shown scores apar
   assert.equal(decimals(0.5), 2);
   // Only shown scores count: hiding 0.611 leaves 0.612 and 0.9, apart at 2 decimals.
   assert.equal(resultsAt(districts(0.611, 0.612, 0.9), 0.612).decimals, 2);
+});
+
+test("a hovered circle reads rank, code and score at the shown decimals", () => {
+  assert.equal(circleLabel({ rank: 3, postcode_district: "M14", score: 0.6213 }, 2), "#3 · M14 · 0.62");
+  assert.equal(circleLabel({ rank: 12, postcode_district: "SE1", score: 0.75 }, 4), "#12 · SE1 · 0.7500");
 });
