@@ -119,25 +119,33 @@ export function setUpFreeText({ bundle, catalogue, nn2, onResults, onBusy }) {
         group.append(label,other,help,none);$('clarification-fields').append(group);
       }
       if (need.field === 'area') {
+        let options = need.options;
+        const control = select('area', need.message, options);
+        const help = document.createElement('p');
+        help.id = 'clarify-area-help';
+        control.setAttribute('aria-describedby',help.id);
+        help.textContent = 'Choose a matching area or an English city. You can also enter a borough, postcode, region or England below.';
+        $('clarification-fields').append(help);
         const search = document.createElement('input');
         search.id = 'clarify-area-text'; search.type = 'text'; search.autocomplete = 'off';
+        search.setAttribute('aria-describedby',help.id);
         search.value = query.placeText;
         const label = document.createElement('label');
-        label.htmlFor = search.id; label.textContent = need.message;
+        label.htmlFor = search.id; label.textContent = 'Refine or re-specify the area';
         $('clarification-fields').append(label, search);
-        const control = select('area', 'Intended place', need.options);
         const reader = makeInterpreter(bundle, undefined, catalogue);
         search.addEventListener('input', () => {
           query.area = null;
           query.completion.area = false;
-          const direct = reader.readArea(search.value);
-          const options = reader.areaCandidates(search.value);
+          const direct = search.value.trim() ? reader.readArea(search.value) : null;
+          options = reader.areaCandidates(search.value);
           if (direct && !options.some(p => p.code === direct.code)) options.push(direct);
+          if (!options.length) options = reader.cityCandidates();
           control.replaceChildren(new Option('Choose…', ''), ...options.map(p => new Option(p.label, `${p.kind}:${p.code}`)));
-          control.onchange = () => { query.area = options.find(p => `${p.kind}:${p.code}` === control.value) ?? null; query.completion.area = Boolean(query.area); };
         });
         control.addEventListener('change', () => {
-          if (!control.onchange) { query.area = need.options.find(p => p.code === control.value) ?? null; query.completion.area = Boolean(query.area); }
+          query.area = control.value ? options.find(p => p.code === control.value || `${p.kind}:${p.code}` === control.value) ?? null : null;
+          query.completion.area = Boolean(query.area);
         });
       }
       if (need.field === 'description') {

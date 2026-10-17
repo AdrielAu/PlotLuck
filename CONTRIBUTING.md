@@ -1,6 +1,6 @@
 # Contributing
 
-Plotluck accepts one free-text restaurant description. Browser NN2 interprets six inputs: area/range, cuisine, menu prices, rent, restaurant type and other requirements. Only absent area defaults to England; missing/defaulted or invalid inputs prompt the original questions. Results open directly once all six are accounted for. NN1 runs in the browser from exported JSON weights. Model quality and release gates remain open; see [the latest user amendment](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
+Plotluck accepts one free-text restaurant description. Browser NN2 interprets six inputs: area/range, cuisine, menu prices, rent, restaurant type and other requirements. An omitted or unresolved place requires a city choice or a clearer area description; missing/defaulted or invalid inputs prompt the original questions. Results open directly once all six are accounted for. NN1 runs in the browser from exported JSON weights. Model quality and release gates remain open; see [the latest user amendment](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
 
 ## Layout
 
