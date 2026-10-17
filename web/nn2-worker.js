@@ -23,10 +23,11 @@ self.onmessage = async ({ data }) => {
       const start = performance.now();
       const result = await engine.chat.completions.create({ messages: buildPrompt(description, vocabulary), temperature: 0,
         max_tokens: 512, response_format: { type: 'json_object', schema: JSON.stringify(interpretationSchema(vocabulary)) } });
-      if (result.choices[0].finish_reason === 'length') throw new Error('Interpretation was truncated. Please retry.');
       reply = result.choices[0].message.content;
+      if (result.choices[0].finish_reason === 'length') throw new Error('Interpretation was truncated. Please retry.');
       const draft = validateInterpretation(reply, description, vocabulary);
-      self.postMessage({ id, draft, seconds: (performance.now() - start) / 1000 });
+      self.postMessage({ id, draft, seconds: (performance.now() - start) / 1000,
+        ...(data.syntheticProof ? { reply, usage: result.usage } : {}) });
     } else throw new Error('Unknown interpreter action.');
   } catch (error) { self.postMessage({ id, error: error.message, seconds: (performance.now()-started)/1000,
     ...(data.syntheticProof ? { reply } : {}) }); }
