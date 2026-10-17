@@ -14,12 +14,12 @@ Follow this once after cloning, in order. The last step is a green `pytest`. Com
 
    Open a new terminal afterwards so the tools are on `PATH`. Check: `py -3.12 --version` prints 3.12.x.
 2. Clone `AdrielAu/PlotLuck`, open the folder in VS Code and accept the recommended extensions (listed in `.vscode/extensions.json`).
-3. From the repo root, create the virtualenv and install the code. `.[test]` also installs `pytest`.
+3. From the repo root, create the virtualenv and install the code. The extra index gives the CPU-only PyTorch build; `.[test]` also installs `pytest`.
 
    ```powershell
    py -3.12 -m venv .venv
    .venv\Scripts\Activate.ps1
-   pip install -r requirements.txt
+   pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
    pip install -e ".[test]"
    ```
 

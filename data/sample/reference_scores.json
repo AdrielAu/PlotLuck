@@ -1,0 +1,84 @@
+{
+ "version": 1,
+ "tolerance": 1e-06,
+ "cases": [
+  {
+   "profile": {
+    "cuisine": "British",
+    "venue_type": "Restaurant",
+    "price_band": "unknown",
+    "chain": false,
+    "vegetarian_friendly": false,
+    "vegan_options": false,
+    "gluten_free": false
+   },
+   "scores": {
+    "EC3M": 0.7046129430600155,
+    "EC3N": 0.6738783655819207,
+    "EC3P": 0.6632848274145654,
+    "EC3R": 0.650923451953291,
+    "EC4P": 0.6632848274145654,
+    "EC4R": 0.6764788170511077,
+    "EC4V": 0.6719773126270897,
+    "SE1": 0.5451084098118363,
+    "SE11": 0.5654755013876736,
+    "SE16": 0.6049720516193055,
+    "SE17": 0.5714089817022365,
+    "SE1P": 0.6587958597886596,
+    "WC2R": 0.6137356580321163
+   }
+  },
+  {
+   "profile": {
+    "cuisine": "Unspecified",
+    "venue_type": "Pub and bar",
+    "price_band": "$$",
+    "chain": true,
+    "vegetarian_friendly": true,
+    "vegan_options": true,
+    "gluten_free": true
+   },
+   "scores": {
+    "EC3M": 0.7237040401676048,
+    "EC3N": 0.6943609959753034,
+    "EC3P": 0.6814150614804311,
+    "EC3R": 0.674733439747553,
+    "EC4P": 0.6814150614804311,
+    "EC4R": 0.7002631871223962,
+    "EC4V": 0.691915329066918,
+    "SE1": 0.5987433337183783,
+    "SE11": 0.6042514218530745,
+    "SE16": 0.6234685422298736,
+    "SE17": 0.6120519568292799,
+    "SE1P": 0.6985621319806539,
+    "WC2R": 0.6491430133157657
+   }
+  },
+  {
+   "profile": {
+    "cuisine": "Unspecified",
+    "venue_type": "Restaurant",
+    "price_band": "unknown",
+    "chain": false,
+    "vegetarian_friendly": false,
+    "vegan_options": false,
+    "gluten_free": false
+   },
+   "scores": {
+    "EC3M": 0.693888786931558,
+    "EC3N": 0.6634948587615059,
+    "EC3P": 0.6485955269677918,
+    "EC3R": 0.6372100335075428,
+    "EC4P": 0.6485955269677918,
+    "EC4R": 0.6654279098074053,
+    "EC4V": 0.6618301273979958,
+    "SE1": 0.5333958208476076,
+    "SE11": 0.5469355188873578,
+    "SE16": 0.591909234009403,
+    "SE17": 0.5615398975163511,
+    "SE1P": 0.6488501804715076,
+    "WC2R": 0.6000359206291461
+   }
+  }
+ ]
+}

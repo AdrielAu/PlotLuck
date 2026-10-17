@@ -1,0 +1,9 @@
+tag,kind,cuisine,parent,venue_type
+British,cuisine,British,European,
+Chinese,cuisine,Chinese,Asian,
+Indian,cuisine,Indian,Asian,
+Italian,cuisine,Italian,European,
+Pizza,cuisine,Italian,European,
+Thai,cuisine,Thai,Asian,
+Turkish,cuisine,Turkish,Middle Eastern,
+Cafe,venue,,,Café

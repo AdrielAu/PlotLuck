@@ -2,13 +2,17 @@
 # issue #8). Direct imports only: add a package here when code first imports
 # it, pinned to the version in that freeze.
 #
-# Nothing is imported yet beyond the standard library. The tests import
-# pytest, which the container image does not ship: pin it here once the
-# version installed in the container is known.
+# The tests import pytest, which the container image does not ship: pin it
+# here once the version installed in the container is known.
+numpy==2.0.2
+scipy==1.13.1
+
+# The image's torch is a local s390x wheel (2.11.0+cpu), which satisfies this
+# pin. Laptops get the CPU build through the extra index in docs/setup.md.
+torch==2.11.0
 
 # Image-provided, s390x only (local wheels; not installable elsewhere).
 # Only server-only code imports these.
-# torch==2.11.0+cpu
 # torch_nnpa==1.5.0+gite861108
 # tensorflow==2.18.1
 # ibm-zdnn-plugin==2.3.0

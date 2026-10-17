@@ -1,0 +1,84 @@
+{
+ "version": 1,
+ "cuisines": [
+  {
+   "cuisine": "British",
+   "cuisine_group": "British",
+   "label": "British"
+  },
+  {
+   "cuisine": "Chinese",
+   "cuisine_group": "Chinese",
+   "label": "Chinese"
+  },
+  {
+   "cuisine": "Indian",
+   "cuisine_group": "Indian",
+   "label": "Indian"
+  },
+  {
+   "cuisine": "Italian",
+   "cuisine_group": "Italian",
+   "label": "Italian"
+  },
+  {
+   "cuisine": "Thai",
+   "cuisine_group": "Thai",
+   "label": "Thai"
+  },
+  {
+   "cuisine": "Turkish",
+   "cuisine_group": "Turkish",
+   "label": "Turkish"
+  },
+  {
+   "cuisine": "Unspecified",
+   "cuisine_group": "Other",
+   "label": "Unspecified (scored as Other)"
+  }
+ ],
+ "traits": [
+  {
+   "name": "venue_type",
+   "kind": "single_choice",
+   "values": [
+    "Restaurant",
+    "Pub and bar",
+    "Café",
+    "Fast food and street food"
+   ],
+   "default": "Restaurant"
+  },
+  {
+   "name": "price_band",
+   "kind": "single_choice",
+   "values": [
+    "$",
+    "$$",
+    "$$$",
+    "unknown"
+   ],
+   "default": "unknown"
+  },
+  {
+   "name": "chain",
+   "kind": "on_off",
+   "default": false
+  },
+  {
+   "name": "vegetarian_friendly",
+   "kind": "on_off",
+   "default": false
+  },
+  {
+   "name": "vegan_options",
+   "kind": "on_off",
+   "default": false
+  },
+  {
+   "name": "gluten_free",
+   "kind": "on_off",
+   "default": false
+  }
+ ]
+}
