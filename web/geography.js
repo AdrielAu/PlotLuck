@@ -25,7 +25,7 @@ export async function validateCatalogue(catalogue, districts) {
   for (const p of catalogue.places) {
     if (!keys(p, ["id", "name", "aliases", "type", "context", "lat", "lon", "districts"]) ||
         ![p.id, p.name, p.context].every(text) || ids.has(p.id) ||
-        !["city", "borough", "region", "local_authority", "settlement"].includes(p.type) ||
+        !["city", "borough", "region", "county", "local_authority", "settlement"].includes(p.type) ||
         !Array.isArray(p.aliases) || !p.aliases.every(text) ||
         !Number.isFinite(p.lat) || !Number.isFinite(p.lon) || p.lat < 49 || p.lat > 57 || p.lon < -7 || p.lon > 3 ||
         !Array.isArray(p.districts) || !p.districts.every(code => codes.has(code)) || new Set(p.districts).size !== p.districts.length) {

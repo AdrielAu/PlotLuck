@@ -15,8 +15,9 @@ function fakeRuntime(loads = true) {
     return {chat:{completions:{create:async options=>{
       const text=options.messages.at(-1).content;
       if (text.includes('slow')) await new Promise(resolve=>setTimeout(resolve,700));
-      const data={region:/london/i.test(text)?'London':text.includes('Hugh Town')?'Hugh Town':text.includes('Greater Manchester')?'Greater Manchester':text.includes('SE1')?'SE1':null,
-        cuisine:/thai/i.test(text)?'Thai':null,price_band:/mid[ -]?range/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
+      const data={region:/london/i.test(text)?'London':text.includes('Hugh Town')?'Hugh Town':/greater manchester/i.test(text)?'Greater Manchester':text.includes('SE1')?'SE1':null,
+        cuisine:/thai/i.test(text)?'Thai':null,price_band:/mid(?:[ -]?range| price range)/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
+        rent_band:/cheap rent/i.test(text)?'low':null,
         requirements:/no other requirements/i.test(text)?'no other requirements':/vegan options/i.test(text)?'vegan options':null};
       if (text.includes('Greater London')) data.region='Greater London';
       if (text.includes('mid Range')) data.price_band='$$';
@@ -43,6 +44,20 @@ async function submit(page, text, {raw = false, omit = []} = {}) {
   await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(raw ? text : completeText(text,omit));
   await page.getByRole('button', { name:'Find districts', exact:true }).click();
 }
+
+test('Greater Manchester and stated food prices and cheap rent are retained without repeat questions',async t=>{
+  const {page}=await openPage(t);
+  await submit(page,'i want to open a thai restaurant in greater manchester that serves mid price range food. i want as cheap rent as possible',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.equal(await page.locator('#clarification-fields select').count(),0);
+  assert.equal(await page.locator('#clarify-other').count(),1);
+  await page.getByRole('button',{name:'No other requirements',exact:true}).click();
+  await page.getByRole('button',{name:'Show districts',exact:true}).click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Thai.*Greater Manchester/);
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Mid-range/);
+  assert.deepEqual(page.errors,[]);
+});
 
 test('A restaurant in london asks every unanswered Erica question and retains the read restaurant type', async t => {
   const {page}=await openPage(t);
@@ -154,7 +169,7 @@ test('an invalid price prediction asks only for price and place, without replaci
   await page.locator('#results-screen').waitFor();
   const before=await page.locator('#ranked').textContent();
   await page.getByRole('button',{name:'Edit description',exact:true}).click();
-  await submit(page,'A Thai restaurant in London with uncertain prices.');
+  await submit(page,'A Thai restaurant in London with uncertain prices.',{omit:['price']});
   await page.waitForFunction(()=>!document.querySelector('#clarification').hidden || !document.querySelector('#description-error').hidden);
   assert.equal(await page.locator('#description-error').isHidden(),true);
   assert.ok(await page.locator('#clarify-price').count());

@@ -448,5 +448,11 @@
     "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Regions_December_2025_Boundaries_EN_BGC/FeatureServer/0/query?where=RGN25CD+LIKE+%27E%25%27&outFields=RGN25CD%2CRGN25NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=0&resultRecordCount=100",
     "sha256": "cabf2bac167908db3ab63418370edea49e824f6510e85182953d1bb47f88fce2",
     "bytes": 5132857
+  },
+  {
+    "file": "metropolitan_county-00000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Upper_Tier_Local_Authorities_December_2022_Boundaries_UK_BGC/FeatureServer/0/query?where=UTLA22CD+LIKE+%27E11%25%27&outFields=UTLA22CD%2CUTLA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=0&resultRecordCount=100",
+    "sha256": "6bb1712d3ca6183512f8bad779f05858c9e00c16eb757a60b7e2291b5ed664e1",
+    "bytes": 315931
   }
 ]
