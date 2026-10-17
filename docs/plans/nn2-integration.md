@@ -1,6 +1,16 @@
 # NN2 integration plan
 
-## Latest user amendment: one description, then results (2026-10-17)
+## Latest user amendment: one description fills the review card (2026-10-17)
+
+The user confirmed: **"The user can prompt the NN2, it will then fill in the review card."** The single free-text description from the amendment below stays; the six questions do not return. Instead of going straight to results, NN2's validated interpretation fills the review card, and the user confirms it before NN1 scores. This supersedes the amendment below's "directly to NN1 results" and "no routine review card".
+
+- One free-text description, up to 1,000 characters, makes one NN2 call.
+- The review card shows the cuisine, venue type, price band, traits, search area and rent band with explicit/inferred/default marks and unused details. Each value is a picker that NN2 pre-fills, so the user can manually pick the right value if NN2 got it wrong, then confirm (ADR 0006, Q5/Q9); **Compare districts** runs NN1. From results, **Edit** reopens the card with the last choices, and manual picks stay until the description is reinterpreted.
+- Unclear or invalid details (ambiguous places, conflicting cuisines, a rent budget without a band, a rejected price) appear on the review card as needing a choice and block comparison.
+- Everything else in the amendment below still applies: download on submission with size, progress and Cancel; strict validation; offline geography; never widening empty areas; retry limits; no silent fallback; preserving previous results. The model quality and release gates remain open.
+- The code still opens results directly (`web/free-text.js`, #169) until the review card is wired in.
+
+## Superseded user amendment: one description, then results (2026-10-17)
 
 The user replaced the six-question journey and confirmed: **"Show results immediately; ask only when clarification is needed."** This supersedes #158's six free-text questions, Q5/Q9's routine review-before-scoring, and #127's picker-based editing. The older requirements below remain historical context where they conflict with this amendment.
 

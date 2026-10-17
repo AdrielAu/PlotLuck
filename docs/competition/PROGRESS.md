@@ -16,7 +16,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
 | 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #164; [ranking revamp](RANKING.md) |
-| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); latest user amendment replaces #136/#158's questions with one description, direct results and targeted clarification; model/release gates remain open; [plan](../plans/nn2-integration.md) |
+| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); one description (#169); latest user amendment has NN2 fill the review card before scoring, not yet wired in; model/release gates remain open; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77, #161; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | in progress | #65, #67, #101, #77; bundle v3 pending full-data export |
@@ -27,7 +27,8 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 ## Now
 
-- **Latest NN2 interface amendment**: one description replaces the six-question flow and results pickers. Clear valid interpretations go straight to results; only unclear/invalid details require clarification. Download starts on submission, with progress and cancellation. This supersedes the older review-card behavior described below; historical experiment results and all release gates remain unchanged. The current UI uses the focused candidate from #139. It has not passed the final quality gate, particularly explicit menu-price/rent extraction.
+- **Latest NN2 interface amendment**: NN2 reads the one description and pre-fills the review card's pickers; the user can correct any wrong value manually and confirms before scoring. The code still opens results directly until the card is wired in.
+- **Earlier NN2 interface amendment**: one description replaces the six-question flow and results pickers. Clear valid interpretations go straight to results; only unclear/invalid details require clarification. Download starts on submission, with progress and cancellation. This supersedes the older review-card behavior described below; historical experiment results and all release gates remain unchanged. The current UI uses the focused candidate from #139. It has not passed the final quality gate, particularly explicit menu-price/rent extraction.
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
