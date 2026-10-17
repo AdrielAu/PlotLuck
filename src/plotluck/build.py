@@ -245,42 +245,57 @@ def validate_run_metrics(metrics: dict) -> None:
         "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
         "districts_without_rent", "cv", "shipped",
     }
-    if not isinstance(metrics, dict) or set(metrics) - allowed:
-        raise ValueError("run metrics have private or unexpected fields")
+    _only_keys(metrics, allowed, "run metrics")
+
+    def count(value):
+        if type(value) is not int or value < 0:
+            raise ValueError("run metrics counts must be non-negative integers")
+
+    def number(value):
+        if not _finite_number(value) or value < 0:
+            raise ValueError("run metrics losses and errors must be finite non-negative numbers")
+
+    def loss_curve(values):
+        if not isinstance(values, list) or not values:
+            raise ValueError("run metrics loss curve must contain numbers only")
+        for value in values:
+            number(value)
+
     for name in ("source_rows", "restaurants", "labelled", "districts_without_rent"):
-        if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
-            raise ValueError(f"run metrics {name} must be a count")
+        count(metrics[name])
     reasons = {
         "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
     }
     for name, allowed_reasons in reasons.items():
         if not isinstance(metrics.get(name), dict) or any(
-            not isinstance(count, int) or count < 0 for count in metrics[name].values()
+            type(value) is not int or value < 0 for value in metrics[name].values()
         ) or set(metrics[name]) - allowed_reasons:
             raise ValueError(f"run metrics {name} must contain counts only")
-    errors = ("mae", "rmse", "baseline_mae", "baseline_rmse")
-    cv = metrics.get("cv")
+    cv = metrics["cv"]
     _only_keys(cv, ("folds", "summary"), "run metrics cv")
+    errors = ("mae", "rmse", "baseline_mae", "baseline_rmse")
+    if not isinstance(cv["folds"], list) or not cv["folds"]:
+        raise ValueError("run metrics cv must contain folds")
+    for fold in cv["folds"]:
+        _only_keys(fold, (*errors, "rows", "best_epoch", "train_loss", "early_stop_loss"), "run metrics fold")
+        _only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics fold rows")
+        for value in fold["rows"].values():
+            count(value)
+        count(fold["best_epoch"])
+        for name in errors:
+            number(fold[name])
+        loss_curve(fold["train_loss"])
+        loss_curve(fold["early_stop_loss"])
     _only_keys(cv["summary"], errors, "run metrics cv summary")
-    for stats in cv["summary"].values():
-        _only_keys(stats, ("mean", "std"), "run metrics cv summary")
-    folds = cv["folds"] if isinstance(cv["folds"], list) else [None]
-    for fold in folds:
-        _only_keys(fold, ("rows", "best_epoch", *errors, "train_loss", "early_stop_loss"), "run metrics cv fold")
-        _only_keys(fold["rows"], ("fit", "early_stop", "test"), "run metrics cv fold rows")
-    shipped = metrics.get("shipped")
+    for summary in cv["summary"].values():
+        _only_keys(summary, ("mean", "std"), "run metrics error summary")
+        for value in summary.values():
+            number(value)
+    shipped = metrics["shipped"]
     _only_keys(shipped, ("epochs", "train_loss"), "run metrics shipped")
-    counts = [shipped["epochs"], *(n for f in folds for n in (f["best_epoch"], *f["rows"].values()))]
-    if not all(isinstance(n, int) and not isinstance(n, bool) and n >= 0 for n in counts):
-        raise ValueError("run metrics epochs and fold rows must be counts")
-    numbers = [s for stats in cv["summary"].values() for s in stats.values()]
-    numbers += [f[name] for f in folds for name in errors]
-    curves = [shipped["train_loss"], *(f[c] for f in folds for c in ("train_loss", "early_stop_loss"))]
-    if not all(isinstance(c, list) for c in curves) or not all(
-        _finite_number(n) for n in numbers + [loss for c in curves for loss in c]
-    ):
-        raise ValueError("run metrics errors and loss curves must contain numbers only")
+    count(shipped["epochs"])
+    loss_curve(shipped["train_loss"])
 
 
 def publish_bundle(out: Path, bundle: dict) -> None:
