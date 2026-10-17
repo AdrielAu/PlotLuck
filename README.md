@@ -6,7 +6,7 @@ Where in England should your restaurant open? Plotluck is building a tool to sco
 
 ## Planned MVP
 
-Describe your restaurant idea and location in one text box. NN2 reads it on your device, then asks for any missing cuisine, menu prices, rent, restaurant type or other requirements. Without a location the search is England; unclear places need confirmation. Results open once all six inputs are accounted for. You can explicitly choose unknown prices, any rent or no other requirements. Edit your description to change the search. Explore district centroid circles, a score threshold and a ranked list. First use downloads about 288 MB; desktop Chrome or Edge with WebGPU is required. NN2's model-quality and release gates remain open. Clusters, driver charts and the cultural demand gap come later.
+Describe your restaurant idea and location in one text box. NN2 reads it on your device, then asks for any missing cuisine, menu prices, rent, restaurant type or other requirements. Without a location the search is England; unclear places need confirmation. Results open once all six inputs are accounted for. You can explicitly choose unknown prices, any rent or no other requirements. Edit your description to change the search. Explore estimated district outlines, a score threshold and a ranked list. First use downloads about 288 MB; desktop Chrome or Edge with WebGPU is required. NN2's model-quality and release gates remain open. Clusters, driver charts and the cultural demand gap come later.
 
 The build is in progress; see [Progress](docs/competition/PROGRESS.md) for implementation status.
 

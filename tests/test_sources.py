@@ -85,6 +85,7 @@ def onspd_row(pcds, ctry, **overrides):
         "lat": "51.498709",
         "long": "-0.101747",
         "imd25ind": "4977",
+        "usrtypind": "0",
     }
     row.update(overrides)
     return row
@@ -93,7 +94,7 @@ def onspd_row(pcds, ctry, **overrides):
 def test_onspd_extract_keeps_england_postcodes_with_their_district(tmp_path):
     rows = [
         onspd_row("SE1 0AA", "E92000001"),
-        onspd_row("SW1A 1AA", "E92000001", doterm="202001"),
+        onspd_row("SW1A 1AA", "E92000001", doterm="202001", usrtypind="1"),
         onspd_row("EH1 1AA", "S92000003"),
     ]
     raw = tmp_path / "raw" / "onspd.zip"
@@ -113,6 +114,7 @@ def test_onspd_extract_keeps_england_postcodes_with_their_district(tmp_path):
     assert out[0]["country_code"] == "E92000001"
     assert out[0]["region_code"] == "E12000007"
     assert out[0]["imd25ind"] == "4977"
+    assert [r["usrtypind"] for r in out] == ["0", "1"]  # residential or business: outlines skip business ones
 
 
 def test_p004_extract_keeps_districts_with_english_postcodes(tmp_path):

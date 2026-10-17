@@ -1,9 +1,12 @@
 // Score a restaurant profile in every district with the bundle's NN1 weights.
 // Pure: no DOM or Leaflet, so it runs in Node tests and in the browser.
+import { decodeOutlines } from "./outlines.js";
 
 // Must match BUNDLE_VERSION in src/plotluck/build.py.
-export const BUNDLE_VERSION = 3;
-const SUPPORTED_BUNDLE_VERSIONS = [2, BUNDLE_VERSION];
+export const BUNDLE_VERSION = 4;
+const SUPPORTED_BUNDLE_VERSIONS = [2, 3, BUNDLE_VERSION];
+// The first bundle version with district_outlines.json.
+const OUTLINES_VERSION = 4;
 
 // Load the bundle through `read(name) -> Promise<text>` (fetch in the page, fs in tests).
 export async function loadBundle(read) {
@@ -24,11 +27,14 @@ export async function loadBundle(read) {
         !Number.isFinite(Number(d.centroid_lon)) || d.centroid_lat === "" || d.centroid_lon === "") {
       throw new Error("districts.csv has an invalid district code or coordinate");
     }
-    // Not an NN1 input: the results map draws each district as a circle of this radius.
+    // Not an NN1 input: the results map draws a district without an outline as a circle of this radius.
     if (!Number.isFinite(Number(d.radius_km)) || !(Number(d.radius_km) > 0)) {
       throw new Error("districts.csv has a missing or invalid radius_km");
     }
   }
+  const outlines = model.version >= OUTLINES_VERSION
+    ? decodeOutlines(JSON.parse(await read("district_outlines.json")), new Set(districts.map((d) => d.postcode_district)))
+    : new Map();
   for (const r of supply) {
     if (!r.postcode_district || !r.cuisine_group || r.restaurants === "" ||
         !Number.isFinite(Number(r.restaurants)) || Number(r.restaurants) < 0) {
@@ -37,6 +43,8 @@ export async function loadBundle(read) {
   }
   return {
     districts,
+    // District code -> closed [lat, lng] rings; districts missing here are drawn as circles.
+    outlines,
     supply: new Map(supply.map((r) => [supplyKey(r.postcode_district, r.cuisine_group), Number(r.restaurants)])),
     groups: new Map(vocabulary.cuisines.map((c) => [c.cuisine, c.cuisine_group])),
     vocabulary,

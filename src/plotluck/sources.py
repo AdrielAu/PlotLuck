@@ -286,6 +286,7 @@ ONSPD_COLUMNS = (
     "region_code",
     "doterm",
     "imd25ind",
+    "usrtypind",
 )
 # Whole-UK file only; Data/multi_csv/ repeats it split by postcode area.
 _ONSPD_MEMBER = re.compile(r"Data/ONSPD_[A-Z]{3}_\d{4}_UK\.csv")
@@ -318,6 +319,7 @@ def _onspd_rows(data: Path):
                         row[rgn],
                         row["doterm"],
                         row["imd25ind"],
+                        row["usrtypind"],
                     ]
 
 

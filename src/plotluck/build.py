@@ -29,16 +29,17 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from plotluck import context, label, nn1, quality
+from plotluck import context, label, nn1, outlines, quality
 from plotluck.geometry import EARTH_RADIUS_KM, cluster_points, haversine_km
 from plotluck.names import normalise_name
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
-BUNDLE_VERSION = 3
+BUNDLE_VERSION = 4
 BUNDLE_FILES = (
     "districts.csv",
     "district_cuisine_supply.csv",
+    "district_outlines.json",
     "vocabulary.json",
     "model.json",
     "reference_scores.json",
@@ -123,10 +124,9 @@ LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisi
 # VOA measuring standards the rent index divides by, in order of preference:
 # net internal area, then gross internal area where a district has no NIA.
 VOA_AREA_UNITS = ("NIA", "GIA")
-# Map circle radius: the distance from the centroid within which this share of
-# a district's postcodes lie, so one stray postcode does not inflate it. A
-# district with one or two postcodes (a PO box, one building) gets the minimum.
-RADIUS_SHARE = 0.9
+# Map circle: the disc whose area matches the district's postcode spread. A
+# district with one or two postcodes (a PO box, one building) gets the minimum,
+# and so does one without an outline (district_outlines.json), drawn as a dot.
 MIN_RADIUS_KM = 0.3
 
 
@@ -179,6 +179,13 @@ def build(
          {d["postcode_district"]: ("unchecked", "") for d in raw_districts})
     )
     scored_codes = {d["postcode_district"] for d in districts}
+    # Every postcode, cross-border ones too, so a neighbour's outline stops where theirs starts.
+    outline_file = {"version": BUNDLE_VERSION, **outlines.district_outlines(all_postcodes, scored_codes)}
+    for d in districts:
+        if d["postcode_district"] not in outline_file["districts"]:
+            # No residential postcode of its own: a business-only or retired district,
+            # whose points scatter across other districts. A dot, not a spread circle.
+            d["radius_km"] = MIN_RADIUS_KM
     policy = label_restaurants(restaurants, reliable_codes)
     labelled = [r for r in restaurants if r["review_success_label"] != "" and r["postcode_district"] in reliable_codes]
     fine_threshold = min(MAX_FINE_CUISINE_THRESHOLD, max(3, group_threshold // 6))
@@ -236,6 +243,7 @@ def build(
     bundle = {
         "districts.csv": districts,
         "district_cuisine_supply.csv": supply_rows,
+        "district_outlines.json": outline_file,
         "vocabulary.json": vocab,
         "model.json": model,
         "reference_scores.json": reference,
@@ -448,6 +456,7 @@ def publish_bundle(out: Path, bundle: dict) -> None:
             if row[name] != context.summary(values, fields, labels):
                 raise ValueError("districts.csv has private or unexpected demographic summaries")
     district_codes = {row["postcode_district"] for row in districts}
+    _validate_outlines(bundle["district_outlines.json"], district_codes)
 
     vocab = bundle["vocabulary.json"]
     only_keys(vocab, ("version", "cuisines", "traits"), "vocabulary.json")
@@ -555,9 +564,33 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     out.mkdir(parents=True, exist_ok=True)
     _write_csv(out / "districts.csv", district_columns, districts)
     _write_csv(out / "district_cuisine_supply.csv", ("postcode_district", "cuisine_group", "restaurants"), supply)
+    (out / "district_outlines.json").write_text(
+        json.dumps(bundle["district_outlines.json"], separators=(",", ":")) + "\n", encoding="utf-8"
+    )
     _write_json(out / "vocabulary.json", vocab)
     _write_json(out / "model.json", model, indent=None)
     _write_json(out / "reference_scores.json", reference)
+
+
+def _validate_outlines(file: dict, district_codes: set[str]) -> None:
+    """Outlines hold only integer arcs and arc references for published districts."""
+    only_keys(file, ("version", "quantum", "arcs", "districts"), "district_outlines.json")
+    if file["version"] != BUNDLE_VERSION or file["quantum"] != outlines.QUANTUM_DEG:
+        raise ValueError("district_outlines.json has unexpected metadata")
+    arcs = file["arcs"]
+    if not isinstance(arcs, list) or not all(
+        isinstance(arc, list) and len(arc) >= 4 and len(arc) % 2 == 0
+        and all(type(value) is int for value in arc) for arc in arcs
+    ):
+        raise ValueError("district_outlines.json has an invalid arc")
+    if not isinstance(file["districts"], dict) or set(file["districts"]) - district_codes:
+        raise ValueError("district_outlines.json has an unexpected district")
+    for rings in file["districts"].values():
+        if not isinstance(rings, list) or not rings or not all(
+            isinstance(ring, list) and ring and all(type(k) is int and -len(arcs) <= k < len(arcs) for k in ring)
+            for ring in rings
+        ):
+            raise ValueError("district_outlines.json has an invalid arc reference")
 
 
 def vocabulary(groups: dict[str, str], traits: list[dict], fine_cuisines=()) -> dict:
@@ -951,16 +984,20 @@ def district_table(
         kinds.append(point["tourism"])
     for district, kind in zip(nearest_postcodes(postcodes, tourism_points)[0], kinds):
         tourism_counts[district, kind] += 1
-    points, ranks = {}, {}
+    points, live, ranks = {}, {}, {}
     for p in postcodes:
         lat, lon = float_or_none(p["lat"]), float_or_none(p["long"])
         if lat is not None and lon is not None and lat <= 90:  # 99.999999 = no grid reference
             points.setdefault(p["district"], []).append((lat, lon))
+            if not p["doterm"]:
+                live.setdefault(p["district"], []).append((lat, lon))
         if float_or_none(p["imd25ind"]) is not None:
             ranks.setdefault(p["district"], []).append(float(p["imd25ind"]))
     rows = []
     for code in sorted(points):
-        lats, lons = zip(*points[code])
+        # Terminated postcodes keep the place they had when retired, kilometres
+        # away after a recode, so the circle uses live ones where there are any.
+        lats, lons = zip(*live.get(code, points[code]))
         lat, lon = statistics.fmean(lats), statistics.fmean(lons)
         demographic = {name: demographics.get(code, {}).get(name, "") for name in context.DEMOGRAPHIC_INPUTS}
         rows.append({
@@ -982,15 +1019,18 @@ def district_table(
 
 
 def _radius_km(lat: float, lon: float, lats: tuple[float, ...], lons: tuple[float, ...]) -> float:
-    """Circle radius around (lat, lon) covering ``RADIUS_SHARE`` of the points, at least ``MIN_RADIUS_KM``.
+    """Radius of the disc the points around (lat, lon) fill, at least ``MIN_RADIUS_KM``.
 
+    Half the points of a filled disc lie within 1/√2 of its radius, so the median
+    distance times √2 sizes it. A cluster of business postcodes stacked on one far
+    point moves a median little, where it stretches a high quantile out to itself.
     Distances are on a flat map local to the district, which is close enough at district scale.
     """
     # shortcut: a coverage circle from postcode points, not district boundaries; upgrade if a
     # permitted postcode-district boundary source appears (none from OS/ONS as of 2026-10).
     dy = np.radians(np.subtract(lats, lat))
     dx = np.radians(np.subtract(lons, lon)) * math.cos(math.radians(lat))
-    radius = float(np.quantile(np.hypot(dx, dy), RADIUS_SHARE)) * EARTH_RADIUS_KM
+    radius = math.sqrt(2) * float(np.median(np.hypot(dx, dy))) * EARTH_RADIUS_KM
     return round(max(radius, MIN_RADIUS_KM), 3)
 
 

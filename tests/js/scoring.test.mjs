@@ -26,6 +26,8 @@ function tinyBundle({
   includeFineCuisine = false,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
+  // AB1 as one closed square ring; version 4 bundles carry it, older ones do not.
+  outlines = { version, quantum: 1e-4, arcs: [[0, 515000, 10, 0, 0, 10, -10, 0, 0, -10]], districts: { AB1: [[0]] } },
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
   // `radiusKm: null` leaves the radius_km column out.
@@ -55,9 +57,31 @@ function tinyBundle({
       layers: [{ weights: [weights], biases: [0] }],
       activations: ["sigmoid"],
     }),
+    "district_outlines.json": JSON.stringify(outlines),
   };
-  return loadBundle(async (name) => files[name]);
+  return loadBundle(async (name) => {
+    if (version < 4 && name === "district_outlines.json") throw new Error("an older bundle has no outlines file");
+    return files[name];
+  });
 }
+
+test("a version 4 bundle carries each district's outline as closed [lat, lng] rings", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0] });
+  const [ring] = bundle.outlines.get("AB1");
+  assert.equal(ring.length, 5);
+  assert.deepEqual(ring[0], ring.at(-1));
+  assert.ok(Math.abs(ring[0][0] - 51.5) < 1e-9 && Math.abs(ring[1][1] - 0.001) < 1e-9);
+});
+
+test("an older bundle loads without outlines, so every district is a circle", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], version: 3 });
+  assert.equal(bundle.outlines.size, 0);
+});
+
+test("an outline for a district not in districts.csv is rejected while loading", async () => {
+  const outlines = { version: BUNDLE_VERSION, quantum: 1e-4, arcs: [[0, 0, 10, 0, 0, 10, -10, -10]], districts: { ZZ9: [[0]] } };
+  await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], outlines }), /ZZ9/);
+});
 
 test("a bundle version the site does not know raises", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], version: BUNDLE_VERSION + 1 }), /version/);

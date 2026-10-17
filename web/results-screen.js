@@ -23,8 +23,11 @@ export function showScreen(id) {
 // Answers stay in this tab's memory: nothing goes in the address, history or storage.
 export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers }) {
   const centroids = new Map(bundle.districts.map((d) => [d.postcode_district, [Number(d.centroid_lat), Number(d.centroid_lon)]]));
+  const radii = new Map(bundle.districts.map((d) => [d.postcode_district, Number(d.radius_km) * 1000]));
   let map = null;
-  let circles = null;
+  // Each district's shape: its estimated outline, or a circle when it has none
+  // (a business-only or retired district, or a bundle from before outlines).
+  let shapes = null;
   // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
   let onScreen = null;
   // The shown districts' list buttons by code, and the district highlighted on both map and list.
@@ -32,17 +35,27 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
   let highlighted = null;
   let ring = null;
 
-  // Highlight one district's circle and list row, or none (`null`). The ring is a separate
-  // layer on top, so the circles keep their best-rank-on-top order.
+  // A district's outline or circle, styled by `style`.
+  function shapeOf(code, style) {
+    const rings = bundle.outlines.get(code);
+    return rings ? L.polygon(rings, style) : L.circle(centroids.get(code), { radius: radii.get(code), ...style });
+  }
+
+  // The box a district's shape fills; it works before the shape is on the map.
+  function boundsOf(code) {
+    return bundle.outlines.has(code) ? shapes.get(code).getBounds() : L.latLng(centroids.get(code)).toBounds(radii.get(code) * 2);
+  }
+
+  // Highlight one district's shape and list row, or none (`null`). The ring is a separate
+  // layer on top, so the shapes keep their best-rank-on-top order.
   function highlight(code) {
     // A tooltip a row click opened stays up until closed here.
-    if (highlighted !== code) circles.get(highlighted)?.closeTooltip();
+    if (highlighted !== code) shapes.get(highlighted)?.closeTooltip();
     rows.get(highlighted)?.classList.remove("is-highlighted");
-    ring.remove();
+    ring?.remove();
     highlighted = code;
     if (!code) return;
-    const circle = circles.get(code);
-    ring.setLatLng(circle.getLatLng()).setRadius(circle.getRadius()).addTo(map);
+    ring = shapeOf(code, { color: "#2f3437", weight: 3, fill: false, interactive: false }).addTo(map);
     const row = rows.get(code);
     row?.classList.add("is-highlighted");
     row?.scrollIntoView({ block: "nearest" });
@@ -71,18 +84,17 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-    // Sized in metres, not pixels, so each circle keeps roughly covering its district at every zoom.
-    circles = new Map(
+    // Circles are sized in metres, not pixels, so they keep their ground size at every zoom.
+    shapes = new Map(
       bundle.districts.map((d) => {
         const code = d.postcode_district;
-        const circle = L.circle(centroids.get(code), { radius: Number(d.radius_km) * 1000, color: "#2f3437", weight: 1, fillOpacity: 0.5 })
+        const shape = shapeOf(code, { color: "#2f3437", weight: 1, fillOpacity: 0.5 })
           .bindTooltip("", { direction: "top" })
           .on("mouseover", () => highlight(code))
           .on("mouseout", () => highlight(null));
-        return [code, circle];
+        return [code, shape];
       }),
     );
-    ring = L.circle(ENGLAND[0], { color: "#2f3437", weight: 3, fill: false, interactive: false });
   }
 
   function render() {
@@ -91,12 +103,12 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     $("threshold").setAttribute("aria-valuetext", `${threshold.toFixed(4)} review-based success score`);
     const { shown, countLine, legend, decimals } = resultsAt(scores, threshold);
     const shownByCode = new Map(shown.map((d) => [d.postcode_district, d]));
-    for (const [code, circle] of circles) {
-      if (!shownByCode.has(code)) circle.remove();
+    for (const [code, shape] of shapes) {
+      if (!shownByCode.has(code)) shape.remove();
     }
-    // Worst rank first, so each better-ranked circle is drawn over those before it.
+    // Worst rank first, so each better-ranked shape is drawn over those before it.
     for (const district of shown.toReversed()) {
-      circles.get(district.postcode_district)
+      shapes.get(district.postcode_district)
         .setStyle({ fillColor: district.colour })
         .setTooltipContent(circleLabel(district, decimals))
         .addTo(map)
@@ -125,13 +137,13 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
           return span;
         }));
         button.addEventListener("click", () => {
-          const circle = circles.get(postcode_district);
           // Zoom in until the district fills about a third of the view (a small one is under a
-          // pixel at England's zoom), never out, and no closer than street level.
-          const fit = map.getBoundsZoom(circle.getLatLng().toBounds(circle.getRadius() * 6));
-          map.flyTo(circle.getLatLng(), Math.max(map.getZoom(), Math.min(fit, 13)), { animate: !reducedMotion(), duration: 1 });
+          // pixel at England's zoom), never out, and no closer than street level. Centre on the
+          // postcodes' centroid, which lies inside the district even when its outline is a ring.
+          const fit = map.getBoundsZoom(boundsOf(postcode_district).pad(1));
+          map.flyTo(centroids.get(postcode_district), Math.max(map.getZoom(), Math.min(fit, 13)), { animate: !reducedMotion(), duration: 1 });
           highlight(postcode_district);
-          circle.openTooltip();
+          shapes.get(postcode_district).openTooltip();
         });
         rows.set(postcode_district, button);
         const item = document.createElement("li");
@@ -174,10 +186,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     // Before framing, so the threshold bar has its legend and final height.
     render();
     if (isNewQuery) {
-      // Glide to the whole search area's circles, not just the shown ones, so circles the
+      // Glide to the whole search area's shapes, not just the shown ones, so shapes the
       // slider reveals land inside the view; clear of the threshold bar.
       const bounds = L.latLngBounds([]);
-      for (const code of query.searchArea) bounds.extend(circles.get(code).getLatLng().toBounds(circles.get(code).getRadius() * 2));
+      for (const code of query.searchArea) bounds.extend(boundsOf(code));
       const framing = { paddingTopLeft: [32, 32], paddingBottomRight: [32, document.querySelector(".map-bar").offsetHeight + 24], maxZoom: 13 };
       if (reducedMotion()) map.fitBounds(bounds, { ...framing, animate: false });
       else map.flyToBounds(bounds, { ...framing, duration: 1.5 });

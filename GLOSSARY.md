@@ -12,6 +12,14 @@ _Avoid_: Postcode, area, neighbourhood, borough, zone
 A postcode district with active postcodes assigned to England and at least one other UK country. A district entirely in England that touches a national boundary is not cross-border.
 _Avoid_: Border district
 
+**District outline**:
+The estimated shape of a postcode district on the map: the land nearer to its live residential postcodes than to any other district's. It is not Royal Mail's boundary, which is not openly published.
+_Avoid_: District boundary, polygon
+
+**Business-only postcode district**:
+A postcode district whose live postcodes are all business (large-user) postcodes, such as PO boxes (BD97, BN99). It has no outline.
+_Avoid_: Non-geographic district
+
 **Postcode area**:
 The letter prefix of a postcode (SE, E, W). It groups postcode districts.
 _Avoid_: Area (on its own), region, borough
