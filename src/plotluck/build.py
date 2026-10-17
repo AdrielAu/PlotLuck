@@ -82,6 +82,9 @@ DISTRICT_COLUMNS = (
     "deprivation_index",
     "commercial_rent_index",
 )
+# Register each approved public economic or demographic extension here before
+# adding it to district_table. Unknown fields must never pass through by default.
+DISTRICT_PUBLIC_EXTENSIONS = ()
 
 # NN1's district inputs, in input-vector order, and which get log1p first.
 DISTRICT_INPUTS = (
@@ -192,19 +195,13 @@ def validate_run_metrics(metrics: dict) -> None:
     """Keep server run output to counts, losses and evaluation metrics."""
     allowed = {
         "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
-        "districts_without_rent", "inputs_left_out", "epochs", "train_loss",
+        "districts_without_rent", "epochs", "train_loss",
     }
     if not isinstance(metrics, dict) or set(metrics) - allowed:
         raise ValueError("run metrics have private or unexpected fields")
     for name in ("source_rows", "restaurants", "labelled", "districts_without_rent", "epochs"):
         if name in metrics and (not isinstance(metrics[name], int) or metrics[name] < 0):
             raise ValueError(f"run metrics {name} must be a count")
-    if "inputs_left_out" in metrics and (
-        not isinstance(metrics["inputs_left_out"], dict) or
-        set(metrics["inputs_left_out"]) - set(DISTRICT_INPUTS) or
-        not all(isinstance(reason, str) for reason in metrics["inputs_left_out"].values())
-    ):
-        raise ValueError("run metrics inputs_left_out has private or unexpected fields")
     reasons = {
         "excluded": {"rating_missing", "rating_out_of_range", "n_total_zero"},
         "label_fixes": {"counts_partly_missing", "total_below_counts"},
@@ -227,13 +224,14 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     supply = bundle["district_cuisine_supply.csv"]
     if not isinstance(districts, list) or not districts or not isinstance(supply, list):
         raise ValueError("bundle tables have private or unexpected shape")
+    district_columns = (*DISTRICT_COLUMNS, *DISTRICT_PUBLIC_EXTENSIONS)
     for row in districts:
-        _only_keys(row, DISTRICT_COLUMNS, "districts.csv")
+        _only_keys(row, district_columns, "districts.csv")
         if not isinstance(row["postcode_district"], str) or not re.fullmatch(
             r"[A-Z]{1,2}\d[A-Z\d]?", row["postcode_district"]
         ):
             raise ValueError("districts.csv has an invalid district code")
-        for name in DISTRICT_COLUMNS[1:]:
+        for name in district_columns[1:]:
             if row[name] != "" and not _finite_number(float(row[name])):
                 raise ValueError(f"districts.csv has an invalid {name}")
     district_codes = {row["postcode_district"] for row in districts}
@@ -332,7 +330,7 @@ def publish_bundle(out: Path, bundle: dict) -> None:
     if out.exists() and {path.name for path in out.iterdir()} - set(BUNDLE_FILES) - {".gitkeep"}:
         raise ValueError("bundle output contains private or unexpected files")
     out.mkdir(parents=True, exist_ok=True)
-    _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
+    _write_csv(out / "districts.csv", district_columns, districts)
     _write_csv(out / "district_cuisine_supply.csv", ("postcode_district", "cuisine_group", "restaurants"), supply)
     _write_json(out / "vocabulary.json", vocab)
     _write_json(out / "model.json", model, indent=None)
