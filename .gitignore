@@ -12,6 +12,13 @@
 data/full/
 .venv/
 
+# Model checkpoints and intermediate arrays (results go in runs/, final weights in web/models/)
+*.keras
+*.pt
+*.h5
+*.npy
+*.npz
+
 # Python build artifacts
 __pycache__/
 *.egg-info/
