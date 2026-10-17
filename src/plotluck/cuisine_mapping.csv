@@ -134,6 +134,13 @@ Gastropub,venue,,,Pub and bar
 Wine Bar,venue,,,Pub and bar
 Brew Pub,venue,,,Pub and bar
 Cafe,venue,,,Café
+Bar,venue,,,Pub and bar
+Dim Sum,cuisine,Chinese,Asian,
+European,umbrella,European,,
+Fast Food,venue,,,Fast food and street food
+Healthy,set_aside,,,
+Mediterranean,umbrella,Mediterranean,European,
+Pub,venue,,,Pub and bar
 Deli,venue,,,Café
 Coffee & Tea,venue,,,Café
 Fast Food,venue,,,Fast food and street food
