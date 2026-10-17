@@ -10,3 +10,5 @@ Ingest, training, benchmark and export notebooks. Keep them thin: orchestration 
 - Server operation (tunnel, shared clone, handover) lives in [`docs/server.md`](../docs/server.md).
 
 `smoke.ipynb` resolves the data folder and lists it; run it first to confirm an environment works.
+
+`train_nn1.ipynb` builds the bundle, cross-validates NN1 and plots its loss curves. On full data it writes the run to `runs/<yyyy-mm-dd>-train-nn1/`.
