@@ -11,14 +11,14 @@ Screenshots prove the judged steps. Anyone on the team can capture one: take the
 
 ## Shots
 
-Required team scope includes browser NN2 interpretation, a confirmed profile/search area and NN1 district scores. Capture LinuxONE NN2 inference/evaluation separately from NN1 training and accelerated-inference benchmarks. Using pretrained NN2 weights is not training NN2; competition eligibility still needs verification. See [the plan](../plans/nn2-integration.md). Keep step numbers stable.
+Required team scope includes browser NN2 interpretation, a confirmed profile/search area and NN1 district scores. Capture LinuxONE NN2 inference/evaluation separately from NN1 training and accelerated-inference benchmarks. Using pretrained NN2 weights is not training NN2; pretrained-weight competition permission is [team-confirmed](../competition/nn2-eligibility.md), with final artifact licences/notices still requiring review. See [the plan](../plans/nn2-integration.md). Keep step numbers stable.
 
 | Step | Filename | What must be visible | Run folder | Done |
 |---|---|---|---|---|
 | SSH + `lscpu` | `01-ssh-lscpu.png` | SSH session on `linux1`@hostname; `lscpu` output showing `s390x` architecture and Big Endian byte order | none | [x] |
 | `docker ps` | `02-docker-ps.png` | `docker ps` listing the running JupyterLab container (name, image, status Up) | none | [x] |
 | JupyterLab | `03-jupyterlab.png` | JupyterLab open in the browser with the file browser showing the repo, and a notebook open | none | [x] |
-| Ingest | `04-ingest.png` | Ingest notebook with executed cells and visible output (row counts, no errors) | `runs/<yyyy-mm-dd>-ingest/` | [ ] |
+| Ingest | `04-ingest.png` | Ingest notebook with executed cells and visible output (row counts, no errors) | `runs/<yyyy-mm-dd>-ingest/` | [x] |
 | Train NN1 | `05-train-nn1.png` | NN1 training notebook with the loss curve or final epoch log, run on the server | `runs/<yyyy-mm-dd>-train-nn1/` | [x] |
 | NN2 LinuxONE inference/evaluation | `06-nn2-inference.png` | Synthetic description, validated profile/location output, model revision, runtime, s390x environment and measured timings/quality; label pretrained inference accurately | `runs/<yyyy-mm-dd>-nn2-evaluation/` | [ ] |
 | NN2 browser evaluation | `06-nn2-inference-2.png` | Browser/hardware, model/runtime revisions, download bytes, warm latency and quality results against the plan's gates | `runs/<yyyy-mm-dd>-nn2-browser/` | [ ] |

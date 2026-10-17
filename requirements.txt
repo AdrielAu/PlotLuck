@@ -14,6 +14,9 @@ torch==2.11.0
 # Notebooks only (loss-curve plots).
 matplotlib==3.11.2
 
+# NN2 operator-only pretrained CPU inference, installed image version (issue #8).
+transformers==5.19.0
+
 # Image-provided, s390x only (local wheels; not installable elsewhere).
 # Only server-only code imports these.
 # torch_nnpa==1.5.0+gite861108

@@ -5,7 +5,7 @@ Plotluck currently scores English postcode districts using cuisine-and-trait pic
 ## Layout
 
 - `src/plotluck/`: the installable Python package.
-- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring, picker, interpretation and kitchen-roster modules (`node --test`, Node 22+, no install).
+- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring, picker and results modules (`node --test`, Node 22+, no install).
 - `tests/browser/`: real-browser confirmation flows; see [browser test setup](docs/setup.md#browser-flow-tests).
 - `data/`: `sample/` is committed and used locally; `full/` is git-ignored and exists only on the server. See `data/AGENTS.md`.
 - `notebooks/`: ingest, training, benchmark and export notebooks.

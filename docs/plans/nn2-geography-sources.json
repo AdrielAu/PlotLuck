@@ -1,0 +1,452 @@
+[
+  {
+    "file": "settlement-00000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=0&resultRecordCount=100",
+    "sha256": "2363859d4f530e7beb12f11fa4da6814dcd33a7bbbd7324391a0e56e8b2bba89",
+    "bytes": 2476862
+  },
+  {
+    "file": "settlement-00100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=100&resultRecordCount=100",
+    "sha256": "6b338bb70a39d0929219d0601b5a9ae20e88bf6848d95bc63e64d2c1951d925a",
+    "bytes": 2681306
+  },
+  {
+    "file": "settlement-00200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=200&resultRecordCount=100",
+    "sha256": "567ab97b850d9c030b8791b7c08a25092cb9b52e5e78480ca487a459b77ad9bd",
+    "bytes": 2169162
+  },
+  {
+    "file": "settlement-00300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=300&resultRecordCount=100",
+    "sha256": "e16c0a5081a41894c84e37b7928702059ba55e2931bf1a9aac90a204ca02b64a",
+    "bytes": 2553698
+  },
+  {
+    "file": "settlement-00400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=400&resultRecordCount=100",
+    "sha256": "c84e0a0a3ef34dde3732bd04caeac80d7ea21b5caa02758664acaafef19df4de",
+    "bytes": 1670620
+  },
+  {
+    "file": "settlement-00500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=500&resultRecordCount=100",
+    "sha256": "9341b3d5a3e51db9e1553acdc44f1dde4f93c67008b3ba66c41b31e1be9c68d3",
+    "bytes": 1798784
+  },
+  {
+    "file": "settlement-00600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=600&resultRecordCount=100",
+    "sha256": "253bd5a3c3e9ae14194d7cc1d8b1b7cca94ea73c5faeccbbe01feacafcb10deb",
+    "bytes": 2110287
+  },
+  {
+    "file": "settlement-00700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=700&resultRecordCount=100",
+    "sha256": "7d9cde4f355b82a472b84833d938ab623771c9a1e3c0327c0459eb8e204ec07c",
+    "bytes": 2978853
+  },
+  {
+    "file": "settlement-00800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=800&resultRecordCount=100",
+    "sha256": "e6aff22157b17b4f0acdd9a62072c64d04aedb8386f01625beb1c1b6aa233d26",
+    "bytes": 3413434
+  },
+  {
+    "file": "settlement-00900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=900&resultRecordCount=100",
+    "sha256": "22804cc6e7164e0135e087a4a8960c29b6eeb5dfe9fbe795779d351a4b6684e1",
+    "bytes": 3171705
+  },
+  {
+    "file": "settlement-01000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1000&resultRecordCount=100",
+    "sha256": "b1252a95ba2636e8f099efb9b717fcadf02b3f4d2dde465418e9355482647518",
+    "bytes": 2764749
+  },
+  {
+    "file": "settlement-01100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1100&resultRecordCount=100",
+    "sha256": "339a9552c2db44d7bfcc0285efe8c4014e5d8f283d7693f9183c5e765ef8047b",
+    "bytes": 3586775
+  },
+  {
+    "file": "settlement-01200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1200&resultRecordCount=100",
+    "sha256": "102382dcd98cf5d184212ee38c7b66dcbe9706060d45f6d4182f4081f0b2c75f",
+    "bytes": 3064907
+  },
+  {
+    "file": "settlement-01300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1300&resultRecordCount=100",
+    "sha256": "e4e1e8d7c8ceec0c6f92fd16b47db8f13c2fa46c63733ecf615dfb32f1900e4a",
+    "bytes": 3700440
+  },
+  {
+    "file": "settlement-01400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1400&resultRecordCount=100",
+    "sha256": "3643c2cbddacccafeaee39dc38f1c0a20332f4ab8fa90240277081c570c75a9e",
+    "bytes": 3237762
+  },
+  {
+    "file": "settlement-01500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1500&resultRecordCount=100",
+    "sha256": "069859e67d3d03887edd1d6f01fbef60dcfeaec24022d51d4f359807002b5919",
+    "bytes": 2232134
+  },
+  {
+    "file": "settlement-01600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1600&resultRecordCount=100",
+    "sha256": "b853f77a4ceac28bd7d68c0781164a5783591a81ba31d8df57f877d0e892953c",
+    "bytes": 2173239
+  },
+  {
+    "file": "settlement-01700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1700&resultRecordCount=100",
+    "sha256": "4cae5e072e8c21ff69a640295ebe4dc9897ef2d15181d640980790270830cdd2",
+    "bytes": 2256102
+  },
+  {
+    "file": "settlement-01800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1800&resultRecordCount=100",
+    "sha256": "973649f8828c77e67511368561fd8f5217d7ca4229ccea4b406b0a311508ec94",
+    "bytes": 2099591
+  },
+  {
+    "file": "settlement-01900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=1900&resultRecordCount=100",
+    "sha256": "d5cd9649a6c48191536c2b0570fd155bf69748294c79799c9987642c9445ddb4",
+    "bytes": 2642830
+  },
+  {
+    "file": "settlement-02000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2000&resultRecordCount=100",
+    "sha256": "f9214359e787595d416da1fb147149e34313fa68bd44cf5335097a73077a9df6",
+    "bytes": 1937155
+  },
+  {
+    "file": "settlement-02100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2100&resultRecordCount=100",
+    "sha256": "3c87efd5b70505861525033f69a9279a85b528764095f50a4e5b9c4a1c1ae876",
+    "bytes": 1502846
+  },
+  {
+    "file": "settlement-02200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2200&resultRecordCount=100",
+    "sha256": "478df56061d2fbd3346bef40f603db25157aec7cf0ab4f6922ec17282cb61029",
+    "bytes": 2192604
+  },
+  {
+    "file": "settlement-02300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2300&resultRecordCount=100",
+    "sha256": "7c4097afe673bbf3683f04c24f1f75ddb0735ba66d192073a225ce738c3c6e37",
+    "bytes": 1771531
+  },
+  {
+    "file": "settlement-02400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2400&resultRecordCount=100",
+    "sha256": "629f2985f5f503d5dda51305db99ce2794e5672c9373466e33cb50286d1e315f",
+    "bytes": 1846619
+  },
+  {
+    "file": "settlement-02500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2500&resultRecordCount=100",
+    "sha256": "757b8913d9405f70284e6f9fc8927b53a6deb25c6f440b399750726b5eefc2c1",
+    "bytes": 2485897
+  },
+  {
+    "file": "settlement-02600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2600&resultRecordCount=100",
+    "sha256": "d470937bae1d06e9dcb9a55c419a02880124d754c7dc4fb41fae7b8a32fc2b23",
+    "bytes": 2313231
+  },
+  {
+    "file": "settlement-02700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2700&resultRecordCount=100",
+    "sha256": "d608264afb03798274e41096a808f9361ab8d5ef29d7abb87688eed963320513",
+    "bytes": 2314807
+  },
+  {
+    "file": "settlement-02800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2800&resultRecordCount=100",
+    "sha256": "96b33a58f8962952c5241b04dd03f711575fdfe498f7e76f68364957a9c02f22",
+    "bytes": 2357830
+  },
+  {
+    "file": "settlement-02900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=2900&resultRecordCount=100",
+    "sha256": "93552b05d77124f3fd034a894110b52d94146c59d7c77e509a91e4a896d816fb",
+    "bytes": 2314663
+  },
+  {
+    "file": "settlement-03000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3000&resultRecordCount=100",
+    "sha256": "2daa6c1320af343fcdfa614c0c14f3aedba8a44e15b49a3d75e67daa4e5e85ed",
+    "bytes": 2564855
+  },
+  {
+    "file": "settlement-03100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3100&resultRecordCount=100",
+    "sha256": "7e826ff6c35fa791a9be8de301551e8ffd29f7a4237cece0cca1c9dc0b8c480a",
+    "bytes": 1817411
+  },
+  {
+    "file": "settlement-03200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3200&resultRecordCount=100",
+    "sha256": "e4799bb9d2178499c8a441c8152add6fdd451bae5bfce8f6b547f045d815b6e0",
+    "bytes": 1908002
+  },
+  {
+    "file": "settlement-03300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3300&resultRecordCount=100",
+    "sha256": "7829d98b4e74f5b71eb06f042a970c136c18bca293a8721f6ed1b33d9586410e",
+    "bytes": 1994826
+  },
+  {
+    "file": "settlement-03400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3400&resultRecordCount=100",
+    "sha256": "b880ca212e8ec08940b92a7e442de569817c0bf195d184705b58e0bdc9896d9c",
+    "bytes": 1796626
+  },
+  {
+    "file": "settlement-03500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3500&resultRecordCount=100",
+    "sha256": "83c5c740b9ff9ceb0ebe920bb746478ab10d2bbda7d38af4e5f5b70f6ff6fe31",
+    "bytes": 1551290
+  },
+  {
+    "file": "settlement-03600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3600&resultRecordCount=100",
+    "sha256": "3f11abac640b25f5353c8851dbebd98090ec6d465659b67c41e6a60e315daa92",
+    "bytes": 1542177
+  },
+  {
+    "file": "settlement-03700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3700&resultRecordCount=100",
+    "sha256": "9fd4b86c33c13bf9454f735387578fda2daf80234a6314eae738ce669596983e",
+    "bytes": 1686803
+  },
+  {
+    "file": "settlement-03800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3800&resultRecordCount=100",
+    "sha256": "854ae19109e580143ee1d21044bc967c57ea5cd56acca7610b17680bc7112b4a",
+    "bytes": 2412160
+  },
+  {
+    "file": "settlement-03900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=3900&resultRecordCount=100",
+    "sha256": "18d7a4c760cf5c1727824ccc9a0ff8e56cb526dd842cb1048f1b22430bbeabd1",
+    "bytes": 1598799
+  },
+  {
+    "file": "settlement-04000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4000&resultRecordCount=100",
+    "sha256": "43d6fad0b2dd6c39fe5eaea9c1d5f3e7646d3ad0b8297d10899a9de69770c794",
+    "bytes": 1557412
+  },
+  {
+    "file": "settlement-04100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4100&resultRecordCount=100",
+    "sha256": "b736abe73263238c95edca4ec4324a18e35a9cde29faaaa653fcba364b7abeac",
+    "bytes": 2349050
+  },
+  {
+    "file": "settlement-04200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4200&resultRecordCount=100",
+    "sha256": "4bb5a8a74992aed02315a2ab49935fa6f12b0385b9944b664e9246bae346e1f1",
+    "bytes": 1775637
+  },
+  {
+    "file": "settlement-04300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4300&resultRecordCount=100",
+    "sha256": "5895ef637660e04c14b3ee90330b82225311e3c76556961a967d126de1ef819a",
+    "bytes": 1980711
+  },
+  {
+    "file": "settlement-04400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4400&resultRecordCount=100",
+    "sha256": "95ebee8fe83de21db900949f37351c48cd7e3c57d4dc434a4ed7d2a43d288553",
+    "bytes": 2788821
+  },
+  {
+    "file": "settlement-04500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4500&resultRecordCount=100",
+    "sha256": "0cb3a89e81c74c14b20e79ef5c5b6ba7898ff78dc8c69119894dae17f52b641f",
+    "bytes": 2151033
+  },
+  {
+    "file": "settlement-04600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4600&resultRecordCount=100",
+    "sha256": "29a832dad373c4b891fddeb1fb320c64e82911f06b162789f4415df91d789a87",
+    "bytes": 2371706
+  },
+  {
+    "file": "settlement-04700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4700&resultRecordCount=100",
+    "sha256": "9ba2a23e8cd523bab0b3861615ab0c9f1958c65f75ed4a737729934c5535cbca",
+    "bytes": 3691456
+  },
+  {
+    "file": "settlement-04800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4800&resultRecordCount=100",
+    "sha256": "04aa20ce4ce7e273504759f3e1fed6e8166f466274b3e3ac84e17a2c54e1bf73",
+    "bytes": 3745662
+  },
+  {
+    "file": "settlement-04900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=4900&resultRecordCount=100",
+    "sha256": "a1ba8e11bdb7d1c649a0310165ffa98e90fc522dca76b32f5786f6ef01cca0a0",
+    "bytes": 2696828
+  },
+  {
+    "file": "settlement-05000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5000&resultRecordCount=100",
+    "sha256": "73595c89a5e21b7dc2a742f06757e15bf90c6c3fc8f2996ab6d84efd24d466d8",
+    "bytes": 3524358
+  },
+  {
+    "file": "settlement-05100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5100&resultRecordCount=100",
+    "sha256": "5f85eacf02bdd2a6a3311d92b79fc422f56e2ab0a3d683d7986ac1069d87a0f7",
+    "bytes": 3567112
+  },
+  {
+    "file": "settlement-05200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5200&resultRecordCount=100",
+    "sha256": "0a9d99d3899ef2c41fa046d4b6668f6bf08ad333270b132364e1fa3e112e61a3",
+    "bytes": 3126042
+  },
+  {
+    "file": "settlement-05300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5300&resultRecordCount=100",
+    "sha256": "62905a07c59e69463e56714580bd931411723d85e64ae4243a551af210fa1ebd",
+    "bytes": 2373587
+  },
+  {
+    "file": "settlement-05400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5400&resultRecordCount=100",
+    "sha256": "dd92a04e0f5573249c01efbd0a25b69d89816e810a8282d206e8e51643de28b6",
+    "bytes": 2551260
+  },
+  {
+    "file": "settlement-05500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5500&resultRecordCount=100",
+    "sha256": "b14a7bc7316b5bbc37172bb1117819d42b1e6255dae8cb00f26b54ed6e79c426",
+    "bytes": 2383486
+  },
+  {
+    "file": "settlement-05600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5600&resultRecordCount=100",
+    "sha256": "8d5635e3cf7fe4a3874f80ce1b53ae6cd6a09ca1938af76b3e2b1e98e84337e7",
+    "bytes": 2034209
+  },
+  {
+    "file": "settlement-05700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5700&resultRecordCount=100",
+    "sha256": "3bfd77fcf779c461bb68abe828371dca570ea35eb80ccb50a191a04ce45405b3",
+    "bytes": 2203837
+  },
+  {
+    "file": "settlement-05800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5800&resultRecordCount=100",
+    "sha256": "42239fb202ea7c918de2485b0a2721aafc5ea1cd49e37a5999b18be23f013196",
+    "bytes": 1938310
+  },
+  {
+    "file": "settlement-05900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=5900&resultRecordCount=100",
+    "sha256": "a5118f50d907f9ef2e9fcb0184d59447b3849f3c88869b123eddbf25597b59f2",
+    "bytes": 2304930
+  },
+  {
+    "file": "settlement-06000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6000&resultRecordCount=100",
+    "sha256": "d935641c59cf85746142499a082732b5d5843d4509daa1f4e8cf7e29b66c3c49",
+    "bytes": 1972855
+  },
+  {
+    "file": "settlement-06100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6100&resultRecordCount=100",
+    "sha256": "b64463ba2a9e08ad56da675541f8a1d2c83bd0da98a0ab20eeff0fc8b7e6f3ac",
+    "bytes": 1883219
+  },
+  {
+    "file": "settlement-06200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6200&resultRecordCount=100",
+    "sha256": "04849902080415511d29525bf5f968fa55df662a7da8b38f058d109566e21af6",
+    "bytes": 1906532
+  },
+  {
+    "file": "settlement-06300.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6300&resultRecordCount=100",
+    "sha256": "b64e3ad690489354e49f11de42bbb09adcc8a8b766c25622e44ab197e31bf7ee",
+    "bytes": 2193435
+  },
+  {
+    "file": "settlement-06400.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6400&resultRecordCount=100",
+    "sha256": "0eeacdb57441a4f5ddafba4497a2847630d866a6b9c3b3142303e9fd5746a64c",
+    "bytes": 2072600
+  },
+  {
+    "file": "settlement-06500.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6500&resultRecordCount=100",
+    "sha256": "0d73531b8c8a634a75cb5165a61c4434a5bc7423939e7190080c6a856326e5fd",
+    "bytes": 2868395
+  },
+  {
+    "file": "settlement-06600.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6600&resultRecordCount=100",
+    "sha256": "062efda496f8897e0c54632b888f7f49ebbdb8f6c596f3ea49022c621adab815",
+    "bytes": 2438454
+  },
+  {
+    "file": "settlement-06700.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6700&resultRecordCount=100",
+    "sha256": "c1872e7eb286216189cb5785ea8f7ab014fae66c0e7e92d18b20800c0df8c7e9",
+    "bytes": 2127813
+  },
+  {
+    "file": "settlement-06800.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6800&resultRecordCount=100",
+    "sha256": "eed7dab3d4ddec522847ae5d8ee90e0ad146117bb45293e33a1efff6ef7751db",
+    "bytes": 2194238
+  },
+  {
+    "file": "settlement-06900.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=6900&resultRecordCount=100",
+    "sha256": "d527b49b8c7e3821681856ea988b71bae9b9a183e2cb40bf7c4d7154b07a1deb",
+    "bytes": 2203674
+  },
+  {
+    "file": "settlement-07000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0/query?where=BUA22CD+LIKE+%27E%25%27&outFields=BUA22CD%2CBUA22NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=OBJECTID&resultOffset=7000&resultRecordCount=100",
+    "sha256": "55d3b432a149a72eb7f701fd74a038e518b1d19fac7f3325d3506a3b409115f2",
+    "bytes": 1549186
+  },
+  {
+    "file": "local_authority-00000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Authority_Districts_DEC_2025_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD25CD+LIKE+%27E%25%27&outFields=LAD25CD%2CLAD25NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=0&resultRecordCount=100",
+    "sha256": "f8f8d30b40a63f07fc6240e90376802da2a449ca9ffb2148054778e8f9d27627",
+    "bytes": 4784008
+  },
+  {
+    "file": "local_authority-00100.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Authority_Districts_DEC_2025_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD25CD+LIKE+%27E%25%27&outFields=LAD25CD%2CLAD25NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=100&resultRecordCount=100",
+    "sha256": "35ac83faf84120193325d1041f3814d4e2788c3d34c034dc1a05ed8fb3993eef",
+    "bytes": 3330828
+  },
+  {
+    "file": "local_authority-00200.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Authority_Districts_DEC_2025_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD25CD+LIKE+%27E%25%27&outFields=LAD25CD%2CLAD25NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=200&resultRecordCount=100",
+    "sha256": "cbb27014d0adb24f0fe96ce13320db959653f455225fc6a73c06dadc89c7e335",
+    "bytes": 1653259
+  },
+  {
+    "file": "region-00000.json",
+    "url": "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Regions_December_2025_Boundaries_EN_BGC/FeatureServer/0/query?where=RGN25CD+LIKE+%27E%25%27&outFields=RGN25CD%2CRGN25NM%2CLAT%2CLONG&returnGeometry=true&outSR=4326&f=geojson&orderByFields=FID&resultOffset=0&resultRecordCount=100",
+    "sha256": "cabf2bac167908db3ab63418370edea49e824f6510e85182953d1bb47f88fce2",
+    "bytes": 5132857
+  }
+]

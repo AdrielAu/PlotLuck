@@ -1,0 +1,2086 @@
+{
+  "version": 1,
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "cases": [
+    {
+      "id": "clear-001",
+      "split": "development",
+      "description": "A Thai restaurant within 3 km of London with vegan options.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-002",
+      "split": "development",
+      "description": "A Thai restaurant in Camden.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-003",
+      "split": "development",
+      "description": "A Thai restaurant in Manchester.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-004",
+      "split": "development",
+      "description": "A Thai restaurant in Leeds with vegan options.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-005",
+      "split": "development",
+      "description": "A Thai restaurant within 3 km of Bristol.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-006",
+      "split": "development",
+      "description": "A Thai restaurant in York.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-007",
+      "split": "development",
+      "description": "A Thai restaurant in Birmingham with vegan options.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-008",
+      "split": "development",
+      "description": "A Thai restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-009",
+      "split": "development",
+      "description": "A Thai restaurant within 3 km of Liverpool.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-010",
+      "split": "development",
+      "description": "A Thai restaurant in Oxford with vegan options.",
+      "expected": {
+        "cuisine": "Thai",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-011",
+      "split": "development",
+      "description": "A Italian restaurant in London.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-012",
+      "split": "development",
+      "description": "A Italian restaurant in Camden.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-013",
+      "split": "development",
+      "description": "A Italian restaurant within 3 km of Manchester with vegan options.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-014",
+      "split": "development",
+      "description": "A Italian restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-015",
+      "split": "development",
+      "description": "A Italian restaurant in Bristol.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-016",
+      "split": "development",
+      "description": "A Italian restaurant in York with vegan options.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-017",
+      "split": "development",
+      "description": "A Italian restaurant within 3 km of Birmingham.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-018",
+      "split": "development",
+      "description": "A Italian restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-019",
+      "split": "development",
+      "description": "A Italian restaurant in Liverpool with vegan options.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-020",
+      "split": "development",
+      "description": "A Italian restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Italian",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-021",
+      "split": "heldout",
+      "description": "A Indian restaurant within 3 km of London.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-022",
+      "split": "heldout",
+      "description": "A Indian restaurant in Camden with vegan options.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-023",
+      "split": "heldout",
+      "description": "A Indian restaurant in Manchester.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-024",
+      "split": "heldout",
+      "description": "A Indian restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-025",
+      "split": "heldout",
+      "description": "A Indian restaurant within 3 km of Bristol with vegan options.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-026",
+      "split": "heldout",
+      "description": "A Indian restaurant in York.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-027",
+      "split": "heldout",
+      "description": "A Indian restaurant in Birmingham.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-028",
+      "split": "heldout",
+      "description": "A Indian restaurant in Westminster with vegan options.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-029",
+      "split": "heldout",
+      "description": "A Indian restaurant within 3 km of Liverpool.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-030",
+      "split": "heldout",
+      "description": "A Indian restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Indian",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-031",
+      "split": "heldout",
+      "description": "A Chinese restaurant in London with vegan options.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-032",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Camden.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-033",
+      "split": "heldout",
+      "description": "A Chinese restaurant within 3 km of Manchester.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-034",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Leeds with vegan options.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-035",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Bristol.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-036",
+      "split": "heldout",
+      "description": "A Chinese restaurant in York.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-037",
+      "split": "heldout",
+      "description": "A Chinese restaurant within 3 km of Birmingham with vegan options.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-038",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-039",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Liverpool.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-040",
+      "split": "heldout",
+      "description": "A Chinese restaurant in Oxford with vegan options.",
+      "expected": {
+        "cuisine": "Chinese",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-041",
+      "split": "heldout",
+      "description": "A Japanese restaurant within 3 km of London.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-042",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Camden.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-043",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Manchester with vegan options.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-044",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-045",
+      "split": "heldout",
+      "description": "A Japanese restaurant within 3 km of Bristol.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-046",
+      "split": "heldout",
+      "description": "A Japanese restaurant in York with vegan options.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-047",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Birmingham.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-048",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-049",
+      "split": "heldout",
+      "description": "A Japanese restaurant within 3 km of Liverpool with vegan options.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-050",
+      "split": "heldout",
+      "description": "A Japanese restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Japanese",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-051",
+      "split": "heldout",
+      "description": "A Mexican restaurant in London.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-052",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Camden with vegan options.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-053",
+      "split": "heldout",
+      "description": "A Mexican restaurant within 3 km of Manchester.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-054",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-055",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Bristol with vegan options.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-056",
+      "split": "heldout",
+      "description": "A Mexican restaurant in York.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-057",
+      "split": "heldout",
+      "description": "A Mexican restaurant within 3 km of Birmingham.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-058",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Westminster with vegan options.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-059",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Liverpool.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-060",
+      "split": "heldout",
+      "description": "A Mexican restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Mexican",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-061",
+      "split": "heldout",
+      "description": "A British restaurant within 3 km of London with vegan options.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-062",
+      "split": "heldout",
+      "description": "A British restaurant in Camden.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-063",
+      "split": "heldout",
+      "description": "A British restaurant in Manchester.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-064",
+      "split": "heldout",
+      "description": "A British restaurant in Leeds with vegan options.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-065",
+      "split": "heldout",
+      "description": "A British restaurant within 3 km of Bristol.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-066",
+      "split": "heldout",
+      "description": "A British restaurant in York.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-067",
+      "split": "heldout",
+      "description": "A British restaurant in Birmingham with vegan options.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-068",
+      "split": "heldout",
+      "description": "A British restaurant in Westminster.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-069",
+      "split": "heldout",
+      "description": "A British restaurant within 3 km of Liverpool.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-070",
+      "split": "heldout",
+      "description": "A British restaurant in Oxford with vegan options.",
+      "expected": {
+        "cuisine": "British",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-071",
+      "split": "heldout",
+      "description": "A French restaurant in London.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-072",
+      "split": "heldout",
+      "description": "A French restaurant in Camden.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-073",
+      "split": "heldout",
+      "description": "A French restaurant within 3 km of Manchester with vegan options.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-074",
+      "split": "heldout",
+      "description": "A French restaurant in Leeds.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-075",
+      "split": "heldout",
+      "description": "A French restaurant in Bristol.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-076",
+      "split": "heldout",
+      "description": "A French restaurant in York with vegan options.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-077",
+      "split": "heldout",
+      "description": "A French restaurant within 3 km of Birmingham.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-078",
+      "split": "heldout",
+      "description": "A French restaurant in Westminster.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-079",
+      "split": "heldout",
+      "description": "A French restaurant in Liverpool with vegan options.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-080",
+      "split": "heldout",
+      "description": "A French restaurant in Oxford.",
+      "expected": {
+        "cuisine": "French",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-081",
+      "split": "heldout",
+      "description": "A Greek restaurant within 3 km of London.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-082",
+      "split": "heldout",
+      "description": "A Greek restaurant in Camden with vegan options.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-083",
+      "split": "heldout",
+      "description": "A Greek restaurant in Manchester.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-084",
+      "split": "heldout",
+      "description": "A Greek restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-085",
+      "split": "heldout",
+      "description": "A Greek restaurant within 3 km of Bristol with vegan options.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-086",
+      "split": "heldout",
+      "description": "A Greek restaurant in York.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-087",
+      "split": "heldout",
+      "description": "A Greek restaurant in Birmingham.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-088",
+      "split": "heldout",
+      "description": "A Greek restaurant in Westminster with vegan options.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-089",
+      "split": "heldout",
+      "description": "A Greek restaurant within 3 km of Liverpool.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-090",
+      "split": "heldout",
+      "description": "A Greek restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Greek",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-091",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in London with vegan options.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-092",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Camden.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-093",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant within 3 km of Manchester.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-094",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Leeds with vegan options.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-095",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Bristol.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-096",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in York.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-097",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant within 3 km of Birmingham with vegan options.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-098",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-099",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Liverpool.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-100",
+      "split": "heldout",
+      "description": "A Vietnamese restaurant in Oxford with vegan options.",
+      "expected": {
+        "cuisine": "Vietnamese",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-101",
+      "split": "heldout",
+      "description": "A Turkish restaurant within 3 km of London.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "London",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-102",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Camden.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-103",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Manchester with vegan options.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Manchester",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-104",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-105",
+      "split": "heldout",
+      "description": "A Turkish restaurant within 3 km of Bristol.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Bristol",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-106",
+      "split": "heldout",
+      "description": "A Turkish restaurant in York with vegan options.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-107",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Birmingham.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Birmingham",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-108",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Westminster.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-109",
+      "split": "heldout",
+      "description": "A Turkish restaurant within 3 km of Liverpool with vegan options.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Liverpool",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-110",
+      "split": "heldout",
+      "description": "A Turkish restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Turkish",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-111",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in London.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "London",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-112",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Camden with vegan options.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Camden",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-113",
+      "split": "heldout",
+      "description": "A Lebanese restaurant within 3 km of Manchester.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Manchester",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-114",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Leeds.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Leeds",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-115",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Bristol with vegan options.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Bristol",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-116",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in York.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "York",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-117",
+      "split": "heldout",
+      "description": "A Lebanese restaurant within 3 km of Birmingham.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Birmingham",
+          "near": true,
+          "distance": 3,
+          "unit": "km"
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-118",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Westminster with vegan options.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Westminster",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant",
+          "vegan_options": true
+        }
+      }
+    },
+    {
+      "id": "clear-119",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Liverpool.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Liverpool",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    },
+    {
+      "id": "clear-120",
+      "split": "heldout",
+      "description": "A Lebanese restaurant in Oxford.",
+      "expected": {
+        "cuisine": "Lebanese",
+        "location": {
+          "text": "Oxford",
+          "near": false,
+          "distance": null,
+          "unit": null
+        },
+        "traits": {
+          "venue_type": "Restaurant"
+        }
+      }
+    }
+  ]
+}

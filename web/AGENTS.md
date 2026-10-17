@@ -8,6 +8,10 @@ Use the agreed [restaurant, district and model-file formats](https://github.com/
 
 Follow [ADR 0003](../docs/adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md): public outputs are weights, district scores, ranked districts and cuisine/trait pick-lists. Keep raw Tripadvisor restaurant names, locations, ratings, review counts and district aggregates of those raw fields out of the site. Include the ADR's required attribution in the footer and preserve the non-commercial condition.
 
+## Screens
+
+The page has two screens, swapped in place: questions (`app.js`) and results (`results-screen.js`, logic in `results.js`; spec [#127](https://github.com/AdrielAu/PlotLuck/issues/127)). Desktop Chrome and Edge only. The results screen only formats NN1's scores for a confirmed query, through the one entry point `setUpResultsScreen` returns: `openResults({ profile, searchArea })`. That shape is NN2's confirmed output (#110): a profile in NN1's vocabulary, and a search area listing postcode district codes, where empty means all England. The pickers fill it with England until NN2 lands. Neither screen writes answers to the address, history or browser storage.
+
 ## Design skills
 
 Building a page that doesn't exist yet: use taste. That means `design-taste-frontend` for the landing page and `minimalist-ui` for the map app.
