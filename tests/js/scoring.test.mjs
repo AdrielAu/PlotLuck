@@ -14,8 +14,14 @@ function readFrom(dir) {
 
 // A one-layer sigmoid model whose logit is `weights . inputs`, so a test reads
 // an input straight back as logit(score). Inputs: cuisine_group one-hot
-// [African, Thai], then population and same_cuisine_supply, both untransformed.
-function tinyBundle({ weights, population = "100", version = 1 }) {
+// [African, Thai], then `districtInputs`, all untransformed.
+function tinyBundle({
+  weights,
+  population = "100",
+  version = 1,
+  districtInputs = ["population", "same_cuisine_supply"],
+}) {
+  const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
   const files = {
     "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index\nAB1,51.5,-0.1,3,${population},10\n`,
     "district_cuisine_supply.csv": "postcode_district,cuisine_group,restaurants\nAB1,Thai,2\n",
@@ -29,11 +35,11 @@ function tinyBundle({ weights, population = "100", version = 1 }) {
     }),
     "model.json": JSON.stringify({
       version,
-      features: { restaurant_inputs: ["cuisine_group"], district_inputs: ["population", "same_cuisine_supply"] },
+      features: { restaurant_inputs: ["cuisine_group"], district_inputs: districtInputs },
       transforms: {
         cuisine_group: { kind: "one_hot", values: ["African", "Thai"] },
-        population: { kind: "numeric", log1p: false, mean: 0, std: 1, median: 7 },
-        same_cuisine_supply: { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 },
+        ...Object.fromEntries(districtInputs.map((name) => [name, numeric])),
+        population: { ...numeric, median: 7 },
       },
       layers: [{ weights: [weights], biases: [0] }],
       activations: ["sigmoid"],
@@ -68,6 +74,17 @@ test("a missing district numeric gets the training median", async () => {
   assert.ok(Math.abs(logit(bundle, "Thai") - 7) < 1e-9);
 });
 
+test("any declared district input is read from its districts.csv column", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 1], districtInputs: ["deprivation_index"] });
+  assert.ok(Math.abs(logit(bundle, "Thai") - 10) < 1e-9);
+});
+
+test("a district input the bundle has no column for raises instead of scoring", async () => {
+  const bundle = await tinyBundle({ weights: [0, 0, 1], districtInputs: ["commercial_rent_index"] });
+  assert.throws(() => scoreDistricts(bundle, { cuisine: "Thai" }), /commercial_rent_index/);
+});
+
+// JS cannot call plotluck.data_dir(), so the sample folder is named here.
 // web/models is the bundle the site deploys: with weights trained on LinuxONE,
 // this is the x86 parity check before the model freeze (#77).
 for (const dir of ["data/sample", "web/models"]) {

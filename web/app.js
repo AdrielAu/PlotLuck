@@ -35,10 +35,10 @@ async function main() {
     for (const { postcode_district, score } of scores) {
       circles.get(postcode_district).bindPopup(`${postcode_district}: ${score.toFixed(2)}`);
     }
-    filter();
+    applyThreshold();
   }
 
-  function filter() {
+  function applyThreshold() {
     const threshold = Number($("threshold").value);
     $("threshold-value").value = threshold.toFixed(2);
     const ranked = rankDistricts(scores, threshold);
@@ -67,7 +67,7 @@ async function main() {
   }
 
   $("cuisine").addEventListener("change", rescore);
-  $("threshold").addEventListener("input", filter);
+  $("threshold").addEventListener("input", applyThreshold);
   rescore();
 }
 

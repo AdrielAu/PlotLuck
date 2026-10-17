@@ -32,13 +32,12 @@ export function scoreDistricts(bundle, profile) {
   const group = bundle.groups.get(profile.cuisine);
   const head = restaurantInputs(model, { ...profile, cuisine_group: group });
   return bundle.districts.map((d) => {
-    const raw = {
-      population: d.population,
-      deprivation_index: d.deprivation_index,
-      total_restaurants: d.total_restaurants,
-      same_cuisine_supply: bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0,
-    };
-    const tail = model.features.district_inputs.map((name) => numericInput(model.transforms[name], raw[name]));
+    const tail = model.features.district_inputs.map((name) => {
+      // Every district input is a districts.csv column, except supply of the profile's own group.
+      const raw = name === "same_cuisine_supply" ? (bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0) : d[name];
+      if (raw === undefined) throw new Error(`model.json input ${name} is not a districts.csv column`);
+      return numericInput(model.transforms[name], raw);
+    });
     return { postcode_district: d.postcode_district, score: forward(model, [...head, ...tail]) };
   });
 }
@@ -64,13 +63,16 @@ function numericInput(t, value) {
   return (x - t.mean) / t.std;
 }
 
+const ACTIVATIONS = {
+  relu: (z) => Math.max(z, 0),
+  sigmoid: (z) => 1 / (1 + Math.exp(-z)),
+};
+
 function forward(model, x) {
   model.layers.forEach((layer, i) => {
-    const relu = model.activations[i] === "relu";
-    x = layer.weights.map((row, j) => {
-      const z = row.reduce((sum, w, k) => sum + w * x[k], layer.biases[j]);
-      return relu ? Math.max(z, 0) : 1 / (1 + Math.exp(-z));
-    });
+    const activation = ACTIVATIONS[model.activations[i]];
+    if (!activation) throw new Error(`model.json activation ${model.activations[i]} is not supported`);
+    x = layer.weights.map((row, j) => activation(row.reduce((sum, w, k) => sum + w * x[k], layer.biases[j])));
   });
   return x[0];
 }
