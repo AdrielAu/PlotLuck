@@ -4,7 +4,7 @@ from pathlib import Path
 
 C = {
     "c": "#f7f6f3", "d": "#e4e2d6", "g": "#bacfa9", "r": "#c27a4a",
-    "G": "#284c29", "F": "#346538", "w": "#f7f6f3", "k": "#2f3437", "s": "#9aa0a1",
+    "G": "#284c29", "F": "#4a7a4a", "w": "#f7f6f3", "k": "#2f3437", "s": "#9aa0a1",
     "o": "#c4602f", "R": "#c8372d", "h": "#5e9a3a", "y": "#f6c84a",
 }
 
@@ -23,28 +23,49 @@ def row(g, y, x0, x1, c):
         put(g, x, y, c)
 
 
-def pot(g, cx, y0):
-    """A small pot of curry, centred on column cx, its heap of food at row y0, steam above."""
-    for x, c in ((cx - 1, "h"), (cx, "o"), (cx + 1, "y")):
-        put(g, x, y0, c)
-    put(g, cx - 4, y0 + 1, "G")
-    for x, c in zip(range(cx - 3, cx + 4), "oyoRoho"):
-        put(g, x, y0 + 1, c)
-    put(g, cx + 4, y0 + 1, "G")
-    row(g, y0 + 2, cx - 5, cx + 5, "G")
-    row(g, y0 + 3, cx - 4, cx + 4, "G"); put(g, cx - 2, y0 + 3, "F")
-    row(g, y0 + 4, cx - 4, cx + 4, "G"); put(g, cx - 2, y0 + 4, "F")
-    row(g, y0 + 5, cx - 3, cx + 3, "G")
-    row(g, y0 + 6, cx - 2, cx + 2, "G")
-    for x, y in ((cx - 2, y0 - 1), (cx - 3, y0 - 2), (cx - 2, y0 - 3), (cx + 2, y0 - 1), (cx + 1, y0 - 2), (cx + 2, y0 - 3)):
+FOOD = "oyRhoyho"
+
+
+def band(g, d0, d1, s0, s1, colour):
+    """Fills cells whose x - y lies in [d0, d1] and x + y in [s0, s1]: a block tilted 45 degrees.
+
+    Along the pin, x - y grows toward the pot's mouth (up-right); x + y runs across the pot.
+    """
+    n = len(g)
+    for y in range(n):
+        for x in range(n):
+            if d0 <= x - y <= d1 and s0 <= x + y <= s1:
+                put(g, x, y, colour if colour != "food" else FOOD[(x + 2 * y) % len(FOOD)])
+
+
+def pot(g, d, s, w, handles=True):
+    """A pot tipped 45 degrees up-right: base at x - y = d, axis at x + y = s, body w across."""
+    lo, hi = s - w // 2, s + w // 2
+    band(g, d, d + 7, lo, hi, "G")
+    band(g, d, d, lo, lo + 1, None); band(g, d, d, hi - 1, hi, None)  # round the base corners
+    band(g, d + 2, d + 6, lo + 2, lo + 2, "F")
+    if handles:
+        band(g, d + 5, d + 6, lo - 2, lo - 1, "G"); band(g, d + 5, d + 6, hi + 1, hi + 2, "G")
+    band(g, d + 8, d + 9, lo - 1, hi + 1, "g")
+    band(g, d + 8, d + 9, lo - 2, lo - 2, "G"); band(g, d + 8, d + 9, hi + 2, hi + 2, "G")
+    band(g, d + 10, d + 11, lo, hi, "food")
+    band(g, d + 12, d + 13, lo + 2, hi - 2, "food")
+
+
+def spill(g, cells):
+    for i, (x, y) in enumerate(cells):
+        put(g, x, y, FOOD[i % len(FOOD)])
+
+
+def steam(g, cells):
+    for x, y in cells:
         put(g, x, y, "s")
 
 
-def pin(g, length):
-    """The pot-headed pin, its needle running diagonally down-right from under the pot."""
+def needle(g, x0, y0, length):
+    """A two-pixel stair running diagonally down-left from (x0, y0)."""
     for i in range(length):
-        put(g, 5 + i, 10 + i, "k"); put(g, 6 + i, 10 + i, "k")
-    pot(g, 5, 3)
+        put(g, x0 - i, y0 + i, "k"); put(g, x0 + 1 - i, y0 + i, "k")
 
 
 def outline(g, fills):
@@ -80,13 +101,19 @@ def folded():
     for x in (8, 16):
         for y in range(top(x), top(x) + 7):
             put(g, x, y, "G")
-    pin(g, 9)
+    needle(g, 13, 10, 7)
+    pot(g, 3, 23, 9)
+    spill(g, [(22, 7), (23, 8), (23, 9), (22, 10), (22, 11), (22, 12), (21, 13), (23, 13)])
+    steam(g, [(15, 3), (14, 2), (15, 1), (14, 0), (18, 1), (17, 0)])
     return g
 
 
 def mark():
     g = grid(16)
-    pin(g, 6)
+    needle(g, 8, 7, 7)
+    pot(g, 2, 15, 7, handles=False)
+    spill(g, [(15, 6), (15, 7), (14, 8)])
+    steam(g, [(10, 1), (9, 0), (12, 0)])
     return g
 
 
