@@ -25,6 +25,12 @@
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
       "computedHash": "fb1d8ab98ad151551eeade003e3ae55a46578a380fd9fc3ed4dbf9c2fbce0a9f"
     },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "41463de84d80d8839b1e9fc8ddfd140578443d095b53710d1f331dbab3079712"
+    },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -67,6 +73,12 @@
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "00e2d31992d62490083ed2fa2fc2a4418362f765875a59e7a3dc52836f826ab2"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "f57225c428f86792ed4fe05029a16c41892c8569523b4212e2f3c7d7067738c9"
+    },
     "implement": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -84,6 +96,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "f74b0bf1be26220dd615523fc1c0562567f9c463d9e9b255d4031345ffb37cd3"
+    },
+    "minimalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/minimalist-skill/SKILL.md",
+      "computedHash": "f9174b67ed00bce3f62641ac6393911a53f61f210f5b59ee3248acbed2ad11a0"
     },
     "pr": {
       "source": "mattpocock/skills",
@@ -150,6 +168,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/triage/SKILL.md",
       "computedHash": "453a7a098edcbec2a6ef67f8aa6720433672ebdf93023c90cefa79f160c72599"
+    },
+    "unslop": {
+      "source": "cursor/plugins",
+      "sourceType": "github",
+      "skillPath": "harness/pstack/claude-code/skills/unslop/SKILL.md",
+      "computedHash": "4069ec6c10a0228152079f52706221dc469a9e30a3040398eefd1e9c18fe6cf2"
     },
     "wait-what": {
       "source": "mattpocock/skills",
