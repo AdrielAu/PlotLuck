@@ -8,14 +8,71 @@
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+<script type="importmap">
+{
+  "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" },
+  "integrity": { "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js": "sha384-8/hf5tabFfIo0BPku31TKUvGIKpWGYaMwNtlSNqNyZzXgZCMd4lnOGWbJElML9dv" }
+}
+</script>
 <link rel="stylesheet" href="results.css">
 <link rel="stylesheet" href="pickers.css">
+<link rel="stylesheet" href="questions.css">
 </head>
 <body>
+<div id="kitchen" aria-hidden="true"><canvas></canvas></div>
 <main>
+  <section id="error" role="alert" hidden>
+    <h2>District scores could not load</h2>
+    <p id="error-detail"></p>
+    <button id="retry" type="button">Try loading again</button>
+  </section>
+  <section id="questions-screen" aria-labelledby="title">
+    <div class="intro-scrim">
+      <h1 id="title">Plotluck</h1>
+      <p class="lede">Tell us about your restaurant idea and we will help you find the ideal location for your restaurant.</p>
+      <p class="model-line">Read my answers with the on-device model (≈300 MB) · <button id="model-download" type="button" class="link">Download</button></p>
+      <p id="model-status" class="model-line" role="status" aria-live="polite"></p>
+    </div>
+    <form id="prompt" class="prompt" novalidate>
+      <label id="question" for="answer">Where would you like to open?</label>
+      <div class="prompt-row">
+        <div class="combobox">
+          <input id="answer" type="text" role="combobox" autocomplete="off" spellcheck="false" disabled
+            aria-autocomplete="list" aria-expanded="false" aria-controls="answer-options" aria-describedby="answer-error progress">
+          <ul id="answer-options" role="listbox" aria-label="Suggestions" hidden></ul>
+        </div>
+        <button id="next" type="submit" aria-label="Next question" disabled>
+          <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true"><path d="M3 7h7V4h1v1h1v1h1v1h1v2h-1v1h-1v1h-1v1h-1V9H3z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <p id="answer-error" role="alert" hidden></p>
+      <p id="answer-status" class="visually-hidden" role="status" aria-live="polite"></p>
+      <div id="chips" class="chips" role="group" aria-label="Suggested answers"></div>
+      <div class="prompt-foot">
+        <button id="back" type="button" class="link" hidden>Back</button>
+        <ol id="pips" class="pips" aria-hidden="true"></ol>
+        <p id="progress" class="visually-hidden">Question 1 of 6</p>
+      </div>
+      <p id="loading" role="status">Loading district scores…</p>
+    </form>
+    <section id="review" class="review" aria-labelledby="review-heading" hidden>
+      <h2 id="review-heading" tabindex="-1">Your restaurant, as we read it</h2>
+      <p>Change anything that is not right. Marked choices were inferred or left at a default.</p>
+      <div id="draft-chips" class="draft-chips"></div>
+      <p id="review-error" role="alert" hidden></p>
+      <div id="unused" hidden>
+        <h3>Not used in scoring</h3>
+        <ul id="unused-list"></ul>
+      </div>
+      <div class="review-actions">
+        <button id="review-compare" type="button" class="primary">Compare districts</button>
+        <button id="review-back" type="button" class="link">Change answers</button>
+      </div>
+    </section>
+  </section>
+  <div id="results-screen" hidden>
   <header>
-    <h1>Plotluck</h1>
-    <p class="intro">Find a district for your restaurant.</p>
+    <p class="intro">Districts for your restaurant. <button id="change-answers" type="button" class="link">Change answers</button></p>
     <p id="score-explanation">Compare expected review-based success: customer satisfaction and accumulated review activity. A score from 0 to 1 is not a probability of survival or profit.</p>
   </header>
   <fieldset id="profile-controls" disabled>
@@ -32,21 +89,15 @@
     </div>
     <div id="trait-pickers"></div>
     <div class="profile-confirmation">
-      <p>Search area: England</p>
+      <div id="rent-picker"></div>
+      <p>Search area: <span id="area-label">England</span> · <button id="change-area" type="button" class="link">Change</button></p>
       <p id="profile-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <p id="profile-error" role="alert" hidden></p>
       <button id="compare" type="button" aria-describedby="profile-status">Compare districts</button>
     </div>
   </fieldset>
-  <p id="loading" role="status">Loading district scores…</p>
-  <p id="pick-prompt" hidden>Choose a cuisine and review the traits, then select Compare districts to see results.</p>
-  <section id="error" role="alert" hidden>
-    <h2>District scores could not load</h2>
-    <p id="error-detail"></p>
-    <button id="retry" type="button">Try loading again</button>
-  </section>
   <section id="results" aria-label="District results" hidden>
-    <h2>Confirmed restaurant · England</h2>
+    <h2>Confirmed restaurant · <span id="confirmed-area">England</span></h2>
     <p id="confirmed-profile"></p>
     <div class="threshold-control">
       <div class="threshold-heading">
@@ -69,6 +120,7 @@
         <h2 id="ranked-heading">District shortlist</h2>
         <p id="count" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="empty" hidden>No district reaches this threshold. Lower it to see more districts.</p>
+        <p id="scope-empty" hidden>No district in this search area falls in this rent band. Change the rent band or the search area.</p>
         <ol id="ranked" aria-labelledby="ranked-heading"></ol>
       </section>
     </div>
@@ -77,6 +129,7 @@
     <h2>One input to your decision</h2>
     <p>Closed restaurants may be missing from the source data. This survivorship bias means the score reflects restaurants that were listed, rather than every restaurant that opened.</p>
   </aside>
+  </div>
 </main>
 <footer>
   <p>Scores come from a model trained on IBM LinuxONE on 17 October 2026 with 132,110 rated restaurants in England, Census 2021 demographics and OpenStreetMap tourism counts. On districts held out from training, its average error was 0.050 on the 0–1 score, against 0.082 for always predicting the average. The 101 districts with no Census match use typical demographic values. Scores estimate review-based success and do not establish suitability for a real location.</p>

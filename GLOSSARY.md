@@ -16,6 +16,10 @@ _Avoid_: Area (on its own), region, borough
 The geographic scope within which a user wants to compare postcode districts. It limits the districts shown in the map and ranked list.
 _Avoid_: Cuisine group, postcode area
 
+**Rent band**:
+How much commercial rent a user can take on: low, mid or high, the thirds of England's postcode districts by commercial rent, or any. Like the search area, it limits the districts shown; it is not a model input. A district with no rent value is in no band.
+_Avoid_: Rent level, budget, price band
+
 ## Restaurants and scoring
 
 **District context**:

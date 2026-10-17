@@ -1,25 +1,20 @@
-// Restaurant pickers, then district results: score colours, threshold and an accessible shortlist.
-import { defaultProfile, matchCuisines } from "./pickers.js";
+// Questions, then district results: score colours, threshold and an accessible shortlist.
+import { setUpCombobox } from "./combobox.js";
+import { makeInterpreter, RENT_BANDS, RENT_LABELS } from "./interpret.js";
+import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
+import { setUpQuestions } from "./questions.js";
 import { loadBundle, rankDistricts, scoreDistricts } from "./scoring.js";
 
 const $ = (id) => document.getElementById(id);
 
-// Display wording for vocabulary names and values. Anything not listed shows its
-// own name, so a trait added to the vocabulary still gets a picker.
-const TRAIT_LABELS = {
-  venue_type: "Venue type",
-  price_band: "Price band",
-  chain: "Part of a chain",
-  vegetarian_friendly: "Vegetarian friendly",
-  vegan_options: "Vegan options",
-  gluten_free: "Gluten free",
-};
-const VALUE_LABELS = { unknown: "Unknown" };
-const traitLabel = (name) => TRAIT_LABELS[name] ?? name.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
+// The kitchen is decorative: without Three.js or WebGL the page keeps its flat background.
+const kitchen = import("./kitchen.js").then((m) => m.startKitchen($("kitchen"))).catch(() => {
+  $("kitchen").dataset.kitchen = "off";
+  return null;
+});
 
 function showError(error) {
   $("loading").hidden = true;
-  $("pick-prompt").hidden = true;
   $("results").hidden = true;
   $("profile-controls").disabled = true;
   $("threshold").disabled = true;
@@ -64,7 +59,7 @@ function buildTraitPickers(traits) {
   const flags = [];
   for (const t of traits) {
     if (t.kind === "single_choice") {
-      groups.push(groupOf(traitLabel(t.name), t.values.map((v) => choiceInput("radio", t.name, v, VALUE_LABELS[v] ?? v, v === t.default))));
+      groups.push(groupOf(traitLabel(t.name), t.values.map((v) => choiceInput("radio", t.name, v, valueLabel(v), v === t.default))));
     } else if (t.kind === "on_off") {
       flags.push(choiceInput("checkbox", t.name, true, traitLabel(t.name), t.default === true));
     } else {
@@ -75,104 +70,56 @@ function buildTraitPickers(traits) {
   $("trait-pickers").replaceChildren(...groups);
 }
 
-// ARIA 1.2 combobox with a listbox popup. `onPick(cuisine)` runs when a cuisine is chosen.
+// The cuisine combobox. `onPick(cuisine)` runs with the chosen cuisine, or undefined for unmatched text.
 function setUpCuisinePicker(cuisines, onPick) {
   const input = $("cuisine");
-  const list = $("cuisine-options");
-  const status = $("cuisine-status");
-  let matches = [];
-  let active = -1;
   let picked = null;
 
-  function setActive(index) {
-    active = index;
-    for (const [i, li] of [...list.children].entries()) li.setAttribute("aria-selected", String(i === active));
-    if (active < 0) {
-      input.removeAttribute("aria-activedescendant");
-    } else {
-      input.setAttribute("aria-activedescendant", list.children[active].id);
-      list.children[active].scrollIntoView({ block: "nearest" });
-    }
-  }
-
-  function open() {
-    matches = matchCuisines(cuisines, input.value === picked?.label ? "" : input.value);
-    list.replaceChildren(
-      ...matches.map((c, i) => {
-        const li = document.createElement("li");
-        li.id = `cuisine-option-${i}`;
-        li.setAttribute("role", "option");
-        li.textContent = c.label;
-        // mousedown keeps focus in the input; click then picks.
-        li.addEventListener("mousedown", (event) => event.preventDefault());
-        li.addEventListener("click", () => pick(c));
-        return li;
-      }),
-    );
-    list.hidden = matches.length === 0;
-    input.setAttribute("aria-expanded", String(!list.hidden));
-    status.textContent = matches.length
-      ? `${matches.length} ${matches.length === 1 ? "cuisine matches" : "cuisines match"}`
-      : `No cuisine matches “${input.value.trim()}”. Try fewer letters.`;
-    status.classList.toggle("shown", matches.length === 0);
-    setActive(-1);
-  }
-
-  function close() {
-    list.hidden = true;
-    input.setAttribute("aria-expanded", "false");
-    input.removeAttribute("aria-activedescendant");
-    status.classList.remove("shown");
-  }
-
-  // Escape restores the last selection; unmatched text otherwise stays visible for correction.
-  function restore() {
-    close();
-    input.value = picked?.label ?? "";
-    onPick(picked?.cuisine);
-  }
-
-  function pick(cuisine) {
+  function choose(cuisine) {
     picked = cuisine;
-    input.value = cuisine.label;
-    close();
-    onPick(cuisine.cuisine);
+    input.value = cuisine?.label ?? "";
+    onPick(cuisine?.cuisine);
   }
 
-  // No open on focus: tabbing through should not announce the whole list.
-  input.addEventListener("input", () => {
-    open();
-    onPick(input.value === picked?.label ? picked.cuisine : undefined);
+  setUpCombobox({
+    input,
+    list: $("cuisine-options"),
+    status: $("cuisine-status"),
+    search: (text) => matchCuisines(cuisines, text === picked?.label ? "" : text),
+    count: (n, text) => (n ? `${n} ${n === 1 ? "cuisine matches" : "cuisines match"}` : `No cuisine matches “${text}”. Try fewer letters.`),
+    onPick: choose,
   });
-  input.addEventListener("click", () => { if (list.hidden) open(); });
-  input.addEventListener("blur", close);
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      if (list.hidden) return open();
-      const step = event.key === "ArrowDown" ? 1 : -1;
-      setActive((active + step + matches.length) % matches.length);
-    } else if (event.key === "Enter" && !list.hidden && (active >= 0 || matches.length === 1)) {
-      // A single match ("viet") is picked by Enter without arrowing to it.
-      event.preventDefault();
-      pick(matches[Math.max(active, 0)]);
-    } else if (event.key === "Escape") {
-      restore();
-    }
-  });
+  input.addEventListener("input", () => onPick(input.value === picked?.label ? picked.cuisine : undefined));
+  // Escape restores the last selection; unmatched text otherwise stays visible for correction.
+  input.addEventListener("keydown", (event) => { if (event.key === "Escape") choose(picked); });
+  return { set: (cuisine) => choose(cuisines.find((c) => c.cuisine === cuisine) ?? null) };
+}
+
+function showScreen(name) {
+  $("questions-screen").hidden = name !== "questions";
+  $("results-screen").hidden = name !== "results";
+  $("kitchen").hidden = name !== "questions";
+  kitchen.then((k) => k?.update());
+  window.scrollTo(0, 0);
 }
 
 async function main() {
   const bundle = await loadBundle(readModelFile);
+  const interpreter = makeInterpreter(bundle);
   buildTraitPickers(bundle.vocabulary.traits);
+  if (interpreter.hasRent) {
+    $("rent-picker").replaceChildren(groupOf("Rent band", RENT_BANDS.map((b) => choiceInput("radio", "rent_band", b, RENT_LABELS[b], b === "any"))));
+  }
   const traitKinds = new Map(bundle.vocabulary.traits.map((t) => [t.name, t.kind]));
+  // The results panel's draft: the profile, the rent band, and the read-only search area.
   let draft = defaultProfile(bundle.vocabulary, undefined);
+  let rentBand = "any";
+  let area = null;
   let confirmedQuery = null;
   let rescore = null;
 
   // The map is built on the first confirmation, once its container is visible.
   function showResults() {
-    $("pick-prompt").hidden = true;
     $("results").hidden = false;
     const map = L.map("map");
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -185,9 +132,8 @@ async function main() {
         L.circleMarker([Number(d.centroid_lat), Number(d.centroid_lon)], { radius: 8, color: "#284c29", weight: 1, fillOpacity: 0.85 }),
       ]),
     );
-    map.fitBounds(L.featureGroup([...circles.values()]).getBounds(), { padding: [20, 20] });
 
-    // Scores change only with the profile; the slider just filters them.
+    // Scores change only with the confirmed query; the slider just filters them.
     let scores = [];
     let threshold = 0;
     let thresholdMoved = false;
@@ -202,7 +148,8 @@ async function main() {
         else circle.remove();
       }
       $("count").textContent = `${ranked.length} of ${scores.length} districts at or above the threshold`;
-      $("empty").hidden = ranked.length > 0;
+      $("scope-empty").hidden = scores.length > 0;
+      $("empty").hidden = ranked.length > 0 || scores.length === 0;
       $("ranked").replaceChildren(
         ...ranked.map(({ postcode_district, score }) => {
           const button = document.createElement("button");
@@ -235,6 +182,10 @@ async function main() {
 
     return (nextScores) => {
       scores = nextScores;
+      map.invalidateSize();
+      // Frame the whole search area, so circles revealed by the slider are in view.
+      const inScope = scores.map((s) => circles.get(s.postcode_district));
+      if (inScope.length) map.fitBounds(L.featureGroup(inScope).getBounds(), { padding: [20, 20], maxZoom: 13 });
       for (const { postcode_district, score } of scores) {
         const pale = [224, 237, 215], dark = [40, 76, 41];
         const fill = pale.map((channel, i) => Math.round(channel + (dark[i] - channel) * score));
@@ -256,25 +207,29 @@ async function main() {
   }
 
   function updateDraft() {
-    const pending = !confirmedQuery || Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
-    let message = "Review your choices, then compare districts across England.";
+    const pending = !confirmedQuery || rentBand !== confirmedQuery.rentBand ||
+      Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+    const where = area?.label ?? "England";
+    let message = `Review your choices, then compare districts in ${where}.`;
     if (confirmedQuery) {
       message = pending
-        ? "Edits are not applied. Results still show your last confirmed restaurant in England."
-        : "Results match your confirmed restaurant in England.";
+        ? `Edits are not applied. Results still show your last confirmed restaurant in ${confirmedQuery.area.label}.`
+        : `Results match your confirmed restaurant in ${confirmedQuery.area.label}.`;
     }
     $("profile-status").textContent = message;
     $("profile-error").hidden = true;
     $("cuisine").removeAttribute("aria-invalid");
   }
 
-  $("compare").addEventListener("click", () => {
+  function confirm() {
     let message = "";
     if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.cuisine)) {
       message = "Choose a cuisine from the list before comparing districts.";
       $("cuisine").setAttribute("aria-invalid", "true");
     } else if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
       message = "Choose a supported value for every trait before comparing districts.";
+    } else if (!area || !RENT_BANDS.includes(rentBand)) {
+      message = "Choose a search area and rent band before comparing districts.";
     }
     if (message) {
       $("profile-error").textContent = message;
@@ -283,26 +238,31 @@ async function main() {
       return;
     }
     try {
-      const query = { profile: { ...draft }, area: "England" };
-      const scores = scoreDistricts(bundle, query.profile);
+      const query = { profile: { ...draft }, area, rentBand };
+      // The search area and rent band filter districts; they are not NN1 inputs.
+      const scope = interpreter.districtsInScope(area, rentBand);
+      const scores = scoreDistricts(bundle, query.profile).filter((s) => scope.has(s.postcode_district));
       rescore ??= showResults();
       rescore(scores);
       confirmedQuery = query;
       const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === query.profile.cuisine);
       const traits = bundle.vocabulary.traits.map((t) => {
         let value = query.profile[t.name];
-        if (typeof value === "boolean") value = value ? "Yes" : "No";
-        else value = VALUE_LABELS[value] ?? value;
+        value = typeof value === "boolean" ? (value ? "Yes" : "No") : valueLabel(value);
         return `${traitLabel(t.name)}: ${value}`;
       });
-      $("confirmed-profile").textContent = `${cuisine.label} · ${query.area}. ${traits.join("; ")}.`;
+      if (interpreter.hasRent) traits.push(`Rent band: ${RENT_LABELS[rentBand]}`);
+      $("confirmed-area").textContent = area.label;
+      $("confirmed-profile").textContent = `${cuisine.label} · ${area.label}. ${traits.join("; ")}.`;
       updateDraft();
     } catch (error) {
       showError(error);
     }
-  });
+  }
 
-  setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
+  $("compare").addEventListener("click", confirm);
+
+  const cuisinePicker = setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
     draft = { ...draft, cuisine };
     updateDraft();
   });
@@ -313,9 +273,40 @@ async function main() {
     draft[name] = traitKinds.get(name) === "on_off" ? checked : value;
     updateDraft();
   });
+  $("rent-picker").addEventListener("change", (event) => {
+    rentBand = event.target.value;
+    updateDraft();
+  });
+
+  // The review card's Compare districts: prefill the results panel, then confirm it.
+  function compareDraft(next) {
+    draft = { ...next.profile };
+    rentBand = next.rentBand;
+    area = next.area;
+    cuisinePicker.set(draft.cuisine);
+    for (const input of $("profile-controls").querySelectorAll("input[name]")) {
+      const value = input.name === "rent_band" ? rentBand : draft[input.name];
+      input.checked = input.type === "checkbox" ? value === true : input.value === value;
+    }
+    $("area-label").textContent = area.label;
+    showScreen("results");
+    confirm();
+  }
+
+  const questions = setUpQuestions({
+    bundle,
+    interpreter,
+    serveDish: () => kitchen.then((k) => k?.serve()),
+    onCompare: compareDraft,
+  });
+  $("change-answers").addEventListener("click", () => { showScreen("questions"); questions.open(); });
+  $("change-area").addEventListener("click", () => { showScreen("questions"); questions.open("location"); });
+  $("model-download").addEventListener("click", () => {
+    // shortcut: no on-device model yet; #136 connects NN2's explicit download (size, progress, cancel) here.
+    $("model-status").textContent = "The on-device model is not available yet, so Plotluck's built-in reader reads your answers.";
+  });
 
   $("loading").hidden = true;
-  $("pick-prompt").hidden = false;
   $("profile-controls").disabled = false;
   updateDraft();
 }

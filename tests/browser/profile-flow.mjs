@@ -1,51 +1,20 @@
-// Real-browser test: install Playwright and Leaflet locally, then run this file with Node.
-// Set PLOTLUCK_PLAYWRIGHT to its module URL and PLOTLUCK_BROWSER to a Chromium executable if needed.
+// Real-browser test of the results panel: install Playwright, Leaflet and Three.js locally
+// (docs/setup.md), then run this file with Node.
 import assert from "node:assert/strict";
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
-const playwright = import.meta.resolve(process.env.PLOTLUCK_PLAYWRIGHT ?? "playwright");
-const { chromium } = await import(playwright);
-const leaflet = new URL("../leaflet/dist/", playwright);
-const types = { html: "text/html", js: "text/javascript", css: "text/css", json: "application/json", csv: "text/csv" };
+import { answerQuestions, newPage, openSite } from "./site.mjs";
 
-test("a picked profile needs confirmation before its district results appear", async (t) => {
-  const root = new URL("../../web/", import.meta.url);
-  const server = createServer(async (request, response) => {
-    const path = new URL(request.url, "http://localhost").pathname;
-    const file = new URL(`.${path === "/" ? "/index.html" : path}`, root);
-    if (!file.href.startsWith(root.href)) { response.writeHead(403).end(); return; }
-    try {
-      const body = await readFile(file);
-      response.writeHead(200, { "Content-Type": types[file.pathname.split(".").at(-1)] ?? "text/plain" }).end(body);
-    } catch { response.writeHead(404).end(); }
-  });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  t.after(() => new Promise((resolve) => server.close(resolve)));
-  const browser = await chromium.launch({ headless: true, ...(process.env.PLOTLUCK_BROWSER ? { executablePath: process.env.PLOTLUCK_BROWSER } : {}) });
-  t.after(() => browser.close());
-  const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  const errors = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  // Serve the real pinned mapping library locally; tiles are irrelevant to profile confirmation.
-  await page.route("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/*", async (route) => {
-    const name = new URL(route.request().url()).pathname.split("/").at(-1);
-    await route.fulfill({ body: await readFile(new URL(name, leaflet)), contentType: types[name.split(".").at(-1)] });
-  });
-  await page.route("https://tile.openstreetmap.org/**", (route) => route.abort());
-  await page.goto(`http://127.0.0.1:${server.address().port}/`);
-  const cuisine = page.getByRole("combobox", { name: "Cuisine", exact: true });
-  await cuisine.waitFor({ state: "visible" });
-  await page.locator("#profile-controls:not([disabled])").waitFor();
-  await page.getByRole("button", { name: "Compare districts", exact: true }).click();
-  assert.match(await page.getByRole("alert").innerText(), /Choose a cuisine from the list/);
-  await page.getByRole("checkbox", { name: "Vegan options", exact: true }).check();
-  await cuisine.fill("Thai");
-  await cuisine.press("Enter");
+test("a profile needs confirmation before its district results appear", async (t) => {
+  const { browser, url } = await openSite(t);
+  const page = await newPage(browser);
+  await page.goto(url);
+  await answerQuestions(page, ["anywhere", "Thai", "", "", "", "vegan options"]);
   assert.equal(await page.getByRole("region", { name: "District results", exact: true }).isVisible(), false);
   await page.getByRole("button", { name: "Compare districts", exact: true }).click();
   await page.getByRole("region", { name: "District results", exact: true }).waitFor();
+  const cuisine = page.getByRole("combobox", { name: "Cuisine", exact: true });
+  assert.equal(await cuisine.inputValue(), "Thai");
   assert.match(await page.locator("#confirmed-profile").innerText(), /Thai.*England/);
   assert.match(await page.locator("#confirmed-profile").innerText(), /Vegan options: Yes/);
   assert.ok(await page.locator("#ranked li").count() > 0);
@@ -98,5 +67,5 @@ test("a picked profile needs confirmation before its district results appear", a
       await page.screenshot({ path: `${process.env.PLOTLUCK_SCREENSHOTS}/plotluck-profile-desktop.png`, fullPage: true });
     }
   });
-  assert.deepEqual(errors, []);
+  assert.deepEqual(page.errors, []);
 });
