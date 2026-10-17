@@ -46,9 +46,9 @@ async function submit(page, text, {raw = false, omit = []} = {}) {
 }
 
 test('the exact mid range Chinese prompt keeps menu prices after either a valid or malformed model reply',async t=>{
-  for(const malformed of [false,true]) {
+  for(const [malformed,gap] of [[false,' '],[true,' '],[true,'\n  ']]) {
     const {page}=await openPage(t,{malformed});
-    await submit(page,'A mid range chinese restaurant in hammersmith',{raw:true});
+    await submit(page,`A mid${gap}range chinese restaurant in hammersmith`,{raw:true});
     await page.locator('#clarification').waitFor();
     assert.equal(await page.locator('#clarify-price').count(),0);
     if(malformed) {

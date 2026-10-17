@@ -57,6 +57,18 @@ test('the exact mid range Chinese prompt retains stated prices even after an unr
   assert.ok(q.needs.find(n=>n.field==='area').options.some(p=>p.code==='E09000013'));
 });
 
+test('recovered mid-range evidence preserves real whitespace and never invents a phrase across punctuation',async()=>{
+  for(const gap of ['  ','\n','\u00a0']) {
+    const text=`A mid${gap}range Chinese restaurant in Hammersmith`;
+    const q=await unreadDescription(text,bundle,catalogue);
+    assert.equal(q.profile.price_band,'$$');
+    assert.equal(q.fields.price_band.evidence,`mid${gap}range`);
+  }
+  const q=await unreadDescription('A mid; range Chinese restaurant in Hammersmith',bundle,catalogue);
+  assert.equal(q.profile.price_band,'unknown');
+  assert.ok(q.needs.some(n=>n.field==='price'));
+});
+
 test('near a city without a distance uses the city boundary rather than a default radius',async()=>{
   const text='A mid range Italian pub near York';
   const q=await descriptionQuery(text,extraction(text,'York'),bundle,catalogue);
