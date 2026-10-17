@@ -48,3 +48,8 @@ def test_independent_of_working_directory(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     assert data_dir() == first
     assert first.is_absolute()
+
+
+def test_choice_overrides_environment(root, monkeypatch):
+    monkeypatch.setenv(ENV_VAR, "full")
+    assert data_dir(root, choice="sample") == root / "data" / "sample"

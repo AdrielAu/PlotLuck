@@ -1,0 +1,453 @@
+osm_type,osm_id,amenity,cuisine,name,lat,lon
+node,262565580,restaurant,international;burger,Giraffe,51.5063119,-0.1171395
+node,268430894,fast_food,sandwich,Pret A Manger,51.5071193,-0.1077261
+node,282686484,restaurant,pizza,PizzaExpress,51.5056639,-0.1151021
+node,282686485,restaurant,burger,Honest Burgers,51.5052621,-0.1167109
+node,282686486,restaurant,french,Côte Brasserie,51.5053303,-0.1169288
+node,282686488,restaurant,italian,Strada,51.5058554,-0.1176662
+node,282686489,fast_food,sandwich,Pret A Manger,51.5060836,-0.117399
+node,286509356,restaurant,chinese,Crystal China,51.49616,-0.0824545
+node,286509357,restaurant,indian,Tower Tandoori,51.4961089,-0.0825286
+node,287453551,restaurant,,Simply Indian,51.5006223,-0.0914796
+node,287457769,fast_food,kebab;burger;wraps,Hassan Bros. Steak & Kebab House,51.4960552,-0.0830153
+node,287457771,fast_food,chinese,Hing Loong Noodle House,51.4957073,-0.083467
+node,287457772,fast_food,kebab,Tower Mangal,51.4956707,-0.0835033
+node,289425959,fast_food,kebab,Village Kebab House,51.4913233,-0.0902584
+node,290128614,restaurant,asian,Wagamama,51.5057566,-0.1177658
+node,296491138,restaurant,greek,The Real Greek,51.5080629,-0.0951957
+node,296491141,restaurant,pizza,PizzaExpress,51.5081984,-0.096
+node,296615758,restaurant,,Tavolino,51.5053308,-0.0801739
+node,296615761,fast_food,burger,Five Guys,51.5052298,-0.0802465
+node,296615763,restaurant,argentinian,Gaucho,51.5051331,-0.0803967
+node,296639103,restaurant,,Oxo Tower Restaurant,51.5083936,-0.108242
+node,302623544,restaurant,pizza,Franco Manca,51.5025507,-0.1084373
+node,338973780,restaurant,,Vivat Bacchus,51.5055547,-0.0848633
+node,339156591,fast_food,sandwich,Pret A Manger,51.5055027,-0.0849532
+node,344101939,fast_food,chicken,Morley's,51.4973845,-0.0897456
+node,439237416,fast_food,lebanese,Lebanese Grill,51.4942837,-0.0920168
+node,441698041,restaurant,turkish,EV,51.5041675,-0.1063447
+node,442330103,fast_food,chicken,Maxy's,51.4942847,-0.0919496
+node,442330104,fast_food,kebab,Lebo Grill,51.4942885,-0.0916936
+node,442330107,fast_food,pizza,Papa John's,51.4942934,-0.0913642
+node,442538227,restaurant,chinese,Dragon Castle,51.4920367,-0.0983889
+node,471421779,restaurant,vietnamese,Caphe House,51.5003181,-0.0817795
+node,472145731,restaurant,turkish,Lokma,51.4975964,-0.0802056
+node,534962783,restaurant,german,Katzenjammers Bavarian Bierkeller,51.5048353,-0.0909682
+node,534964527,fast_food,chicken;fish_and_chips;burger,Hot Munchies,51.5048163,-0.0925125
+node,534967055,fast_food,sandwich,Subway,51.502225,-0.092601
+node,534968866,fast_food,,Giggling Sausage,51.5007347,-0.0979624
+node,534968924,fast_food,,Olley's Fish & Chips,51.5008117,-0.0981308
+node,538090951,restaurant,,The Archduke,51.5049229,-0.1160324
+node,540284574,restaurant,chicken;portuguese,Nando's,51.495569,-0.0996223
+node,544460890,restaurant,fish_and_chips;steak_house;italian;asian,Westminster Kitchen Grill House,51.5011784,-0.1181531
+node,544460892,restaurant,mediterranean,Troia,51.5022334,-0.1177247
+node,544464087,fast_food,,Neds Noodle Bar,51.5021582,-0.1177611
+node,544504825,restaurant,italian,Fratelli Caprini,51.5040584,-0.1118212
+node,559510570,restaurant,,La Fogata,51.4948267,-0.0984783
+node,567814235,fast_food,sandwich,Pret A Manger,51.5068441,-0.0913009
+node,587746213,restaurant,italian,Olivelli,51.5028072,-0.107681
+node,587754447,restaurant,,Cubana,51.5015282,-0.1109605
+node,587754458,restaurant,italian,La Barca,51.501757,-0.1109812
+node,587757716,restaurant,,Ha-Noi,51.4995269,-0.1140982
+node,587759520,restaurant,italian,Cotto,51.4988211,-0.1127235
+node,587761906,restaurant,chinese,碳鲜生（柒味）Mr Charcoal Restaurant,51.4959251,-0.1117837
+node,587764588,restaurant,,Duke Thai Restaurant,51.499436,-0.1138906
+node,587768723,restaurant,italian,Locale,51.501583,-0.117893
+node,587773383,fast_food,,Bagel Street,51.5023075,-0.1176932
+node,587787640,restaurant,,Aji Zen Canteen,51.5010382,-0.1186688
+node,587850784,fast_food,pizza,Red Planet,51.4950191,-0.0881809
+node,588470670,fast_food,,PFC,51.4949568,-0.0883294
+node,588513517,restaurant,,Azzurro,51.5043933,-0.114644
+node,592030782,restaurant,indian,The Rajasthan I,51.5094421,-0.0841004
+node,597287600,fast_food,fish_and_chips,Masters Super Fish,51.5005685,-0.1077254
+node,597316522,restaurant,indian,The Thames,51.5039978,-0.111751
+node,597342965,restaurant,british,Roast Restaurant,51.5053997,-0.0909664
+node,603089948,fast_food,chinese,Golden Sun,51.4980697,-0.1042022
+node,623502284,restaurant,,Skylon,51.5057009,-0.1173971
+node,648871868,fast_food,lebanese,Lebanese Grill Mix,51.4901515,-0.0805041
+node,655168894,restaurant,italian,Theo's,51.4928104,-0.1003874
+node,656666426,restaurant,vietnamese,,51.4924392,-0.0988489
+node,668540445,restaurant,,GB Grill & Bar,51.4976029,-0.0812871
+node,671694989,fast_food,lebanese,Lebanese Grills,51.5006138,-0.1077833
+node,677315950,fast_food,fish_and_chips,Joseph's Fish & Chips,51.4963009,-0.0827908
+node,677316017,restaurant,pie_and_mash,M. Manze,51.4963383,-0.082749
+node,679658812,fast_food,,Golden Chicken,51.4968373,-0.0809727
+node,686568571,restaurant,italian;tapas,Amora Gusto,51.504169,-0.105598
+node,689930363,fast_food,sandwich;bakery,Greggs,51.4962039,-0.082883
+node,694696792,fast_food,,,51.4963868,-0.0827086
+node,702806732,fast_food,sandwich,Pret A Manger,51.5098502,-0.0867427
+node,751822149,fast_food,chinese,,51.4965816,-0.0808145
+node,805515651,fast_food,fish_and_chips,Long Lane Fish Bar,51.4994927,-0.0867337
+node,821921666,fast_food,kebab,Shawarma Bros,51.5038846,-0.1120136
+node,832601759,fast_food,indian,Curry Express,51.4984545,-0.0858923
+node,835142421,fast_food,chinese;fish_and_chips,Mei King,51.5022036,-0.0837951
+node,847102117,restaurant,,The Leather Uppers,51.5003476,-0.0844458
+node,847136078,fast_food,,Pizza 2 Go,51.5007309,-0.0915628
+node,847136214,fast_food,chinese,Double Happy,51.5008227,-0.0916298
+node,863838496,restaurant,,Inshoku,51.5007452,-0.1126786
+node,863838518,restaurant,spanish,Chango,51.5005483,-0.1131646
+node,863838614,fast_food,,,51.5007214,-0.1127447
+node,888615322,restaurant,italian,Cafe Murano,51.49867,-0.081188
+node,936361394,fast_food,sandwich,Pret A Manger,51.5048964,-0.081838
+node,1184333730,restaurant,,Donde Lucho,51.4926074,-0.1007555
+node,1184333810,restaurant,brazilian,Theo's,51.4928692,-0.1003007
+node,1394233340,fast_food,Cornish,West Cornwall Pasty Company,51.5049528,-0.0861372
+node,1757377762,restaurant,pizza,Franco Manca,51.5063082,-0.0914182
+node,1760413588,restaurant,steak_house,Flat Iron Southbank,51.50557,-0.1163361
+node,1797692539,restaurant,italian,Altamarea,51.5057703,-0.0899601
+node,1822127901,fast_food,salad,Tossed,51.5050444,-0.0827142
+node,1822172747,restaurant,,Brigade Bar & Bistro,51.5039617,-0.081239
+node,1938110507,restaurant,italian,Flour & Grape,51.498013,-0.0814971
+node,1938614377,restaurant,chinese,Zen China,51.5019611,-0.1191968
+node,2189991994,restaurant,italian,Zizzi,51.509227,-0.0800317
+node,2461305295,restaurant,mediterranean,Gordon Ramsay Bread Street Kitchen,51.5035987,-0.1012291
+node,2611020395,fast_food,chicken,Pizza & Chicken Palace,51.4990374,-0.1130094
+node,2739053219,restaurant,,Assado,51.5010289,-0.1082874
+node,2808228603,restaurant,italian,Zizzi,51.507982,-0.09491
+node,2918726101,restaurant,indian,Shaheen,51.5000383,-0.1071301
+node,2918729805,fast_food,chicken,PFC,51.4996622,-0.1066566
+node,2921835874,fast_food,ethiopian,,51.5058622,-0.0900897
+node,2921835875,fast_food,international,,51.5057447,-0.0897022
+node,2996559744,restaurant,,BAO,51.5057188,-0.0916112
+node,3052704737,fast_food,sandwich,Deliverance,51.4976424,-0.1151143
+node,3054326508,restaurant,steak_house,Flat Iron,51.5070275,-0.0921286
+node,3134099059,restaurant,chicken;portuguese,Nando's,51.5040819,-0.1037565
+node,3176893047,restaurant,french,Côte Brasserie,51.5062517,-0.0835132
+node,3217425361,fast_food,,Fusion grill,51.4996202,-0.1066037
+node,3248482325,fast_food,kebab,Kebab Addiction,51.4989456,-0.0994588
+node,3248482385,fast_food,pizza,Tops Pizza,51.4989364,-0.0992992
+node,3306047204,restaurant,french,Brasserie Toulouse Lautrec,51.4911287,-0.1033552
+node,3333944752,fast_food,burger,Gourmet Burger Kitchen,51.5026654,-0.1102252
+node,3333951907,restaurant,mexican,Wahaca,51.5026408,-0.1101956
+node,3333964321,restaurant,indian,Spice of India,51.5027445,-0.107866
+node,3333975493,restaurant,kebab,Capital Kebab House,51.5027814,-0.1077569
+node,3335139739,fast_food,,The Sandwichman,51.4950904,-0.1167293
+node,3447788452,fast_food,,Falafel Lover,51.4953669,-0.1025767
+node,3447789927,fast_food,,Nandine Coffee,51.4953564,-0.1025201
+node,3474103568,fast_food,sandwich,Pret A Manger,51.5067638,-0.1042074
+node,3543800768,fast_food,burger;sandwich,LEON,51.5050186,-0.083584
+node,3567118900,fast_food,chicken,Chicken Cottage,51.5039423,-0.0816839
+node,3619793495,fast_food,sandwich,Subway,51.5013493,-0.1181502
+node,3691652451,restaurant,,Mina's Grill,51.4995388,-0.0964186
+node,3691652456,fast_food,chicken,Chicken Cottage,51.500741,-0.0942175
+node,3714081157,restaurant,,Po Cha 포장마차,51.501014,-0.1121741
+node,3714081162,restaurant,ramen,Fukuoka Ramen Bar,51.5009527,-0.1127469
+node,3716898171,restaurant,french,Brasserie Blanc,51.5057459,-0.1149505
+node,3796261409,restaurant,,Flakes,51.4909148,-0.1038454
+node,3796261411,fast_food,chinese,Mr Ma,51.4908808,-0.1037783
+node,3796265629,restaurant,indian,Ivory Arch,51.4928134,-0.0988917
+node,3796265636,fast_food,,Chatkhara,51.4927082,-0.0988031
+node,3845915785,restaurant,,The Understudy by Kerb,51.5075526,-0.1139562
+node,4021881294,restaurant,,Pharmacy 2,51.4934731,-0.1168643
+node,4087798584,fast_food,sandwich,Pret A Manger,51.5017932,-0.104357
+node,4264981992,fast_food,pizza,La Parma Pizzeria,51.4951782,-0.1106821
+node,4290298109,fast_food,donut,Krispy Kreme,51.5036417,-0.1140835
+node,4314864398,fast_food,pizza,Domino's,51.4909409,-0.1035272
+node,4319757095,fast_food,burger,Beany,51.5055477,-0.1182375
+node,4341727240,fast_food,chinese,Spring Orchid,51.5009767,-0.1103078
+node,4341801181,restaurant,korean,Go Po Cha,51.5002886,-0.1108388
+node,4382236692,restaurant,italian,Carluccio's,51.507311,-0.1013507
+node,4409656868,fast_food,fish_and_chips,Castle Fish Bar,51.4979203,-0.1040152
+node,4409665813,fast_food,sandwich,Subway,51.4977608,-0.1038154
+node,4452607095,restaurant,,,51.5072409,-0.1002778
+node,4456938325,restaurant,,The London Kitchen,51.4956573,-0.1155457
+node,4475157775,restaurant,coffee_shop;international,Caravan,51.5045541,-0.0971758
+node,4484745568,fast_food,spanish,EDū,51.5041349,-0.0951414
+node,4577310106,restaurant,italian,Al dente,51.5099858,-0.0859874
+node,4685641267,restaurant,italian,Via Bermondsey,51.4988293,-0.0809603
+node,4697297510,restaurant,,Jamboree,51.5051339,-0.1047604
+node,4705700760,restaurant,italian,O Ver,51.5048842,-0.0940841
+node,4750544121,restaurant,mexican,Santo Remedio,51.5036468,-0.0809466
+node,4757068123,restaurant,french,Casse Croute,51.5005173,-0.0816433
+node,4779514963,restaurant,steak,Hawksmoor,51.5063,-0.0912496
+node,4781209342,restaurant,indian,Silka,51.5050685,-0.0899488
+node,4867163668,fast_food,chicken,Assenheims,51.5053618,-0.0884793
+node,4939271627,restaurant,asian;chinese,Glass garden,51.5062702,-0.1015881
+node,4995776904,fast_food,pizza,Wood Stone Oven,51.4925849,-0.116719
+node,4995776906,fast_food,fish_and_chips,Lee's Fish and Chips Shop,51.4924863,-0.1168169
+node,5005993021,restaurant,,Shrigleys Moroccan Cafe,51.5036416,-0.0912076
+node,5009816422,fast_food,,Bleecker,51.505534,-0.1181545
+node,5050323144,restaurant,italian,Flavours of Naples,51.4999634,-0.0950851
+node,5052898701,fast_food,noodle,Noodle House,51.4995133,-0.0964713
+node,5067116998,restaurant,lebanese,Al Masar,51.5009181,-0.0939569
+node,5067127594,fast_food,,,51.4927441,-0.0988551
+node,5211002736,restaurant,,Cafe Piazza,51.5056511,-0.0834278
+node,5253890621,restaurant,grill,Texas Joe's Slow Smoked Meats,51.5022037,-0.0838347
+node,5281656093,fast_food,ice_cream,M&M Gelato,51.4995692,-0.096381
+node,5296303423,restaurant,indian,Est. India,51.5038699,-0.0951751
+node,5329493921,restaurant,american,The Breakfast Club,51.5045588,-0.0914023
+node,5339935734,fast_food,,Fishcotheque,51.5039614,-0.1117052
+node,5344783291,restaurant,british;fusion,Oxbo,51.5056969,-0.1011895
+node,5396322683,fast_food,tex-mex,Tortilla,51.5035549,-0.1049702
+node,5411808174,restaurant,,Sabor Peruano Internacional,51.4926052,-0.1009415
+node,5493149390,restaurant,,Union Viet Cafe and Restaurant,51.5038535,-0.0984717
+node,5542939132,fast_food,sandwich,Pret A Manger,51.502227,-0.110234
+node,5563814677,restaurant,pizza,Crust Bros,51.5027732,-0.1103387
+node,5585792067,fast_food,burger;sandwich,LEON,51.5041803,-0.084635
+node,5585792995,fast_food,sandwich,Pret A Manger,51.5048131,-0.0852745
+node,5726497961,restaurant,australian;coffee_shop,Lantana,51.5049005,-0.0942771
+node,5760381473,fast_food,donut,Krispy Kreme,51.5042318,-0.0856196
+node,5881492186,fast_food,sandwich,Pret A Manger,51.49914,-0.1132517
+node,5943462687,restaurant,,Florentine,51.4982585,-0.1135094
+node,6090685492,restaurant,,Rabot 1745,51.5053783,-0.0901397
+node,6091111487,restaurant,,Champor Champor,51.5024702,-0.0854504
+node,6167831579,fast_food,ice_cream,Gelateria Carte d'Or,51.5064425,-0.0880599
+node,6283507763,fast_food,sandwich,Pret A Manger,51.4935425,-0.1010837
+node,6329192111,fast_food,burger,McDonald's,51.5052434,-0.0849181
+node,6331429189,restaurant,portuguese,Casa do Frango,51.5048484,-0.0927197
+node,6339919610,restaurant,italian,Marco’s New York Italian London Bridge,51.5051841,-0.0992199
+node,6429327325,restaurant,polish,Mamuska!,51.50103,-0.1153916
+node,6450370287,restaurant,italian,Franco Manca,51.5001446,-0.0817032
+node,6482358885,restaurant,vietnamese,BanhMi City,51.5096348,-0.0810362
+node,6557948390,fast_food,,Porteña,51.5052768,-0.0912367
+node,6575428115,restaurant,japanese,OKAN,51.5020002,-0.1183297
+node,6577138396,restaurant,japanese,Kauboi Ramen,51.5022049,-0.0837258
+node,6655693185,restaurant,,La Nonna,51.5040703,-0.0947809
+node,6811559885,restaurant,,Brix,51.5047828,-0.0973671
+node,6951294118,restaurant,,Art Yard,51.5078595,-0.1051627
+node,7004139186,restaurant,,Terrace Restaurant,51.5070016,-0.1146892
+node,7056456785,restaurant,italian,Pulia,51.5066332,-0.0913841
+node,7066802685,restaurant,ramen,Hakata Ramen,51.4988314,-0.0808991
+node,7103157886,restaurant,ethiopian,Beza vegan food,51.4919795,-0.0964642
+node,7699150385,restaurant,,Redwood Sports Pub & Kitchen,51.5050242,-0.0862519
+node,7856335286,restaurant,caribbean,Tasty Jerk,51.4925644,-0.0971145
+node,7856351687,restaurant,japanese,KOI Ramen Bar,51.4926151,-0.0971509
+node,7982720361,restaurant,latin_american,Leños & Carbon,51.4940717,-0.0984532
+node,8541538491,restaurant,thai,Rosa's Thai Cafe,51.5025816,-0.1083463
+node,8707728250,restaurant,italian,Gusto,51.5043479,-0.104778
+node,8817402988,restaurant,,Whisky Ginger,51.5057304,-0.0892648
+node,8879625562,restaurant,brazilian;brunch,Tupi,51.4940168,-0.0980738
+node,8879625563,restaurant,pizza;italian,Pizza Pappagone Sud,51.4940286,-0.0979772
+node,8916367891,restaurant,pizza,400 Rabbits,51.4935622,-0.0959134
+node,8952014892,restaurant,bolivian,Cabana,51.4942921,-0.0914487
+node,9170558346,restaurant,,Numnum,51.5042379,-0.1033254
+node,9170573255,restaurant,,Skewered,51.5098598,-0.0803913
+node,9537464640,restaurant,middle_eastern,Bala Baya,51.5031927,-0.1017749
+node,9550710674,restaurant,italian,Macellaio,51.5033013,-0.1018118
+node,9764354228,fast_food,mexican,Tacos Padre,51.5058891,-0.0908779
+node,9764354229,fast_food,israeli,Shuk;,51.5060858,-0.0907587
+node,9764354231,fast_food,indian,Horn OK Please,51.5058854,-0.0908299
+node,9830545517,restaurant,,Aqua Shard,51.5045496,-0.0862327
+node,9831574619,fast_food,chicken,KFC,51.5041484,-0.1138289
+node,9842144897,restaurant,,Mallow,51.5062423,-0.0903798
+node,9919330055,restaurant,,1751 Distillery Bar & Kitchen,51.5048766,-0.0820253
+node,9919330056,fast_food,asian,itsu,51.50491,-0.0815372
+node,9919330057,fast_food,italian,Coco di Mama,51.50491,-0.0814165
+node,9920641996,restaurant,steak_house,Flat Iron,51.5041889,-0.082255
+node,9949098463,restaurant,steak_house;breakfast,Bar + Block,51.5026314,-0.1062003
+node,9960441422,restaurant,burger,Honest Burgers,51.5041797,-0.0834794
+node,9960441423,restaurant,pizza,Pizza Pilgrims,51.5043745,-0.083645
+node,9960451064,restaurant,spanish,Parrillan,51.5055963,-0.0920185
+node,9960451077,restaurant,,Brother Marcus,51.5055225,-0.0922233
+node,9960451081,restaurant,,Barrafina,51.5054528,-0.0920724
+node,9961024709,fast_food,breakfast;salad,Pure,51.5053637,-0.0851607
+node,9961024710,fast_food,japanese,Wasabi,51.5053228,-0.0850809
+node,9961024711,restaurant,lebanese,Comptoir Libanais,51.5045671,-0.0838464
+node,9962734975,restaurant,burger,Burger & Beyond,51.5068621,-0.0926065
+node,9962758031,restaurant,asian,Banh Bao Brothers,51.5014626,-0.1149511
+node,9962758032,restaurant,american,Passyunk Avenue,51.5015695,-0.1151214
+node,9977284957,restaurant,,baccalà,51.4985128,-0.0812174
+node,9977324642,restaurant,,Jose Pizarro,51.4984834,-0.0812289
+node,9985873717,restaurant,,Flour & Grape,51.4980734,-0.0814526
+node,10044488726,fast_food,kebab,Londoner Kebabs,51.5058864,-0.0872799
+node,10085893871,fast_food,pizza,Yard Sale Pizza,51.4960172,-0.0830649
+node,10119814270,fast_food,pizza,Spizza,51.5054517,-0.0887103
+node,10124873117,restaurant,,Bala Baya,51.5033263,-0.1018136
+node,10225863101,restaurant,,Bob's Lobster,51.5027881,-0.0832811
+node,10225863102,restaurant,greek,Smashing Plates,51.5031099,-0.084197
+node,10706626285,restaurant,japanese,The Sushi Co,51.5014966,-0.1114099
+node,10798047254,restaurant,sushi,Love Sushi,51.5010667,-0.1120549
+node,10798047279,fast_food,sandwich;bakery,Greggs,51.501426,-0.1116217
+node,10814720916,fast_food,sandwich,Pret A Manger,51.508029,-0.095034
+node,10839916461,restaurant,sushi,Japanese Yama Sushi,51.499582,-0.0951611
+node,10899909722,restaurant,,Applebee’s Fish,51.5050964,-0.090944
+node,10973601927,fast_food,sandwich,Simply Bread,51.4914955,-0.1184155
+node,10992277805,restaurant,spanish;tapas,La Gamba,51.506196,-0.1172718
+node,11012716555,fast_food,burger;sandwich,LEON,51.5042659,-0.1150398
+node,11077564219,restaurant,pizza,Mondo Beer + Pizza,51.506935,-0.0926106
+node,11096673502,restaurant,caribbean,Jerk in Da Park,51.5012997,-0.1099151
+node,11115111605,restaurant,,Where the Pancakes Are,51.5042193,-0.0953773
+node,11171724872,restaurant,,Enough To Feed An Elephant,51.500511,-0.1132414
+node,11189252856,restaurant,,Crosby & Hope,51.5073347,-0.0960008
+node,11203665614,fast_food,sandwich;bakery,Greggs,51.5045826,-0.0842922
+node,11203671438,fast_food,donut,Crosstown,51.5048302,-0.0862823
+node,11206327439,restaurant,,Nanny Bill’s,51.5026832,-0.0841301
+node,11216405642,fast_food,,Omelette Bar,51.5085465,-0.106429
+node,11216593881,restaurant,pizza;burger;seafood;fish_and_chips,BFI Riverfront,51.5072678,-0.1155393
+node,11229939569,restaurant,korean,Bap Jo,51.5003315,-0.110813
+node,11231274687,restaurant,pizza,Street Pizza,51.5035709,-0.1012225
+node,11239922499,restaurant,asian;noodle,Y G C,51.505164,-0.1014091
+node,11286238370,restaurant,vietnamese,Pho,51.5045715,-0.0912529
+node,11295320803,fast_food,sandwich,Kappacasein Dairy,51.504981,-0.0909769
+node,11394080056,fast_food,asian,itsu,51.5051579,-0.0875474
+node,11413568269,restaurant,italian,La Tua Pasta,51.5058813,-0.0909626
+node,11514198568,fast_food,regional,Farmer J,51.5042705,-0.0835399
+node,11557826349,fast_food,donut,Longboys,51.5070709,-0.092341
+node,11676429528,restaurant,,Vinoteca,51.5062778,-0.0916463
+node,11676429529,restaurant,,Bancone Borough Yards,51.5065691,-0.0916052
+node,11676429530,restaurant,,Akara,51.5064104,-0.0916276
+node,11734904571,fast_food,lebanese,Lebanese Grill,51.4906062,-0.0812613
+node,11753693669,restaurant,,Paladar,51.4981617,-0.1043174
+node,11784747676,restaurant,pizza,Pizza Pilgrims,51.5016691,-0.1111239
+node,11822802969,restaurant,malaysian,Roti King,51.5013569,-0.111818
+node,11869927809,restaurant,sushi,,51.5077276,-0.1070684
+node,11876524394,fast_food,pizza,Domino's,51.4920584,-0.0824307
+node,11989784842,restaurant,middle_eastern;british;coffee_shop,Bermondsey Garden,51.4969035,-0.0824611
+node,12083747069,restaurant,,Seoul tokyo,51.5051501,-0.0897893
+node,12097520873,fast_food,,Atis,51.5059393,-0.0921677
+node,12097520874,fast_food,japanese,SushiDog,51.5057114,-0.0886497
+node,12151899376,restaurant,,Marco's New York Italian,51.505335,-0.0989226
+node,12177084967,restaurant,,Leo's,51.5054142,-0.0886002
+node,12183994718,restaurant,japanese,Sagamiya,51.5021013,-0.1182816
+node,12209053233,restaurant,pizza,Papi's Munchies,51.5099581,-0.0858751
+node,12238929321,fast_food,hot_dog;fries,The Sweet Spot,51.5083094,-0.1111531
+node,12400829693,restaurant,,Hannah Restaurant,51.5011821,-0.118676
+node,12404564015,restaurant,,Jeux Jeux Okonomiyaki,51.5014443,-0.1185616
+node,12424512702,restaurant,,El Pastor,51.505262,-0.0911525
+node,12431133250,restaurant,chinese,Cheli,51.4942627,-0.0961648
+node,12477919501,restaurant,greek,Oma,51.5053404,-0.0900773
+node,12495732001,restaurant,french,Fleurie,51.5009077,-0.0820371
+node,12518898580,restaurant,spanish,Jose,51.5006118,-0.0819039
+node,12572012531,fast_food,,Tower Fried Chicken,51.4963713,-0.0821889
+node,12620888701,restaurant,thai,Kolae,51.505443,-0.0915899
+node,12666515501,fast_food,vietnamese;deli,Kêu,51.5052471,-0.089157
+node,12744447476,restaurant,tapas,Andanza,51.5023436,-0.0855055
+node,12773123647,fast_food,,All that Falafel,51.5052866,-0.089089
+node,12864557875,fast_food,,MOMO,51.5067348,-0.0926156
+node,12864586036,restaurant,,DanDan,51.5048576,-0.0930798
+node,12889145547,restaurant,turkish,Tas Restaurant,51.5038088,-0.0913747
+node,12977972702,restaurant,,Auberge,51.5036704,-0.1108736
+node,12982298316,restaurant,chinese,BiangBiang Xi'an Noodles,51.5058514,-0.0880449
+node,13019786853,restaurant,kebab,Doner and Burger,51.5045506,-0.0834291
+node,13041605664,restaurant,spanish;fish,Lè Joint,51.4908907,-0.0809997
+node,13055014361,restaurant,spanish;latin_american,Matiz,51.4982286,-0.1044012
+node,13055014365,restaurant,chinese;hotpot,Mao Pao Mini Hot Pot,51.497997,-0.1041111
+node,13055106786,restaurant,korean,Horangee Pocha & Karaoke,51.4939715,-0.0939635
+node,13055106787,fast_food,,Five Star Fish Bar,51.4939785,-0.0938699
+node,13071193746,restaurant,lebanese,Comptoir Libanais,51.5054475,-0.117292
+node,13085056351,restaurant,chinese,Culture Grub,51.5029576,-0.1080093
+node,13103482000,restaurant,thai,Maries cafe,51.5014819,-0.111451
+node,13103482701,fast_food,,Chicken Valley,51.501793,-0.1109365
+node,13116959720,restaurant,turkish;mediterranean,TAS,51.5032135,-0.1064223
+node,13116959723,restaurant,burger,Honest Burgers,51.5031216,-0.1067008
+node,13116959724,restaurant,steak_house,Flat Iron,51.503073,-0.106848
+node,13116959726,restaurant,japanese,Kokura,51.5030074,-0.1070617
+node,13116959728,restaurant,spanish,Meson Don Felipe,51.5029561,-0.1072019
+node,13116959732,fast_food,sandwich,Pret A Manger,51.50371,-0.1026428
+node,13116959733,restaurant,eastern_european,Baltic,51.5034707,-0.1048149
+node,13355347626,restaurant,,Heavenly Desserts,51.4928597,-0.0969873
+node,13355347628,fast_food,juice,Joe & The Juice,51.4926466,-0.0968777
+node,13355347630,restaurant,asian,Pot & Rice,51.4924285,-0.0970365
+node,13376401911,fast_food,chicken,Popeyes,51.5057312,-0.0864181
+node,13409071870,restaurant,pizza,Gourmet Pizza,51.5080803,-0.1100877
+node,13409071871,restaurant,,The Wharf,51.5080975,-0.1102976
+node,13409071872,fast_food,burrito;mexican;tacos,Hola Guacamole,51.508024,-0.1103368
+node,13409071883,restaurant,caribbean,Limim,51.5075878,-0.1098971
+node,13409071886,restaurant,,Fed by plants,51.5074357,-0.1101529
+node,13476270303,restaurant,seafood,Angry Crab Shack,51.5067946,-0.0926114
+node,13563937201,restaurant,greek,Agora,51.5053651,-0.0900406
+node,13596107564,fast_food,chicken,Chicky Wiki,51.4942775,-0.0924364
+node,13630306851,fast_food,chicken,HFC Chicken,51.497344,-0.103416
+node,13652446974,restaurant,,Options Cuisine,51.4905637,-0.0806268
+node,13665646120,restaurant,,Salt Yard,51.5062258,-0.0906405
+node,13699098357,fast_food,sandwich;bakery,Greggs,51.4943518,-0.0904579
+node,13699362603,restaurant,vietnamese,Rao Deli,51.4995226,-0.0964503
+node,13764193602,restaurant,korean,Cheemc,51.4942223,-0.09814
+node,13764193702,fast_food,,Filishack,51.492499,-0.0970738
+node,13764252502,restaurant,,Rambutan,51.5055551,-0.0914446
+node,13859056962,restaurant,african;caribbean,Presidential Suya,51.4909104,-0.0816528
+node,13859056966,fast_food,fish_and_chips,Bert's Fish And Chips,51.4905171,-0.0815158
+node,13859056979,restaurant,brazilian;venezuelan,Tropical,51.4904041,-0.080952
+node,13859056980,restaurant,,El Socavon,51.4903517,-0.080874
+node,13882941901,restaurant,asian,BARANG,51.5054631,-0.0898893
+node,13897200001,restaurant,venezuelan,Los Chamos,51.4926809,-0.0992286
+node,13909074901,restaurant,indian,Katchori,51.4937798,-0.09682
+node,13917129001,restaurant,chinese,Murger Han,51.4942151,-0.0979919
+node,13986889621,restaurant,,Lasdun,51.5074401,-0.1140066
+node,13999685301,restaurant,,Miko’s Ecuadorian & Spanish Kitchen,51.4925258,-0.0970655
+node,14048795301,restaurant,greek,Pyro,51.5046935,-0.0948841
+node,14097713702,restaurant,oriental;persian,Berenjak Borough,51.5052834,-0.0899024
+node,14152458920,fast_food,kebab,German Doner Kebab,51.5008037,-0.0941253
+node,14170777901,fast_food,,KFC Borough,51.502706,-0.0923053
+node,14181043724,restaurant,,Del Mercato,51.5053504,-0.0918382
+node,14181043728,restaurant,fish,Wright Brothers,51.5056249,-0.0915192
+node,14181043739,fast_food,sandwich,Subway,51.5045292,-0.0901405
+node,14181043741,fast_food,japanese,Wasabi,51.5046031,-0.0900299
+node,14181043743,fast_food,donut,Doughnuts,51.5046742,-0.089936
+node,14181043745,fast_food,sandwich,Pret A Manger,51.504744,-0.0898424
+node,14181043746,restaurant,italian,Giuseppe's,51.5047698,-0.0897304
+node,14181043747,fast_food,,Luncheonette,51.5047726,-0.089804
+node,14181043752,fast_food,burger;sandwich,LEON,51.5051937,-0.0897612
+node,14181043755,restaurant,italian,Padella,51.5051341,-0.0899091
+node,14181043757,restaurant,tapas,Brindisa,51.5049803,-0.0904365
+node,14181043761,restaurant,italian,Alma's,51.5045338,-0.0905492
+node,14181043762,fast_food,indian,Yen Burger,51.5045806,-0.0906857
+node,14192241201,restaurant,,Shake Shack,51.5054132,-0.0845757
+node,14201321960,fast_food,chicken,Rotate,51.506855,-0.1169338
+node,14201445587,restaurant,,Gordon Ramsey at Sea Containers,51.5085288,-0.1073109
+way,77754135,restaurant,chinese,So Noodles,51.506401,-0.1019179
+way,77765230,restaurant,spanish,Mar i Terra,51.5043213,-0.1027275
+way,77830773,restaurant,brasserie,RSJ,51.5060894,-0.109841
+way,82770800,restaurant,,Black & Blue,51.5059362,-0.0913433
+way,82770830,restaurant,french,Boro Bistro,51.5061598,-0.0887264
+way,82770832,restaurant,seafood,fish!,51.5058121,-0.0902346
+way,82770889,restaurant,british,Bill's,51.5069474,-0.0916027
+way,82770909,restaurant,chicken;portuguese,Nando's,51.5073095,-0.0925056
+way,82770910,restaurant,asian,Wagamama,51.5072101,-0.0925178
+way,90376674,restaurant,thai,Plants of Roselyn,51.5042785,-0.0826262
+way,90376705,fast_food,burger,Bleecker,51.504262,-0.082544
+way,90376727,fast_food,tex-mex,Tortilla,51.5044308,-0.0831097
+way,94069699,restaurant,,Lupins,51.5041163,-0.0949503
+way,94069732,restaurant,,Lupins,51.5041286,-0.0950301
+way,99929027,restaurant,,Joe's Kitchen,51.5013196,-0.0942071
+way,100799861,fast_food,sandwich,Pret A Manger,51.5026915,-0.0918169
+way,101328323,restaurant,thai,Kin + Deum,51.5022374,-0.0820599
+way,101358448,restaurant,asian;thai,The Last Talisman,51.4990235,-0.0809128
+way,156720866,restaurant,indian,Sripur,51.5096149,-0.0809267
+way,156720875,restaurant,,Yalla Beirut,51.5097325,-0.0812607
+way,156720887,restaurant,american,Assenheims 56,51.5097127,-0.0811994
+way,308138088,fast_food,sandwich,Pret A Manger,51.5054443,-0.0888357
+way,335716203,fast_food,ice_cream,London Eye Ice Cream,51.5033703,-0.119223
+way,348210566,restaurant,chicken;portuguese,Nando's,51.506283,-0.1104804
+way,348211519,restaurant,grill,Black & Blue,51.5043008,-0.1140851
+way,420499131,restaurant,,Sollip,51.5024831,-0.0847018
+way,428337479,fast_food,,Bagel Factory,51.5032054,-0.1119159
+way,428337482,fast_food,burger,Burger King,51.5032861,-0.1119388
+way,428337486,restaurant,italian,Carluccio's,51.5028193,-0.1113385
+way,428337500,fast_food,burger,McDonald's,51.502898,-0.111203
+way,428337501,fast_food,,Mi Casa Burritos,51.5031634,-0.1118453
+way,428337502,restaurant,,Natural Kitchen,51.5030597,-0.1116317
+way,428337506,fast_food,sandwich,Pret A Manger,51.5031245,-0.1120949
+way,428337508,restaurant,,Sports Bar & Grill,51.5037195,-0.1135553
+way,428337512,fast_food,,The Pastry Shop,51.5028569,-0.112248
+way,428337514,fast_food,sandwich,Upper Crust,51.5029208,-0.1124862
+way,428337517,fast_food,japanese,Wasabi,51.5027623,-0.1112617
+way,428337520,restaurant,sushi,YO! Sushi,51.5036638,-0.1132957
+way,428337521,fast_food,sandwich,Upper Crust,51.5030291,-0.1111215
+way,485210584,fast_food,breakfast;salad,Pure,51.5037373,-0.1136979
+way,671492062,restaurant,pizza,PizzaExpress,51.5063625,-0.0888091
+way,810225020,restaurant,turkish,Tas,51.5077545,-0.0960845
+way,810617500,fast_food,italian,Coco di Mama,51.5056807,-0.0988708
+way,810617515,fast_food,salad,Tossed,51.5060429,-0.0990682
+way,810617516,restaurant,ramen,Tonkotsu,51.5059449,-0.0991086
+way,810617519,restaurant,,The Table,51.5054356,-0.0996438
+way,810617520,fast_food,sandwich,Pret A Manger,51.505744,-0.0992593
+way,810617542,restaurant,italian,Capricci,51.5066015,-0.1005673
+way,810617543,restaurant,asian,Wagamama,51.5064634,-0.1001792
+way,810617545,fast_food,burger;sandwich,LEON,51.5064768,-0.0995542
+way,812976864,fast_food,asian,itsu,51.5049988,-0.0973593
+way,812989302,restaurant,indian,Mango,51.5050183,-0.0929291
+way,813457447,restaurant,burger,Honest Burgers,51.5045615,-0.0910711
+way,863180040,fast_food,chicken,H Chicken & Grill,51.5007802,-0.0888849
+way,863180066,restaurant,indian,Cafe Nawaz Indian Restaurant,51.502033,-0.0879917
+way,1060462032,restaurant,mexican,Wahaca,51.506938,-0.116077
+way,1164897199,restaurant,,The Elements,51.4944948,-0.1188406
+way,1183431697,restaurant,,In Horto,51.5045463,-0.0951631
+way,1183431702,restaurant,,Spring Street Pizza,51.5044825,-0.0947441
+way,1183431714,restaurant,,where the pancakes are,51.5043424,-0.0954039
+way,1234874653,restaurant,indian,Shad,51.5043369,-0.0828371
+way,1330459123,fast_food,,Honi Poke,51.5056579,-0.0987351
+way,1386150703,restaurant,burger;chicken;mexican;american;ice_cream,Boulebar South Bank,51.5059268,-0.1137495
+way,1394167500,fast_food,mexican,El Sabor,51.5039555,-0.096266
+way,1409749436,fast_food,italian,Spizza Napoletana,51.5040369,-0.0964274
+relation,11367803,fast_food,pizza,Riverside Terrace,51.5081933,-0.0995497

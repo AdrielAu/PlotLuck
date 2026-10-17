@@ -1,0 +1,10 @@
+{
+  "source": "onspd",
+  "url": "https://www.arcgis.com/sharing/rest/content/items/9e5a92a3cfb14dc7ad43d6ea7a7b8c7f/data",
+  "edition": "ONS Postcode Directory, August 2026",
+  "licence": "Open Government Licence v3.0",
+  "attribution": "Contains OS data © Crown copyright and database right 2026. Contains Royal Mail data © Royal Mail copyright and database right 2026. Source: Office for National Statistics licensed under the Open Government Licence v.3.0",
+  "retrieved_at": "2026-10-17T10:58:14+00:00",
+  "bytes": 253928895,
+  "sha256": "ab51f1e82bd5beeb1089c3732ea6e11d62eb5693d619e2c4f4dd8c4baaa69293"
+}
