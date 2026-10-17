@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "plotluck"
 version = "0.1.0"
-description = "Plotluck: survival scores for London restaurants by postcode district"
+description = "Plotluck: review-based success scores for English postcode districts"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["numpy==2.0.2", "torch==2.11.0"]
 
 [project.optional-dependencies]
 test = ["pytest"]

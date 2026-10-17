@@ -1,0 +1,201 @@
+{
+  "version": "1.0",
+  "tolerance": 1e-06,
+  "profiles": [
+    {
+      "profile": {
+        "cuisine": "British",
+        "venue_type": "Restaurant",
+        "price_band": "unknown",
+        "is_chain": 0,
+        "vegetarian_friendly": 0,
+        "vegan_options": 0,
+        "gluten_free": 0
+      },
+      "scores": [
+        {
+          "postcode_district": "EC3M",
+          "score": 0.5469851493835449
+        },
+        {
+          "postcode_district": "EC3N",
+          "score": 0.5424909591674805
+        },
+        {
+          "postcode_district": "EC3P",
+          "score": 0.5432496070861816
+        },
+        {
+          "postcode_district": "EC3R",
+          "score": 0.5386229753494263
+        },
+        {
+          "postcode_district": "EC4P",
+          "score": 0.5432496070861816
+        },
+        {
+          "postcode_district": "EC4R",
+          "score": 0.5416651368141174
+        },
+        {
+          "postcode_district": "EC4V",
+          "score": 0.5427390336990356
+        },
+        {
+          "postcode_district": "SE1",
+          "score": 0.5445714592933655
+        },
+        {
+          "postcode_district": "SE11",
+          "score": 0.5416902303695679
+        },
+        {
+          "postcode_district": "SE16",
+          "score": 0.5382748246192932
+        },
+        {
+          "postcode_district": "SE17",
+          "score": 0.5418899059295654
+        },
+        {
+          "postcode_district": "SE1P",
+          "score": 0.541533887386322
+        },
+        {
+          "postcode_district": "WC2R",
+          "score": 0.5391074419021606
+        }
+      ]
+    },
+    {
+      "profile": {
+        "cuisine": "Chinese",
+        "venue_type": "Café",
+        "price_band": "$$$",
+        "is_chain": 1,
+        "vegetarian_friendly": 1,
+        "vegan_options": 1,
+        "gluten_free": 1
+      },
+      "scores": [
+        {
+          "postcode_district": "EC3M",
+          "score": 0.536961555480957
+        },
+        {
+          "postcode_district": "EC3N",
+          "score": 0.5364065766334534
+        },
+        {
+          "postcode_district": "EC3P",
+          "score": 0.5370665788650513
+        },
+        {
+          "postcode_district": "EC3R",
+          "score": 0.5351873636245728
+        },
+        {
+          "postcode_district": "EC4P",
+          "score": 0.5370665788650513
+        },
+        {
+          "postcode_district": "EC4R",
+          "score": 0.5354814529418945
+        },
+        {
+          "postcode_district": "EC4V",
+          "score": 0.5371711850166321
+        },
+        {
+          "postcode_district": "SE1",
+          "score": 0.5474614500999451
+        },
+        {
+          "postcode_district": "SE11",
+          "score": 0.5440468192100525
+        },
+        {
+          "postcode_district": "SE16",
+          "score": 0.5409196019172668
+        },
+        {
+          "postcode_district": "SE17",
+          "score": 0.5429381132125854
+        },
+        {
+          "postcode_district": "SE1P",
+          "score": 0.541540265083313
+        },
+        {
+          "postcode_district": "WC2R",
+          "score": 0.5378389358520508
+        }
+      ]
+    },
+    {
+      "profile": {
+        "cuisine": "Indian",
+        "venue_type": "Restaurant",
+        "price_band": "unknown",
+        "is_chain": 0,
+        "vegetarian_friendly": 0,
+        "vegan_options": 0,
+        "gluten_free": 0
+      },
+      "scores": [
+        {
+          "postcode_district": "EC3M",
+          "score": 0.5325865745544434
+        },
+        {
+          "postcode_district": "EC3N",
+          "score": 0.5299696326255798
+        },
+        {
+          "postcode_district": "EC3P",
+          "score": 0.5304630398750305
+        },
+        {
+          "postcode_district": "EC3R",
+          "score": 0.5300754308700562
+        },
+        {
+          "postcode_district": "EC4P",
+          "score": 0.5304630398750305
+        },
+        {
+          "postcode_district": "EC4R",
+          "score": 0.5295752286911011
+        },
+        {
+          "postcode_district": "EC4V",
+          "score": 0.530655562877655
+        },
+        {
+          "postcode_district": "SE1",
+          "score": 0.5466284155845642
+        },
+        {
+          "postcode_district": "SE11",
+          "score": 0.5351502895355225
+        },
+        {
+          "postcode_district": "SE16",
+          "score": 0.5349003672599792
+        },
+        {
+          "postcode_district": "SE17",
+          "score": 0.5329203605651855
+        },
+        {
+          "postcode_district": "SE1P",
+          "score": 0.5323288440704346
+        },
+        {
+          "postcode_district": "WC2R",
+          "score": 0.5309561491012573
+        }
+      ]
+    }
+  ]
+}
