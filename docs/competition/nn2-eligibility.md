@@ -41,6 +41,12 @@ The researched candidate is Qwen2.5-0.5B-Instruct. These are licence findings, n
 
 The `main` runtime links are discovery references: the release reviewer must inspect the exact pinned distribution, including transitive dependencies. The browser downloads are part of the reviewed distribution even when fetched from a model host. Large weights stay outside git. Geography licences are reviewed separately in #114; Tripadvisor-derived rows remain subject to ADR 0003. Neither dataset risk acceptance nor an Apache licence proves compliance with section 11.
 
+### Pinned browser notice pack
+
+[Public NN2 notices](../../web/nn2-notices.txt) now preserve the exact native Qwen revision's complete licence, WebLLM 0.2.86's npm-package licence including its bundled-component section, and copyright/permission headers from that package's shipped JavaScript. The tarball identity is recorded with its registry integrity. The pack also includes loglevel's MIT text, grammar/tokenizer licences from the package source revisions, and pinned MLC LLM/Apache TVM source licence/notice snapshots.
+
+The compiled model library is pinned to binary repository commit `00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0`. That repository has no root licence/notice or build-source revision manifest. Applying the official MLC/TVM source terms to its published library is a provenance inference, not proof of exact build inputs. This metadata gap establishes no prohibition and adds no separate build-manifest release requirement. It does limit the audit: notices for unidentified transitive native components and any CDN transformations are not exhaustively verified. Preserve further applicable notices if discovered during final review. The pack does not claim that a dependency range identifies the precise bundled tokenizer/loglevel build. These limits do not reopen the team's competition-permission decision.
+
 ## Release decision and human follow-up
 
 The permission question was resolved by the team's 2026-10-17 confirmation above. No message has been sent to organizers by the agent, and no separate organizer response was supplied. Keep that provenance distinction in reviews and submission evidence; do not describe the rules as explicitly permitting pretrained weights. #112's permission decision is resolved on the team-confirmed basis and does not need another permission request.
