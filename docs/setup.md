@@ -6,7 +6,7 @@ The repo works the same in Claude Code, Codex and Antigravity. Instructions live
 |---|---|---|---|
 | Codex | reads `AGENTS.md` | reads `.agents/skills/` | none |
 | Antigravity (CLI and IDE) | reads `AGENTS.md` | reads `.agents/skills/` | none |
-| Claude Code | `CLAUDE.md` imports `AGENTS.md` | reads `.claude/skills/` only | link below |
+| Claude Code | reads `AGENTS.md` natively (v2.1.281+) | reads `.claude/skills/` only | link below |
 
 ## Link Claude's skills to `.agents/skills`
 
@@ -27,9 +27,13 @@ mkdir -p .claude && ln -s ../.agents/skills .claude/skills
 
 Check: `.claude/skills` lists the same folders as `.agents/skills`.
 
+## Check Claude reads `AGENTS.md`
+
+In Claude Code, run `/memory`. The list must include `AGENTS.md`.
+
 ## Adding agent config
 
-- Instructions for every tool go in `AGENTS.md`. Keep `CLAUDE.md` as the single `@AGENTS.md` line.
+- Instructions for every tool go in `AGENTS.md`. Never add a `CLAUDE.md` or `CLAUDE.local.md`.
 - New skills go in `.agents/skills/<name>/SKILL.md`; record their source in `skills-lock.json`.
 - Claude-only settings (`settings.json`, subagents) go in `.claude/`. Personal settings go in `.claude/settings.local.json`, which is git-ignored.
 
