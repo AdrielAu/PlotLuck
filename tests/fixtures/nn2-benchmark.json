@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "label_status": "Agent-authored expected labels; human review required before tuning or quality claims.",
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
   "cases": [
     {
       "id": "clear-001",

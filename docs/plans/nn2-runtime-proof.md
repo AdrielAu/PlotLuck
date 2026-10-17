@@ -22,11 +22,21 @@ float32 parameter footprint; neither is a GPU-memory estimate.
 
 120 clear cases: 20 development and 100 reserved heldout, spanning 12 cuisines,
 10 locations, explicit vegan options, omitted traits and 3 km searches. Expected
-labels are **agent-authored and require human review before tuning**. The initial
+labels were agent-authored, then **reviewed and approved by the user on 2026-10-17**,
+together with the inference rubric. Prompt tuning uses development cases only;
+100 heldout cases remain reserved. The initial
 set does not yet cover every release requirement (spelling, negation, adversarial
 requests, ambiguity and the full inference rubric); #119/#121 must expand the
-separate edge-case set and obtain human label approval. Do not claim the quality
+separate edge-case set and obtain human approval for any new labels. Do not claim the quality
 gate from this provisional fixture. Keep failed cases in the denominator.
+
+The current generated contract is sparse: cuisine is required, optional traits
+are included only with textual evidence. The validator fills omitted traits from
+the shipped vocabulary and marks them as defaults. It never repairs an invalid
+provided value. Normalized drafts still expose all fields for user review. A
+single development example illustrates the shape; the model must not copy its
+traits into unrelated descriptions. When the vocabulary is provided at loading,
+task-grammar compilation is measured as cold initialization before user requests.
 
 Inference rubric to freeze at human review: a suggestion must cite an actual
 substring; explicit statements and negations take precedence; context may justify
