@@ -167,6 +167,46 @@ def test_osm_extract_flattens_elements_once_each(tmp_path):
     ]
 
 
+def voa_valuation(uarn, postcode, scat, *, to_date="", area="120.50", rv="45000"):
+    """One summary-valuation ``01`` record: 28 asterisk-delimited fields plus a trailing ``*``."""
+    fields = [""] * 29
+    fields[0], fields[2], fields[3], fields[13] = "01", uarn, "5210", postcode
+    fields[15], fields[16], fields[19], fields[20] = "Restaurant And Premises", area, rv, "2026"
+    fields[24], fields[25], fields[26], fields[27] = "01-APR-2026", to_date, scat, "NIA"
+    return "*".join(fields)
+
+
+def test_voa_extract_keeps_current_food_and_retail_valuations_in_england(tmp_path):
+    records = [
+        voa_valuation("101", "SE1 0AA", "234"),
+        "02*1*Ground*Restaurant*120.50*373.44*45000*",  # line items are not kept
+        voa_valuation("102", "SE1 0AA", "234", to_date="15-JUN-2026"),  # historic
+        voa_valuation("103", "SE1 0AA", "268"),  # store, not food or retail
+        voa_valuation("104", "CF10 1AA", "249"),  # Welsh postcode
+        voa_valuation("105", "SE1 0AA", "442", area="", rv="9000"),
+    ]
+    raw = tmp_path / "raw" / "voa.zip"
+    raw.parent.mkdir(parents=True)
+    with zipfile.ZipFile(raw, "w") as zf:
+        zf.writestr("summaryvaluations.csv", "\n".join(records) + "\n")
+    (tmp_path / "onspd_england.csv").write_text(
+        "pcds,district\nSE1 0AA,SE1\n", encoding="utf-8"
+    )
+
+    count = sources.extract("voa", tmp_path)
+
+    out = read_csv(tmp_path / "voa_england.csv")
+    assert count == 2
+    assert out == [
+        {"uarn": "101", "postcode": "SE1 0AA", "district": "SE1", "scat_code": "234",
+         "description": "Restaurant And Premises", "unit": "NIA",
+         "total_area": "120.50", "adopted_rv": "45000"},
+        {"uarn": "105", "postcode": "SE1 0AA", "district": "SE1", "scat_code": "442",
+         "description": "Restaurant And Premises", "unit": "NIA",
+         "total_area": "", "adopted_rv": "9000"},
+    ]
+
+
 def fake_fetch(body):
     calls = []
 
@@ -245,7 +285,7 @@ def test_cut_sample_keeps_one_london_area_across_all_files(tmp_path):
 
     counts = sources.cut_sample(full, sample)
 
-    assert {k: v for k, v in counts.items() if k != "tripadvisor"} == {
+    assert {k: v for k, v in counts.items() if k not in ("tripadvisor", "voa")} == {
         "onspd": 1, "osm": 1, "p004": 1
     }
     assert read_csv(sample / "p004_england.csv") == [
@@ -282,6 +322,37 @@ def test_tripadvisor_sample_is_synthetic_with_the_full_schema(tmp_path):
     assert counts["tripadvisor"] == len(rows) > 0
     assert "g1-d1" not in fake and "Cafe" not in {r["restaurant_name"] for r in rows}
     assert all(sources._in_box(r["latitude"], r["longitude"]) for r in rows)
+
+
+def test_voa_sample_is_synthetic_at_sample_postcodes(tmp_path):
+    # The VOA licence bars onward disclosure, so no real valuation is committed.
+    full = tmp_path / "full"
+    full.mkdir()
+    write_csv(full / "onspd_england.csv", [
+        {"pcds": "SE1 0AA", "district": "SE1", "lat": LONDON[0], "long": LONDON[1]},
+        {"pcds": "EC4M 7AA", "district": "EC4M", "lat": "51.5136", "long": "-0.0989"},
+        {"pcds": "M1 1AA", "district": "M1", "lat": MANCHESTER[0], "long": MANCHESTER[1]},
+    ])
+    write_csv(full / "osm_england.csv", [{"osm_id": "1", "lat": LONDON[0], "lon": LONDON[1]}])
+    write_csv(full / "p004_england.csv", [{"district": "SE1", "residents": "40000"}])
+    write_csv(full / "voa_england.csv", [{
+        "uarn": "987654321", "postcode": "SE1 0AA", "district": "SE1", "scat_code": "234",
+        "description": "Restaurant And Premises", "unit": "NIA",
+        "total_area": "120.50", "adopted_rv": "45000",
+    }])
+
+    counts = sources.cut_sample(full, tmp_path / "a")
+    sources.cut_sample(full, tmp_path / "b")
+
+    fake = (tmp_path / "a" / "voa_england.csv").read_text(encoding="utf-8")
+    assert fake == (tmp_path / "b" / "voa_england.csv").read_text(encoding="utf-8")
+    assert fake.splitlines()[0] == ",".join(sources.VOA_COLUMNS)
+    rows = read_csv(tmp_path / "a" / "voa_england.csv")
+    assert counts["voa"] == len(rows) > 0
+    assert "987654321" not in fake
+    assert {(r["postcode"], r["district"]) for r in rows} == {("SE1 0AA", "SE1")}
+    assert {r["scat_code"] for r in rows} <= sources.VOA_SCAT_CODES
+    assert any(r["total_area"] == "" for r in rows)  # real rows can lack an area
 
 
 def test_committed_synthetic_sample_covers_cv_districts_and_edge_cases(tmp_path):

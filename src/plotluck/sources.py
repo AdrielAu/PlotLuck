@@ -63,6 +63,18 @@ SOURCES = {
         "licence": "Open Database Licence 1.0",
         "attribution": "© OpenStreetMap contributors",
     },
+    "voa": {
+        "file": "voa.zip",
+        "url": "https://voaratinglists.blob.core.windows.net/downloads/"
+        "uk-englandwales-ndr-2026-summaryvaluations-compiled-epoch-0004-baseline-csv.zip",
+        "edition": "VOA 2026 compiled rating list, summary valuations, epoch 0004 "
+        "baseline (published 2026-10-07; antecedent valuation date 2024-04-01)",
+        "licence": "VOA restricted-use licence, not OGL: use for non-domestic rating "
+        "purposes only, no onward disclosure "
+        "(https://www.tax.service.gov.uk/view-my-valuation/terms-and-conditions)",
+        "attribution": "Source: Valuation Office Agency. © Crown copyright and "
+        "database rights 2026",
+    },
 }
 
 # England in 1-degree tiles: the whole-country query times out on Overpass.
@@ -293,11 +305,49 @@ def _osm_rows(data: Path):
         ]
 
 
+# SCAT codes kept: 234 restaurants, 249 shops, 409 cafes, 442 takeaways.
+VOA_SCAT_CODES = {"234", "249", "409", "442"}
+VOA_COLUMNS = (
+    "uarn",
+    "postcode",
+    "district",
+    "scat_code",
+    "description",
+    "unit",
+    "total_area",
+    "adopted_rv",
+)
+
+
+def _voa_rows(data: Path):
+    """Current summary valuations of food and retail premises at English postcodes.
+
+    The file is asterisk-delimited with no header. Each valuation starts with a
+    type ``01`` record (field numbers from the VOA data specification); the
+    line-item records after it are skipped. A blank To Date marks the current
+    record. Areas and values are copied unchanged, blanks included.
+    """
+    with (data / "onspd_england.csv").open(encoding="utf-8", newline="") as f:
+        english = {row["pcds"] for row in csv.DictReader(f)}
+    with zipfile.ZipFile(data / "raw" / "voa.zip") as zf:
+        (member,) = zf.namelist()
+        with zf.open(member) as raw:
+            yield VOA_COLUMNS
+            for line in io.TextIOWrapper(raw, encoding="utf-8", errors="replace"):
+                f = line.rstrip("\r\n").split("*")
+                if f[0] != "01" or f[25] or f[26] not in VOA_SCAT_CODES:
+                    continue
+                postcode = f[13].strip()
+                if postcode in english:
+                    yield [f[2], postcode, postcode.split(" ")[0], f[26], f[15], f[27], f[16], f[19]]
+
+
 _EXTRACTORS = {
     "tripadvisor": _tripadvisor_rows,
     "osm": _osm_rows,
     "onspd": _onspd_rows,
     "p004": _p004_rows,
+    "voa": _voa_rows,
 }
 
 
@@ -334,6 +384,7 @@ def cut_sample(full: Path, sample: Path) -> dict[str, int]:
     counts["tripadvisor"] = _write_csv(
         sample / "tripadvisor_england.csv", _synthetic_tripadvisor_rows(anchors)
     )
+    counts["voa"] = _write_csv(sample / "voa_england.csv", _synthetic_voa_rows(postcodes))
     counts["p004"] = _write_csv(
         sample / "p004_england.csv",
         _filter_csv(full / "p004_england.csv", lambda r: r["district"] in districts),
@@ -422,6 +473,45 @@ def _synthetic_tripadvisor_rows(anchors):
         yield [row[c] for c in TRIPADVISOR_COLUMNS]
 
 
+SYNTHETIC_VOA_ROWS = 300
+_VOA_DESCRIPTIONS = {
+    "234": "Restaurant And Premises",
+    "249": "Shop And Premises",
+    "409": "Cafe And Premises",
+    "442": "Shop And Premises",
+}
+
+
+def _synthetic_voa_rows(postcodes):
+    """Made-up valuations in the VOA extract's schema, at sample postcodes.
+
+    The VOA licence bars onward disclosure, so no real valuation is read.
+    Rateable values are area times a made-up price per square metre, rounded
+    down to £50 as the VOA rounds them. Every 25th row has no area.
+    """
+    rng = random.Random(SYNTHETIC_SEED)
+    by_district = {}
+    for p in postcodes:
+        by_district.setdefault(p["district"], []).append(p["pcds"])
+    districts = sorted(by_district)
+    yield VOA_COLUMNS
+    for i in range(1, SYNTHETIC_VOA_ROWS + 1):
+        district = districts[(i - 1) % len(districts)]
+        scat = rng.choice(sorted(VOA_SCAT_CODES))
+        area = round(rng.uniform(15, 400), 2)
+        rv = int(area * rng.uniform(250, 900)) // 50 * 50
+        yield [
+            f"synthetic-{i:04d}",
+            rng.choice(by_district[district]),
+            district,
+            scat,
+            _VOA_DESCRIPTIONS[scat],
+            rng.choice(("NIA", "NIA", "GIA")),
+            "" if i % 25 == 0 else f"{area:.2f}",
+            str(rv),
+        ]
+
+
 def _in_box(lat: str, lon: str) -> bool:
     south, west, north, east = SAMPLE_BBOX
     try:
@@ -452,8 +542,8 @@ def _write_csv(path: Path, rows) -> int:
     return count
 
 
-# Extract order matters: p004 reads the ONSPD extract.
-ORDER = ("tripadvisor", "onspd", "p004", "osm")
+# Extract order matters: p004 and voa read the ONSPD extract.
+ORDER = ("tripadvisor", "onspd", "p004", "voa", "osm")
 
 
 def main(argv=None) -> None:
