@@ -1,6 +1,52 @@
-# Preliminary NN2 browser experiment
+# Preliminary NN2 evaluation
 
-**Candidate fails preliminary quality and latency.** No release approval.
+**Candidate fails preliminary quality in both runtimes.** No release approval.
+Sections: LinuxONE native CPU run (below), then the earlier browser experiment.
+
+## LinuxONE native CPU run (#140)
+
+Pretrained CPU inference on the shared LinuxONE image, run unchanged by the
+human operator through `notebooks/evaluate_nn2.ipynb`. Not training and not
+NNPA acceleration. Three synthetic development cases; heldout untouched.
+Evidence: `docs/evidence/06-nn2-inference.png`.
+
+- Model: Qwen/Qwen2.5-0.5B-Instruct, native revision
+  `7ae557604adf67be50417f59c2c2f167def9a775`, float32 on CPU.
+- Environment: `s390x`, byte order `big`, Python 3.12.15, torch 2.11.0+cpu,
+  Transformers 5.19.0 (the image as shipped; nothing installed or upgraded).
+- Native weight file `model.safetensors`: 988,097,824 bytes, kept in the
+  external Hugging Face cache, not committed. Float32 parameter footprint:
+  1,976,131,072 bytes.
+- Cold download and load (empty cache, about 1 GB at 89.8 MB/s): 16.46 seconds.
+- Warm requests: 35.75, 31.82 and 26.14 seconds for 63, 50 and 31 generated
+  tokens. **All three are within the 60-second LinuxONE limit**; three requests
+  do not establish a release latency figure.
+- No timeouts, load failures or architecture failures.
+- Benchmark and contract SHA-256 hashes match the browser compact run.
+
+**Quality: 0/3 valid, 0/3 correct.** `operator-results.json.scores.json` is the
+output of `node scripts/score-nn2.mjs` with the strict browser validator.
+
+- 2 of 3 replies are malformed JSON, and the third has an invalid shape. All three
+  nest `location` inside `fields`; two then leave the outer object unclosed,
+  the third gives `cuisine` as a bare string. Replies stopped well before the
+  1024-token cap, so this is not truncation.
+- Content, read by hand and not validated: cuisine Thai and the place
+  text are right in all three. `near` is `true` for "in Camden" and
+  "in Manchester" (expected `false`), with `unit: "km"` and no distance
+  (expected `null`). The explicit vegan request went to `clarifications`
+  instead of `vegan_options: true`.
+
+Revised investigation: the native run generates unconstrained text, so the
+structural failures are expected without a grammar/JSON-schema constraint at
+decode time. Next, measure the same three cases with constrained decoding on
+LinuxONE, scoring with the same validator, and keep the semantic failures
+(`near`/`unit`, missed vegan trait) as separate evidence. Prefill of the long
+system prompt likely dominates these CPU timings, so a larger candidate risks
+the 60-second limit and must be measured, not assumed. NN2 remains mandatory and
+no gate changes. Full release evaluation stays with #121.
+
+## Browser experiment
 
 Pinned Qwen2.5-0.5B-Instruct q4f16_1, WebLLM 0.2.86, Intel gen-12lp WebGPU,
 desktop Edge 155 on Windows. Exact model/library revisions are in the runtime
