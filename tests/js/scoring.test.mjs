@@ -20,13 +20,16 @@ function tinyBundle({
   population = "100",
   centroidLat = "51.5",
   supplyCount = "2",
+  radiusKm = "1.2",
   version = BUNDLE_VERSION,
   districtInputs = ["population", "same_cuisine_supply"],
   contextColumns = {},
 }) {
   const numeric = { kind: "numeric", log1p: false, mean: 0, std: 1, median: 0 };
+  // `radiusKm: null` leaves the radius_km column out.
+  const columns = { ...contextColumns, ...(radiusKm === null ? {} : { radius_km: radiusKm }) };
   const files = {
-    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index${Object.keys(contextColumns).map((name) => `,${name}`).join("")}\nAB1,${centroidLat},-0.1,3,${population},10${Object.values(contextColumns).map((value) => `,${value}`).join("")}\n`,
+    "districts.csv": `postcode_district,centroid_lat,centroid_lon,total_restaurants,population,deprivation_index${Object.keys(columns).map((name) => `,${name}`).join("")}\nAB1,${centroidLat},-0.1,3,${population},10${Object.values(columns).map((value) => `,${value}`).join("")}\n`,
     "district_cuisine_supply.csv": `postcode_district,cuisine_group,restaurants\nAB1,Thai,${supplyCount}\n`,
     "vocabulary.json": JSON.stringify({
       version,
@@ -58,6 +61,14 @@ test("a bundle version the site does not know raises", async () => {
 test("invalid coordinates and supply counts are rejected while loading", async () => {
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], centroidLat: "missing" }), /coordinate/i);
   await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], supplyCount: "missing" }), /supply/i);
+});
+
+test("a district without a positive circle radius is rejected while loading", async () => {
+  for (const radiusKm of [null, "", "0", "-1", "wide", "Infinity"]) {
+    await assert.rejects(tinyBundle({ weights: [0, 0, 0, 0], radiusKm }), /radius_km/, `radius_km ${radiusKm}`);
+  }
+  const bundle = await tinyBundle({ weights: [0, 0, 0, 0], radiusKm: "0.3" });
+  assert.equal(bundle.districts[0].radius_km, "0.3");
 });
 
 test("invalid numeric inputs and model shapes raise instead of returning NaN", async () => {
