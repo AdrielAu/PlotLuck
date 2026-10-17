@@ -307,6 +307,8 @@ def _osm_rows(data: Path):
 
 # SCAT codes kept: 234 restaurants, 249 shops, 409 cafes, 442 takeaways.
 VOA_SCAT_CODES = {"234", "249", "409", "442"}
+# A type 01 record: 28 fields, each followed by "*", so 29 after splitting.
+VOA_VALUATION_FIELDS = 29
 VOA_COLUMNS = (
     "uarn",
     "postcode",
@@ -333,13 +335,19 @@ def _voa_rows(data: Path):
         (member,) = zf.namelist()
         with zf.open(member) as raw:
             yield VOA_COLUMNS
-            for line in io.TextIOWrapper(raw, encoding="utf-8", errors="replace"):
-                f = line.rstrip("\r\n").split("*")
-                if f[0] != "01" or f[25] or f[26] not in VOA_SCAT_CODES:
+            for number, line in enumerate(io.TextIOWrapper(raw, encoding="utf-8", errors="replace"), 1):
+                fields = line.rstrip("\r\n").split("*")
+                if fields[0] != "01":
                     continue
-                postcode = f[13].strip()
-                if postcode in english:
-                    yield [f[2], postcode, postcode.split(" ")[0], f[26], f[15], f[27], f[16], f[19]]
+                if len(fields) != VOA_VALUATION_FIELDS:
+                    raise ValueError(
+                        f"VOA line {number}: {len(fields)} fields, expected {VOA_VALUATION_FIELDS}"
+                    )
+                uarn, postcode, description, area, rv = (fields[i] for i in (2, 13, 15, 16, 19))
+                to_date, scat, unit = fields[25:28]
+                postcode = postcode.strip()
+                if not to_date and scat in VOA_SCAT_CODES and postcode in english:
+                    yield [uarn, postcode, postcode.split(" ")[0], scat, description, unit, area, rv]
 
 
 _EXTRACTORS = {

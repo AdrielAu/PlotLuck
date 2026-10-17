@@ -90,8 +90,9 @@ DISTRICT_INPUTS = (
     "same_cuisine_supply",
 )
 LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply"}
-# VOA units of measurement that are square metres; OTH counts units instead.
-VOA_AREA_UNITS = {"NIA", "GIA", "EFA", "GEA", "RCA"}
+# VOA measuring standards the rent index divides by, in order of preference:
+# net internal area, then gross internal area where a district has no NIA.
+VOA_AREA_UNITS = ("NIA", "GIA")
 
 
 def build(
@@ -433,17 +434,20 @@ def district_table(
 def rent_index(voa: list[dict]) -> dict[str, float]:
     """Median rateable value per square metre of each district's VOA valuations.
 
-    Only valuations with a positive area in square metres count; the rest have
-    no valid denominator, and a district with none is left out, not filled.
-    shortcut: NIA and GIA are pooled although GIA areas run larger; split by
-    unit if the index looks biased by measuring standard.
+    £/m² only compares within one measuring standard, so a district uses its
+    NIA valuations, or its GIA ones when it has no NIA. Valuations without a
+    positive area have no valid denominator; a district with none is left
+    out, not filled.
     """
     per_m2 = {}
     for v in voa:
         area, rv = _float(v["total_area"]), _float(v["adopted_rv"])
         if v["unit"] in VOA_AREA_UNITS and area and area > 0 and rv is not None:
-            per_m2.setdefault(v["district"], []).append(rv / area)
-    return {d: round(statistics.median(values), 1) for d, values in per_m2.items()}
+            per_m2.setdefault(v["district"], {}).setdefault(v["unit"], []).append(rv / area)
+    return {
+        d: round(statistics.median(next(by_unit[u] for u in VOA_AREA_UNITS if u in by_unit)), 1)
+        for d, by_unit in per_m2.items()
+    }
 
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:

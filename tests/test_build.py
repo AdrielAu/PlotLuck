@@ -6,7 +6,7 @@ from collections import Counter
 import numpy as np
 import pytest
 
-from plotluck import build, data_dir
+from plotluck import build, data_dir, sources
 
 
 def read_csv(path):
@@ -111,17 +111,17 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
     data = copy_sources(tmp_path / "data")
     voa = [
         ("SE1", "NIA", "100.00", "10000"),
-        ("SE1", "GIA", "100.00", "30000"),
+        ("SE1", "GIA", "100.00", "30000"),  # SE1 has NIA areas, so GIA is not used
         ("SE1", "NIA", "50.00", "10000"),
         ("SE1", "NIA", "", "90000"),  # no area: not a valid denominator
         ("SE1", "NIA", "0.00", "90000"),
         ("SE1", "OTH", "3.00", "90000"),  # a count of units, not square metres
+        ("SE11", "GIA", "100.00", "40000"),  # no NIA area: GIA stands in
         ("EC4R", "NIA", "", "5000"),
     ]
     with (data / "voa_england.csv").open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f, lineterminator="\n")
-        writer.writerow(["uarn", "postcode", "district", "scat_code", "description",
-                         "unit", "total_area", "adopted_rv"])
+        writer.writerow(sources.VOA_COLUMNS)
         for i, (district, unit, area, rv) in enumerate(voa):
             writer.writerow([f"synthetic-{i}", f"{district} 1AA", district, "234",
                              "Restaurant And Premises", unit, area, rv])
@@ -130,7 +130,8 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
 
     rent = {d["postcode_district"]: d["commercial_rent_index"]
             for d in read_csv(data / "bundle" / "districts.csv")}
-    assert rent["SE1"] == "200.0"  # median of 100, 300 and 200 £/m²
+    assert rent["SE1"] == "150.0"  # median of 100 and 200 £/m², NIA only
+    assert rent["SE11"] == "400.0"
     assert rent["EC4R"] == ""
     model = read_json(data / "bundle" / "model.json")
     assert "commercial_rent_index" in model["features"]["district_inputs"]

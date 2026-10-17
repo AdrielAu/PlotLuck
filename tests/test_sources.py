@@ -3,6 +3,8 @@ import io
 import json
 import zipfile
 
+import pytest
+
 from plotluck import sources
 
 
@@ -207,6 +209,18 @@ def test_voa_extract_keeps_current_food_and_retail_valuations_in_england(tmp_pat
     ]
 
 
+def test_voa_extract_rejects_a_valuation_with_the_wrong_field_count(tmp_path):
+    # A changed layout must fail loudly, not shift every column by one.
+    raw = tmp_path / "raw" / "voa.zip"
+    raw.parent.mkdir(parents=True)
+    with zipfile.ZipFile(raw, "w") as zf:
+        zf.writestr("summaryvaluations.csv", voa_valuation("101", "SE1 0AA", "234") + "extra*\n")
+    (tmp_path / "onspd_england.csv").write_text("pcds,district\nSE1 0AA,SE1\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="line 1"):
+        sources.extract("voa", tmp_path)
+
+
 def fake_fetch(body):
     calls = []
 
@@ -233,6 +247,22 @@ def test_pull_saves_raw_file_with_provenance(tmp_path):
     assert prov["bytes"] == 3
     assert prov["retrieved_at"].startswith("20")
     assert prov["licence"]
+
+
+def test_pull_voa_records_the_restricted_licence(tmp_path):
+    fetch = fake_fetch(b"PK")
+
+    raw = sources.pull("voa", tmp_path, fetch=fetch)
+
+    assert raw == tmp_path / "raw" / "voa.zip"
+    assert fetch.calls == [(
+        "https://voaratinglists.blob.core.windows.net/downloads/"
+        "uk-englandwales-ndr-2026-summaryvaluations-compiled-epoch-0004-baseline-csv.zip",
+        None,
+    )]
+    prov = json.loads((tmp_path / "raw" / "voa.provenance.json").read_text(encoding="utf-8"))
+    assert "not OGL" in prov["licence"]
+    assert prov["attribution"].startswith("Source: Valuation Office Agency")
 
 
 def test_pull_osm_merges_tiles_and_records_snapshot(tmp_path):
