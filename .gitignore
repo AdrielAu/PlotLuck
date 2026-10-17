@@ -2,6 +2,9 @@
 .claude/skills
 .claude/settings.local.json
 
+# Design-skill working files (direction sheet, inspector screenshots)
+.taste-skill/
+
 # Agent worktrees: disposable, per clone
 .claude/worktrees/
 

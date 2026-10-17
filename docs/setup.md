@@ -32,14 +32,15 @@ Agent worktrees (`.claude/worktrees/`) are disposable and git-ignored. Push anyt
 
 ## Browser flow tests
 
-`node --test` remains dependency-free. The separate browser workflow installs isolated test tools and exercises the actual site with Chromium; it serves Leaflet locally and does not fetch map tiles.
+`node --test` remains dependency-free. The separate browser workflow installs isolated test tools and exercises the actual site with Chromium; it serves Leaflet and Three.js locally and does not fetch map tiles.
 
 To run it on Windows with an installed Edge browser:
 
 ```powershell
-npm.cmd install --prefix "$env:TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4
+npm.cmd install --prefix "$env:TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4 three@0.160.0
 $env:PLOTLUCK_PLAYWRIGHT = 'file:///' + $env:TEMP.Replace('\', '/') + '/plotluck-browser-tools/node_modules/playwright/index.mjs'
 $env:PLOTLUCK_BROWSER = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+node tests/browser/questions-flow.mjs
 node tests/browser/profile-flow.mjs
 ```
 

@@ -47,10 +47,10 @@ jobs:
         with:
           node-version: "22"
       - name: Install isolated browser test tools
-        run: npm install --prefix "$RUNNER_TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4
+        run: npm install --prefix "$RUNNER_TEMP/plotluck-browser-tools" --no-package-lock --no-audit --no-fund playwright@1.64.1 leaflet@1.9.4 three@0.160.0
       - name: Install Chromium
         run: '"$RUNNER_TEMP/plotluck-browser-tools/node_modules/.bin/playwright" install --with-deps chromium'
-      - name: Test profile confirmation in Chromium
-        run: node tests/browser/profile-flow.mjs
+      - name: Test the questions screen and profile confirmation in Chromium
+        run: node tests/browser/questions-flow.mjs && node tests/browser/profile-flow.mjs
         env:
           PLOTLUCK_PLAYWRIGHT: file://${{ runner.temp }}/plotluck-browser-tools/node_modules/playwright/index.mjs

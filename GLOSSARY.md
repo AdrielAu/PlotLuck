@@ -16,6 +16,10 @@ _Avoid_: Area (on its own), region, borough
 The geographic scope within which a user wants to compare postcode districts. It limits the districts shown in the map and ranked list.
 _Avoid_: Cuisine group, postcode area
 
+**Rent band**:
+How much commercial rent a user can take on: low, mid or high, the thirds of England's postcode districts by commercial rent, or any. Like the search area, it limits the districts shown; it is not a model input. A district with no rent value is in no band.
+_Avoid_: Rent level, budget, price band
+
 ## Restaurants and scoring
 
 **District context**:
@@ -31,7 +35,7 @@ A real food business in the source data that serves a cuisine. Cafés, takeaways
 _Avoid_: Venue, outlet, business
 
 **Restaurant profile**:
-The user's free-text description of the restaurant they want to open. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
+The user's description of the restaurant they want to open, given as answers to the questions screen and joined into one labelled text. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
 _Avoid_: Hypothetical restaurant, query, concept
 
 **Restaurant-profile interpreter (NN2)**:

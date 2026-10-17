@@ -10,9 +10,10 @@ export function showScreen(id) {
   for (const screen of ["questions-screen", "results-screen", "answers-error"]) $(screen).hidden = screen !== id;
 }
 
-// Hand-off from the questions screen. Returns `openResults({ profile, searchArea })`:
-// `profile` is a cuisine plus every shipped trait in the vocabulary's values, and
-// `searchArea` lists postcode district codes (empty or absent means all England).
+// Hand-off from the questions screen. Returns `openResults({ profile, searchArea, searchAreaName })`:
+// `profile` is a cuisine plus every shipped trait in the vocabulary's values,
+// `searchArea` lists postcode district codes (empty or absent means all England),
+// and the optional `searchAreaName` names it in the heading.
 // Unreadable answers show "We couldn't read your answers" instead of a map, and
 // `openResults` returns false. `describeProfile(profile, searchAreaName)` gives
 // `{ heading, summary }` text; `onChangeAnswers()`
@@ -119,7 +120,7 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
         maxZoom: 13,
       });
     }
-    const { heading, summary } = describeProfile(query.profile, answers.searchArea?.length ? "your search area" : "England");
+    const { heading, summary } = describeProfile(query.profile, answers.searchAreaName ?? (answers.searchArea?.length ? "your search area" : "England"));
     $("results-heading").textContent = heading;
     $("confirmed-profile").textContent = summary;
     render();
