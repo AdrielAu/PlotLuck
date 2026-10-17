@@ -24,4 +24,4 @@ The MVP is NN1 with cuisine/trait pickers and English district circles. Accelera
 | Metrics | `07-metrics.png` | NN1 evaluation metrics table or plot, with metric names and values readable | `runs/<yyyy-mm-dd>-metrics/` | [x] |
 | Inference benchmark | `08-inference-benchmark.png` | Accelerated-inference benchmark output: the NNPA device in use and the timings next to the CPU baseline | `runs/<yyyy-mm-dd>-inference-benchmark/` | [ ] |
 | Weight export | `09-weight-export.png` | Export cell output listing the written weight files with sizes, and the x86 load check passing | `runs/<yyyy-mm-dd>-weight-export/` | [x] |
-| Live site | `10-live-site.png` | GitHub Pages URL visible; England district circles with scores loaded, cuisine/trait pickers, score threshold and ranked list | none | [ ] |
+| Live site | `10-live-site.png` | GitHub Pages URL visible; England district circles with scores loaded, cuisine/trait pickers, score threshold and ranked list | none | [x] |
