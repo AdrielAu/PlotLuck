@@ -260,16 +260,19 @@ test('unknown locations can be clarified, while empty boundaries preserve the pr
   assert.equal(await page.locator('#ranked').textContent(), before);
 });
 
-test('reduced motion keeps dishes still while the kitchen day turns, and hidden tabs pause it', async t => {
+test('dishes fly out on their own under reduced motion while the kitchen day turns, and hidden tabs pause it', async t => {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser, { reducedMotion:'reduce' });
   await page.goto(url);
   await page.locator('#kitchen[data-kitchen]').waitFor();
   assert.equal(await page.locator('#kitchen').getAttribute('data-kitchen'), 'still');
-  const frames = await page.locator('#kitchen').getAttribute('data-frames');
-  await page.waitForTimeout(150);
-  assert.ok(Number(await page.locator('#kitchen').getAttribute('data-frames')) > Number(frames));
-  assert.equal(await page.locator('#kitchen').getAttribute('data-flying'), '0');
+  const frames = Number(await page.locator('#kitchen').getAttribute('data-frames'));
+  // Waited for, not timed: building the first dish can hold up a frame or two.
+  await page.waitForFunction(before => Number(document.querySelector('#kitchen').dataset.frames) > before, frames, { timeout:5000 });
+  // No input: the first dish comes out about 1.5 s after the kitchen appears.
+  // Checked every frame, so the 1.1 s flight is not missed on a busy machine.
+  await page.waitForFunction(() => document.querySelector('#kitchen').dataset.flying === '1', null, { polling:'raf', timeout:15000 });
+  assert.ok(Number(await page.locator('#kitchen').getAttribute('data-dishes')) >= 1);
   await page.evaluate(()=>{
     Object.defineProperty(document,'visibilityState',{configurable:true,get:()=> 'hidden'});
     document.dispatchEvent(new Event('visibilitychange'));

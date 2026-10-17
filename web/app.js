@@ -35,7 +35,6 @@ async function main() {
   flow = setUpFreeText({
     bundle, catalogue, nn2: makeNN2(bundle.vocabulary),
     onBusy(busy) { $('description-form').setAttribute('aria-busy', String(busy)); },
-    onDescription() { kitchen.then(k => k?.serve(1)); },
     onResults(confirmed, query) {
       const defaults = Object.entries(query.fields).filter(([name, f]) => ['venue_type', 'price_band'].includes(name) && f.provenance === 'default').map(([name]) => traitLabel(name));
       const inferred = Object.entries(query.fields).filter(([, f]) => f.provenance === 'inferred').map(([name, f]) => `${traitLabel(name)}: ${valueLabel(f.value)}${f.evidence ? ` (${f.evidence})` : ''}`);
