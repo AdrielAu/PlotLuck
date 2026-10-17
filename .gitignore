@@ -11,3 +11,7 @@
 # Server-only full data, virtualenv
 data/full/
 .venv/
+
+# Python build artifacts
+__pycache__/
+*.egg-info/
