@@ -1,4 +1,4 @@
-"""Plotluck: survival scores for London restaurants by postcode district."""
+"""Plotluck: scores English postcode districts for the review-based success of a restaurant."""
 
 from plotluck.data import data_dir
 
