@@ -115,7 +115,7 @@ AL9,Unspecified,5
 B1,American,5
 B1,Asian,1
 B1,Barbecue,1
-B1,British,39
+B1,British,38
 B1,Caribbean,1
 B1,Chinese,3
 B1,European,3
@@ -296,7 +296,7 @@ B2,Portuguese,2
 B2,Seafood,2
 B2,Steakhouse,1
 B2,Thai,2
-B2,Unspecified,35
+B2,Unspecified,34
 B20,African,1
 B20,British,1
 B20,Indian,3
@@ -357,7 +357,7 @@ B26,International,1
 B26,Italian,10
 B26,Seafood,2
 B26,Steakhouse,3
-B26,Unspecified,14
+B26,Unspecified,13
 B27,American,2
 B27,Barbecue,1
 B27,British,3
@@ -376,7 +376,6 @@ B28,Barbecue,3
 B28,British,8
 B28,Chinese,3
 B28,Indian,15
-B28,International,1
 B28,Italian,5
 B28,Japanese,2
 B28,Middle Eastern,1
@@ -412,7 +411,7 @@ B3,Italian,6
 B3,Portuguese,1
 B3,Spanish,1
 B3,Thai,2
-B3,Unspecified,25
+B3,Unspecified,24
 B30,American,2
 B30,Asian,1
 B30,British,15
@@ -444,7 +443,7 @@ B32,Chinese,1
 B32,Indian,4
 B32,Italian,2
 B32,Thai,1
-B32,Unspecified,17
+B32,Unspecified,16
 B33,British,7
 B33,Chinese,2
 B33,Indian,7
@@ -500,7 +499,7 @@ B40,Italian,3
 B40,Latin,1
 B40,Portuguese,1
 B40,Steakhouse,1
-B40,Unspecified,13
+B40,Unspecified,12
 B42,African,1
 B42,American,1
 B42,Barbecue,1
@@ -551,7 +550,7 @@ B48,British,11
 B48,Indian,1
 B48,Italian,2
 B48,Steakhouse,1
-B48,Unspecified,10
+B48,Unspecified,8
 B49,American,1
 B49,British,25
 B49,Chinese,1
@@ -564,12 +563,12 @@ B5,Asian,5
 B5,Barbecue,3
 B5,British,32
 B5,Caribbean,1
-B5,Chinese,41
+B5,Chinese,40
 B5,European,4
 B5,French,1
 B5,Greek,3
 B5,Indian,10
-B5,Italian,18
+B5,Italian,17
 B5,Japanese,11
 B5,Lebanese,1
 B5,Mexican,3
@@ -580,7 +579,7 @@ B5,Spanish,1
 B5,Steakhouse,1
 B5,Thai,3
 B5,Turkish,1
-B5,Unspecified,49
+B5,Unspecified,47
 B50,British,8
 B50,Indian,2
 B50,Steakhouse,1
@@ -660,7 +659,7 @@ B66,European,1
 B66,Indian,20
 B66,Italian,7
 B66,Unspecified,25
-B67,British,5
+B67,British,4
 B67,Caribbean,2
 B67,Chinese,1
 B67,European,1
@@ -693,7 +692,7 @@ B7,Chinese,3
 B7,Indian,3
 B7,Italian,2
 B7,Portuguese,1
-B7,Unspecified,13
+B7,Unspecified,12
 B70,American,3
 B70,British,8
 B70,Caribbean,3
@@ -720,7 +719,7 @@ B72,British,12
 B72,Chinese,2
 B72,European,1
 B72,Greek,2
-B72,Indian,4
+B72,Indian,3
 B72,Italian,6
 B72,Japanese,1
 B72,Portuguese,1
@@ -762,7 +761,7 @@ B75,Italian,2
 B75,Mexican,1
 B75,Steakhouse,1
 B75,Turkish,1
-B75,Unspecified,3
+B75,Unspecified,2
 B76,Asian,1
 B76,British,20
 B76,Chinese,2
@@ -817,7 +816,6 @@ B9,Asian,1
 B9,British,4
 B9,Caribbean,1
 B9,European,1
-B9,International,1
 B9,Italian,4
 B9,Mediterranean,1
 B9,Unspecified,21
@@ -864,7 +862,7 @@ B92,Unspecified,11
 B93,Asian,1
 B93,British,13
 B93,Chinese,3
-B93,European,2
+B93,European,1
 B93,French,1
 B93,Indian,6
 B93,Italian,4
@@ -875,7 +873,7 @@ B94,Chinese,1
 B94,Indian,4
 B94,Italian,1
 B94,Steakhouse,1
-B94,Unspecified,8
+B94,Unspecified,6
 B95,Asian,1
 B95,British,18
 B95,Chinese,1
@@ -918,7 +916,7 @@ BA1,Chinese,10
 BA1,European,8
 BA1,French,7
 BA1,Greek,4
-BA1,Indian,13
+BA1,Indian,12
 BA1,International,1
 BA1,Italian,31
 BA1,Japanese,6
@@ -932,7 +930,7 @@ BA1,Seafood,7
 BA1,Spanish,4
 BA1,Steakhouse,3
 BA1,Thai,9
-BA1,Unspecified,108
+BA1,Unspecified,107
 BA10,British,8
 BA10,Chinese,1
 BA10,Italian,1
@@ -987,7 +985,6 @@ BA15,British,30
 BA15,Chinese,2
 BA15,Indian,2
 BA15,Italian,3
-BA15,Mediterranean,1
 BA15,Seafood,1
 BA15,Spanish,2
 BA15,Thai,2
@@ -1017,7 +1014,7 @@ BA16,Unspecified,32
 BA2,African,1
 BA2,American,3
 BA2,Barbecue,1
-BA2,British,70
+BA2,British,69
 BA2,Caribbean,2
 BA2,Chinese,6
 BA2,European,2
@@ -1079,14 +1076,14 @@ BA4,Portuguese,1
 BA4,Seafood,1
 BA4,Unspecified,13
 BA5,Barbecue,1
-BA5,British,43
+BA5,British,42
 BA5,French,1
 BA5,Greek,1
 BA5,Indian,2
 BA5,Italian,7
 BA5,Seafood,2
 BA5,Thai,2
-BA5,Unspecified,20
+BA5,Unspecified,19
 BA6,British,30
 BA6,Chinese,2
 BA6,Indian,2
@@ -1158,7 +1155,7 @@ BB12,Thai,1
 BB12,Unspecified,8
 BB18,Barbecue,1
 BB18,British,15
-BB18,Chinese,5
+BB18,Chinese,4
 BB18,Indian,3
 BB18,Italian,3
 BB18,Seafood,2
@@ -1175,7 +1172,7 @@ BB2,Middle Eastern,2
 BB2,Portuguese,1
 BB2,Seafood,1
 BB2,Thai,2
-BB2,Unspecified,28
+BB2,Unspecified,27
 BB3,American,2
 BB3,Barbecue,2
 BB3,British,31
@@ -1221,7 +1218,7 @@ BB7,American,2
 BB7,Asian,1
 BB7,British,73
 BB7,Chinese,10
-BB7,European,2
+BB7,European,1
 BB7,French,1
 BB7,Indian,6
 BB7,Italian,11
@@ -1230,7 +1227,6 @@ BB7,Mexican,2
 BB7,Seafood,2
 BB7,Steakhouse,1
 BB7,Unspecified,37
-BB8,American,1
 BB8,British,26
 BB8,Chinese,4
 BB8,Indian,5
@@ -1267,7 +1263,7 @@ BD1,Middle Eastern,1
 BD1,Portuguese,2
 BD1,Seafood,2
 BD1,Thai,1
-BD1,Unspecified,52
+BD1,Unspecified,50
 BD10,American,1
 BD10,Asian,1
 BD10,British,13
@@ -1290,7 +1286,7 @@ BD12,Chinese,1
 BD12,Indian,2
 BD12,Italian,1
 BD12,Thai,2
-BD12,Unspecified,5
+BD12,Unspecified,4
 BD13,British,12
 BD13,Chinese,2
 BD13,Indian,3
@@ -1313,7 +1309,7 @@ BD16,Unspecified,11
 BD17,American,1
 BD17,British,17
 BD17,Chinese,1
-BD17,Indian,8
+BD17,Indian,7
 BD17,Italian,3
 BD17,Seafood,1
 BD17,Spanish,1
@@ -1383,7 +1379,7 @@ BD22,Unspecified,16
 BD23,American,2
 BD23,Asian,1
 BD23,Barbecue,1
-BD23,British,124
+BD23,British,123
 BD23,Chinese,4
 BD23,French,2
 BD23,Indian,8
@@ -1510,7 +1506,7 @@ BH1,Spanish,1
 BH1,Steakhouse,4
 BH1,Thai,2
 BH1,Turkish,4
-BH1,Unspecified,55
+BH1,Unspecified,54
 BH10,Asian,1
 BH10,British,6
 BH10,Caribbean,1
@@ -1601,7 +1597,7 @@ BH19,Chinese,1
 BH19,French,1
 BH19,Indian,3
 BH19,Italian,6
-BH19,Seafood,12
+BH19,Seafood,11
 BH19,Thai,1
 BH19,Turkish,1
 BH19,Unspecified,11
@@ -1649,7 +1645,7 @@ BH21,Thai,2
 BH21,Turkish,1
 BH21,Unspecified,20
 BH22,American,2
-BH22,British,31
+BH22,British,30
 BH22,Chinese,6
 BH22,Indian,6
 BH22,Italian,3
@@ -1789,7 +1785,7 @@ BL0,International,1
 BL0,Italian,6
 BL0,Spanish,5
 BL0,Thai,1
-BL0,Unspecified,10
+BL0,Unspecified,9
 BL1,African,3
 BL1,American,2
 BL1,Asian,2
@@ -1846,7 +1842,7 @@ BL5,Italian,7
 BL5,Spanish,1
 BL5,Unspecified,8
 BL6,African,1
-BL6,American,4
+BL6,American,3
 BL6,British,29
 BL6,Chinese,5
 BL6,European,1
@@ -1893,7 +1889,7 @@ BL9,Portuguese,1
 BL9,Seafood,2
 BL9,Spanish,1
 BL9,Thai,1
-BL9,Unspecified,71
+BL9,Unspecified,70
 BN1,African,8
 BN1,American,25
 BN1,Asian,14
@@ -1914,7 +1910,7 @@ BN1,Mediterranean,4
 BN1,Mexican,16
 BN1,Middle Eastern,7
 BN1,Portuguese,2
-BN1,Seafood,21
+BN1,Seafood,20
 BN1,Spanish,6
 BN1,Steakhouse,9
 BN1,Thai,14
@@ -1948,7 +1944,7 @@ BN11,Turkish,7
 BN11,Unspecified,35
 BN12,Asian,1
 BN12,Barbecue,1
-BN12,British,22
+BN12,British,21
 BN12,Chinese,4
 BN12,European,1
 BN12,Indian,3
@@ -2122,7 +2118,7 @@ BN3,Barbecue,2
 BN3,British,78
 BN3,Caribbean,5
 BN3,Chinese,14
-BN3,European,4
+BN3,European,3
 BN3,French,8
 BN3,Greek,2
 BN3,Indian,19
@@ -2139,7 +2135,7 @@ BN3,Seafood,8
 BN3,Spanish,2
 BN3,Thai,8
 BN3,Turkish,4
-BN3,Unspecified,72
+BN3,Unspecified,71
 BN41,Barbecue,1
 BN41,British,13
 BN41,Chinese,3
@@ -2190,9 +2186,9 @@ BN6,Chinese,1
 BN6,Indian,2
 BN6,Italian,2
 BN6,Turkish,1
-BN6,Unspecified,7
+BN6,Unspecified,6
 BN7,Barbecue,1
-BN7,British,42
+BN7,British,41
 BN7,Caribbean,1
 BN7,Chinese,3
 BN7,European,2
@@ -2227,14 +2223,14 @@ BR1,French,2
 BR1,Greek,1
 BR1,Indian,16
 BR1,International,1
-BR1,Italian,16
+BR1,Italian,15
 BR1,Japanese,4
 BR1,Mediterranean,2
 BR1,Seafood,6
 BR1,Steakhouse,2
 BR1,Thai,1
 BR1,Turkish,6
-BR1,Unspecified,53
+BR1,Unspecified,52
 BR2,American,3
 BR2,Barbecue,3
 BR2,British,19
@@ -2253,7 +2249,7 @@ BR3,British,26
 BR3,Caribbean,1
 BR3,Chinese,3
 BR3,European,2
-BR3,French,2
+BR3,French,1
 BR3,Greek,1
 BR3,Indian,11
 BR3,Italian,15
@@ -2269,7 +2265,7 @@ BR4,American,1
 BR4,British,10
 BR4,Chinese,2
 BR4,Greek,1
-BR4,Indian,8
+BR4,Indian,7
 BR4,International,1
 BR4,Italian,5
 BR4,Japanese,1
@@ -2331,7 +2327,7 @@ BR8,Italian,1
 BR8,Seafood,1
 BR8,Turkish,1
 BR8,Unspecified,7
-BS1,African,2
+BS1,African,1
 BS1,American,18
 BS1,Asian,12
 BS1,Barbecue,5
@@ -2349,15 +2345,15 @@ BS1,Latin,5
 BS1,Lebanese,5
 BS1,Mediterranean,5
 BS1,Mexican,11
-BS1,Middle Eastern,8
+BS1,Middle Eastern,7
 BS1,Portuguese,3
 BS1,Seafood,4
 BS1,Spanish,9
 BS1,Steakhouse,8
 BS1,Thai,2
 BS1,Turkish,4
-BS1,Unspecified,154
-BS10,American,3
+BS1,Unspecified,152
+BS10,American,2
 BS10,British,11
 BS10,Chinese,1
 BS10,Indian,3
@@ -2365,7 +2361,7 @@ BS10,Italian,6
 BS10,Mexican,1
 BS10,Portuguese,1
 BS10,Steakhouse,1
-BS10,Unspecified,16
+BS10,Unspecified,14
 BS11,British,6
 BS11,Chinese,1
 BS11,Indian,1
@@ -2391,7 +2387,7 @@ BS15,Caribbean,1
 BS15,Chinese,6
 BS15,Indian,8
 BS15,International,1
-BS15,Italian,15
+BS15,Italian,14
 BS15,Portuguese,2
 BS15,Seafood,2
 BS15,Turkish,1
@@ -2427,15 +2423,15 @@ BS20,American,1
 BS20,Asian,1
 BS20,Barbecue,1
 BS20,British,25
-BS20,Chinese,3
+BS20,Chinese,2
 BS20,Indian,6
 BS20,Italian,5
 BS20,Mediterranean,1
 BS20,Seafood,1
 BS20,Spanish,1
-BS20,Unspecified,17
+BS20,Unspecified,15
 BS21,Asian,1
-BS21,Barbecue,2
+BS21,Barbecue,1
 BS21,British,24
 BS21,Chinese,2
 BS21,Indian,2
@@ -2548,7 +2544,7 @@ BS34,Italian,5
 BS34,Japanese,2
 BS34,Mexican,1
 BS34,Portuguese,1
-BS34,Unspecified,28
+BS34,Unspecified,25
 BS35,British,20
 BS35,Chinese,2
 BS35,Indian,3
@@ -2575,7 +2571,7 @@ BS37,Portuguese,1
 BS37,Seafood,1
 BS37,Steakhouse,1
 BS37,Thai,1
-BS37,Unspecified,18
+BS37,Unspecified,17
 BS39,British,22
 BS39,Chinese,2
 BS39,Indian,1
@@ -2716,7 +2712,7 @@ CA1,Middle Eastern,1
 CA1,Portuguese,1
 CA1,Thai,1
 CA1,Unspecified,29
-CA10,American,3
+CA10,American,1
 CA10,British,41
 CA10,European,1
 CA10,French,1
@@ -2725,7 +2721,7 @@ CA10,Italian,2
 CA10,Mediterranean,1
 CA10,Seafood,1
 CA10,Thai,2
-CA10,Unspecified,17
+CA10,Unspecified,16
 CA11,American,3
 CA11,Barbecue,1
 CA11,British,75
@@ -2751,7 +2747,7 @@ CA12,Seafood,3
 CA12,Steakhouse,2
 CA12,Thai,2
 CA12,Unspecified,10
-CA13,British,44
+CA13,British,43
 CA13,Chinese,4
 CA13,European,1
 CA13,Indian,2
@@ -2817,17 +2813,15 @@ CA26,British,1
 CA26,Italian,1
 CA26,Unspecified,1
 CA27,British,5
-CA28,American,2
-CA28,British,23
+CA28,British,22
 CA28,Chinese,4
 CA28,European,1
-CA28,Indian,4
-CA28,Italian,8
-CA28,Latin,1
-CA28,Seafood,3
-CA28,Unspecified,22
+CA28,Indian,2
+CA28,Italian,7
+CA28,Seafood,2
+CA28,Unspecified,21
 CA3,American,1
-CA3,British,48
+CA3,British,47
 CA3,Chinese,4
 CA3,European,1
 CA3,French,1
@@ -2846,25 +2840,19 @@ CA4,Italian,1
 CA4,Unspecified,4
 CA5,British,13
 CA5,Unspecified,2
-CA6,American,3
-CA6,British,16
-CA6,Greek,1
+CA6,British,12
 CA6,Indian,1
-CA6,Italian,4
-CA6,Japanese,1
-CA6,Mexican,1
-CA6,Middle Eastern,1
+CA6,Italian,2
 CA6,Seafood,1
-CA6,Unspecified,14
-CA7,British,42
+CA6,Unspecified,7
+CA7,British,41
 CA7,Chinese,2
 CA7,Indian,2
 CA7,Italian,2
 CA7,Seafood,1
 CA7,Spanish,1
-CA7,Thai,1
 CA7,Turkish,1
-CA7,Unspecified,12
+CA7,Unspecified,11
 CA8,British,26
 CA8,Chinese,2
 CA8,European,1
@@ -2886,7 +2874,7 @@ CB1,European,1
 CB1,French,2
 CB1,Greek,2
 CB1,Indian,10
-CB1,Italian,27
+CB1,Italian,26
 CB1,Japanese,6
 CB1,Latin,2
 CB1,Lebanese,2
@@ -2899,7 +2887,7 @@ CB1,Spanish,1
 CB1,Steakhouse,1
 CB1,Thai,2
 CB1,Turkish,6
-CB1,Unspecified,68
+CB1,Unspecified,67
 CB10,American,2
 CB10,Barbecue,1
 CB10,British,25
@@ -2916,7 +2904,7 @@ CB11,Indian,5
 CB11,Italian,1
 CB11,Thai,1
 CB11,Unspecified,5
-CB2,African,3
+CB2,African,2
 CB2,American,8
 CB2,Asian,7
 CB2,Barbecue,2
@@ -2939,7 +2927,7 @@ CB2,Spanish,4
 CB2,Steakhouse,2
 CB2,Thai,3
 CB2,Turkish,4
-CB2,Unspecified,55
+CB2,Unspecified,54
 CB21,British,11
 CB21,Chinese,2
 CB21,French,1
@@ -2995,7 +2983,7 @@ CB3,Seafood,1
 CB3,Steakhouse,2
 CB3,Thai,3
 CB3,Unspecified,3
-CB4,American,3
+CB4,American,2
 CB4,British,19
 CB4,Chinese,8
 CB4,European,2
@@ -3066,7 +3054,7 @@ CH1,Barbecue,3
 CH1,British,128
 CH1,Caribbean,1
 CH1,Chinese,9
-CH1,European,4
+CH1,European,3
 CH1,French,2
 CH1,Greek,1
 CH1,Indian,11
@@ -3124,7 +3112,7 @@ CH41,Mexican,2
 CH41,Seafood,1
 CH41,Thai,4
 CH41,Turkish,2
-CH41,Unspecified,87
+CH41,Unspecified,86
 CH42,American,3
 CH42,Barbecue,1
 CH42,British,9
@@ -3144,7 +3132,7 @@ CH43,Chinese,6
 CH43,Indian,1
 CH43,Italian,1
 CH43,Spanish,1
-CH43,Unspecified,15
+CH43,Unspecified,13
 CH44,British,6
 CH44,Chinese,2
 CH44,Greek,1
@@ -3152,11 +3140,11 @@ CH44,Indian,2
 CH44,Italian,3
 CH44,Thai,1
 CH44,Turkish,1
-CH44,Unspecified,28
+CH44,Unspecified,27
 CH45,American,2
 CH45,Asian,2
 CH45,Barbecue,1
-CH45,British,36
+CH45,British,35
 CH45,Chinese,5
 CH45,French,1
 CH45,Greek,1
@@ -3168,7 +3156,7 @@ CH45,Middle Eastern,1
 CH45,Seafood,1
 CH45,Thai,1
 CH45,Turkish,1
-CH45,Unspecified,28
+CH45,Unspecified,27
 CH46,American,2
 CH46,British,12
 CH46,Chinese,4
@@ -3178,7 +3166,7 @@ CH46,Mexican,1
 CH46,Seafood,1
 CH46,Turkish,1
 CH46,Unspecified,9
-CH47,British,18
+CH47,British,16
 CH47,Chinese,5
 CH47,European,2
 CH47,Greek,1
@@ -3255,7 +3243,7 @@ CH64,Indian,2
 CH64,Seafood,1
 CH64,Thai,1
 CH64,Unspecified,18
-CH65,American,10
+CH65,American,9
 CH65,Asian,1
 CH65,British,18
 CH65,Chinese,10
@@ -3318,7 +3306,7 @@ CM12,Spanish,1
 CM12,Thai,2
 CM12,Turkish,2
 CM12,Unspecified,13
-CM13,British,20
+CM13,British,19
 CM13,Chinese,2
 CM13,Indian,3
 CM13,Italian,1
@@ -3351,7 +3339,7 @@ CM15,Unspecified,16
 CM16,American,1
 CM16,British,25
 CM16,Chinese,3
-CM16,European,4
+CM16,European,3
 CM16,Greek,1
 CM16,Indian,7
 CM16,Italian,7
@@ -3509,7 +3497,7 @@ CM77,Mediterranean,1
 CM77,Steakhouse,1
 CM77,Thai,1
 CM77,Turkish,1
-CM77,Unspecified,9
+CM77,Unspecified,8
 CM8,American,1
 CM8,British,23
 CM8,Chinese,10
@@ -3584,7 +3572,7 @@ CO12,Seafood,6
 CO12,Thai,1
 CO12,Turkish,3
 CO12,Unspecified,8
-CO13,British,16
+CO13,British,15
 CO13,Chinese,2
 CO13,Indian,3
 CO13,Italian,1
@@ -3706,7 +3694,7 @@ CR0,American,12
 CR0,Asian,13
 CR0,Barbecue,12
 CR0,British,38
-CR0,Caribbean,14
+CR0,Caribbean,13
 CR0,Chinese,29
 CR0,European,7
 CR0,French,2
@@ -3725,7 +3713,7 @@ CR0,Spanish,1
 CR0,Steakhouse,1
 CR0,Thai,3
 CR0,Turkish,13
-CR0,Unspecified,127
+CR0,Unspecified,125
 CR2,American,1
 CR2,Asian,1
 CR2,British,13
@@ -3803,7 +3791,7 @@ CR8,Indian,9
 CR8,Italian,8
 CR8,Lebanese,1
 CR8,Portuguese,2
-CR8,Spanish,2
+CR8,Spanish,1
 CR8,Steakhouse,1
 CR8,Thai,2
 CR8,Turkish,3
@@ -3850,7 +3838,7 @@ CT10,Spanish,1
 CT10,Thai,3
 CT10,Turkish,2
 CT10,Unspecified,34
-CT11,American,2
+CT11,American,1
 CT11,British,37
 CT11,Caribbean,1
 CT11,Chinese,12
@@ -3893,7 +3881,7 @@ CT14,Seafood,9
 CT14,Thai,2
 CT14,Turkish,3
 CT14,Unspecified,18
-CT15,British,14
+CT15,British,13
 CT15,Chinese,1
 CT15,Indian,2
 CT15,Mexican,1
@@ -4098,7 +4086,6 @@ CV2,Italian,7
 CV2,Mexican,2
 CV2,Portuguese,1
 CV2,Steakhouse,1
-CV2,Turkish,1
 CV2,Unspecified,30
 CV21,American,4
 CV21,British,33
@@ -4212,8 +4199,8 @@ CV35,Indian,2
 CV35,Seafood,1
 CV35,Spanish,1
 CV35,Steakhouse,2
-CV35,Unspecified,21
-CV36,British,18
+CV35,Unspecified,19
+CV36,British,17
 CV36,Chinese,2
 CV36,Indian,2
 CV36,Italian,2
@@ -4239,7 +4226,7 @@ CV37,Spanish,2
 CV37,Steakhouse,2
 CV37,Thai,3
 CV37,Turkish,3
-CV37,Unspecified,50
+CV37,Unspecified,49
 CV4,American,1
 CV4,British,7
 CV4,Chinese,5
@@ -4266,7 +4253,7 @@ CV5,Mexican,1
 CV5,Middle Eastern,1
 CV5,Seafood,1
 CV5,Spanish,1
-CV5,Unspecified,15
+CV5,Unspecified,14
 CV6,American,1
 CV6,Asian,1
 CV6,Barbecue,1
@@ -4290,7 +4277,7 @@ CV7,Italian,1
 CV7,Seafood,1
 CV7,Steakhouse,1
 CV7,Thai,1
-CV7,Unspecified,18
+CV7,Unspecified,17
 CV8,Asian,1
 CV8,British,36
 CV8,Chinese,4
@@ -4303,12 +4290,12 @@ CV9,Asian,1
 CV9,British,22
 CV9,Chinese,2
 CV9,Indian,4
-CV9,Italian,4
+CV9,Italian,3
 CV9,Unspecified,13
 CW1,American,2
 CW1,Barbecue,1
 CW1,British,32
-CW1,Chinese,8
+CW1,Chinese,7
 CW1,Indian,1
 CW1,Italian,5
 CW1,Mexican,1
@@ -4337,7 +4324,7 @@ CW11,International,1
 CW11,Italian,6
 CW11,Seafood,2
 CW11,Thai,1
-CW11,Unspecified,18
+CW11,Unspecified,17
 CW12,American,2
 CW12,Asian,1
 CW12,British,28
@@ -4376,7 +4363,7 @@ CW5,Indian,8
 CW5,Italian,5
 CW5,Mexican,1
 CW5,Thai,1
-CW5,Unspecified,26
+CW5,Unspecified,25
 CW6,Barbecue,1
 CW6,British,35
 CW6,Indian,1
@@ -4390,7 +4377,6 @@ CW7,Indian,5
 CW7,Italian,2
 CW7,Spanish,1
 CW7,Unspecified,13
-CW8,American,1
 CW8,Asian,1
 CW8,British,27
 CW8,Chinese,4
@@ -4417,7 +4403,7 @@ DA1,British,30
 DA1,Chinese,5
 DA1,Greek,1
 DA1,Indian,13
-DA1,Italian,13
+DA1,Italian,12
 DA1,Portuguese,1
 DA1,Spanish,1
 DA1,Turkish,7
@@ -4472,7 +4458,7 @@ DA14,Japanese,1
 DA14,Lebanese,1
 DA14,Mediterranean,1
 DA14,Turkish,3
-DA14,Unspecified,16
+DA14,Unspecified,15
 DA15,American,1
 DA15,Asian,3
 DA15,British,10
@@ -4548,7 +4534,7 @@ DA6,Mexican,1
 DA6,Middle Eastern,1
 DA6,Seafood,1
 DA6,Steakhouse,1
-DA6,Thai,2
+DA6,Thai,1
 DA6,Turkish,7
 DA6,Unspecified,20
 DA7,American,1
@@ -4586,7 +4572,7 @@ DA9,Portuguese,2
 DA9,Seafood,1
 DA9,Spanish,1
 DA9,Thai,1
-DA9,Unspecified,26
+DA9,Unspecified,23
 DE1,African,1
 DE1,American,10
 DE1,Asian,2
@@ -4651,7 +4637,7 @@ DE14,Portuguese,1
 DE14,Seafood,1
 DE14,Steakhouse,1
 DE14,Thai,2
-DE14,Unspecified,38
+DE14,Unspecified,35
 DE15,British,7
 DE15,Chinese,1
 DE15,Indian,2
@@ -4673,9 +4659,9 @@ DE22,Japanese,1
 DE22,Mexican,1
 DE22,Seafood,2
 DE22,Steakhouse,1
-DE22,Unspecified,27
+DE22,Unspecified,26
 DE23,American,2
-DE23,British,10
+DE23,British,9
 DE23,Chinese,4
 DE23,Indian,13
 DE23,Italian,8
@@ -4787,7 +4773,7 @@ DE72,Indian,4
 DE72,Italian,1
 DE72,Seafood,1
 DE72,Spanish,1
-DE72,Unspecified,11
+DE72,Unspecified,10
 DE73,British,23
 DE73,Indian,3
 DE73,Italian,1
@@ -4803,7 +4789,7 @@ DE74,Indian,5
 DE74,International,1
 DE74,Italian,4
 DE74,Seafood,3
-DE74,Unspecified,13
+DE74,Unspecified,12
 DE75,Asian,1
 DE75,British,8
 DE75,Chinese,3
@@ -4817,7 +4803,7 @@ DH1,Chinese,8
 DH1,European,1
 DH1,Indian,14
 DH1,International,2
-DH1,Italian,28
+DH1,Italian,27
 DH1,Japanese,3
 DH1,Lebanese,3
 DH1,Mediterranean,1
@@ -4834,7 +4820,7 @@ DH2,Indian,3
 DH2,Italian,3
 DH2,Seafood,1
 DH2,Unspecified,2
-DH3,American,3
+DH3,American,2
 DH3,Barbecue,2
 DH3,British,23
 DH3,Chinese,6
@@ -4924,7 +4910,7 @@ DL10,Steakhouse,1
 DL10,Thai,1
 DL10,Unspecified,19
 DL11,British,34
-DL11,Unspecified,5
+DL11,Unspecified,3
 DL12,Barbecue,1
 DL12,British,34
 DL12,Chinese,1
@@ -4961,7 +4947,7 @@ DL15,Italian,5
 DL15,Seafood,1
 DL15,Spanish,1
 DL15,Unspecified,6
-DL16,British,16
+DL16,British,15
 DL16,Chinese,2
 DL16,Indian,1
 DL16,Italian,6
@@ -5007,8 +4993,8 @@ DL5,Indian,3
 DL5,Italian,5
 DL5,Seafood,1
 DL5,Unspecified,10
-DL6,Barbecue,2
-DL6,British,25
+DL6,Barbecue,1
+DL6,British,24
 DL6,Chinese,2
 DL6,Italian,5
 DL6,Steakhouse,1
@@ -5053,7 +5039,7 @@ DN1,Spanish,3
 DN1,Steakhouse,2
 DN1,Thai,2
 DN1,Turkish,5
-DN1,Unspecified,52
+DN1,Unspecified,50
 DN10,Asian,1
 DN10,Barbecue,1
 DN10,British,22
@@ -5088,11 +5074,11 @@ DN14,Barbecue,1
 DN14,British,44
 DN14,Chinese,3
 DN14,European,2
-DN14,Indian,8
+DN14,Indian,7
 DN14,International,1
 DN14,Italian,14
 DN14,Seafood,1
-DN14,Unspecified,33
+DN14,Unspecified,32
 DN15,American,4
 DN15,Asian,1
 DN15,British,26
@@ -5113,7 +5099,7 @@ DN16,Indian,5
 DN16,Italian,4
 DN16,Seafood,2
 DN16,Steakhouse,1
-DN16,Unspecified,8
+DN16,Unspecified,7
 DN17,British,14
 DN17,Chinese,1
 DN17,European,1
@@ -5141,7 +5127,7 @@ DN2,Chinese,2
 DN2,Indian,5
 DN2,Italian,8
 DN2,Seafood,5
-DN2,Unspecified,9
+DN2,Unspecified,8
 DN20,British,23
 DN20,Chinese,4
 DN20,Indian,4
@@ -5168,7 +5154,7 @@ DN22,Italian,10
 DN22,Seafood,3
 DN22,Spanish,1
 DN22,Thai,2
-DN22,Unspecified,21
+DN22,Unspecified,20
 DN3,Barbecue,1
 DN3,British,13
 DN3,Chinese,4
@@ -5178,7 +5164,7 @@ DN3,Mexican,1
 DN3,Seafood,3
 DN3,Spanish,1
 DN3,Thai,1
-DN3,Unspecified,11
+DN3,Unspecified,10
 DN31,American,2
 DN31,British,17
 DN31,Chinese,2
@@ -5273,7 +5259,7 @@ DN5,Indian,5
 DN5,Italian,8
 DN5,Seafood,1
 DN5,Turkish,1
-DN5,Unspecified,16
+DN5,Unspecified,15
 DN6,British,11
 DN6,Chinese,2
 DN6,European,2
@@ -5343,7 +5329,7 @@ DT3,Italian,1
 DT3,Seafood,3
 DT3,Unspecified,6
 DT4,Asian,2
-DT4,British,79
+DT4,British,78
 DT4,Chinese,12
 DT4,European,1
 DT4,French,3
@@ -5352,17 +5338,17 @@ DT4,International,1
 DT4,Italian,13
 DT4,Mediterranean,1
 DT4,Portuguese,1
-DT4,Seafood,22
+DT4,Seafood,21
 DT4,Steakhouse,3
 DT4,Thai,2
 DT4,Turkish,1
-DT4,Unspecified,40
+DT4,Unspecified,39
 DT5,British,14
 DT5,Chinese,2
 DT5,Indian,1
 DT5,Italian,1
 DT5,Seafood,6
-DT5,Unspecified,6
+DT5,Unspecified,5
 DT6,American,2
 DT6,British,68
 DT6,Chinese,2
@@ -5393,7 +5379,7 @@ DT8,British,13
 DT8,Chinese,1
 DT8,Indian,1
 DT8,Unspecified,5
-DT9,British,36
+DT9,British,35
 DT9,Chinese,2
 DT9,European,1
 DT9,Indian,2
@@ -5401,7 +5387,7 @@ DT9,Italian,3
 DT9,Middle Eastern,1
 DT9,Seafood,3
 DT9,Steakhouse,1
-DT9,Unspecified,16
+DT9,Unspecified,15
 DY1,Asian,1
 DY1,Barbecue,2
 DY1,British,22
@@ -5410,7 +5396,7 @@ DY1,Indian,7
 DY1,Italian,10
 DY1,Portuguese,1
 DY1,Steakhouse,1
-DY1,Unspecified,30
+DY1,Unspecified,29
 DY10,American,2
 DY10,Asian,1
 DY10,British,42
@@ -5486,7 +5472,7 @@ DY5,Seafood,2
 DY5,Steakhouse,3
 DY5,Unspecified,35
 DY6,American,2
-DY6,British,22
+DY6,British,21
 DY6,Chinese,3
 DY6,Greek,1
 DY6,Indian,8
@@ -5527,8 +5513,8 @@ DY9,Unspecified,14
 E1,African,2
 E1,American,31
 E1,Asian,34
-E1,Barbecue,26
-E1,British,83
+E1,Barbecue,25
+E1,British,82
 E1,Caribbean,5
 E1,Chinese,16
 E1,European,10
@@ -5549,7 +5535,7 @@ E1,Spanish,5
 E1,Steakhouse,12
 E1,Thai,15
 E1,Turkish,21
-E1,Unspecified,255
+E1,Unspecified,253
 E10,African,1
 E10,American,8
 E10,Asian,1
@@ -5567,7 +5553,7 @@ E10,Portuguese,2
 E10,Seafood,1
 E10,Steakhouse,1
 E10,Turkish,4
-E10,Unspecified,41
+E10,Unspecified,40
 E11,African,5
 E11,American,7
 E11,Asian,2
@@ -5593,7 +5579,7 @@ E12,Asian,7
 E12,Barbecue,2
 E12,British,2
 E12,Chinese,4
-E12,Indian,20
+E12,Indian,19
 E12,Italian,3
 E12,Japanese,1
 E12,Mediterranean,1
@@ -5641,7 +5627,7 @@ E14,Spanish,2
 E14,Steakhouse,2
 E14,Thai,4
 E14,Turkish,9
-E14,Unspecified,124
+E14,Unspecified,123
 E15,African,1
 E15,American,6
 E15,Asian,1
@@ -5686,7 +5672,7 @@ E16,Turkish,2
 E16,Unspecified,40
 E17,American,7
 E17,Barbecue,3
-E17,British,28
+E17,British,27
 E17,Caribbean,9
 E17,Chinese,13
 E17,European,6
@@ -5720,8 +5706,8 @@ E18,Lebanese,1
 E18,Portuguese,1
 E18,Seafood,2
 E18,Steakhouse,1
-E18,Turkish,3
-E18,Unspecified,19
+E18,Turkish,2
+E18,Unspecified,18
 E1W,American,2
 E1W,Asian,1
 E1W,Barbecue,1
@@ -5766,11 +5752,10 @@ E20,American,7
 E20,Asian,3
 E20,Barbecue,2
 E20,British,13
-E20,Caribbean,1
 E20,Chinese,2
 E20,European,4
 E20,French,2
-E20,Greek,4
+E20,Greek,3
 E20,Indian,3
 E20,International,2
 E20,Italian,15
@@ -5801,7 +5786,7 @@ E3,Middle Eastern,1
 E3,Seafood,3
 E3,Thai,1
 E3,Turkish,4
-E3,Unspecified,58
+E3,Unspecified,57
 E4,American,4
 E4,Barbecue,2
 E4,British,30
@@ -5815,7 +5800,7 @@ E4,Japanese,2
 E4,Seafood,1
 E4,Spanish,2
 E4,Thai,3
-E4,Turkish,13
+E4,Turkish,12
 E4,Unspecified,47
 E5,American,2
 E5,British,10
@@ -5849,7 +5834,7 @@ E6,Unspecified,30
 E7,American,2
 E7,Asian,2
 E7,Barbecue,3
-E7,British,5
+E7,British,4
 E7,Caribbean,1
 E7,Chinese,6
 E7,European,1
@@ -5862,7 +5847,7 @@ E7,Seafood,1
 E7,Spanish,1
 E7,Steakhouse,3
 E7,Turkish,3
-E7,Unspecified,38
+E7,Unspecified,37
 E8,African,4
 E8,American,17
 E8,Asian,10
@@ -5937,7 +5922,7 @@ EC1M,Mexican,1
 EC1M,Spanish,2
 EC1M,Steakhouse,2
 EC1M,Thai,4
-EC1M,Unspecified,32
+EC1M,Unspecified,31
 EC1N,Asian,1
 EC1N,Barbecue,1
 EC1N,British,9
@@ -5983,8 +5968,8 @@ EC1V,European,5
 EC1V,French,3
 EC1V,Greek,1
 EC1V,Indian,3
-EC1V,International,5
-EC1V,Italian,21
+EC1V,International,4
+EC1V,Italian,20
 EC1V,Japanese,9
 EC1V,Mediterranean,2
 EC1V,Mexican,1
@@ -6041,7 +6026,7 @@ EC2M,European,3
 EC2M,French,1
 EC2M,Indian,3
 EC2M,International,5
-EC2M,Italian,11
+EC2M,Italian,10
 EC2M,Japanese,7
 EC2M,Lebanese,2
 EC2M,Mexican,5
@@ -6052,7 +6037,7 @@ EC2M,Spanish,1
 EC2M,Steakhouse,4
 EC2M,Thai,2
 EC2M,Turkish,1
-EC2M,Unspecified,58
+EC2M,Unspecified,57
 EC2N,Asian,2
 EC2N,British,6
 EC2N,European,3
@@ -6106,7 +6091,7 @@ EC3A,Middle Eastern,1
 EC3A,Steakhouse,1
 EC3A,Thai,1
 EC3A,Turkish,1
-EC3A,Unspecified,22
+EC3A,Unspecified,21
 EC3M,American,1
 EC3M,Asian,1
 EC3M,Barbecue,2
@@ -6115,7 +6100,7 @@ EC3M,Caribbean,1
 EC3M,French,1
 EC3M,Indian,1
 EC3M,International,1
-EC3M,Italian,4
+EC3M,Italian,3
 EC3M,Japanese,1
 EC3M,Latin,1
 EC3M,Middle Eastern,3
@@ -6155,7 +6140,7 @@ EC3R,Middle Eastern,1
 EC3R,Spanish,2
 EC3R,Thai,2
 EC3R,Turkish,1
-EC3R,Unspecified,15
+EC3R,Unspecified,13
 EC3V,American,2
 EC3V,Asian,1
 EC3V,Barbecue,1
@@ -6187,7 +6172,7 @@ EC4A,Mediterranean,2
 EC4A,Mexican,2
 EC4A,Steakhouse,1
 EC4A,Turkish,1
-EC4A,Unspecified,31
+EC4A,Unspecified,29
 EC4M,American,3
 EC4M,Asian,2
 EC4M,Barbecue,3
@@ -6203,14 +6188,14 @@ EC4M,Mexican,4
 EC4M,Middle Eastern,2
 EC4M,Spanish,1
 EC4M,Thai,2
-EC4M,Unspecified,37
+EC4M,Unspecified,35
 EC4N,American,3
 EC4N,Barbecue,2
 EC4N,British,10
 EC4N,Chinese,2
 EC4N,European,3
 EC4N,International,1
-EC4N,Italian,5
+EC4N,Italian,4
 EC4N,Japanese,4
 EC4N,Latin,3
 EC4N,Mexican,2
@@ -6246,7 +6231,7 @@ EC4V,Middle Eastern,2
 EC4V,Spanish,3
 EC4V,Steakhouse,1
 EC4V,Thai,3
-EC4V,Unspecified,35
+EC4V,Unspecified,33
 EC4Y,Asian,2
 EC4Y,British,8
 EC4Y,Indian,1
@@ -6299,7 +6284,7 @@ EN2,European,1
 EN2,French,1
 EN2,Greek,1
 EN2,Indian,5
-EN2,Italian,12
+EN2,Italian,11
 EN2,Mediterranean,1
 EN2,Portuguese,1
 EN2,Seafood,1
@@ -6411,7 +6396,7 @@ EX1,Turkish,2
 EX1,Unspecified,27
 EX10,American,1
 EX10,Asian,1
-EX10,British,45
+EX10,British,44
 EX10,Chinese,3
 EX10,Indian,2
 EX10,Italian,5
@@ -6443,7 +6428,7 @@ EX13,Italian,2
 EX13,Seafood,2
 EX13,Unspecified,10
 EX14,American,1
-EX14,British,39
+EX14,British,38
 EX14,Chinese,3
 EX14,Indian,3
 EX14,Italian,3
@@ -6496,7 +6481,7 @@ EX2,Italian,5
 EX2,Japanese,1
 EX2,Mexican,2
 EX2,Seafood,2
-EX2,Unspecified,37
+EX2,Unspecified,36
 EX20,American,1
 EX20,British,44
 EX20,Chinese,2
@@ -6539,12 +6524,12 @@ EX31,British,49
 EX31,Chinese,4
 EX31,European,3
 EX31,Indian,3
-EX31,Italian,6
+EX31,Italian,5
 EX31,Seafood,3
 EX31,Steakhouse,1
 EX31,Thai,1
 EX31,Turkish,1
-EX31,Unspecified,28
+EX31,Unspecified,27
 EX32,American,1
 EX32,British,18
 EX32,Chinese,5
@@ -6568,7 +6553,7 @@ EX33,Steakhouse,1
 EX33,Thai,2
 EX33,Turkish,1
 EX33,Unspecified,8
-EX34,American,2
+EX34,American,1
 EX34,Asian,2
 EX34,British,83
 EX34,Chinese,3
@@ -6611,7 +6596,7 @@ EX39,British,79
 EX39,Chinese,9
 EX39,French,3
 EX39,Indian,4
-EX39,Italian,10
+EX39,Italian,9
 EX39,Seafood,9
 EX39,Thai,2
 EX39,Unspecified,20
@@ -6643,14 +6628,14 @@ EX5,British,33
 EX5,Chinese,2
 EX5,Indian,1
 EX5,Italian,3
-EX5,Unspecified,14
+EX5,Unspecified,13
 EX6,American,1
 EX6,British,37
 EX6,Chinese,2
 EX6,European,1
 EX6,Italian,1
 EX6,Seafood,2
-EX6,Unspecified,7
+EX6,Unspecified,6
 EX7,British,34
 EX7,Chinese,4
 EX7,Indian,3
@@ -6673,7 +6658,7 @@ EX8,Seafood,7
 EX8,Spanish,1
 EX8,Steakhouse,1
 EX8,Turkish,3
-EX8,Unspecified,31
+EX8,Unspecified,30
 EX9,British,21
 EX9,Chinese,1
 EX9,Indian,1
@@ -6684,7 +6669,6 @@ FY1,Barbecue,1
 FY1,British,108
 FY1,Caribbean,3
 FY1,Chinese,20
-FY1,European,1
 FY1,French,1
 FY1,Indian,14
 FY1,International,3
@@ -6748,7 +6732,7 @@ FY5,Spanish,1
 FY5,Thai,3
 FY5,Unspecified,19
 FY6,American,1
-FY6,British,29
+FY6,British,28
 FY6,Chinese,5
 FY6,Indian,4
 FY6,Italian,6
@@ -6807,7 +6791,7 @@ GL1,Spanish,1
 GL1,Steakhouse,1
 GL1,Thai,4
 GL1,Turkish,6
-GL1,Unspecified,60
+GL1,Unspecified,58
 GL10,British,14
 GL10,Chinese,1
 GL10,Indian,3
@@ -6815,7 +6799,7 @@ GL10,Italian,1
 GL10,Turkish,1
 GL10,Unspecified,8
 GL11,American,1
-GL11,British,16
+GL11,British,15
 GL11,Chinese,3
 GL11,Indian,2
 GL11,International,1
@@ -6835,7 +6819,7 @@ GL12,Unspecified,9
 GL13,American,1
 GL13,British,9
 GL13,Indian,1
-GL13,Unspecified,8
+GL13,Unspecified,7
 GL14,American,1
 GL14,Asian,1
 GL14,Barbecue,1
@@ -6849,7 +6833,6 @@ GL15,Asian,1
 GL15,British,25
 GL15,Chinese,4
 GL15,Indian,1
-GL15,Italian,1
 GL15,Mexican,1
 GL15,Thai,1
 GL15,Turkish,2
@@ -6977,7 +6960,7 @@ GL53,Indian,3
 GL53,Seafood,1
 GL53,Unspecified,17
 GL54,Asian,2
-GL54,British,84
+GL54,British,83
 GL54,Chinese,2
 GL54,European,1
 GL54,French,1
@@ -6987,7 +6970,7 @@ GL54,Italian,3
 GL54,Seafood,4
 GL54,Thai,1
 GL54,Turkish,1
-GL54,Unspecified,27
+GL54,Unspecified,25
 GL55,British,17
 GL55,Chinese,1
 GL55,French,1
@@ -7008,7 +6991,7 @@ GL6,Chinese,3
 GL6,Indian,3
 GL6,Italian,3
 GL6,Seafood,2
-GL6,Unspecified,8
+GL6,Unspecified,6
 GL7,African,1
 GL7,American,2
 GL7,British,88
@@ -7069,7 +7052,7 @@ GU11,Italian,6
 GU11,Portuguese,1
 GU11,Turkish,1
 GU11,Unspecified,20
-GU12,American,2
+GU12,American,1
 GU12,Asian,1
 GU12,British,7
 GU12,Chinese,6
@@ -7123,7 +7106,7 @@ GU18,Italian,2
 GU18,Seafood,1
 GU18,Unspecified,3
 GU19,American,1
-GU19,British,11
+GU19,British,10
 GU19,Chinese,3
 GU19,Indian,2
 GU19,Italian,3
@@ -7164,7 +7147,7 @@ GU21,Portuguese,2
 GU21,Seafood,2
 GU21,Thai,2
 GU21,Turkish,3
-GU21,Unspecified,45
+GU21,Unspecified,44
 GU22,British,9
 GU22,Chinese,4
 GU22,Indian,4
@@ -7172,9 +7155,8 @@ GU22,International,1
 GU22,Italian,1
 GU22,Seafood,1
 GU22,Unspecified,8
-GU23,American,1
 GU23,Asian,1
-GU23,British,18
+GU23,British,17
 GU23,Chinese,1
 GU23,Indian,1
 GU23,Unspecified,6
@@ -7216,7 +7198,7 @@ GU29,Indian,1
 GU29,Italian,2
 GU29,Spanish,1
 GU29,Thai,1
-GU29,Unspecified,10
+GU29,Unspecified,9
 GU3,British,9
 GU3,European,1
 GU3,Unspecified,4
@@ -7270,7 +7252,7 @@ GU46,British,5
 GU46,Chinese,1
 GU46,Indian,3
 GU46,Italian,3
-GU46,Unspecified,5
+GU46,Unspecified,4
 GU47,American,1
 GU47,British,11
 GU47,Chinese,3
@@ -7288,7 +7270,6 @@ GU51,Asian,1
 GU51,British,14
 GU51,Chinese,3
 GU51,Indian,7
-GU51,International,1
 GU51,Italian,7
 GU51,Seafood,2
 GU51,Steakhouse,1
@@ -7340,7 +7321,7 @@ GU9,Seafood,3
 GU9,Steakhouse,2
 GU9,Thai,3
 GU9,Turkish,1
-GU9,Unspecified,20
+GU9,Unspecified,19
 HA0,American,2
 HA0,Asian,5
 HA0,Barbecue,1
@@ -7367,7 +7348,7 @@ HA1,Middle Eastern,3
 HA1,Portuguese,1
 HA1,Seafood,2
 HA1,Spanish,1
-HA1,Steakhouse,3
+HA1,Steakhouse,2
 HA1,Thai,1
 HA1,Turkish,3
 HA1,Unspecified,43
@@ -7402,7 +7383,7 @@ HA3,Turkish,2
 HA3,Unspecified,37
 HA4,American,4
 HA4,Barbecue,2
-HA4,British,24
+HA4,British,23
 HA4,Chinese,7
 HA4,French,3
 HA4,Indian,14
@@ -7500,7 +7481,7 @@ HA9,Portuguese,2
 HA9,Steakhouse,1
 HA9,Thai,1
 HA9,Turkish,4
-HA9,Unspecified,42
+HA9,Unspecified,41
 HD1,African,1
 HD1,American,4
 HD1,Asian,3
@@ -7562,7 +7543,7 @@ HD6,Seafood,2
 HD6,Spanish,1
 HD6,Thai,2
 HD6,Turkish,2
-HD6,Unspecified,24
+HD6,Unspecified,23
 HD7,American,1
 HD7,British,27
 HD7,Chinese,2
@@ -7602,7 +7583,7 @@ HG1,Chinese,11
 HG1,European,3
 HG1,French,4
 HG1,Greek,3
-HG1,Indian,12
+HG1,Indian,11
 HG1,International,1
 HG1,Italian,29
 HG1,Japanese,3
@@ -7633,7 +7614,7 @@ HG3,European,1
 HG3,Indian,1
 HG3,Italian,5
 HG3,Seafood,2
-HG3,Unspecified,11
+HG3,Unspecified,10
 HG4,American,1
 HG4,Asian,2
 HG4,British,51
@@ -7783,7 +7764,7 @@ HP21,Chinese,1
 HP21,Indian,4
 HP21,International,1
 HP21,Unspecified,5
-HP22,British,31
+HP22,British,30
 HP22,Chinese,2
 HP22,Indian,3
 HP22,International,1
@@ -7887,9 +7868,9 @@ HR1,Middle Eastern,1
 HR1,Portuguese,1
 HR1,Seafood,1
 HR1,Turkish,1
-HR1,Unspecified,25
+HR1,Unspecified,24
 HR2,Barbecue,3
-HR2,British,26
+HR2,British,25
 HR2,Chinese,1
 HR2,European,1
 HR2,Italian,1
@@ -7940,12 +7921,12 @@ HR9,British,44
 HR9,Chinese,2
 HR9,European,2
 HR9,French,1
-HR9,Indian,9
+HR9,Indian,8
 HR9,Italian,4
 HR9,Seafood,2
 HR9,Thai,2
 HR9,Turkish,1
-HR9,Unspecified,22
+HR9,Unspecified,21
 HU1,American,4
 HU1,Asian,3
 HU1,Barbecue,1
@@ -7976,7 +7957,6 @@ HU11,British,19
 HU11,International,1
 HU11,Seafood,2
 HU11,Unspecified,3
-HU12,American,1
 HU12,British,35
 HU12,Chinese,2
 HU12,Indian,2
@@ -8122,7 +8102,7 @@ HU8,Indian,4
 HU8,Italian,2
 HU8,Seafood,2
 HU8,Turkish,1
-HU8,Unspecified,14
+HU8,Unspecified,13
 HU9,American,4
 HU9,Asian,1
 HU9,Barbecue,1
@@ -8340,7 +8320,7 @@ IG8,Mediterranean,1
 IG8,Steakhouse,1
 IG8,Thai,1
 IG8,Turkish,6
-IG8,Unspecified,16
+IG8,Unspecified,15
 IG9,British,5
 IG9,Chinese,1
 IG9,French,1
@@ -8375,7 +8355,7 @@ IP10,Steakhouse,1
 IP11,African,1
 IP11,American,3
 IP11,Asian,1
-IP11,British,38
+IP11,British,37
 IP11,Chinese,5
 IP11,French,1
 IP11,Indian,3
@@ -8386,7 +8366,7 @@ IP11,Steakhouse,1
 IP11,Turkish,1
 IP11,Unspecified,32
 IP12,American,1
-IP12,British,46
+IP12,British,45
 IP12,Chinese,4
 IP12,Indian,4
 IP12,Italian,2
@@ -8400,7 +8380,7 @@ IP13,Indian,3
 IP13,Italian,3
 IP13,Mexican,1
 IP13,Seafood,1
-IP13,Unspecified,8
+IP13,Unspecified,7
 IP14,American,1
 IP14,Barbecue,1
 IP14,British,25
@@ -8413,7 +8393,7 @@ IP14,Thai,1
 IP14,Turkish,1
 IP14,Unspecified,14
 IP15,American,1
-IP15,British,8
+IP15,British,7
 IP15,Chinese,1
 IP15,European,1
 IP15,French,1
@@ -8422,7 +8402,7 @@ IP15,Italian,2
 IP15,Seafood,7
 IP15,Thai,1
 IP15,Unspecified,3
-IP16,British,9
+IP16,British,8
 IP16,Chinese,2
 IP16,Indian,1
 IP16,Italian,2
@@ -8441,7 +8421,7 @@ IP18,European,1
 IP18,Indian,1
 IP18,Italian,1
 IP18,Seafood,6
-IP18,Unspecified,9
+IP18,Unspecified,8
 IP19,American,1
 IP19,British,17
 IP19,Chinese,2
@@ -8464,7 +8444,7 @@ IP20,Indian,1
 IP20,Italian,2
 IP20,Japanese,1
 IP20,Unspecified,6
-IP21,British,14
+IP21,British,13
 IP21,Italian,1
 IP21,Unspecified,3
 IP22,British,39
@@ -8494,11 +8474,11 @@ IP24,Seafood,2
 IP24,Steakhouse,1
 IP24,Unspecified,13
 IP25,British,9
-IP25,Chinese,3
+IP25,Chinese,2
 IP25,Indian,1
 IP25,Italian,2
 IP25,Seafood,1
-IP25,Unspecified,11
+IP25,Unspecified,10
 IP26,American,2
 IP26,British,8
 IP26,Chinese,1
@@ -8561,7 +8541,7 @@ IP32,Italian,1
 IP32,Unspecified,7
 IP33,American,6
 IP33,Barbecue,1
-IP33,British,55
+IP33,British,53
 IP33,Chinese,6
 IP33,French,2
 IP33,Greek,2
@@ -8645,7 +8625,7 @@ KT1,Indian,9
 KT1,International,4
 KT1,Italian,20
 KT1,Japanese,7
-KT1,Latin,4
+KT1,Latin,3
 KT1,Lebanese,8
 KT1,Mediterranean,1
 KT1,Mexican,2
@@ -8654,7 +8634,7 @@ KT1,Portuguese,2
 KT1,Seafood,1
 KT1,Thai,4
 KT1,Turkish,5
-KT1,Unspecified,61
+KT1,Unspecified,60
 KT10,American,1
 KT10,Asian,2
 KT10,British,15
@@ -8759,7 +8739,7 @@ KT18,American,1
 KT18,Barbecue,1
 KT18,British,15
 KT18,European,1
-KT18,Indian,4
+KT18,Indian,3
 KT18,Italian,2
 KT18,Japanese,1
 KT18,Portuguese,1
@@ -8830,7 +8810,7 @@ KT22,Italian,12
 KT22,Japanese,1
 KT22,Latin,1
 KT22,Thai,2
-KT22,Unspecified,17
+KT22,Unspecified,16
 KT23,British,8
 KT23,Chinese,1
 KT23,Indian,1
@@ -8889,8 +8869,7 @@ KT6,British,31
 KT6,Chinese,4
 KT6,European,3
 KT6,French,1
-KT6,Indian,17
-KT6,International,1
+KT6,Indian,16
 KT6,Italian,21
 KT6,Japanese,2
 KT6,Lebanese,3
@@ -8933,7 +8912,7 @@ KT9,Seafood,2
 KT9,Turkish,1
 KT9,Unspecified,14
 L1,African,3
-L1,American,31
+L1,American,30
 L1,Asian,11
 L1,Barbecue,10
 L1,British,112
@@ -9084,7 +9063,7 @@ L2,Spanish,1
 L2,Steakhouse,3
 L2,Thai,1
 L2,Turkish,1
-L2,Unspecified,49
+L2,Unspecified,48
 L20,American,2
 L20,British,8
 L20,Caribbean,2
@@ -9107,7 +9086,7 @@ L22,British,19
 L22,Chinese,5
 L22,Greek,1
 L22,Indian,4
-L22,Italian,4
+L22,Italian,3
 L22,Mediterranean,1
 L22,Mexican,1
 L22,Spanish,1
@@ -9132,7 +9111,7 @@ L24,International,1
 L24,Italian,2
 L24,Japanese,1
 L24,Turkish,1
-L24,Unspecified,22
+L24,Unspecified,21
 L25,American,1
 L25,Barbecue,1
 L25,British,14
@@ -9225,7 +9204,7 @@ L37,Mexican,1
 L37,Seafood,2
 L37,Thai,1
 L37,Turkish,1
-L37,Unspecified,19
+L37,Unspecified,18
 L38,American,1
 L38,British,6
 L39,American,5
@@ -9313,7 +9292,7 @@ L9,Italian,10
 L9,Latin,1
 L9,Portuguese,1
 L9,Turkish,2
-L9,Unspecified,32
+L9,Unspecified,31
 LA1,African,1
 LA1,American,12
 LA1,British,49
@@ -9330,7 +9309,7 @@ LA1,Seafood,3
 LA1,Spanish,1
 LA1,Thai,4
 LA1,Turkish,3
-LA1,Unspecified,39
+LA1,Unspecified,38
 LA10,British,12
 LA10,Italian,1
 LA11,British,41
@@ -9388,7 +9367,7 @@ LA2,International,1
 LA2,Italian,2
 LA2,Seafood,2
 LA2,Steakhouse,1
-LA2,Unspecified,16
+LA2,Unspecified,15
 LA20,British,9
 LA20,Unspecified,1
 LA21,British,18
@@ -9397,7 +9376,7 @@ LA21,Italian,1
 LA21,Unspecified,4
 LA22,American,1
 LA22,Asian,1
-LA22,British,92
+LA22,British,91
 LA22,Chinese,2
 LA22,European,2
 LA22,Indian,1
@@ -9412,13 +9391,13 @@ LA22,Unspecified,24
 LA23,American,2
 LA23,Asian,1
 LA23,Barbecue,1
-LA23,British,85
+LA23,British,84
 LA23,Chinese,6
 LA23,European,2
 LA23,French,2
 LA23,Indian,5
 LA23,International,1
-LA23,Italian,13
+LA23,Italian,12
 LA23,Mediterranean,1
 LA23,Mexican,1
 LA23,Seafood,3
@@ -9508,7 +9487,7 @@ LE1,Spanish,1
 LE1,Steakhouse,6
 LE1,Thai,1
 LE1,Turkish,2
-LE1,Unspecified,89
+LE1,Unspecified,88
 LE10,American,1
 LE10,Asian,1
 LE10,Barbecue,2
@@ -9546,15 +9525,15 @@ LE12,Barbecue,1
 LE12,British,59
 LE12,Chinese,6
 LE12,Greek,1
-LE12,Indian,13
-LE12,Italian,11
+LE12,Indian,12
+LE12,Italian,10
 LE12,Latin,1
 LE12,Mexican,1
 LE12,Portuguese,1
 LE12,Seafood,1
 LE12,Steakhouse,1
 LE12,Thai,1
-LE12,Unspecified,29
+LE12,Unspecified,28
 LE13,American,2
 LE13,Asian,1
 LE13,British,27
@@ -9581,7 +9560,7 @@ LE15,Italian,9
 LE15,Seafood,1
 LE15,Unspecified,27
 LE16,American,1
-LE16,British,61
+LE16,British,60
 LE16,Chinese,9
 LE16,French,2
 LE16,Indian,9
@@ -9590,7 +9569,7 @@ LE16,Mexican,1
 LE16,Seafood,5
 LE16,Thai,2
 LE16,Turkish,2
-LE16,Unspecified,27
+LE16,Unspecified,26
 LE17,British,37
 LE17,Chinese,4
 LE17,Indian,6
@@ -9713,7 +9692,7 @@ LE67,Unspecified,31
 LE7,British,45
 LE7,Chinese,2
 LE7,Indian,12
-LE7,Italian,8
+LE7,Italian,7
 LE7,Mediterranean,1
 LE7,Seafood,4
 LE7,Spanish,2
@@ -9782,7 +9761,7 @@ LN12,Indian,2
 LN12,Italian,8
 LN12,Seafood,5
 LN12,Unspecified,15
-LN13,British,19
+LN13,British,18
 LN13,European,1
 LN13,Indian,2
 LN13,Italian,2
@@ -9818,13 +9797,13 @@ LN5,American,2
 LN5,British,33
 LN5,Chinese,10
 LN5,Greek,3
-LN5,Indian,9
+LN5,Indian,8
 LN5,International,1
 LN5,Italian,8
 LN5,Mexican,1
 LN5,Seafood,1
 LN5,Thai,1
-LN5,Unspecified,30
+LN5,Unspecified,29
 LN6,American,2
 LN6,British,28
 LN6,Chinese,3
@@ -9839,14 +9818,14 @@ LN7,Italian,2
 LN7,Seafood,1
 LN7,Steakhouse,1
 LN7,Unspecified,3
-LN8,British,23
+LN8,British,22
 LN8,Chinese,1
 LN8,Indian,3
 LN8,Seafood,3
-LN8,Spanish,2
+LN8,Spanish,1
 LN8,Steakhouse,1
 LN8,Thai,1
-LN8,Unspecified,13
+LN8,Unspecified,12
 LN9,British,17
 LN9,Chinese,3
 LN9,Indian,1
@@ -9902,7 +9881,7 @@ LS11,Portuguese,1
 LS11,Seafood,5
 LS11,Steakhouse,1
 LS11,Turkish,1
-LS11,Unspecified,34
+LS11,Unspecified,33
 LS12,American,3
 LS12,Asian,1
 LS12,British,11
@@ -9930,7 +9909,7 @@ LS14,Asian,1
 LS14,Barbecue,1
 LS14,British,8
 LS14,Italian,4
-LS14,Unspecified,13
+LS14,Unspecified,12
 LS15,American,3
 LS15,Asian,2
 LS15,British,15
@@ -9987,7 +9966,6 @@ LS19,Unspecified,10
 LS2,African,3
 LS2,American,4
 LS2,Asian,2
-LS2,Barbecue,1
 LS2,British,37
 LS2,Caribbean,3
 LS2,Chinese,9
@@ -10009,7 +9987,7 @@ LS2,Thai,4
 LS2,Turkish,2
 LS2,Unspecified,44
 LS20,American,1
-LS20,British,13
+LS20,British,12
 LS20,Chinese,3
 LS20,Indian,6
 LS20,Italian,4
@@ -10043,7 +10021,7 @@ LS23,Spanish,1
 LS23,Thai,1
 LS23,Unspecified,2
 LS24,Barbecue,2
-LS24,British,13
+LS24,British,12
 LS24,Chinese,1
 LS24,French,1
 LS24,Indian,3
@@ -10066,7 +10044,6 @@ LS26,Italian,4
 LS26,Middle Eastern,1
 LS26,Seafood,3
 LS26,Unspecified,9
-LS27,African,1
 LS27,American,1
 LS27,British,24
 LS27,Chinese,3
@@ -10081,7 +10058,7 @@ LS28,British,23
 LS28,Chinese,3
 LS28,European,1
 LS28,Indian,12
-LS28,Italian,7
+LS28,Italian,6
 LS28,Latin,1
 LS28,Seafood,3
 LS28,Thai,2
@@ -10304,14 +10281,14 @@ M1,African,2
 M1,American,20
 M1,Asian,8
 M1,Barbecue,1
-M1,British,72
+M1,British,71
 M1,Caribbean,2
 M1,Chinese,34
 M1,European,4
 M1,French,2
 M1,Greek,2
 M1,Indian,9
-M1,Italian,35
+M1,Italian,34
 M1,Japanese,13
 M1,Latin,2
 M1,Lebanese,1
@@ -10352,7 +10329,7 @@ M13,Italian,4
 M13,Mexican,1
 M13,Middle Eastern,3
 M13,Turkish,1
-M13,Unspecified,46
+M13,Unspecified,44
 M14,African,2
 M14,American,5
 M14,Asian,5
@@ -10379,7 +10356,7 @@ M15,Caribbean,2
 M15,Chinese,5
 M15,European,3
 M15,Indian,2
-M15,Italian,9
+M15,Italian,8
 M15,Steakhouse,2
 M15,Unspecified,26
 M16,African,1
@@ -10437,7 +10414,7 @@ M2,American,12
 M2,Asian,2
 M2,Barbecue,4
 M2,British,43
-M2,Chinese,4
+M2,Chinese,3
 M2,European,4
 M2,French,1
 M2,Greek,2
@@ -10451,7 +10428,7 @@ M2,Middle Eastern,1
 M2,Spanish,3
 M2,Steakhouse,1
 M2,Thai,3
-M2,Unspecified,54
+M2,Unspecified,53
 M20,American,4
 M20,Asian,2
 M20,Barbecue,1
@@ -10505,7 +10482,7 @@ M22,Middle Eastern,2
 M22,Seafood,1
 M22,Steakhouse,1
 M22,Thai,1
-M22,Unspecified,42
+M22,Unspecified,41
 M23,American,2
 M23,British,3
 M23,Chinese,1
@@ -10563,7 +10540,7 @@ M28,Asian,1
 M28,Barbecue,2
 M28,British,22
 M28,Chinese,1
-M28,Indian,8
+M28,Indian,7
 M28,International,2
 M28,Italian,8
 M28,Japanese,1
@@ -10572,7 +10549,7 @@ M29,American,1
 M29,Barbecue,1
 M29,British,8
 M29,Chinese,2
-M29,Indian,10
+M29,Indian,9
 M29,Italian,2
 M29,Turkish,1
 M29,Unspecified,10
@@ -10599,7 +10576,7 @@ M3,Spanish,4
 M3,Steakhouse,2
 M3,Thai,3
 M3,Turkish,3
-M3,Unspecified,61
+M3,Unspecified,60
 M30,American,1
 M30,Asian,2
 M30,British,20
@@ -10607,7 +10584,7 @@ M30,Caribbean,2
 M30,Chinese,2
 M30,Indian,7
 M30,Italian,9
-M30,Latin,3
+M30,Latin,2
 M30,Mediterranean,1
 M30,Middle Eastern,1
 M30,Seafood,1
@@ -10669,7 +10646,7 @@ M4,African,1
 M4,American,24
 M4,Asian,12
 M4,Barbecue,1
-M4,British,67
+M4,British,66
 M4,Caribbean,5
 M4,Chinese,6
 M4,European,5
@@ -10772,7 +10749,7 @@ M6,Unspecified,28
 M60,British,3
 M60,International,1
 M60,Unspecified,1
-M7,American,4
+M7,American,3
 M7,British,2
 M7,Caribbean,1
 M7,Chinese,1
@@ -11020,7 +10997,7 @@ ME9,Chinese,3
 ME9,Indian,2
 ME9,Seafood,1
 ME9,Unspecified,13
-MK1,American,4
+MK1,American,3
 MK1,British,4
 MK1,Chinese,1
 MK1,European,1
@@ -11080,7 +11057,7 @@ MK15,Chinese,1
 MK15,Indian,1
 MK15,Italian,1
 MK15,Mexican,1
-MK15,Unspecified,5
+MK15,Unspecified,4
 MK16,American,1
 MK16,British,14
 MK16,Chinese,3
@@ -11113,7 +11090,7 @@ MK18,Latin,1
 MK18,Seafood,2
 MK18,Turkish,2
 MK18,Unspecified,16
-MK19,British,5
+MK19,British,4
 MK19,Chinese,2
 MK19,Indian,2
 MK19,Unspecified,7
@@ -11164,8 +11141,8 @@ MK40,Portuguese,3
 MK40,Seafood,4
 MK40,Steakhouse,1
 MK40,Thai,3
-MK40,Turkish,6
-MK40,Unspecified,52
+MK40,Turkish,5
+MK40,Unspecified,51
 MK41,Barbecue,1
 MK41,British,14
 MK41,Indian,3
@@ -11175,7 +11152,7 @@ MK41,Steakhouse,1
 MK41,Unspecified,9
 MK42,American,5
 MK42,Barbecue,1
-MK42,British,20
+MK42,British,19
 MK42,Caribbean,1
 MK42,Chinese,9
 MK42,European,1
@@ -11186,7 +11163,7 @@ MK42,Italian,6
 MK42,Seafood,3
 MK42,Thai,2
 MK42,Turkish,1
-MK42,Unspecified,25
+MK42,Unspecified,24
 MK43,American,1
 MK43,Asian,1
 MK43,British,26
@@ -11207,7 +11184,7 @@ MK44,Unspecified,7
 MK45,American,3
 MK45,Asian,1
 MK45,Barbecue,1
-MK45,British,39
+MK45,British,38
 MK45,Chinese,5
 MK45,European,1
 MK45,French,1
@@ -11218,8 +11195,8 @@ MK45,Seafood,1
 MK45,Spanish,1
 MK45,Thai,1
 MK45,Turkish,1
-MK45,Unspecified,17
-MK46,British,15
+MK45,Unspecified,16
+MK46,British,14
 MK46,Chinese,3
 MK46,Indian,3
 MK46,Italian,5
@@ -11272,12 +11249,12 @@ MK9,Seafood,1
 MK9,Steakhouse,2
 MK9,Thai,1
 MK9,Turkish,6
-MK9,Unspecified,40
+MK9,Unspecified,39
 N1,African,5
 N1,American,19
 N1,Asian,15
-N1,Barbecue,6
-N1,British,95
+N1,Barbecue,5
+N1,British,94
 N1,Caribbean,2
 N1,Chinese,18
 N1,European,19
@@ -11297,7 +11274,7 @@ N1,Spanish,8
 N1,Steakhouse,6
 N1,Thai,16
 N1,Turkish,25
-N1,Unspecified,185
+N1,Unspecified,184
 N10,American,1
 N10,Asian,1
 N10,Barbecue,2
@@ -11375,15 +11352,14 @@ N14,Italian,10
 N14,Japanese,2
 N14,Lebanese,2
 N14,Mediterranean,2
-N14,Portuguese,1
 N14,Seafood,1
 N14,Spanish,1
 N14,Steakhouse,2
 N14,Thai,1
 N14,Turkish,6
-N14,Unspecified,27
+N14,Unspecified,26
 N15,African,4
-N15,American,3
+N15,American,2
 N15,British,8
 N15,Chinese,3
 N15,European,3
@@ -11401,7 +11377,7 @@ N15,Seafood,1
 N15,Spanish,1
 N15,Steakhouse,1
 N15,Turkish,4
-N15,Unspecified,39
+N15,Unspecified,38
 N16,African,2
 N16,American,7
 N16,Asian,7
@@ -11482,7 +11458,7 @@ N1C,Mexican,2
 N1C,Middle Eastern,1
 N1C,Seafood,1
 N1C,Spanish,3
-N1C,Unspecified,35
+N1C,Unspecified,33
 N2,African,1
 N2,American,1
 N2,British,8
@@ -11521,7 +11497,7 @@ N21,French,2
 N21,Greek,3
 N21,Indian,8
 N21,International,1
-N21,Italian,10
+N21,Italian,9
 N21,Japanese,1
 N21,Mediterranean,1
 N21,Middle Eastern,1
@@ -11614,7 +11590,7 @@ N6,Mediterranean,1
 N6,Seafood,1
 N6,Spanish,1
 N6,Turkish,1
-N6,Unspecified,25
+N6,Unspecified,24
 N7,African,9
 N7,American,10
 N7,Asian,4
@@ -11675,13 +11651,13 @@ N9,Middle Eastern,3
 N9,Seafood,1
 N9,Thai,1
 N9,Turkish,10
-N9,Unspecified,21
+N9,Unspecified,20
 NE1,American,29
 NE1,Asian,11
 NE1,Barbecue,11
 NE1,British,125
 NE1,Caribbean,2
-NE1,Chinese,39
+NE1,Chinese,38
 NE1,European,2
 NE1,French,4
 NE1,Greek,5
@@ -11747,12 +11723,12 @@ NE15,Indian,5
 NE15,Italian,5
 NE15,Mexican,1
 NE15,Seafood,1
-NE15,Unspecified,10
+NE15,Unspecified,9
 NE16,American,3
 NE16,British,20
 NE16,Chinese,6
 NE16,European,2
-NE16,Indian,9
+NE16,Indian,8
 NE16,Italian,10
 NE16,Seafood,2
 NE16,Spanish,1
@@ -11769,7 +11745,7 @@ NE2,African,1
 NE2,American,1
 NE2,Asian,1
 NE2,Barbecue,1
-NE2,British,41
+NE2,British,40
 NE2,Chinese,4
 NE2,French,1
 NE2,Indian,5
@@ -11783,7 +11759,7 @@ NE2,Spanish,1
 NE2,Steakhouse,3
 NE2,Thai,1
 NE2,Turkish,2
-NE2,Unspecified,16
+NE2,Unspecified,15
 NE20,British,14
 NE20,Chinese,2
 NE20,Indian,3
@@ -11891,7 +11867,7 @@ NE3,Seafood,1
 NE3,Unspecified,25
 NE30,Asian,1
 NE30,Barbecue,1
-NE30,British,48
+NE30,British,47
 NE30,Chinese,1
 NE30,European,1
 NE30,French,1
@@ -11920,7 +11896,7 @@ NE33,African,1
 NE33,American,1
 NE33,British,40
 NE33,Chinese,9
-NE33,Indian,29
+NE33,Indian,28
 NE33,International,1
 NE33,Italian,20
 NE33,Latin,1
@@ -11942,7 +11918,7 @@ NE34,Italian,8
 NE34,Seafood,4
 NE34,Turkish,1
 NE34,Unspecified,17
-NE35,American,2
+NE35,American,1
 NE35,Barbecue,1
 NE35,British,4
 NE35,Chinese,1
@@ -12074,7 +12050,7 @@ NE61,Indian,6
 NE61,Italian,6
 NE61,Thai,2
 NE61,Turkish,1
-NE61,Unspecified,17
+NE61,Unspecified,16
 NE62,British,6
 NE62,Chinese,1
 NE62,Indian,1
@@ -12113,7 +12089,7 @@ NE66,Italian,9
 NE66,Seafood,5
 NE66,Thai,1
 NE66,Unspecified,21
-NE67,British,3
+NE67,British,2
 NE67,Italian,1
 NE67,Seafood,3
 NE67,Unspecified,2
@@ -12156,7 +12132,7 @@ NE8,Italian,11
 NE8,Middle Eastern,1
 NE8,Portuguese,1
 NE8,Thai,1
-NE8,Unspecified,22
+NE8,Unspecified,21
 NE9,Barbecue,1
 NE9,British,21
 NE9,Chinese,2
@@ -12182,7 +12158,7 @@ NG1,French,4
 NG1,Greek,3
 NG1,Indian,19
 NG1,International,7
-NG1,Italian,35
+NG1,Italian,34
 NG1,Japanese,8
 NG1,Lebanese,2
 NG1,Mediterranean,3
@@ -12194,7 +12170,7 @@ NG1,Spanish,4
 NG1,Steakhouse,6
 NG1,Thai,7
 NG1,Turkish,5
-NG1,Unspecified,164
+NG1,Unspecified,163
 NG10,American,1
 NG10,British,40
 NG10,Chinese,8
@@ -12279,7 +12255,7 @@ NG18,Italian,12
 NG18,Portuguese,1
 NG18,Steakhouse,1
 NG18,Thai,1
-NG18,Unspecified,31
+NG18,Unspecified,30
 NG19,British,17
 NG19,Chinese,5
 NG19,European,1
@@ -12287,7 +12263,7 @@ NG19,Indian,4
 NG19,International,1
 NG19,Italian,2
 NG19,Seafood,1
-NG19,Unspecified,18
+NG19,Unspecified,17
 NG2,American,4
 NG2,Asian,2
 NG2,Barbecue,2
@@ -12336,7 +12312,7 @@ NG23,Indian,4
 NG23,Unspecified,11
 NG24,American,2
 NG24,Asian,1
-NG24,British,60
+NG24,British,59
 NG24,Chinese,7
 NG24,Greek,1
 NG24,Indian,9
@@ -12380,12 +12356,12 @@ NG32,Chinese,1
 NG32,International,1
 NG32,Unspecified,5
 NG33,American,2
-NG33,British,16
+NG33,British,15
 NG33,European,1
 NG33,Steakhouse,1
 NG33,Unspecified,8
 NG34,American,5
-NG34,British,43
+NG34,British,42
 NG34,Chinese,7
 NG34,Indian,6
 NG34,Italian,7
@@ -12463,11 +12439,11 @@ NG8,International,1
 NG8,Italian,2
 NG8,Middle Eastern,1
 NG8,Seafood,2
-NG8,Unspecified,27
+NG8,Unspecified,26
 NG9,American,3
 NG9,Asian,1
 NG9,Barbecue,1
-NG9,British,37
+NG9,British,36
 NG9,Caribbean,1
 NG9,Chinese,11
 NG9,European,1
@@ -12480,7 +12456,7 @@ NG9,Seafood,2
 NG9,Spanish,1
 NG9,Steakhouse,1
 NG9,Thai,3
-NG9,Unspecified,40
+NG9,Unspecified,39
 NN1,African,1
 NN1,American,12
 NN1,Asian,2
@@ -12502,7 +12478,7 @@ NN1,Spanish,1
 NN1,Steakhouse,1
 NN1,Thai,2
 NN1,Turkish,8
-NN1,Unspecified,76
+NN1,Unspecified,74
 NN10,American,3
 NN10,Asian,1
 NN10,Barbecue,1
@@ -12613,7 +12589,7 @@ NN29,Indian,2
 NN29,Unspecified,1
 NN3,American,2
 NN3,Barbecue,3
-NN3,British,23
+NN3,British,22
 NN3,Chinese,6
 NN3,Indian,3
 NN3,Italian,3
@@ -12675,11 +12651,10 @@ NN9,Indian,8
 NN9,Italian,3
 NN9,Steakhouse,1
 NN9,Unspecified,10
-NP16,British,1
 NP16,Unspecified,1
 NR1,African,1
 NR1,American,8
-NR1,Asian,2
+NR1,Asian,1
 NR1,British,41
 NR1,Caribbean,2
 NR1,Chinese,8
@@ -12704,14 +12679,14 @@ NR10,Italian,2
 NR10,Steakhouse,2
 NR10,Turkish,1
 NR10,Unspecified,4
-NR11,British,36
+NR11,British,35
 NR11,Chinese,1
 NR11,Indian,1
 NR11,Seafood,3
 NR11,Thai,1
 NR11,Unspecified,11
 NR12,American,1
-NR12,British,59
+NR12,British,58
 NR12,Chinese,5
 NR12,European,1
 NR12,French,1
@@ -12782,14 +12757,14 @@ NR2,European,4
 NR2,French,5
 NR2,Indian,4
 NR2,International,4
-NR2,Italian,19
+NR2,Italian,18
 NR2,Japanese,4
 NR2,Latin,2
 NR2,Mexican,4
 NR2,Middle Eastern,2
 NR2,Seafood,4
 NR2,Spanish,2
-NR2,Steakhouse,2
+NR2,Steakhouse,1
 NR2,Thai,6
 NR2,Turkish,2
 NR2,Unspecified,58
@@ -12826,7 +12801,7 @@ NR25,Seafood,6
 NR25,Spanish,1
 NR25,Turkish,1
 NR25,Unspecified,11
-NR26,British,32
+NR26,British,31
 NR26,Chinese,2
 NR26,European,1
 NR26,Indian,3
@@ -12899,7 +12874,7 @@ NR30,Spanish,1
 NR30,Steakhouse,3
 NR30,Thai,2
 NR30,Turkish,3
-NR30,Unspecified,45
+NR30,Unspecified,44
 NR31,American,4
 NR31,Barbecue,2
 NR31,British,45
@@ -12922,7 +12897,7 @@ NR32,Mexican,1
 NR32,Middle Eastern,1
 NR32,Seafood,4
 NR32,Turkish,2
-NR32,Unspecified,21
+NR32,Unspecified,20
 NR33,American,1
 NR33,Barbecue,1
 NR33,British,36
@@ -12944,7 +12919,7 @@ NR34,Seafood,2
 NR34,Unspecified,11
 NR35,American,1
 NR35,Asian,1
-NR35,British,19
+NR35,British,18
 NR35,European,1
 NR35,Indian,2
 NR35,Italian,3
@@ -13015,7 +12990,7 @@ NW1,Steakhouse,3
 NW1,Thai,8
 NW1,Turkish,11
 NW1,Unspecified,223
-NW10,African,4
+NW10,African,3
 NW10,American,10
 NW10,Barbecue,6
 NW10,British,24
@@ -13023,7 +12998,7 @@ NW10,Caribbean,7
 NW10,Chinese,6
 NW10,European,6
 NW10,Greek,1
-NW10,Indian,18
+NW10,Indian,17
 NW10,International,2
 NW10,Italian,19
 NW10,Japanese,2
@@ -13036,7 +13011,7 @@ NW10,Seafood,4
 NW10,Spanish,1
 NW10,Thai,3
 NW10,Turkish,3
-NW10,Unspecified,89
+NW10,Unspecified,88
 NW11,African,1
 NW11,American,3
 NW11,Barbecue,3
@@ -13093,7 +13068,7 @@ NW3,Spanish,2
 NW3,Steakhouse,4
 NW3,Thai,5
 NW3,Turkish,2
-NW3,Unspecified,68
+NW3,Unspecified,67
 NW4,African,2
 NW4,American,7
 NW4,Asian,1
@@ -13136,7 +13111,7 @@ NW6,African,3
 NW6,American,9
 NW6,Asian,5
 NW6,Barbecue,3
-NW6,British,29
+NW6,British,28
 NW6,Chinese,10
 NW6,European,4
 NW6,French,2
@@ -13214,20 +13189,20 @@ OL1,Middle Eastern,1
 OL1,Portuguese,1
 OL1,Seafood,1
 OL1,Steakhouse,3
-OL1,Unspecified,19
+OL1,Unspecified,18
 OL10,British,9
 OL10,Chinese,4
 OL10,Greek,1
 OL10,Indian,3
 OL10,Italian,7
 OL10,Steakhouse,1
-OL10,Unspecified,14
+OL10,Unspecified,13
 OL11,American,2
 OL11,Asian,2
 OL11,Barbecue,2
 OL11,British,18
 OL11,Chinese,3
-OL11,Indian,8
+OL11,Indian,7
 OL11,Italian,7
 OL11,Mediterranean,1
 OL11,Middle Eastern,1
@@ -13267,7 +13242,7 @@ OL15,Unspecified,7
 OL16,American,2
 OL16,Asian,1
 OL16,Barbecue,1
-OL16,British,27
+OL16,British,26
 OL16,Chinese,7
 OL16,Indian,8
 OL16,Italian,9
@@ -13286,11 +13261,11 @@ OL2,Seafood,1
 OL2,Turkish,1
 OL2,Unspecified,21
 OL3,Barbecue,1
-OL3,British,35
+OL3,British,34
 OL3,Chinese,4
 OL3,European,1
 OL3,French,1
-OL3,Indian,3
+OL3,Indian,2
 OL3,International,1
 OL3,Italian,6
 OL3,Spanish,1
@@ -13359,7 +13334,7 @@ OX1,African,1
 OX1,American,11
 OX1,Asian,6
 OX1,Barbecue,1
-OX1,British,68
+OX1,British,67
 OX1,Caribbean,1
 OX1,Chinese,11
 OX1,European,8
@@ -13392,7 +13367,7 @@ OX10,Unspecified,12
 OX11,American,2
 OX11,Barbecue,1
 OX11,British,24
-OX11,Chinese,7
+OX11,Chinese,6
 OX11,Greek,1
 OX11,Indian,7
 OX11,Italian,11
@@ -13411,7 +13386,7 @@ OX13,British,21
 OX13,Indian,1
 OX13,Thai,1
 OX13,Unspecified,2
-OX14,American,2
+OX14,American,1
 OX14,British,30
 OX14,Chinese,4
 OX14,European,3
@@ -13493,8 +13468,8 @@ OX25,French,2
 OX25,Indian,1
 OX25,Italian,1
 OX25,Steakhouse,1
-OX25,Unspecified,5
-OX26,American,4
+OX25,Unspecified,4
+OX26,American,3
 OX26,British,27
 OX26,Chinese,13
 OX26,French,1
@@ -13527,7 +13502,7 @@ OX28,Turkish,1
 OX28,Unspecified,19
 OX29,American,2
 OX29,Asian,1
-OX29,British,27
+OX29,British,26
 OX29,Chinese,1
 OX29,French,2
 OX29,Indian,2
@@ -13604,7 +13579,7 @@ OX5,Seafood,2
 OX5,Steakhouse,1
 OX5,Unspecified,7
 OX7,Barbecue,1
-OX7,British,43
+OX7,British,42
 OX7,Chinese,2
 OX7,European,1
 OX7,Indian,3
@@ -13669,7 +13644,7 @@ PE11,Spanish,1
 PE11,Turkish,1
 PE11,Unspecified,10
 PE12,American,4
-PE12,British,39
+PE12,British,38
 PE12,Chinese,5
 PE12,European,3
 PE12,Indian,5
@@ -13678,7 +13653,7 @@ PE12,Italian,4
 PE12,Seafood,1
 PE12,Thai,1
 PE12,Turkish,1
-PE12,Unspecified,24
+PE12,Unspecified,23
 PE13,African,1
 PE13,American,1
 PE13,British,36
@@ -13706,7 +13681,7 @@ PE15,Italian,3
 PE15,Middle Eastern,1
 PE15,Seafood,3
 PE15,Thai,1
-PE15,Unspecified,11
+PE15,Unspecified,10
 PE16,British,6
 PE16,Chinese,2
 PE16,Indian,2
@@ -13857,7 +13832,6 @@ PE31,Unspecified,6
 PE32,Barbecue,1
 PE32,British,17
 PE32,Italian,1
-PE32,Seafood,1
 PE32,Unspecified,5
 PE33,British,10
 PE33,Chinese,1
@@ -13919,7 +13893,7 @@ PE7,Mexican,2
 PE7,Seafood,2
 PE7,Thai,1
 PE7,Turkish,3
-PE7,Unspecified,22
+PE7,Unspecified,20
 PE8,American,1
 PE8,British,38
 PE8,Chinese,1
@@ -13928,8 +13902,8 @@ PE8,Indian,1
 PE8,Italian,2
 PE8,Seafood,3
 PE8,Spanish,1
-PE8,Unspecified,17
-PE9,American,7
+PE8,Unspecified,15
+PE9,American,6
 PE9,Barbecue,1
 PE9,British,46
 PE9,Chinese,3
@@ -13963,8 +13937,8 @@ PL1,Spanish,2
 PL1,Steakhouse,3
 PL1,Thai,3
 PL1,Turkish,6
-PL1,Unspecified,69
-PL10,British,19
+PL1,Unspecified,68
+PL10,British,18
 PL10,Seafood,1
 PL10,Unspecified,4
 PL11,British,25
@@ -14008,7 +13982,7 @@ PL15,Indian,1
 PL15,Italian,1
 PL15,Seafood,1
 PL15,Turkish,1
-PL15,Unspecified,12
+PL15,Unspecified,10
 PL16,British,6
 PL16,Unspecified,1
 PL17,British,16
@@ -14020,7 +13994,7 @@ PL18,American,1
 PL18,British,6
 PL18,Italian,1
 PL18,Unspecified,2
-PL19,British,33
+PL19,British,32
 PL19,Chinese,3
 PL19,Indian,4
 PL19,Italian,2
@@ -14040,7 +14014,7 @@ PL20,Barbecue,1
 PL20,British,25
 PL20,Chinese,1
 PL20,Indian,1
-PL20,Unspecified,9
+PL20,Unspecified,8
 PL21,British,26
 PL21,Chinese,3
 PL21,French,1
@@ -14063,7 +14037,7 @@ PL23,Seafood,5
 PL23,Spanish,1
 PL23,Unspecified,8
 PL24,Barbecue,1
-PL24,British,13
+PL24,British,12
 PL24,Chinese,3
 PL24,Indian,1
 PL24,Italian,3
@@ -14096,7 +14070,7 @@ PL26,Italian,3
 PL26,Japanese,1
 PL26,Seafood,8
 PL26,Steakhouse,1
-PL26,Unspecified,22
+PL26,Unspecified,21
 PL27,American,1
 PL27,Barbecue,1
 PL27,British,49
@@ -14119,17 +14093,17 @@ PL28,Unspecified,12
 PL29,Barbecue,1
 PL29,British,13
 PL29,Italian,1
-PL29,Seafood,8
+PL29,Seafood,7
 PL29,Unspecified,6
 PL3,British,13
 PL3,Chinese,3
 PL3,Indian,3
 PL3,Italian,2
 PL3,Unspecified,6
-PL30,British,23
+PL30,British,22
 PL30,Italian,1
 PL30,Seafood,1
-PL30,Unspecified,3
+PL30,Unspecified,2
 PL31,British,23
 PL31,Chinese,4
 PL31,Indian,3
@@ -14223,14 +14197,14 @@ PO1,Portuguese,1
 PO1,Seafood,4
 PO1,Steakhouse,2
 PO1,Turkish,2
-PO1,Unspecified,69
+PO1,Unspecified,68
 PO10,British,24
 PO10,Chinese,4
 PO10,Indian,3
 PO10,Italian,2
 PO10,Seafood,2
 PO10,Turkish,1
-PO10,Unspecified,9
+PO10,Unspecified,8
 PO11,Barbecue,1
 PO11,British,26
 PO11,Chinese,6
@@ -14259,7 +14233,7 @@ PO13,Indian,5
 PO13,Italian,1
 PO13,Seafood,3
 PO13,Turkish,1
-PO13,Unspecified,12
+PO13,Unspecified,10
 PO14,African,1
 PO14,American,2
 PO14,British,21
@@ -14273,7 +14247,7 @@ PO14,Turkish,1
 PO14,Unspecified,5
 PO15,American,4
 PO15,Barbecue,1
-PO15,British,13
+PO15,British,12
 PO15,Chinese,2
 PO15,Indian,3
 PO15,Italian,5
@@ -14292,7 +14266,7 @@ PO16,Portuguese,1
 PO16,Seafood,1
 PO16,Spanish,1
 PO16,Thai,1
-PO16,Unspecified,25
+PO16,Unspecified,24
 PO17,British,11
 PO17,Indian,2
 PO17,Latin,1
@@ -14369,7 +14343,7 @@ PO3,Turkish,1
 PO3,Unspecified,13
 PO30,African,1
 PO30,American,2
-PO30,British,43
+PO30,British,42
 PO30,Chinese,6
 PO30,European,1
 PO30,Indian,3
@@ -14377,7 +14351,7 @@ PO30,Italian,9
 PO30,Mexican,1
 PO30,Seafood,4
 PO30,Turkish,1
-PO30,Unspecified,31
+PO30,Unspecified,30
 PO31,American,2
 PO31,British,27
 PO31,Chinese,2
@@ -14398,7 +14372,7 @@ PO32,Italian,1
 PO32,Unspecified,3
 PO33,African,1
 PO33,American,3
-PO33,British,52
+PO33,British,51
 PO33,Caribbean,1
 PO33,Chinese,4
 PO33,European,3
@@ -14474,7 +14448,7 @@ PO40,Chinese,2
 PO40,Seafood,3
 PO40,Steakhouse,1
 PO40,Unspecified,3
-PO41,British,16
+PO41,British,15
 PO41,Italian,1
 PO41,Seafood,1
 PO41,Steakhouse,2
@@ -14516,7 +14490,7 @@ PO6,Spanish,1
 PO6,Steakhouse,2
 PO6,Thai,1
 PO6,Turkish,3
-PO6,Unspecified,22
+PO6,Unspecified,21
 PO7,Barbecue,1
 PO7,British,25
 PO7,Chinese,5
@@ -14575,7 +14549,7 @@ PR2,Mexican,2
 PR2,Middle Eastern,1
 PR2,Seafood,1
 PR2,Steakhouse,1
-PR2,Unspecified,23
+PR2,Unspecified,22
 PR25,American,3
 PR25,Asian,1
 PR25,Barbecue,1
@@ -14603,7 +14577,7 @@ PR3,Italian,10
 PR3,Mediterranean,2
 PR3,Seafood,2
 PR3,Spanish,1
-PR3,Unspecified,32
+PR3,Unspecified,31
 PR4,American,5
 PR4,British,68
 PR4,Chinese,4
@@ -14611,7 +14585,7 @@ PR4,Indian,14
 PR4,Italian,17
 PR4,Seafood,2
 PR4,Thai,1
-PR4,Unspecified,22
+PR4,Unspecified,21
 PR5,American,6
 PR5,British,27
 PR5,Chinese,7
@@ -14619,7 +14593,7 @@ PR5,Indian,11
 PR5,Italian,13
 PR5,Steakhouse,1
 PR5,Thai,1
-PR5,Unspecified,19
+PR5,Unspecified,18
 PR6,American,3
 PR6,Asian,1
 PR6,Barbecue,1
@@ -14659,7 +14633,7 @@ PR8,Spanish,2
 PR8,Steakhouse,1
 PR8,Thai,1
 PR8,Turkish,2
-PR8,Unspecified,49
+PR8,Unspecified,48
 PR9,African,1
 PR9,American,2
 PR9,Asian,1
@@ -14675,9 +14649,9 @@ PR9,Seafood,5
 PR9,Steakhouse,1
 PR9,Thai,1
 PR9,Turkish,1
-PR9,Unspecified,31
+PR9,Unspecified,30
 RG1,African,1
-RG1,American,18
+RG1,American,17
 RG1,Asian,7
 RG1,Barbecue,5
 RG1,British,57
@@ -14699,10 +14673,10 @@ RG1,Spanish,1
 RG1,Steakhouse,2
 RG1,Thai,6
 RG1,Turkish,3
-RG1,Unspecified,86
+RG1,Unspecified,85
 RG10,American,1
 RG10,Asian,1
-RG10,British,24
+RG10,British,23
 RG10,Chinese,1
 RG10,Indian,4
 RG10,International,2
@@ -14769,7 +14743,7 @@ RG2,Indian,9
 RG2,Italian,6
 RG2,Middle Eastern,1
 RG2,Steakhouse,1
-RG2,Unspecified,21
+RG2,Unspecified,20
 RG20,American,1
 RG20,British,28
 RG20,Chinese,1
@@ -14810,13 +14784,13 @@ RG22,Unspecified,18
 RG23,British,8
 RG23,Indian,1
 RG23,Unspecified,1
-RG24,British,16
+RG24,British,15
 RG24,Chinese,3
 RG24,Indian,3
 RG24,Italian,1
 RG24,Seafood,1
 RG24,Turkish,1
-RG24,Unspecified,22
+RG24,Unspecified,21
 RG25,British,17
 RG25,Indian,1
 RG25,International,1
@@ -14869,12 +14843,12 @@ RG30,Seafood,1
 RG30,Steakhouse,1
 RG30,Thai,2
 RG30,Turkish,2
-RG30,Unspecified,26
+RG30,Unspecified,24
 RG31,American,2
 RG31,British,3
 RG31,Chinese,2
 RG31,European,1
-RG31,Indian,11
+RG31,Indian,10
 RG31,Italian,2
 RG31,Seafood,1
 RG31,Unspecified,2
@@ -14906,7 +14880,7 @@ RG40,Portuguese,1
 RG40,Seafood,1
 RG40,Spanish,1
 RG40,Thai,2
-RG40,Unspecified,24
+RG40,Unspecified,23
 RG41,African,1
 RG41,American,1
 RG41,British,7
@@ -14954,7 +14928,7 @@ RG7,Barbecue,1
 RG7,British,40
 RG7,Chinese,1
 RG7,Greek,1
-RG7,Indian,7
+RG7,Indian,6
 RG7,Italian,1
 RG7,Thai,1
 RG7,Unspecified,8
@@ -14979,7 +14953,7 @@ RG9,Seafood,2
 RG9,Steakhouse,1
 RG9,Thai,1
 RG9,Turkish,1
-RG9,Unspecified,16
+RG9,Unspecified,15
 RH1,American,2
 RH1,British,35
 RH1,Caribbean,1
@@ -15008,7 +14982,7 @@ RH10,Portuguese,3
 RH10,Seafood,2
 RH10,Thai,2
 RH10,Turkish,7
-RH10,Unspecified,57
+RH10,Unspecified,56
 RH11,British,13
 RH11,Caribbean,1
 RH11,Chinese,4
@@ -15040,7 +15014,7 @@ RH13,Indian,4
 RH13,Italian,1
 RH13,Seafood,1
 RH13,Turkish,2
-RH13,Unspecified,13
+RH13,Unspecified,12
 RH14,British,15
 RH14,Chinese,3
 RH14,European,1
@@ -15134,20 +15108,18 @@ RH4,Seafood,1
 RH4,Thai,1
 RH4,Turkish,1
 RH4,Unspecified,18
-RH5,British,26
+RH5,British,25
 RH5,Indian,3
 RH5,Italian,1
-RH5,Unspecified,9
+RH5,Unspecified,8
 RH6,American,2
-RH6,British,42
+RH6,British,41
 RH6,Chinese,6
 RH6,European,3
 RH6,Indian,9
-RH6,International,1
 RH6,Italian,9
-RH6,Japanese,4
+RH6,Japanese,3
 RH6,Lebanese,3
-RH6,Mexican,1
 RH6,Portuguese,2
 RH6,Seafood,2
 RH6,Spanish,1
@@ -15213,7 +15185,7 @@ RM11,Portuguese,2
 RM11,Seafood,2
 RM11,Thai,1
 RM11,Turkish,1
-RM11,Unspecified,14
+RM11,Unspecified,13
 RM12,American,2
 RM12,Asian,1
 RM12,British,18
@@ -15258,7 +15230,7 @@ RM16,Caribbean,1
 RM16,Chinese,2
 RM16,Indian,4
 RM16,Turkish,1
-RM16,Unspecified,13
+RM16,Unspecified,12
 RM17,African,1
 RM17,American,2
 RM17,Asian,1
@@ -15271,7 +15243,7 @@ RM17,Japanese,1
 RM17,Seafood,2
 RM17,Steakhouse,1
 RM17,Turkish,3
-RM17,Unspecified,20
+RM17,Unspecified,19
 RM18,African,2
 RM18,British,3
 RM18,Chinese,1
@@ -15290,7 +15262,7 @@ RM2,Indian,5
 RM2,Italian,4
 RM2,Turkish,4
 RM2,Unspecified,7
-RM20,American,11
+RM20,American,10
 RM20,Asian,2
 RM20,Barbecue,1
 RM20,British,6
@@ -15305,7 +15277,7 @@ RM20,Mexican,3
 RM20,Portuguese,4
 RM20,Spanish,1
 RM20,Thai,1
-RM20,Unspecified,30
+RM20,Unspecified,28
 RM3,American,1
 RM3,British,4
 RM3,Chinese,3
@@ -15322,8 +15294,8 @@ RM5,Chinese,3
 RM5,European,1
 RM5,Indian,9
 RM5,Turkish,2
-RM5,Unspecified,13
-RM6,American,4
+RM5,Unspecified,12
+RM6,American,3
 RM6,Asian,1
 RM6,Barbecue,1
 RM6,British,5
@@ -15338,14 +15310,13 @@ RM6,Steakhouse,1
 RM6,Turkish,1
 RM6,Unspecified,4
 RM7,American,2
-RM7,Asian,1
 RM7,British,1
 RM7,Chinese,5
 RM7,Indian,6
 RM7,Italian,2
 RM7,Seafood,1
 RM7,Turkish,2
-RM7,Unspecified,15
+RM7,Unspecified,14
 RM8,American,1
 RM8,Asian,1
 RM8,Barbecue,1
@@ -15388,7 +15359,7 @@ S1,Middle Eastern,3
 S1,Portuguese,1
 S1,Thai,1
 S1,Turkish,1
-S1,Unspecified,67
+S1,Unspecified,66
 S10,American,4
 S10,Asian,3
 S10,British,39
@@ -15450,7 +15421,7 @@ S17,Indian,3
 S17,Italian,2
 S17,Mediterranean,1
 S17,Spanish,1
-S17,Unspecified,7
+S17,Unspecified,6
 S18,British,27
 S18,Chinese,4
 S18,Indian,7
@@ -15475,7 +15446,7 @@ S2,Seafood,1
 S2,Steakhouse,1
 S2,Thai,3
 S2,Turkish,5
-S2,Unspecified,48
+S2,Unspecified,47
 S20,American,2
 S20,British,16
 S20,Indian,2
@@ -15504,7 +15475,7 @@ S26,Italian,4
 S26,Seafood,2
 S26,Steakhouse,1
 S26,Turkish,1
-S26,Unspecified,12
+S26,Unspecified,10
 S3,African,3
 S3,American,8
 S3,Asian,1
@@ -15521,7 +15492,6 @@ S3,Mexican,2
 S3,Middle Eastern,3
 S3,Seafood,2
 S3,Unspecified,31
-S32,Barbecue,1
 S32,British,29
 S32,Caribbean,1
 S32,Indian,3
@@ -15545,7 +15515,7 @@ S36,Chinese,3
 S36,European,1
 S36,Indian,4
 S36,Italian,5
-S36,Unspecified,14
+S36,Unspecified,13
 S4,British,1
 S4,Indian,2
 S4,Japanese,1
@@ -15576,7 +15546,7 @@ S41,Seafood,2
 S41,Spanish,1
 S41,Steakhouse,2
 S41,Turkish,4
-S41,Unspecified,29
+S41,Unspecified,28
 S42,British,19
 S42,Chinese,3
 S42,Indian,3
@@ -15584,11 +15554,11 @@ S42,Italian,2
 S42,Seafood,1
 S42,Unspecified,5
 S43,American,2
-S43,British,17
+S43,British,16
 S43,Chinese,5
 S43,Indian,2
 S43,Italian,7
-S43,Unspecified,24
+S43,Unspecified,23
 S44,American,1
 S44,British,16
 S44,Caribbean,1
@@ -15645,7 +15615,7 @@ S61,Italian,3
 S61,Seafood,1
 S61,Unspecified,7
 S62,American,3
-S62,British,15
+S62,British,14
 S62,Chinese,2
 S62,Greek,1
 S62,Indian,3
@@ -15661,7 +15631,7 @@ S63,Indian,2
 S63,Italian,3
 S63,Seafood,4
 S63,Thai,1
-S63,Unspecified,20
+S63,Unspecified,19
 S64,British,25
 S64,Chinese,4
 S64,Indian,7
@@ -15707,7 +15677,7 @@ S7,Thai,1
 S7,Unspecified,28
 S70,American,5
 S70,Barbecue,2
-S70,British,34
+S70,British,33
 S70,Chinese,3
 S70,European,3
 S70,Indian,4
@@ -15718,7 +15688,7 @@ S70,Seafood,6
 S70,Steakhouse,3
 S70,Thai,2
 S70,Turkish,3
-S70,Unspecified,38
+S70,Unspecified,37
 S71,American,1
 S71,British,9
 S71,Chinese,3
@@ -15738,7 +15708,7 @@ S73,American,1
 S73,British,18
 S73,Chinese,1
 S73,Indian,4
-S73,Italian,6
+S73,Italian,5
 S73,Seafood,3
 S73,Spanish,1
 S73,Thai,1
@@ -15770,7 +15740,7 @@ S8,Seafood,1
 S8,Steakhouse,1
 S8,Thai,2
 S8,Turkish,1
-S8,Unspecified,22
+S8,Unspecified,21
 S80,American,2
 S80,Asian,1
 S80,British,44
@@ -15782,13 +15752,12 @@ S80,Mediterranean,1
 S80,Seafood,2
 S80,Spanish,1
 S80,Thai,1
-S80,Turkish,1
 S80,Unspecified,27
 S81,Barbecue,2
 S81,British,21
 S81,Chinese,3
 S81,Greek,1
-S81,Indian,4
+S81,Indian,3
 S81,Italian,2
 S81,Seafood,1
 S81,Unspecified,13
@@ -15800,7 +15769,7 @@ S9,Caribbean,1
 S9,Chinese,2
 S9,European,4
 S9,Indian,7
-S9,Italian,14
+S9,Italian,13
 S9,Japanese,4
 S9,Mexican,4
 S9,Portuguese,2
@@ -15813,7 +15782,7 @@ SE1,African,7
 SE1,American,34
 SE1,Asian,16
 SE1,Barbecue,6
-SE1,British,204
+SE1,British,203
 SE1,Caribbean,2
 SE1,Chinese,20
 SE1,European,18
@@ -15829,17 +15798,17 @@ SE1,Mediterranean,8
 SE1,Mexican,17
 SE1,Middle Eastern,6
 SE1,Portuguese,11
-SE1,Seafood,20
+SE1,Seafood,18
 SE1,Spanish,17
 SE1,Steakhouse,12
 SE1,Thai,14
 SE1,Turkish,9
-SE1,Unspecified,335
+SE1,Unspecified,330
 SE10,African,1
 SE10,American,16
 SE10,Asian,6
 SE10,Barbecue,1
-SE10,British,61
+SE10,British,60
 SE10,Caribbean,1
 SE10,Chinese,5
 SE10,European,5
@@ -15859,7 +15828,7 @@ SE10,Spanish,1
 SE10,Steakhouse,3
 SE10,Thai,5
 SE10,Turkish,7
-SE10,Unspecified,65
+SE10,Unspecified,64
 SE11,Asian,3
 SE11,British,15
 SE11,Caribbean,1
@@ -15924,7 +15893,7 @@ SE14,Thai,3
 SE14,Turkish,6
 SE14,Unspecified,20
 SE15,African,5
-SE15,American,9
+SE15,American,8
 SE15,Asian,6
 SE15,Barbecue,3
 SE15,British,22
@@ -15971,7 +15940,7 @@ SE17,French,1
 SE17,Indian,1
 SE17,International,1
 SE17,Italian,6
-SE17,Latin,8
+SE17,Latin,7
 SE17,Lebanese,1
 SE17,Middle Eastern,1
 SE17,Thai,1
@@ -15997,7 +15966,7 @@ SE19,Barbecue,1
 SE19,British,14
 SE19,Caribbean,3
 SE19,Chinese,5
-SE19,French,5
+SE19,French,4
 SE19,Indian,9
 SE19,Italian,15
 SE19,Japanese,1
@@ -16007,7 +15976,7 @@ SE19,Middle Eastern,3
 SE19,Seafood,3
 SE19,Spanish,1
 SE19,Thai,2
-SE19,Unspecified,23
+SE19,Unspecified,22
 SE2,Asian,1
 SE2,Chinese,1
 SE2,Indian,4
@@ -16027,7 +15996,7 @@ SE20,Portuguese,1
 SE20,Seafood,1
 SE20,Thai,1
 SE20,Turkish,2
-SE20,Unspecified,19
+SE20,Unspecified,18
 SE21,British,8
 SE21,Chinese,1
 SE21,European,1
@@ -16208,8 +16177,8 @@ SE8,Middle Eastern,1
 SE8,Seafood,2
 SE8,Spanish,1
 SE8,Steakhouse,1
-SE8,Unspecified,26
-SE9,American,6
+SE8,Unspecified,25
+SE9,American,5
 SE9,Barbecue,1
 SE9,British,17
 SE9,Chinese,9
@@ -16223,22 +16192,21 @@ SE9,Seafood,3
 SE9,Spanish,1
 SE9,Thai,1
 SE9,Turkish,7
-SE9,Unspecified,42
+SE9,Unspecified,41
 SG1,American,8
 SG1,Asian,1
-SG1,British,31
+SG1,British,30
 SG1,Caribbean,1
 SG1,Chinese,7
 SG1,Indian,13
 SG1,Italian,12
-SG1,Japanese,1
 SG1,Middle Eastern,1
 SG1,Portuguese,2
 SG1,Seafood,2
 SG1,Spanish,1
 SG1,Steakhouse,1
 SG1,Turkish,6
-SG1,Unspecified,33
+SG1,Unspecified,32
 SG10,British,2
 SG11,British,11
 SG11,Greek,1
@@ -16257,7 +16225,7 @@ SG12,Thai,4
 SG12,Turkish,1
 SG12,Unspecified,17
 SG13,American,1
-SG13,British,12
+SG13,British,11
 SG13,Chinese,1
 SG13,Indian,3
 SG13,Italian,1
@@ -16332,7 +16300,7 @@ SG4,Italian,2
 SG4,Seafood,2
 SG4,Thai,1
 SG4,Turkish,1
-SG4,Unspecified,18
+SG4,Unspecified,17
 SG5,American,3
 SG5,Asian,2
 SG5,Barbecue,2
@@ -16372,7 +16340,7 @@ SG8,British,30
 SG8,Chinese,6
 SG8,European,1
 SG8,Indian,7
-SG8,Italian,8
+SG8,Italian,7
 SG8,Mediterranean,1
 SG8,Seafood,1
 SG8,Thai,2
@@ -16424,7 +16392,7 @@ SK11,Seafood,1
 SK11,Spanish,4
 SK11,Thai,2
 SK11,Turkish,3
-SK11,Unspecified,29
+SK11,Unspecified,28
 SK12,American,2
 SK12,Barbecue,1
 SK12,British,17
@@ -16482,7 +16450,7 @@ SK17,Mexican,1
 SK17,Seafood,2
 SK17,Spanish,2
 SK17,Thai,3
-SK17,Unspecified,27
+SK17,Unspecified,24
 SK2,African,1
 SK2,American,1
 SK2,Asian,2
@@ -16548,12 +16516,12 @@ SK6,Seafood,6
 SK6,Spanish,1
 SK6,Steakhouse,1
 SK6,Thai,2
-SK6,Unspecified,31
+SK6,Unspecified,30
 SK7,American,4
 SK7,Asian,1
 SK7,Barbecue,2
 SK7,British,29
-SK7,Chinese,7
+SK7,Chinese,6
 SK7,European,1
 SK7,French,1
 SK7,Indian,15
@@ -16760,7 +16728,7 @@ SM3,Japanese,2
 SM3,Seafood,2
 SM3,Thai,3
 SM3,Turkish,1
-SM3,Unspecified,19
+SM3,Unspecified,18
 SM4,American,2
 SM4,British,3
 SM4,Chinese,2
@@ -16850,7 +16818,7 @@ SN12,Mediterranean,1
 SN12,Mexican,1
 SN12,Middle Eastern,1
 SN12,Seafood,1
-SN12,Unspecified,19
+SN12,Unspecified,18
 SN13,British,18
 SN13,Chinese,2
 SN13,European,1
@@ -16858,13 +16826,13 @@ SN13,Indian,4
 SN13,Italian,2
 SN13,Seafood,1
 SN13,Unspecified,6
-SN14,American,3
-SN14,British,38
+SN14,American,2
+SN14,British,37
 SN14,Chinese,1
 SN14,European,1
 SN14,Indian,1
 SN14,Japanese,1
-SN14,Unspecified,8
+SN14,Unspecified,7
 SN15,American,1
 SN15,Asian,1
 SN15,British,42
@@ -16889,7 +16857,7 @@ SN2,Barbecue,1
 SN2,British,14
 SN2,Chinese,6
 SN2,European,2
-SN2,Indian,13
+SN2,Indian,12
 SN2,Italian,3
 SN2,Japanese,1
 SN2,Latin,1
@@ -16915,13 +16883,13 @@ SN3,European,1
 SN3,Indian,1
 SN3,Italian,2
 SN3,Mediterranean,1
-SN3,Unspecified,20
+SN3,Unspecified,19
 SN38,Chinese,1
 SN38,Unspecified,1
 SN4,British,32
 SN4,Chinese,4
 SN4,French,1
-SN4,Indian,5
+SN4,Indian,4
 SN4,Italian,6
 SN4,Steakhouse,1
 SN4,Turkish,1
@@ -16944,7 +16912,7 @@ SN6,Thai,2
 SN6,Unspecified,17
 SN7,American,2
 SN7,Barbecue,1
-SN7,British,16
+SN7,British,15
 SN7,Chinese,1
 SN7,European,1
 SN7,Indian,3
@@ -16958,7 +16926,7 @@ SN8,European,2
 SN8,Indian,6
 SN8,Italian,5
 SN8,Unspecified,16
-SN9,British,13
+SN9,British,12
 SN9,Chinese,1
 SN9,European,1
 SN9,Indian,1
@@ -16991,7 +16959,7 @@ SO14,Unspecified,47
 SO15,American,15
 SO15,Asian,2
 SO15,Barbecue,1
-SO15,British,40
+SO15,British,39
 SO15,Chinese,5
 SO15,European,7
 SO15,French,1
@@ -17009,7 +16977,7 @@ SO15,Seafood,1
 SO15,Steakhouse,1
 SO15,Thai,4
 SO15,Turkish,3
-SO15,Unspecified,64
+SO15,Unspecified,63
 SO16,British,17
 SO16,Chinese,9
 SO16,Indian,7
@@ -17058,14 +17026,14 @@ SO20,British,15
 SO20,French,1
 SO20,Indian,1
 SO20,Italian,1
-SO20,Unspecified,5
+SO20,Unspecified,4
 SO21,American,1
 SO21,Asian,1
 SO21,British,23
 SO21,Indian,1
 SO21,Italian,1
 SO21,Spanish,1
-SO21,Unspecified,11
+SO21,Unspecified,10
 SO22,American,1
 SO22,British,10
 SO22,Chinese,4
@@ -17091,7 +17059,7 @@ SO23,Seafood,3
 SO23,Steakhouse,1
 SO23,Thai,2
 SO23,Turkish,1
-SO23,Unspecified,25
+SO23,Unspecified,24
 SO24,British,26
 SO24,Indian,1
 SO24,Italian,1
@@ -17115,13 +17083,12 @@ SO31,Chinese,7
 SO31,Indian,9
 SO31,Italian,3
 SO31,Seafood,2
-SO31,Steakhouse,1
 SO31,Thai,1
 SO31,Turkish,1
 SO31,Unspecified,15
 SO32,American,1
 SO32,Asian,1
-SO32,British,25
+SO32,British,24
 SO32,Chinese,1
 SO32,European,1
 SO32,Greek,1
@@ -17173,7 +17140,7 @@ SO45,Italian,5
 SO45,Seafood,4
 SO45,Thai,1
 SO45,Turkish,2
-SO45,Unspecified,7
+SO45,Unspecified,6
 SO50,American,3
 SO50,Barbecue,2
 SO50,British,35
@@ -17183,7 +17150,7 @@ SO50,International,1
 SO50,Italian,6
 SO50,Seafood,2
 SO50,Turkish,2
-SO50,Unspecified,27
+SO50,Unspecified,26
 SO51,British,46
 SO51,Chinese,3
 SO51,European,2
@@ -17193,7 +17160,7 @@ SO51,Italian,2
 SO51,Seafood,1
 SO51,Thai,1
 SO51,Turkish,1
-SO51,Unspecified,17
+SO51,Unspecified,16
 SO52,British,2
 SO52,Chinese,1
 SO52,Indian,1
@@ -17210,7 +17177,7 @@ SO53,Thai,1
 SO53,Unspecified,5
 SP1,American,3
 SP1,British,43
-SP1,Chinese,5
+SP1,Chinese,4
 SP1,European,2
 SP1,French,2
 SP1,Greek,1
@@ -17235,7 +17202,7 @@ SP10,Portuguese,1
 SP10,Seafood,3
 SP10,Thai,1
 SP10,Turkish,2
-SP10,Unspecified,24
+SP10,Unspecified,23
 SP11,British,36
 SP11,Chinese,1
 SP11,Indian,2
@@ -17254,10 +17221,10 @@ SP2,Seafood,2
 SP2,Thai,1
 SP2,Turkish,1
 SP2,Unspecified,16
-SP3,British,21
+SP3,British,20
 SP3,European,1
 SP3,Italian,2
-SP3,Unspecified,9
+SP3,Unspecified,8
 SP4,American,3
 SP4,British,27
 SP4,Chinese,5
@@ -17363,7 +17330,7 @@ SR6,Mexican,1
 SR6,Seafood,5
 SR6,Steakhouse,1
 SR6,Unspecified,25
-SR7,American,3
+SR7,American,2
 SR7,British,26
 SR7,Chinese,4
 SR7,Indian,5
@@ -17511,7 +17478,6 @@ SS6,American,4
 SS6,Barbecue,1
 SS6,British,21
 SS6,Chinese,4
-SS6,European,1
 SS6,Indian,8
 SS6,Italian,10
 SS6,Seafood,1
@@ -17532,7 +17498,7 @@ SS7,Seafood,1
 SS7,Spanish,1
 SS7,Thai,1
 SS7,Turkish,6
-SS7,Unspecified,26
+SS7,Unspecified,25
 SS8,American,2
 SS8,British,15
 SS8,Chinese,4
@@ -17582,9 +17548,9 @@ ST1,Seafood,1
 ST1,Steakhouse,1
 ST1,Thai,2
 ST1,Turkish,2
-ST1,Unspecified,50
+ST1,Unspecified,49
 ST10,American,4
-ST10,British,32
+ST10,British,31
 ST10,Chinese,3
 ST10,Indian,4
 ST10,Italian,4
@@ -17648,7 +17614,7 @@ ST17,Chinese,4
 ST17,Indian,4
 ST17,Italian,4
 ST17,Thai,1
-ST17,Unspecified,8
+ST17,Unspecified,7
 ST18,British,19
 ST18,Chinese,1
 ST18,French,1
@@ -17670,7 +17636,7 @@ ST2,Seafood,1
 ST2,Unspecified,10
 ST20,British,9
 ST20,Unspecified,3
-ST21,British,8
+ST21,British,7
 ST21,Chinese,1
 ST21,Indian,3
 ST21,Thai,1
@@ -17715,7 +17681,7 @@ ST5,Seafood,1
 ST5,Steakhouse,4
 ST5,Thai,3
 ST5,Turkish,2
-ST5,Unspecified,56
+ST5,Unspecified,54
 ST55,British,1
 ST6,American,4
 ST6,Asian,1
@@ -17780,13 +17746,13 @@ SW11,French,11
 SW11,Greek,1
 SW11,Indian,20
 SW11,International,9
-SW11,Italian,49
+SW11,Italian,48
 SW11,Japanese,8
 SW11,Lebanese,2
 SW11,Mediterranean,3
 SW11,Mexican,4
 SW11,Middle Eastern,3
-SW11,Portuguese,5
+SW11,Portuguese,4
 SW11,Seafood,2
 SW11,Spanish,6
 SW11,Steakhouse,2
@@ -17911,7 +17877,7 @@ SW17,Spanish,5
 SW17,Steakhouse,3
 SW17,Thai,5
 SW17,Turkish,3
-SW17,Unspecified,60
+SW17,Unspecified,59
 SW18,African,1
 SW18,American,3
 SW18,Asian,3
@@ -17956,14 +17922,14 @@ SW19,Spanish,3
 SW19,Steakhouse,3
 SW19,Thai,10
 SW19,Turkish,2
-SW19,Unspecified,60
+SW19,Unspecified,59
 SW1A,American,2
 SW1A,Asian,1
 SW1A,British,26
 SW1A,European,1
 SW1A,French,2
 SW1A,Indian,2
-SW1A,Italian,5
+SW1A,Italian,4
 SW1A,Japanese,2
 SW1A,Seafood,1
 SW1A,Unspecified,20
@@ -17981,14 +17947,14 @@ SW1E,Portuguese,1
 SW1E,Spanish,2
 SW1E,Steakhouse,2
 SW1E,Turkish,1
-SW1E,Unspecified,36
+SW1E,Unspecified,35
 SW1H,British,18
 SW1H,European,1
 SW1H,French,1
 SW1H,Italian,2
 SW1H,Japanese,2
 SW1H,Mexican,1
-SW1H,Unspecified,18
+SW1H,Unspecified,17
 SW1P,African,1
 SW1P,American,3
 SW1P,Barbecue,1
@@ -18028,7 +17994,7 @@ SW1V,Spanish,3
 SW1V,Steakhouse,2
 SW1V,Thai,3
 SW1V,Turkish,2
-SW1V,Unspecified,35
+SW1V,Unspecified,34
 SW1W,American,6
 SW1W,Asian,2
 SW1W,British,38
@@ -18075,7 +18041,7 @@ SW1Y,French,1
 SW1Y,Greek,2
 SW1Y,Indian,3
 SW1Y,International,1
-SW1Y,Italian,18
+SW1Y,Italian,17
 SW1Y,Japanese,5
 SW1Y,Lebanese,2
 SW1Y,Mexican,1
@@ -18115,13 +18081,13 @@ SW20,Turkish,4
 SW20,Unspecified,9
 SW3,American,4
 SW3,Asian,1
-SW3,British,41
+SW3,British,39
 SW3,Chinese,8
 SW3,European,9
 SW3,French,16
 SW3,Indian,4
 SW3,International,2
-SW3,Italian,51
+SW3,Italian,50
 SW3,Japanese,9
 SW3,Latin,1
 SW3,Lebanese,8
@@ -18133,7 +18099,7 @@ SW3,Spanish,1
 SW3,Steakhouse,3
 SW3,Thai,4
 SW3,Turkish,3
-SW3,Unspecified,71
+SW3,Unspecified,70
 SW4,American,7
 SW4,Barbecue,2
 SW4,British,31
@@ -18176,7 +18142,7 @@ SW5,Seafood,1
 SW5,Spanish,3
 SW5,Thai,2
 SW5,Turkish,1
-SW5,Unspecified,14
+SW5,Unspecified,13
 SW6,African,4
 SW6,American,9
 SW6,Asian,7
@@ -18207,7 +18173,7 @@ SW7,Asian,2
 SW7,Barbecue,2
 SW7,British,36
 SW7,Chinese,5
-SW7,European,12
+SW7,European,11
 SW7,French,16
 SW7,Indian,11
 SW7,International,6
@@ -18223,7 +18189,7 @@ SW7,Spanish,1
 SW7,Steakhouse,1
 SW7,Thai,6
 SW7,Turkish,1
-SW7,Unspecified,68
+SW7,Unspecified,66
 SW8,African,5
 SW8,American,5
 SW8,Asian,3
@@ -18252,7 +18218,7 @@ SW9,American,7
 SW9,Asian,3
 SW9,Barbecue,5
 SW9,British,25
-SW9,Caribbean,16
+SW9,Caribbean,15
 SW9,Chinese,12
 SW9,European,4
 SW9,French,3
@@ -18269,11 +18235,11 @@ SW9,Seafood,3
 SW9,Spanish,1
 SW9,Thai,3
 SW9,Turkish,1
-SW9,Unspecified,75
+SW9,Unspecified,74
 SY1,African,1
 SY1,American,9
 SY1,Asian,1
-SY1,British,75
+SY1,British,74
 SY1,Chinese,8
 SY1,European,2
 SY1,French,3
@@ -18289,7 +18255,7 @@ SY1,Turkish,2
 SY1,Unspecified,54
 SY10,British,16
 SY10,Steakhouse,1
-SY10,Unspecified,6
+SY10,Unspecified,5
 SY11,American,4
 SY11,British,47
 SY11,Caribbean,1
@@ -18316,12 +18282,11 @@ SY13,European,1
 SY13,Indian,4
 SY13,Italian,1
 SY13,Seafood,1
-SY13,Unspecified,11
+SY13,Unspecified,10
 SY14,Barbecue,1
 SY14,British,10
 SY14,Indian,1
 SY14,Unspecified,2
-SY15,European,1
 SY2,American,1
 SY2,Asian,1
 SY2,British,12
@@ -18347,7 +18312,7 @@ SY3,Turkish,1
 SY3,Unspecified,7
 SY4,American,2
 SY4,Barbecue,1
-SY4,British,39
+SY4,British,38
 SY4,Chinese,2
 SY4,Indian,5
 SY4,Seafood,1
@@ -18385,7 +18350,7 @@ SY8,Seafood,1
 SY8,Spanish,2
 SY8,Thai,1
 SY8,Turkish,1
-SY8,Unspecified,22
+SY8,Unspecified,21
 SY9,British,12
 SY9,Chinese,1
 SY9,Indian,2
@@ -18492,7 +18457,7 @@ TA4,British,36
 TA4,Chinese,1
 TA4,Indian,2
 TA4,Italian,1
-TA4,Unspecified,7
+TA4,Unspecified,6
 TA5,British,20
 TA5,Indian,1
 TA5,Unspecified,3
@@ -18528,21 +18493,17 @@ TA9,Indian,1
 TA9,Italian,1
 TA9,Seafood,2
 TA9,Unspecified,3
-TD12,British,7
-TD12,Indian,1
-TD12,Lebanese,1
-TD12,Turkish,1
-TD12,Unspecified,5
+TD12,British,6
+TD12,Unspecified,1
 TD15,American,3
-TD15,British,60
+TD15,British,59
 TD15,Chinese,5
 TD15,European,1
-TD15,French,1
-TD15,Indian,3
-TD15,Italian,6
+TD15,Indian,2
+TD15,Italian,4
 TD15,Mexican,1
 TD15,Seafood,2
-TD15,Unspecified,16
+TD15,Unspecified,13
 TF1,American,5
 TF1,British,23
 TF1,Caribbean,1
@@ -18554,7 +18515,7 @@ TF1,Latin,1
 TF1,Seafood,1
 TF1,Steakhouse,1
 TF1,Turkish,1
-TF1,Unspecified,26
+TF1,Unspecified,25
 TF10,American,1
 TF10,British,19
 TF10,Chinese,1
@@ -18605,7 +18566,7 @@ TF4,Indian,3
 TF4,Seafood,1
 TF4,Unspecified,11
 TF5,British,3
-TF6,British,9
+TF6,British,8
 TF6,Chinese,1
 TF6,Indian,1
 TF6,Steakhouse,1
@@ -18656,7 +18617,7 @@ TN10,Indian,2
 TN10,Italian,1
 TN10,Seafood,1
 TN10,Turkish,1
-TN10,Unspecified,3
+TN10,Unspecified,2
 TN11,British,24
 TN11,Indian,3
 TN11,Turkish,1
@@ -18770,7 +18731,7 @@ TN23,Mediterranean,1
 TN23,Mexican,2
 TN23,Seafood,1
 TN23,Turkish,3
-TN23,Unspecified,13
+TN23,Unspecified,12
 TN24,American,4
 TN24,Asian,1
 TN24,British,24
@@ -18842,7 +18803,7 @@ TN30,Indian,3
 TN30,Italian,5
 TN30,Seafood,2
 TN30,Spanish,1
-TN30,Turkish,2
+TN30,Turkish,1
 TN30,Unspecified,9
 TN31,Asian,1
 TN31,Barbecue,1
@@ -18898,7 +18859,7 @@ TN37,American,2
 TN37,Asian,3
 TN37,Barbecue,2
 TN37,British,21
-TN37,Caribbean,2
+TN37,Caribbean,1
 TN37,Chinese,9
 TN37,Indian,7
 TN37,International,1
@@ -18944,7 +18905,7 @@ TN4,Mexican,1
 TN4,Seafood,4
 TN4,Thai,2
 TN4,Turkish,1
-TN4,Unspecified,14
+TN4,Unspecified,13
 TN40,American,3
 TN40,British,26
 TN40,Chinese,2
@@ -19035,7 +18996,7 @@ TQ13,Seafood,1
 TQ13,Turkish,1
 TQ13,Unspecified,16
 TQ14,American,2
-TQ14,British,49
+TQ14,British,48
 TQ14,Chinese,3
 TQ14,Greek,1
 TQ14,Indian,3
@@ -19103,7 +19064,7 @@ TQ6,Indian,1
 TQ6,Italian,3
 TQ6,Japanese,1
 TQ6,Seafood,12
-TQ6,Unspecified,18
+TQ6,Unspecified,17
 TQ7,Asian,3
 TQ7,British,45
 TQ7,European,1
@@ -19180,7 +19141,7 @@ TR11,Spanish,1
 TR11,Steakhouse,2
 TR11,Thai,2
 TR11,Turkish,1
-TR11,Unspecified,40
+TR11,Unspecified,39
 TR12,American,1
 TR12,British,31
 TR12,Chinese,1
@@ -19223,7 +19184,7 @@ TR15,Turkish,1
 TR15,Unspecified,10
 TR16,American,1
 TR16,Barbecue,1
-TR16,British,24
+TR16,British,23
 TR16,Chinese,1
 TR16,European,1
 TR16,Indian,2
@@ -19255,12 +19216,12 @@ TR19,Italian,1
 TR19,Latin,1
 TR19,Seafood,7
 TR19,Unspecified,8
-TR2,British,31
+TR2,British,30
 TR2,Chinese,1
 TR2,Indian,1
 TR2,Italian,1
 TR2,Seafood,3
-TR2,Unspecified,6
+TR2,Unspecified,5
 TR20,British,20
 TR20,Chinese,2
 TR20,Seafood,1
@@ -19296,7 +19257,7 @@ TR26,Steakhouse,3
 TR26,Thai,1
 TR26,Unspecified,24
 TR27,American,1
-TR27,British,43
+TR27,British,42
 TR27,Chinese,3
 TR27,Indian,3
 TR27,Italian,4
@@ -19320,7 +19281,7 @@ TR4,British,22
 TR4,Italian,2
 TR4,Seafood,1
 TR4,Unspecified,4
-TR5,British,13
+TR5,British,12
 TR5,Chinese,1
 TR5,European,1
 TR5,Italian,1
@@ -19358,7 +19319,7 @@ TR7,Spanish,3
 TR7,Steakhouse,2
 TR7,Thai,5
 TR7,Unspecified,31
-TR8,British,39
+TR8,British,38
 TR8,French,1
 TR8,International,1
 TR8,Italian,3
@@ -19389,7 +19350,7 @@ TS1,Seafood,2
 TS1,Steakhouse,2
 TS1,Thai,1
 TS1,Turkish,2
-TS1,Unspecified,52
+TS1,Unspecified,51
 TS10,American,2
 TS10,British,27
 TS10,Chinese,5
@@ -19464,7 +19425,7 @@ TS18,Italian,18
 TS18,Middle Eastern,2
 TS18,Seafood,3
 TS18,Spanish,1
-TS18,Unspecified,49
+TS18,Unspecified,48
 TS19,British,7
 TS19,Chinese,3
 TS19,Italian,4
@@ -19563,7 +19524,7 @@ TS6,Chinese,2
 TS6,Indian,1
 TS6,Italian,5
 TS6,Seafood,2
-TS6,Unspecified,12
+TS6,Unspecified,11
 TS7,British,8
 TS7,Indian,1
 TS7,Italian,2
@@ -19651,7 +19612,7 @@ TW13,Italian,6
 TW13,Portuguese,1
 TW13,Thai,1
 TW13,Turkish,2
-TW13,Unspecified,20
+TW13,Unspecified,19
 TW14,Asian,1
 TW14,Barbecue,1
 TW14,British,3
@@ -19702,7 +19663,7 @@ TW18,Portuguese,1
 TW18,Seafood,1
 TW18,Thai,1
 TW18,Turkish,1
-TW18,Unspecified,21
+TW18,Unspecified,20
 TW19,American,1
 TW19,British,7
 TW19,Chinese,2
@@ -19745,7 +19706,7 @@ TW3,Chinese,7
 TW3,European,3
 TW3,French,2
 TW3,Greek,1
-TW3,Indian,38
+TW3,Indian,37
 TW3,International,1
 TW3,Italian,8
 TW3,Lebanese,5
@@ -19755,7 +19716,7 @@ TW3,Seafood,1
 TW3,Steakhouse,1
 TW3,Thai,2
 TW3,Turkish,5
-TW3,Unspecified,31
+TW3,Unspecified,30
 TW4,American,2
 TW4,Asian,1
 TW4,Barbecue,1
@@ -19768,7 +19729,7 @@ TW4,Middle Eastern,1
 TW4,Seafood,1
 TW4,Steakhouse,1
 TW4,Thai,1
-TW4,Unspecified,10
+TW4,Unspecified,9
 TW5,American,2
 TW5,Asian,1
 TW5,Barbecue,1
@@ -19795,7 +19756,7 @@ TW6,Japanese,5
 TW6,Lebanese,1
 TW6,Seafood,3
 TW6,Steakhouse,1
-TW6,Unspecified,26
+TW6,Unspecified,25
 TW7,American,2
 TW7,British,13
 TW7,Chinese,5
@@ -19809,7 +19770,7 @@ TW7,Turkish,2
 TW7,Unspecified,17
 TW8,American,1
 TW8,Barbecue,1
-TW8,British,16
+TW8,British,15
 TW8,Chinese,2
 TW8,French,1
 TW8,Indian,10
@@ -19860,7 +19821,7 @@ UB10,Asian,1
 UB10,British,10
 UB10,Caribbean,1
 UB10,Chinese,6
-UB10,Indian,8
+UB10,Indian,7
 UB10,International,1
 UB10,Italian,4
 UB10,Seafood,1
@@ -19901,7 +19862,6 @@ UB4,Portuguese,1
 UB4,Steakhouse,1
 UB4,Turkish,1
 UB4,Unspecified,13
-UB5,American,1
 UB5,Asian,1
 UB5,Barbecue,1
 UB5,British,3
@@ -19918,14 +19878,14 @@ UB6,Caribbean,2
 UB6,Chinese,2
 UB6,European,2
 UB6,French,1
-UB6,Indian,11
+UB6,Indian,10
 UB6,Italian,5
 UB6,Lebanese,6
 UB6,Mediterranean,1
 UB6,Middle Eastern,3
 UB6,Thai,1
 UB6,Turkish,2
-UB6,Unspecified,34
+UB6,Unspecified,33
 UB7,American,3
 UB7,Barbecue,1
 UB7,British,10
@@ -19952,7 +19912,7 @@ UB8,Portuguese,1
 UB8,Seafood,1
 UB8,Steakhouse,1
 UB8,Turkish,2
-UB8,Unspecified,35
+UB8,Unspecified,34
 UB9,American,1
 UB9,Asian,1
 UB9,British,12
@@ -19962,7 +19922,7 @@ UB9,Indian,4
 UB9,Italian,2
 UB9,Thai,2
 UB9,Turkish,1
-UB9,Unspecified,9
+UB9,Unspecified,8
 W10,African,1
 W10,American,4
 W10,Asian,3
@@ -20009,7 +19969,7 @@ W11,Thai,2
 W11,Turkish,2
 W11,Unspecified,60
 W12,African,4
-W12,American,21
+W12,American,20
 W12,Asian,6
 W12,Barbecue,5
 W12,British,29
@@ -20033,7 +19993,7 @@ W12,Spanish,1
 W12,Steakhouse,1
 W12,Thai,7
 W12,Turkish,5
-W12,Unspecified,84
+W12,Unspecified,82
 W13,African,1
 W13,American,2
 W13,Asian,5
@@ -20053,11 +20013,11 @@ W13,Seafood,2
 W13,Spanish,1
 W13,Thai,2
 W13,Turkish,2
-W13,Unspecified,28
+W13,Unspecified,27
 W14,African,1
 W14,Asian,1
 W14,Barbecue,2
-W14,British,22
+W14,British,21
 W14,Caribbean,1
 W14,Chinese,4
 W14,European,2
@@ -20099,7 +20059,7 @@ W1B,Seafood,3
 W1B,Spanish,1
 W1B,Steakhouse,1
 W1B,Thai,2
-W1B,Unspecified,47
+W1B,Unspecified,46
 W1C,American,3
 W1C,Barbecue,1
 W1C,British,17
@@ -20110,9 +20070,9 @@ W1C,Italian,4
 W1C,Japanese,5
 W1C,Steakhouse,1
 W1C,Turkish,2
-W1C,Unspecified,18
+W1C,Unspecified,17
 W1D,American,28
-W1D,Asian,35
+W1D,Asian,34
 W1D,Barbecue,3
 W1D,British,30
 W1D,Caribbean,1
@@ -20122,8 +20082,8 @@ W1D,French,11
 W1D,Greek,2
 W1D,Indian,8
 W1D,International,2
-W1D,Italian,48
-W1D,Japanese,31
+W1D,Italian,47
+W1D,Japanese,30
 W1D,Latin,2
 W1D,Lebanese,4
 W1D,Mediterranean,1
@@ -20135,7 +20095,7 @@ W1D,Spanish,5
 W1D,Steakhouse,7
 W1D,Thai,4
 W1D,Turkish,3
-W1D,Unspecified,116
+W1D,Unspecified,115
 W1F,American,13
 W1F,Asian,1
 W1F,Barbecue,3
@@ -20158,7 +20118,7 @@ W1F,Spanish,8
 W1F,Steakhouse,2
 W1F,Thai,5
 W1F,Turkish,2
-W1F,Unspecified,101
+W1F,Unspecified,99
 W1G,African,1
 W1G,American,4
 W1G,Asian,1
@@ -20169,7 +20129,7 @@ W1G,Italian,3
 W1G,Japanese,2
 W1G,Lebanese,2
 W1G,Steakhouse,1
-W1G,Unspecified,12
+W1G,Unspecified,11
 W1H,American,1
 W1H,Asian,2
 W1H,Barbecue,1
@@ -20206,7 +20166,6 @@ W1J,Mediterranean,2
 W1J,Mexican,2
 W1J,Middle Eastern,2
 W1J,Seafood,3
-W1J,Spanish,1
 W1J,Steakhouse,2
 W1J,Thai,1
 W1J,Turkish,3
@@ -20220,7 +20179,7 @@ W1K,European,11
 W1K,French,11
 W1K,Indian,1
 W1K,International,5
-W1K,Italian,14
+W1K,Italian,13
 W1K,Japanese,6
 W1K,Latin,1
 W1K,Mediterranean,2
@@ -20243,11 +20202,11 @@ W1S,Lebanese,1
 W1S,Mediterranean,1
 W1S,Mexican,2
 W1S,Middle Eastern,1
-W1S,Unspecified,34
+W1S,Unspecified,33
 W1T,American,10
 W1T,Asian,10
 W1T,Barbecue,4
-W1T,British,38
+W1T,British,37
 W1T,Chinese,8
 W1T,European,11
 W1T,French,9
@@ -20292,7 +20251,7 @@ W1U,Spanish,1
 W1U,Steakhouse,1
 W1U,Thai,3
 W1U,Turkish,3
-W1U,Unspecified,63
+W1U,Unspecified,62
 W1W,American,3
 W1W,Asian,4
 W1W,Barbecue,1
@@ -20314,7 +20273,7 @@ W1W,Thai,3
 W1W,Turkish,2
 W1W,Unspecified,45
 W2,African,3
-W2,American,15
+W2,American,14
 W2,Asian,15
 W2,Barbecue,5
 W2,British,74
@@ -20338,7 +20297,7 @@ W2,Spanish,1
 W2,Steakhouse,5
 W2,Thai,5
 W2,Turkish,1
-W2,Unspecified,114
+W2,Unspecified,113
 W3,American,4
 W3,Asian,2
 W3,British,19
@@ -20358,10 +20317,10 @@ W3,Portuguese,3
 W3,Seafood,2
 W3,Thai,3
 W3,Turkish,2
-W3,Unspecified,57
+W3,Unspecified,55
 W4,American,7
 W4,Asian,5
-W4,British,43
+W4,British,42
 W4,Caribbean,1
 W4,Chinese,3
 W4,European,4
@@ -20378,7 +20337,7 @@ W4,Portuguese,1
 W4,Seafood,4
 W4,Spanish,1
 W4,Steakhouse,1
-W4,Thai,6
+W4,Thai,5
 W4,Turkish,4
 W4,Unspecified,36
 W5,African,2
@@ -20388,13 +20347,13 @@ W5,Barbecue,3
 W5,British,28
 W5,Caribbean,1
 W5,Chinese,7
-W5,European,11
+W5,European,10
 W5,French,2
 W5,Greek,3
 W5,Indian,17
 W5,International,2
 W5,Italian,29
-W5,Japanese,14
+W5,Japanese,13
 W5,Latin,1
 W5,Lebanese,4
 W5,Mediterranean,1
@@ -20428,7 +20387,7 @@ W6,Seafood,3
 W6,Spanish,2
 W6,Thai,14
 W6,Turkish,2
-W6,Unspecified,68
+W6,Unspecified,67
 W7,American,3
 W7,British,6
 W7,Caribbean,1
@@ -20491,7 +20450,7 @@ WA1,British,31
 WA1,Caribbean,1
 WA1,Chinese,7
 WA1,Indian,8
-WA1,Italian,8
+WA1,Italian,7
 WA1,Lebanese,1
 WA1,Mexican,1
 WA1,Middle Eastern,1
@@ -20514,7 +20473,7 @@ WA10,Seafood,2
 WA10,Spanish,1
 WA10,Steakhouse,1
 WA10,Thai,1
-WA10,Unspecified,82
+WA10,Unspecified,81
 WA11,British,19
 WA11,Chinese,6
 WA11,Indian,5
@@ -20532,7 +20491,7 @@ WA12,Italian,4
 WA12,Seafood,1
 WA12,Spanish,1
 WA12,Thai,1
-WA12,Unspecified,39
+WA12,Unspecified,38
 WA13,American,1
 WA13,British,14
 WA13,Chinese,1
@@ -20614,7 +20573,7 @@ WA4,Seafood,2
 WA4,Spanish,1
 WA4,Thai,1
 WA4,Turkish,2
-WA4,Unspecified,28
+WA4,Unspecified,27
 WA5,British,19
 WA5,Chinese,13
 WA5,European,2
@@ -20640,7 +20599,7 @@ WA7,Middle Eastern,2
 WA7,Portuguese,1
 WA7,Seafood,2
 WA7,Steakhouse,2
-WA7,Unspecified,37
+WA7,Unspecified,36
 WA8,American,2
 WA8,Asian,1
 WA8,Barbecue,2
@@ -20667,7 +20626,7 @@ WA9,Unspecified,58
 WC1A,American,1
 WC1A,Asian,2
 WC1A,Barbecue,1
-WC1A,British,13
+WC1A,British,12
 WC1A,Chinese,5
 WC1A,French,3
 WC1A,International,1
@@ -20683,12 +20642,12 @@ WC1B,European,3
 WC1B,French,1
 WC1B,Indian,4
 WC1B,International,4
-WC1B,Italian,13
+WC1B,Italian,12
 WC1B,Japanese,2
 WC1B,Mexican,1
 WC1B,Seafood,2
 WC1B,Turkish,3
-WC1B,Unspecified,24
+WC1B,Unspecified,23
 WC1E,British,4
 WC1E,European,1
 WC1E,Greek,1
@@ -20792,7 +20751,7 @@ WC2B,Lebanese,1
 WC2B,Portuguese,1
 WC2B,Spanish,3
 WC2B,Steakhouse,1
-WC2B,Unspecified,43
+WC2B,Unspecified,42
 WC2E,African,1
 WC2E,American,10
 WC2E,Asian,8
@@ -20804,7 +20763,7 @@ WC2E,French,12
 WC2E,Greek,1
 WC2E,Indian,8
 WC2E,International,3
-WC2E,Italian,33
+WC2E,Italian,32
 WC2E,Japanese,3
 WC2E,Lebanese,1
 WC2E,Mexican,1
@@ -20820,7 +20779,7 @@ WC2H,American,7
 WC2H,Asian,10
 WC2H,Barbecue,3
 WC2H,British,41
-WC2H,Chinese,25
+WC2H,Chinese,24
 WC2H,European,10
 WC2H,French,4
 WC2H,Indian,8
@@ -20833,11 +20792,11 @@ WC2H,Mediterranean,1
 WC2H,Mexican,5
 WC2H,Middle Eastern,5
 WC2H,Seafood,5
-WC2H,Spanish,3
+WC2H,Spanish,2
 WC2H,Steakhouse,5
 WC2H,Thai,5
 WC2H,Turkish,2
-WC2H,Unspecified,94
+WC2H,Unspecified,91
 WC2N,American,6
 WC2N,Asian,5
 WC2N,Barbecue,1
@@ -20859,7 +20818,7 @@ WC2N,Seafood,2
 WC2N,Spanish,1
 WC2N,Thai,2
 WC2N,Turkish,1
-WC2N,Unspecified,54
+WC2N,Unspecified,51
 WC2R,American,1
 WC2R,Asian,3
 WC2R,British,21
@@ -20875,7 +20834,7 @@ WC2R,Mexican,3
 WC2R,Seafood,1
 WC2R,Spanish,3
 WC2R,Thai,2
-WC2R,Unspecified,39
+WC2R,Unspecified,38
 WD17,American,8
 WD17,Asian,2
 WD17,Barbecue,1
@@ -20895,7 +20854,7 @@ WD17,Portuguese,1
 WD17,Seafood,1
 WD17,Thai,1
 WD17,Turkish,1
-WD17,Unspecified,38
+WD17,Unspecified,35
 WD18,American,1
 WD18,Barbecue,2
 WD18,British,7
@@ -21015,7 +20974,7 @@ WF1,Spanish,2
 WF1,Steakhouse,3
 WF1,Thai,2
 WF1,Turkish,2
-WF1,Unspecified,52
+WF1,Unspecified,50
 WF10,American,3
 WF10,Barbecue,1
 WF10,British,36
@@ -21089,7 +21048,7 @@ WF17,Mexican,1
 WF17,Seafood,3
 WF17,Steakhouse,1
 WF17,Turkish,2
-WF17,Unspecified,33
+WF17,Unspecified,32
 WF2,American,2
 WF2,British,30
 WF2,Chinese,9
@@ -21153,7 +21112,7 @@ WF8,Turkish,1
 WF8,Unspecified,25
 WF9,American,1
 WF9,Barbecue,3
-WF9,British,13
+WF9,British,12
 WF9,Chinese,5
 WF9,Indian,3
 WF9,Italian,8
@@ -21210,7 +21169,7 @@ WN5,Indian,6
 WN5,Italian,13
 WN5,Seafood,1
 WN5,Turkish,1
-WN5,Unspecified,20
+WN5,Unspecified,19
 WN6,American,1
 WN6,British,27
 WN6,Chinese,7
@@ -21320,7 +21279,7 @@ WR3,Asian,1
 WR3,British,13
 WR3,Chinese,2
 WR3,Indian,3
-WR3,Italian,3
+WR3,Italian,2
 WR3,Middle Eastern,1
 WR3,Unspecified,10
 WR4,American,3
@@ -21337,7 +21296,7 @@ WR5,Chinese,4
 WR5,Indian,2
 WR5,Italian,2
 WR5,Unspecified,6
-WR6,British,35
+WR6,British,34
 WR6,Italian,1
 WR6,Thai,1
 WR6,Unspecified,6
@@ -21351,7 +21310,7 @@ WR8,Indian,3
 WR8,Italian,2
 WR8,Mediterranean,1
 WR8,Spanish,1
-WR8,Unspecified,18
+WR8,Unspecified,17
 WR9,British,36
 WR9,Chinese,7
 WR9,French,1
@@ -21381,7 +21340,7 @@ WS10,Indian,14
 WS10,Italian,8
 WS10,Mediterranean,1
 WS10,Portuguese,1
-WS10,Unspecified,30
+WS10,Unspecified,28
 WS11,American,1
 WS11,Barbecue,1
 WS11,British,31
@@ -21417,7 +21376,7 @@ WS13,Seafood,1
 WS13,Spanish,1
 WS13,Steakhouse,2
 WS13,Thai,3
-WS13,Unspecified,18
+WS13,Unspecified,17
 WS14,American,1
 WS14,British,16
 WS14,European,1
@@ -21452,7 +21411,7 @@ WS2,Portuguese,1
 WS2,Seafood,1
 WS2,Steakhouse,3
 WS2,Turkish,1
-WS2,Unspecified,18
+WS2,Unspecified,17
 WS3,American,1
 WS3,British,11
 WS3,Chinese,3
@@ -21484,7 +21443,7 @@ WS8,American,1
 WS8,British,6
 WS8,Indian,5
 WS8,Thai,1
-WS8,Unspecified,8
+WS8,Unspecified,7
 WS9,African,1
 WS9,American,2
 WS9,British,20
@@ -21564,7 +21523,7 @@ WV16,Italian,4
 WV16,Seafood,2
 WV16,Spanish,1
 WV16,Thai,1
-WV16,Unspecified,12
+WV16,Unspecified,11
 WV2,American,2
 WV2,Asian,1
 WV2,Barbecue,1
@@ -21579,7 +21538,7 @@ WV3,Barbecue,2
 WV3,British,13
 WV3,Caribbean,1
 WV3,Chinese,4
-WV3,Indian,5
+WV3,Indian,4
 WV3,Italian,4
 WV3,Japanese,1
 WV3,Middle Eastern,1
@@ -21620,11 +21579,11 @@ WV8,Unspecified,6
 WV9,Indian,1
 WV9,Seafood,1
 WV9,Unspecified,3
-YO1,African,3
+YO1,African,2
 YO1,American,15
 YO1,Asian,5
 YO1,Barbecue,3
-YO1,British,163
+YO1,British,161
 YO1,Chinese,10
 YO1,European,7
 YO1,French,6
@@ -21692,7 +21651,7 @@ YO14,Chinese,5
 YO14,Indian,2
 YO14,Italian,10
 YO14,Seafood,6
-YO14,Unspecified,9
+YO14,Unspecified,8
 YO15,American,3
 YO15,Asian,1
 YO15,British,67
@@ -21738,7 +21697,7 @@ YO19,Japanese,1
 YO19,Seafood,2
 YO19,Thai,1
 YO19,Unspecified,10
-YO21,British,81
+YO21,British,80
 YO21,Chinese,5
 YO21,French,1
 YO21,Indian,1
@@ -21749,7 +21708,7 @@ YO21,Seafood,14
 YO21,Thai,1
 YO21,Unspecified,36
 YO22,American,1
-YO22,British,58
+YO22,British,57
 YO22,Indian,1
 YO22,Italian,4
 YO22,Seafood,14
@@ -21838,7 +21797,7 @@ YO42,Indian,2
 YO42,Italian,4
 YO42,Seafood,1
 YO42,Steakhouse,1
-YO42,Unspecified,12
+YO42,Unspecified,11
 YO43,American,1
 YO43,Asian,1
 YO43,British,17
@@ -21853,7 +21812,7 @@ YO51,European,1
 YO51,Indian,2
 YO51,Italian,1
 YO51,Mexican,1
-YO51,Unspecified,6
+YO51,Unspecified,5
 YO60,American,2
 YO60,British,9
 YO60,Indian,1

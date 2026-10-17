@@ -465,7 +465,11 @@ def test_tripadvisor_sample_is_synthetic_with_the_full_schema(tmp_path):
     rows = read_csv(tmp_path / "a" / "tripadvisor_england.csv")
     assert counts["tripadvisor"] == len(rows) > 0
     assert "g1-d1" not in fake and "Cafe" not in {r["restaurant_name"] for r in rows}
-    assert all(sources._in_box(r["latitude"], r["longitude"]) for r in rows)
+    # Only the seeded far point lies outside the sample box.
+    assert all(
+        sources._in_box(r["latitude"], r["longitude"])
+        for r in rows if not r["restaurant_link"].startswith("synthetic-far-")
+    )
 
 
 def test_voa_sample_is_synthetic_at_sample_postcodes(tmp_path):
@@ -509,7 +513,8 @@ def test_committed_synthetic_sample_covers_cv_districts_and_edge_cases(tmp_path)
         (r["lat"], r["long"]): r["district"] for r in postcodes
     }
     covered = {
-        districts_by_point[(r["latitude"], r["longitude"])] for r in rows
+        districts_by_point[(r["latitude"], r["longitude"])]
+        for r in rows if (r["latitude"], r["longitude"]) in districts_by_point  # not the seeded far or near rows
     }
     assert len(covered) >= 5
     tags = {tag.strip() for r in rows for tag in r["cuisines"].split(",")}
@@ -548,7 +553,7 @@ def test_committed_synthetic_sample_covers_cv_districts_and_edge_cases(tmp_path)
 def test_row_counts_reports_every_sample_extract():
     counts = sources.row_counts(data_dir(choice="sample"))
     assert list(counts) == list(sources.ORDER)
-    assert counts["tripadvisor"] == 200  # synthetic sample size
+    assert counts["tripadvisor"] == 206  # 200 synthetic rows plus 6 seeded cleaning defects
     assert counts["voa"] == 300
     assert all(n > 0 for n in counts.values())
 
