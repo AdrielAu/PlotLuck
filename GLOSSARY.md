@@ -51,7 +51,7 @@ Two or more source rows that describe the same restaurant at the same place. Plo
 _Avoid_: Duplicate restaurant, copy
 
 **Restaurant profile**:
-The user's free-text description of the restaurant they want to open, including any location and preferences. Unclear or invalid details require clarification before comparing postcode districts.
+The user's free-text description of the restaurant they want to open, including any location and preferences. Plotluck proposes a cuisine, supported traits and a search area on the review card for the user to confirm before comparing postcode districts.
 _Avoid_: Hypothetical restaurant, query, concept
 
 **Restaurant-profile interpreter (NN2)**:
@@ -59,7 +59,7 @@ The part of Plotluck that interprets a restaurant profile into a cuisine, suppor
 _Avoid_: District scorer, success predictor
 
 **Inferred profile value**:
-A cuisine or trait derived from the context of a restaurant profile rather than explicitly stated by its author. It remains distinguishable from an explicit preference.
+A cuisine or trait suggested from the context of a restaurant profile rather than explicitly stated by its author. It is a proposal for the user to confirm.
 _Avoid_: Confirmed preference, observed fact
 
 **Cuisine**:
@@ -135,7 +135,7 @@ _Avoid_: Explanation panel, breakdown
 ## Workflow
 
 **MVP**:
-The required competition product: free-text interpretation by NN2, clarification of unclear or invalid details, and district scores from NN1 shown on a map and ranked list within the resolved search area. Clusters, driver charts and the cultural demand gap are outside this scope.
+The required competition product: NN2 interpretation of one free-text description, a review card to confirm the cuisine, traits and search area, and district scores from NN1 shown on a map and ranked list within the confirmed area. Clusters, driver charts and the cultural demand gap are outside this scope.
 _Avoid_: Demo, v1, vertical slice
 
 **Sample data**:

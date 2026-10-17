@@ -16,7 +16,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 1 | Data ingest: sources → one row per restaurant | done | #43, #42, #65, #68, #82, #101, #77 |
 | 2 | Labels: review-based success | done | #36, #47, #69 |
 | 3 | NN1 | in progress | #62, #65, #74, #101, #77, #150, #161, #164; [ranking revamp](RANKING.md) |
-| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); latest user amendment replaces #136/#158's questions with one description, direct results and targeted clarification; model/release gates remain open; [plan](../plans/nn2-integration.md) |
+| 4 | NN2 free-text interpretation (required for competition) | in progress | [spec #110](https://github.com/AdrielAu/PlotLuck/issues/110); one description (#169); latest user amendment has NN2 fill the review card before scoring, not yet wired in; model/release gates remain open; [plan](../plans/nn2-integration.md) |
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77, #161; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | in progress | #65, #67, #101, #77; bundle v3 pending full-data export |
@@ -28,6 +28,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 ## Now
 
 - **Latest NN2 interface amendment**: one description replaces the routine six-question flow and results pickers. All six inputs must be accounted for before scoring: area/range, cuisine, menu prices, rent, restaurant type and other requirements. Only absent area defaults to England. Missing/defaulted or invalid inputs prompt Erica's original questions, including after failed inference; complete descriptions go directly to results. The product extends the focused candidate with literal requirements and per-field recovery; historical five-field proof results do not establish this path's quality. Download starts on submission with cancellation. All quality/release gates remain open.
+- **Planned review card**: preserve main's documented plan for NN2 to pre-fill editable pickers and require confirmation. That wiring remains separate from this six-field completion fix; current code opens results after completion.
 
 - **Server operator**: Adriel (@AdrielAu), from 2026-10-17, for the #77 full-data run
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
