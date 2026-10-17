@@ -72,6 +72,8 @@ body:has(#kitchen:not([hidden])) footer { max-width: none; padding-inline: max(3
 .draft-chips { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
 .draft-chip { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 14px; background: var(--tint); }
 .draft-chip label { font-size: 14px; }
+.draft-chip:has(#draft-place) { flex: 1 1 100%; }
+#draft-area-help { max-width: 70ch; margin: 4px 0 0; font-size: 14px; }
 .draft-chip select, .draft-chip input[type="text"] { min-height: 44px; max-width: 100%; padding: 6px 8px; border: 0; border-radius: 0; background: var(--surface); color: var(--ink); font-size: 16px; }
 .draft-chip input[aria-invalid="true"] { background: var(--error-surface); }
 .draft-flag { flex-direction: row; align-items: center; gap: 10px; min-height: 64px; }

@@ -22,16 +22,18 @@ test("six questions lead through a review card to scoped results", async (t) => 
     assert.equal(await page.locator("#results-screen").isVisible(), false);
   });
 
-  await t.test("a required question shakes and will not move on without a readable answer", async () => {
+  await t.test("an unknown location shakes and will not move on without correction", async () => {
     const question = page.getByRole("combobox", { name: "Where would you like to open?" });
-    await box.press("Enter");
-    assert.equal(await page.getByRole("alert").innerText(), "You must answer this question.");
-    assert.equal(await page.locator("#prompt").evaluate((el) => el.classList.contains("shake")), true);
-    assert.equal(await question.getAttribute("aria-invalid"), "true");
-    await box.fill("Leeds");
+    await box.fill("Atlantis");
     await box.press("Escape");
     await box.press("Enter");
-    assert.equal(await page.getByRole("alert").innerText(), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.");
+    assert.match(await page.getByRole("alert").innerText(), /Choose one English place/);
+    assert.equal(await page.locator("#prompt").evaluate((el) => el.classList.contains("shake")), true);
+    assert.equal(await question.getAttribute("aria-invalid"), "true");
+    await box.fill("Cardiff");
+    await box.press("Escape");
+    await box.press("Enter");
+    assert.match(await page.getByRole("alert").innerText(), /Choose one English place/);
     assert.ok(await question.isVisible());
   });
 
@@ -71,12 +73,12 @@ test("six questions lead through a review card to scoped results", async (t) => 
     assert.deepEqual(await page.locator("#unused-list li").allInnerTexts(), ["Other: lots of parking"]);
     await page.getByLabel("Venue type").selectOption("Café");
     assert.equal(await page.locator(".draft-chip", { has: page.getByLabel("Venue type") }).locator(".mark").count(), 0);
-    await page.getByLabel("Search area").fill("Leeds");
+    await page.getByLabel("Search area").fill("Cardiff");
     await page.getByLabel("Search area").press("Tab");
     assert.equal(await page.getByLabel("Search area").getAttribute("aria-invalid"), "true");
     assert.equal(await page.locator(".draft-chip", { has: page.getByLabel("Search area") }).locator(".mark").count(), 0);
     await page.getByRole("button", { name: "Compare districts" }).click();
-    assert.match(await page.getByRole("alert").innerText(), /Place names arrive soon/);
+    assert.match(await page.getByRole("alert").innerText(), /Choose one English place/);
     await page.getByLabel("Search area").fill("SE");
     await page.getByLabel("Search area").press("Tab");
     await page.getByLabel("Rent band").selectOption("high");

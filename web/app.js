@@ -2,6 +2,7 @@
 import { setUpCombobox } from "./combobox.js";
 import { makeInterpreter, RENT_BANDS, RENT_LABELS } from "./interpret.js";
 import { makeNN2 } from "./nn2.js";
+import { validateCatalogue } from "./geography.js";
 import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
 import { setUpQuestions } from "./questions.js";
 import { setUpResultsScreen, showScreen } from "./results-screen.js";
@@ -240,7 +241,9 @@ async function main() {
     if (!area) return "Choose a valid search area and positive radius before comparing districts.";
     if (rentBudget && (!Number.isFinite(rentBudget.annualGBP) || rentBudget.amount <= 0)) return "Enter a positive rent budget and its period, or clear it.";
     if (!RENT_BANDS.includes(rentBand)) return "Confirm a rent band alongside your total rent budget before comparing districts.";
-    if (!scope.size) return "No district in this search area falls in this rent band. Change the rent band or the search area.";
+    if (!scope.size) return rentBand === "any"
+      ? "No district centroid lies in this search area. Choose another area; the search has not been widened."
+      : "No district in this search area falls in this rent band. Change the rent band or the search area.";
     return "";
   }
 
@@ -320,7 +323,7 @@ async function main() {
     return confirm();
   }
 
-  descriptionControls = setUpDescription({vocabulary:bundle.vocabulary,
+  descriptionControls = setUpDescription({vocabulary:bundle.vocabulary, districts:bundle.districts,
     onDraft:interpretation=>{
       draft={...draft,...Object.fromEntries(['cuisine','venue_type','price_band'].map(name=>[name,interpretation.profile[name]]))};
       applyingInterpretation=true;cuisinePicker.set(draft.cuisine);applyingInterpretation=false;
@@ -354,6 +357,18 @@ async function main() {
   $("loading").hidden = true;
   $("profile-controls").disabled = false;
   updateDraft();
+  // A slow optional catalogue must not prevent postcode-only comparisons.
+  $("answer").setAttribute("aria-busy", "true");
+  const loadingPlaces = "Loading English place names. Postcode districts and postcode areas work meanwhile.";
+  modelStatus(loadingPlaces);
+  readModelFile("geography.json").then(JSON.parse)
+    .then(data => validateCatalogue(data, bundle.districts))
+    .then(data => {
+      interpreter.setCatalogue(data);
+      if ($("model-status").textContent === loadingPlaces) modelStatus("");
+    }).catch(() => {
+      if ($("model-status").textContent === loadingPlaces) modelStatus("Place names could not load. Postcode districts and postcode areas still work; reload to try place names again.");
+    }).finally(() => $("answer").setAttribute("aria-busy", "false"));
 }
 
 main().catch(showError);

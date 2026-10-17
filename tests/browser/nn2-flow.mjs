@@ -23,18 +23,18 @@ const reply = {
 };
 
 // A stand-in for the pinned WebLLM module. `loads` false never finishes loading, to test cancel.
-function fakeRuntime(loads) {
+function fakeRuntime(loads, modelReply = reply) {
   return `export async function CreateMLCEngine(id, { initProgressCallback }) {
   initProgressCallback({ progress: 0.25, text: "Fetching" });
   if (!${loads}) await new Promise(() => {});
   initProgressCallback({ progress: 1, text: "Done" });
-  const content = ${JSON.stringify(JSON.stringify(reply))};
+  const content = ${JSON.stringify(JSON.stringify(modelReply))};
   return { chat: { completions: { create: async () => ({ choices: [{ finish_reason: "stop", message: { content } }] }) } } };
 }`;
 }
 
 // A page whose WebGPU is `gpu` (true: an adapter, false: none) and whose WebLLM is the stand-in.
-async function openPage(t, { gpu, loads = true }) {
+async function openPage(t, { gpu, loads = true, modelReply = reply }) {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser);
   page.sent = [];
@@ -43,7 +43,7 @@ async function openPage(t, { gpu, loads = true }) {
     Object.defineProperty(Navigator.prototype, "gpu", { configurable: true, get: () => (has ? { requestAdapter: async () => ({}) } : undefined) });
   }, gpu);
   await page.context().route(NN2.runtimeUrl, (route) => route.fulfill({
-    body: fakeRuntime(loads), contentType: "text/javascript", headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" },
+    body: fakeRuntime(loads, modelReply), contentType: "text/javascript", headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" },
   }));
   await page.goto(url);
   await page.locator("#answer:not([disabled])").waitFor();
@@ -51,6 +51,26 @@ async function openPage(t, { gpu, loads = true }) {
 }
 
 const status = (page) => page.locator("#model-status").innerText();
+
+test("an NN2 draft with London waits for a confirmed catalogue boundary", async (t) => {
+  const modelReply = { ...reply, location: { text: "London", near: false, distance: null, unit: null } };
+  const page = await openPage(t, { gpu: true, modelReply });
+  await page.locator('#answer[aria-busy="false"]').waitFor();
+  await page.getByRole("button", { name: "Download" }).click();
+  await page.waitForFunction(() => /ready/.test(document.querySelector("#model-status").textContent));
+  await answerQuestions(page, ["London", ...answers.slice(1)]);
+  assert.equal(await status(page), "The on-device model read your answers.");
+  await page.getByRole("button", { name: "Compare districts", exact: true }).click();
+  assert.match(await page.getByRole("alert").innerText(), /Choose the intended place/);
+  await page.getByLabel("Intended place", { exact: true }).selectOption({ label: "City of London (city, England)" });
+  await page.getByLabel("Rent band", { exact: true }).selectOption("any");
+  await page.getByRole("button", { name: "Compare districts", exact: true }).click();
+  assert.equal(await page.locator("#review-error").isVisible(), false, await page.locator("#review-error").innerText());
+  await page.locator("#results-screen").waitFor();
+  assert.match(await page.locator("#results-heading").innerText(), /^Italian.*City of London/);
+  assert.ok((await page.locator(".district-code").allInnerTexts()).every(code => code.startsWith("EC")));
+  assert.deepEqual(page.errors, []);
+});
 
 test("the downloaded model reads the answers into a review that compares districts", async (t) => {
   const page = await openPage(t, { gpu: true });

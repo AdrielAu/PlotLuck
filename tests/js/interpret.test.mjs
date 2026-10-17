@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
-import { describe, makeInterpreter } from "../../web/interpret.js";
+import { AREA_HELP, describe, makeInterpreter } from "../../web/interpret.js";
 import { validateInterpretation } from "../../web/interpreter.js";
 import { loadBundle, scoreDistricts } from "../../web/scoring.js";
 
@@ -13,6 +13,30 @@ const bundle = await loadBundle((name) => readFile(new URL(name, sample), "utf8"
 const { interpret, check, districtsInScope } = makeInterpreter(bundle);
 
 const blank = { location: "", food: "", place: "", prices: "", rent: "", other: "" };
+
+test("named areas use catalogue membership and ambiguous London requires a choice", async () => {
+  const catalogue = { places: [
+    { id: "city", name: "City of London", aliases: ["London"], type: "city", context: "England", districts: ["EC4R"] },
+    { id: "region", name: "Greater London", aliases: ["London"], type: "region", context: "England", districts: ["EC4R", "SE1"] },
+  ] };
+  const reader = makeInterpreter(bundle, undefined, catalogue);
+  const draft = await reader.interpret({ ...blank, location: "London", food: "Thai" });
+  assert.equal(reader.check("location", "London"), null);
+  assert.equal(draft.area, null);
+  assert.equal(draft.marks.area, "unresolved");
+  assert.deepEqual(reader.areaCandidates("London").map(a => a.label), ["City of London (city, England)", "Greater London (region, England)"]);
+  const area = reader.areaCandidates("London")[0];
+  assert.deepEqual([...reader.districtsInScope(area, "any")], ["EC4R"]);
+  assert.deepEqual([...reader.districtsInScope({ ...area, code: "invented" }, "any")], []);
+  assert.equal(reader.readArea("Greater London").code, "region");
+  assert.equal(reader.readArea("London or Leeds"), null);
+  assert.equal(reader.readArea("London except Westminster"), null);
+  assert.equal(reader.readArea("Cardiff"), null);
+  assert.equal(reader.readArea("Greater Londno"), null);
+  assert.equal(reader.areaCandidates("Greater Londno")[0].code, "region");
+  assert.equal(reader.readArea("!!!"), null);
+  assert.equal(reader.readArea("").kind, "england");
+});
 
 test("clear answers become an explicit draft that the scorer accepts", async () => {
   const draft = await interpret({
@@ -32,10 +56,10 @@ test("clear answers become an explicit draft that the scorer accepts", async () 
 });
 
 test("required answers stop on empty or unreadable text; areas accept England, districts and postcode areas", async () => {
-  assert.equal(check("location", "  "), "You must answer this question.");
-  assert.equal(check("location", "Leeds"), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.");
+  assert.equal(check("location", "  "), null);
+  assert.equal(check("location", "Leeds"), AREA_HELP);
   for (const text of ["anywhere", "England", "anywhere in England", "SE1", "se 1", "SE"]) assert.equal(check("location", text), null, text);
-  for (const text of ["the", "all", "in the"]) assert.equal(check("location", text), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.", text);
+  for (const text of ["the", "all", "in the"]) assert.equal(check("location", text), AREA_HELP, text);
   assert.equal(check("food", ""), "You must answer this question.");
   assert.equal(check("food", "Atlantis food"), "You must answer this question.");
   assert.equal(check("food", "viet"), null);
@@ -193,6 +217,6 @@ test("with NN2 ready, any food answer moves on for NN2 to read, but the area mus
   const { interpreter } = withModel({});
   assert.equal(interpreter.check("food", "neapolitan pizza"), null);
   assert.equal(interpreter.check("food", " "), "You must answer this question.");
-  assert.equal(interpreter.check("location", "Leeds"), "Place names arrive soon. For now, enter a postcode like LS1, or 'anywhere'.");
+  assert.equal(interpreter.check("location", "Leeds"), AREA_HELP);
   assert.equal(check("food", "neapolitan pizza"), "You must answer this question.");
 });

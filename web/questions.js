@@ -1,7 +1,7 @@
 // The questions screen: six questions one at a time in one prompt box, then a review card.
 // Answers reach a draft only through interpreter.interpret, which NN2 or its fallback serves.
 import { setUpCombobox } from "./combobox.js";
-import { ANSWER_LABELS, PLACE_SOON, RENT_BANDS, RENT_LABELS, REQUIRED } from "./interpret.js";
+import { ANSWER_LABELS, AREA_HELP, RENT_BANDS, RENT_LABELS, REQUIRED } from "./interpret.js";
 import { matchCuisines, traitLabel, valueLabel } from "./pickers.js";
 
 const $ = (id) => document.getElementById(id);
@@ -39,6 +39,7 @@ function buildQuestions(bundle, interpreter) {
         const options = contains(anywhere.label, text) ? [anywhere] : [];
         options.push(...areas.filter((a) => a.startsWith(code)).map((a) => ({ label: `${a} postcode area`, text: a })));
         options.push(...codes.filter((c) => c.startsWith(code)).map((c) => ({ label: c, text: c })));
+        options.push(...interpreter.areaCandidates(text).map(a => ({ label: a.label, text })));
         return options.slice(0, MAX_OPTIONS);
       },
     },
@@ -60,7 +61,7 @@ function buildQuestions(bundle, interpreter) {
     },
   ].filter((q) => !q.skip);
   for (const q of questions) {
-    q.required = q.key === "location" || q.key === "food";
+    q.required = q.key === "food";
     if (q.options) {
       q.chips = q.options;
       q.search = filtered(q.options);
@@ -226,14 +227,53 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
     const area = document.createElement("input");
     area.type = "text";
     area.autocomplete = "off";
-    area.value = draft.area ? draft.area.code || draft.area.label : answers.location;
+    area.value = draft.area?.kind === "place" ? answers.location : draft.area ? draft.area.code || draft.area.label : answers.location;
+    const intended = document.createElement("select");
+    intended.id = "draft-place";
+    const choice = document.createElement("div");
+    choice.className = "draft-chip";
+    const choiceLabel = document.createElement("label");
+    choiceLabel.htmlFor = intended.id;
+    choiceLabel.textContent = "Intended place";
+    const help = document.createElement("p");
+    help.id = "draft-area-help";
+    help.textContent = "Choose the intended boundary. Districts are included when their centres lie inside it; scores describe whole districts. An overlapping district with its centre outside is excluded.";
+    intended.setAttribute("aria-describedby", help.id);
+    choice.append(choiceLabel, intended, help);
+    function updatePlaces() {
+      const candidates = interpreter.areaCandidates(area.value);
+      choice.hidden = candidates.length === 0;
+      intended.replaceChildren(new Option("Choose the intended place", ""),
+        ...candidates.map(a => new Option(a.label, a.code, false, a.code === draft.area?.code)));
+    }
+    intended.addEventListener("change", () => {
+      draft.area = interpreter.areaCandidates(area.value).find(a => a.code === intended.value) ?? null;
+      if (draft.area) {
+        area.removeAttribute("aria-invalid");
+        draft.marks.area = "explicit";
+        $("draft-area").closest(".draft-chip").querySelector(".mark")?.remove();
+        $("review-error").hidden = true;
+      }
+    });
     // Registered before the chip's own handler, so the mark only clears once the area reads.
-    area.addEventListener("change", () => {
+    area.addEventListener("input", () => {
       draft.area = interpreter.readArea(area.value);
+      updatePlaces();
+      // Clear stale errors while typing, before a click can move the comparison button on blur.
+      $("review-error").hidden = true;
+      if (draft.area) {
+        area.removeAttribute("aria-invalid");
+        area.closest(".draft-chip").querySelector(".mark")?.remove();
+        draft.marks.area = "explicit";
+      }
+    });
+    area.addEventListener("change", () => {
       if (draft.area) area.removeAttribute("aria-invalid");
       else showAreaError();
     });
     chips.push(draftChip("area", "Search area", area, () => Boolean(draft.area)));
+    updatePlaces();
+    chips.push(choice);
 
     const cuisine = select(vocabulary.cuisines.map((c) => c.cuisine), draft.profile.cuisine,
       (v) => vocabulary.cuisines.find((c) => c.cuisine === v).label, "Choose a cuisine");
@@ -269,7 +309,9 @@ export function setUpQuestions({ bundle, interpreter, serveDish, onCompare }) {
 
   function showAreaError() {
     $("draft-area").setAttribute("aria-invalid", "true");
-    showReviewError(interpreter.check("location", $("draft-area").value) ?? PLACE_SOON, $("draft-area"));
+    const candidates = interpreter.areaCandidates($("draft-area").value);
+    showReviewError(candidates.length ? "Choose the intended place before comparing districts." : AREA_HELP,
+      candidates.length ? $("draft-place") : $("draft-area"));
   }
 
   function showReviewError(message, control) {

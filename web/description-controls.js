@@ -1,7 +1,8 @@
 import { placeCandidates, retryAdvice } from './grounded-interpreter.js';
+import { validateCatalogue } from './geography.js';
 
 // The worker boundary is isolated so cancellation cannot publish an old draft.
-export function setUpDescription({vocabulary, onDraft, onArea, onBusy, onRent}) {
+export function setUpDescription({vocabulary, districts, onDraft, onArea, onBusy, onRent}) {
   const $ = id => document.getElementById(id);
   const preview = new URLSearchParams(window.location.search).get('nn2') === '1';
   $('description-panel').hidden = !preview;
@@ -30,8 +31,7 @@ export function setUpDescription({vocabulary, onDraft, onArea, onBusy, onRent}) 
     if (!catalogue) {
       const response = await fetch('models/geography.json');
       if (!response.ok) throw new Error('Places could not load. Try again or keep your current search area.');
-      catalogue = await response.json();
-      if (catalogue.version !== 1 || !Array.isArray(catalogue.places)) throw new Error('The place catalogue needs updating.');
+      catalogue = await validateCatalogue(await response.json(), districts);
     }
     return catalogue;
   }
