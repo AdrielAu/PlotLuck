@@ -16,7 +16,7 @@ The planning index is [Plan the Plotluck MVP as a vertical slice](https://github
 - Output: a 0–1 **score** for expected **review-based success**, covering customer satisfaction and accumulated review activity. It is not survival, profitability or a calibrated probability. The review-count policy is settled in [ADR 0002](../adr/0002-review-based-success-label.md).
 - Display: Leaflet map with one circle per district centroid, a score threshold slider and a ranked list of districts above it. Clusters, driver chart and cultural demand gap are after the MVP.
 - Motivation: a teammate's father's restaurant closed in COVID; help small independents; widen under-represented cuisines.
-- Training unit: one row per **restaurant**, joined to its postcode-district context. NN1 scores the selected cuisine and traits in each district. Architecture and exact preprocessing are open; spatial CV remains the evaluation plan.
+- Training unit: one row per **restaurant**, joined to its postcode-district context. NN1 scores the selected cuisine and traits in each district. Its MVP architecture (a 64 → 32 ReLU MLP with a sigmoid output, trained in PyTorch with district-grouped 5-fold CV) is in [Choose NN1's architecture for the MVP](https://github.com/AdrielAu/PlotLuck/issues/62).
 - [ADR 0001](../adr/0001-open-source-llm-reads-the-restaurant-profile.md) supersedes the team's initial no-LLM and mandatory two-NN-hybrid choices. Free-text interpretation by an open-source LLM in the browser comes after the MVP.
 
 ## Data (current candidates)
@@ -70,7 +70,5 @@ This text predates the England scope and review-based target; it is not the curr
 
 ## Open
 
-- [Slice the MVP into independent implementation issues](https://github.com/AdrielAu/PlotLuck/issues/39): finalise handoffs once contracts are agreed (unblocked by [ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)).
-- Agree the NN1 architecture; [ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md) fixes the formats but not the architecture.
-- Define canonical cuisine taxonomy and raw descriptor mapping (to collapse "pizza", "pasta" into "Italian", etc. before NN vectorization).
+- The [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed. Next: `/to-spec` from its decisions, then `/to-tickets` for the implementation issues.
 - Assign the server operator in person. Later decisions include the LLM-to-NN1 interface and post-MVP map/driver design.

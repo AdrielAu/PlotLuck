@@ -38,6 +38,14 @@ _Avoid_: Tag, property, attribute, feature
 The trait that says what kind of place a restaurant is: restaurant, pub and bar, café, or fast food and street food.
 _Avoid_: Format, venue, establishment type
 
+**Chain**:
+The trait for a restaurant whose name appears at least three times in England.
+_Avoid_: Franchise, brand
+
+**Supply**:
+How many restaurants a postcode district already has, either in total or of one cuisine (same-cuisine supply).
+_Avoid_: Competition, density, saturation
+
 **Score**:
 A number from 0 to 1 that rates the expected review-based success of a restaurant profile in one postcode district. It is not a calibrated probability.
 _Avoid_: Probability, likelihood, chance, rating, rank
