@@ -172,6 +172,9 @@ def build(
         restaurants=len(restaurants),
         labelled=len(labelled),
         districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
+        districts_without_census={
+            name: sum(d[fields[0]] == "" for d in districts) for name, fields in context.SOURCE_COLUMNS.items()
+        },
         cv=cv,
         shipped={"epochs": epochs, "train_loss": losses},
     )
@@ -247,7 +250,7 @@ def validate_run_metrics(metrics: dict) -> None:
     """Keep server run output to counts, losses and evaluation metrics."""
     allowed = {
         "source_rows", "excluded", "label_fixes", "restaurants", "labelled",
-        "districts_without_rent", "cv", "shipped",
+        "districts_without_rent", "districts_without_census", "cv", "shipped",
     }
     _only_keys(metrics, allowed, "run metrics")
 
@@ -267,6 +270,9 @@ def validate_run_metrics(metrics: dict) -> None:
 
     for name in ("source_rows", "restaurants", "labelled", "districts_without_rent"):
         count(metrics[name])
+    _only_keys(metrics["districts_without_census"], context.SOURCE_COLUMNS, "run metrics districts_without_census")
+    for value in metrics["districts_without_census"].values():
+        count(value)
     reasons = {
         "excluded": {"no_location", "rating_missing", "rating_out_of_range", "n_total_zero"},
         "label_fixes": {"counts_partly_missing", "total_below_counts"},

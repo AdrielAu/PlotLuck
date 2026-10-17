@@ -226,6 +226,14 @@ def test_private_metadata_cannot_enter_run_metrics(data, field, value):
         build.validate_run_metrics(metrics)
 
 
+@pytest.mark.parametrize("value", [{"census_age": "EC3M"}, {"census_age": 1, "SE1": 0}, 3])
+def test_census_coverage_in_run_metrics_must_be_counts_per_source(data, value):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics["districts_without_census"] = value
+    with pytest.raises(ValueError, match="private|unexpected|counts"):
+        build.validate_run_metrics(metrics)
+
+
 def test_registered_district_extension_can_be_published(built, tmp_path, monkeypatch):
     bundle = {
         name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
@@ -370,6 +378,26 @@ def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_pa
     }
     assert model["transforms"]["attractions_count"]["log1p"] is True
     assert model["transforms"]["sex_female_share"]["log1p"] is False
+
+
+def test_run_metrics_count_districts_each_census_source_leaves_blank(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    for name, keep in (("census_age", None), ("census_ethnicity", slice(2, None))):
+        path = data / f"{name}_england.csv"
+        rows = read_csv(path)
+        if keep is None:
+            rows[0]["average_age"] = ""
+        else:
+            rows = rows[keep]
+        with path.open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, list(rows[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+    run = tmp_path / "run"
+    build.build(data, tmp_path / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, run=run, max_epochs=1)
+    assert read_json(run / "metrics.json")["districts_without_census"] == {
+        "census_age": 1, "census_ethnicity": 2, "census_sex": 0,
+    }
 
 
 @pytest.mark.parametrize("name, field, value", [
