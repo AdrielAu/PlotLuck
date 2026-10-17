@@ -35,7 +35,8 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #results-screen { display: grid; grid-template-rows: auto auto minmax(480px, 1fr) auto; gap: 16px; min-height: 100vh; padding: 20px 32px 12px; }
 .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
 .results-top p { margin: 0; }
-.wordmark { font: 500 18px/1.2 Georgia, serif; letter-spacing: -0.02em; }
+.wordmark { display: flex; align-items: center; gap: 4px; font: 500 18px/1.2 Georgia, serif; letter-spacing: -0.02em; }
+.wordmark img { width: 32px; height: 32px; }
 #results-heading { margin: 4px 0 2px; font: 500 32px/1.1 Georgia, serif; letter-spacing: -0.03em; }
 #results-heading:focus { outline: none; }
 #confirmed-profile { font-size: 14px; }
