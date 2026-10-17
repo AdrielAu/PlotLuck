@@ -5,6 +5,7 @@ import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers
 import { setUpQuestions } from "./questions.js";
 import { setUpResultsScreen, showScreen } from "./results-screen.js";
 import { loadBundle } from "./scoring.js";
+import { setUpDescription, areaDistricts } from "./description-controls.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -121,6 +122,11 @@ async function main() {
   let area = null;
   let confirmedQuery = null;
   let questions = null;
+  let descriptionControls;
+  let applyingInterpretation = false;
+  let interpreting = false;
+  let catalogueArea;
+  let rentBudget = null;
 
   function describeProfile(profile, searchAreaName) {
     const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === profile.cuisine);
@@ -130,12 +136,14 @@ async function main() {
       return `${traitLabel(t.name)}: ${value}`;
     });
     if (interpreter.hasRent) traits.push(`Rent band: ${RENT_LABELS[rentBand]}`);
+    if (rentBudget) traits.push(`Rent budget: £${rentBudget.annualGBP.toLocaleString('en-GB')}/year (not used in scoring)`);
     return { heading: `${cuisine.label} · ${searchAreaName}`, summary: `${traits.join("; ")}.` };
   }
 
   const openResults = setUpResultsScreen(bundle, {
     describeProfile,
     onChangeAnswers: () => {
+      descriptionControls?.manualEdit('search area');
       syncKitchen();
       questions.open();
     },
@@ -143,7 +151,10 @@ async function main() {
 
   function updateDraft() {
     const pending = !confirmedQuery || rentBand !== confirmedQuery.rentBand ||
-      Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+      Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]) ||
+      JSON.stringify(area) !== JSON.stringify(confirmedQuery.area) ||
+      JSON.stringify(catalogueArea) !== JSON.stringify(confirmedQuery.catalogueArea) ||
+      JSON.stringify(rentBudget) !== JSON.stringify(confirmedQuery.rentBudget);
     const where = area?.label ?? "England";
     let message = `Review your choices, then compare districts in ${where}.`;
     if (confirmedQuery) {
@@ -162,19 +173,30 @@ async function main() {
     if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
       return "Choose a supported value for every trait before comparing districts.";
     }
-    if (!area || !RENT_BANDS.includes(rentBand)) return "Choose a search area and rent band before comparing districts.";
+    if (!area) return "Choose a valid search area and positive radius before comparing districts.";
+    if (rentBudget && (!Number.isFinite(rentBudget.annualGBP) || rentBudget.amount <= 0)) return "Enter a positive rent budget and its period, or clear it.";
+    if (!RENT_BANDS.includes(rentBand)) return "Confirm a rent band alongside your total rent budget before comparing districts.";
     if (!scope.size) return "No district in this search area falls in this rent band. Change the rent band or the search area.";
     return "";
   }
 
   // Opens results for the draft, or returns why it cannot.
   function confirm() {
+    if (interpreting) return "Wait for interpretation or cancel it before comparing districts.";
     // The search area and rent band filter districts; they are not NN1 inputs.
-    const scope = area && RENT_BANDS.includes(rentBand) ? interpreter.districtsInScope(area, rentBand) : new Set();
+    let scope = new Set();
+    if (area && RENT_BANDS.includes(rentBand)) {
+      if (catalogueArea === undefined) scope = interpreter.districtsInScope(area, rentBand);
+      else if (catalogueArea) {
+        const codes = areaDistricts(catalogueArea,bundle.districts);
+        const rents = interpreter.districtsInScope({kind:'england'},rentBand);
+        scope = new Set([...rents].filter(code=>!codes || codes.has(code)));
+      }
+    }
     const message = problemWith(scope);
     if (message) return message;
     try {
-      const query = { profile: { ...draft }, area, rentBand };
+      const query = { profile: { ...draft }, area, rentBand, rentBudget, catalogueArea };
       const opened = openResults({ profile: query.profile, searchArea: [...scope], searchAreaName: area.label });
       syncKitchen();
       if (!opened) return "";
@@ -198,6 +220,7 @@ async function main() {
   });
 
   const cuisinePicker = setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
+    if (!applyingInterpretation) descriptionControls?.manualEdit('cuisine');
     draft = { ...draft, cuisine };
     updateDraft();
   });
@@ -210,15 +233,20 @@ async function main() {
   });
   $("rent-picker").addEventListener("change", (event) => {
     rentBand = event.target.value;
+    descriptionControls?.manualEdit('rent budget');
+    descriptionControls?.setRentBand(rentBand);
     updateDraft();
   });
 
   // The review card's Compare districts: prefill the results panel, then confirm it.
   // Returns why the draft cannot be compared, for the review card to show.
   function compareDraft(next) {
+    descriptionControls?.manualEdit('cuisine');
     draft = { ...next.profile };
     rentBand = next.rentBand;
     area = next.area;
+    catalogueArea = undefined;
+    descriptionControls?.setRentBand(rentBand);
     cuisinePicker.set(draft.cuisine);
     for (const input of $("profile-controls").querySelectorAll("input[name]")) {
       const value = input.name === "rent_band" ? rentBand : draft[input.name];
@@ -228,13 +256,36 @@ async function main() {
     return confirm();
   }
 
+  descriptionControls = setUpDescription({vocabulary:bundle.vocabulary,
+    onDraft:interpretation=>{
+      draft={...draft,...Object.fromEntries(['cuisine','venue_type','price_band'].map(name=>[name,interpretation.profile[name]]))};
+      applyingInterpretation=true;cuisinePicker.set(draft.cuisine);applyingInterpretation=false;
+      for (const input of $("trait-pickers").querySelectorAll('input')) input.checked=input.type==='checkbox' ? draft[input.name] : input.value===draft[input.name];
+      updateDraft();
+    },
+    onArea:selected=>{
+      catalogueArea=selected;
+      area=selected ? {kind:'catalogue',code:'',label:selected.label} : null;
+      $("area-label").textContent=area?.label ?? 'choose a place';updateDraft();
+    },
+    onBusy:value=>{interpreting=value;$("compare").disabled=value;},
+    onRent:(budget,band)=>{
+      rentBudget=budget;rentBand=band;
+      for (const input of $("rent-picker").querySelectorAll('input')) input.checked=input.value===band;
+      updateDraft();
+    },
+  });
+
   questions = setUpQuestions({
     bundle,
     interpreter,
     serveDish: (places) => kitchen.then((k) => k?.serve(places)),
     onCompare: compareDraft,
   });
-  $("change-area").addEventListener("click", () => { showQuestions(); questions.open("location"); });
+  $("change-area").addEventListener("click", () => {
+    descriptionControls?.manualEdit('search area');
+    showQuestions();questions.open("location");
+  });
   $("model-download").addEventListener("click", () => {
     // shortcut: no on-device model yet; #136 connects NN2's explicit download (size, progress, cancel) here.
     $("model-status").textContent = "The on-device model is not available yet, so Plotluck's built-in reader reads your answers.";
