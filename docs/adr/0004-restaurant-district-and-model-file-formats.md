@@ -9,10 +9,12 @@ On 2026-10-17 the team fixed the data schemas for the `restaurants` table, the `
 - Per [ADR 0003](0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md), raw Tripadvisor rows stay server-only on LinuxONE. The committed sample is synthetic.
 - All individual identifying fields (restaurant name, source link/id, full street address, and full postcode) are stripped. The sole geographic identifier retained on restaurant rows is the outward code `postcode_district` (e.g. `SE15`).
 
-### 2. Schema: `restaurants.csv` (11 columns)
+### 2. Schema: `restaurants.csv` (15 columns)
 - `postcode_district`: string outward postcode code (e.g. `SE15`, `E1`).
 - `cuisines`: raw comma-separated cuisine descriptors from the source (e.g. `"Italian, Pizza"`).
 - `price_band`: string trait (e.g. `"$"`, `"$$"`, `"$$$"` or empty if unknown).
+- `is_chain`: 0/1 trait, 1 when the restaurant's name appears 3 or more times in England. Computed at ingest on LinuxONE before names are stripped.
+- `vegetarian_friendly`, `vegan_options`, `gluten_free`: 0/1 diet-flag traits from the source, empty when the source doesn't say.
 - `avg_rating`: float star rating (1.0 to 5.0).
 - `total_reviews`: integer total review count ($n_{total}$).
 - `count_excellent`, `count_very_good`, `count_average`, `count_poor`, `count_terrible`: integer category counts summing to $n_{default}$ per [Issue #47](https://github.com/AdrielAu/PlotLuck/issues/47).
@@ -28,12 +30,12 @@ On 2026-10-17 the team fixed the data schemas for the `restaurants` table, the `
 - `commercial_rent_index`: float commercial cost proxy (median VOA rateable value per square metre for retail/food premises).
 - Additional economic or demographic columns may be appended as research settles.
 
-Cuisine supply per district is derived directly by aggregating occurrences in `restaurants.csv` rather than maintaining a separate lookup table.
+Cuisine supply per district is aggregated from `restaurants.csv` on LinuxONE and published as `district_cuisine_supply.csv` (`postcode_district`, `cuisine_group`, `restaurants`), because the browser cannot read `restaurants.csv`. [ADR 0003](0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md) allows publishing these counts and `total_restaurants`.
 
 ### 4. Model export interface: `model.json`
 - Saved as JSON containing `features` (restaurant input names and district input names), `transforms` (numeric normalization means/stds and categorical vocabularies), `layers` (nested weight matrices and bias vectors), and `activations`.
 - Sized and evaluated by a ~25-line pure JavaScript forward pass running client-side in the browser on GitHub Pages.
-- Internal layer topology (number of hidden layers and units) is deferred to the NN1 training phase.
+- Layer topology for the MVP: inputs → Dense 64 ReLU → Dense 32 ReLU → Dense 1 sigmoid. Dropout and weight decay are used in training only, so the forward pass is plain dense layers. See [Choose NN1's architecture for the MVP](https://github.com/AdrielAu/PlotLuck/issues/62#issuecomment-6233523453) for inputs, transforms and training.
 
 ### 5. Evaluation splitting policy
 - Train/test validation splits must be grouped strictly by `postcode_district` (spatial Group-KFold).
@@ -44,4 +46,4 @@ Cuisine supply per district is derived directly by aggregating occurrences in `r
 - An upstream mapping ticket must be created to collapse raw descriptors (e.g. "Pizza", "Pasta" -> "Italian") before NN1 feature vectorization.
 - Ingestion, baseline feature creation, and frontend map rendering can immediately develop against the committed synthetic stubs in `data/sample/`.
 
-Decided in [Fix the restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38).
+Decided in [Fix the restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38). The trait columns, published supply counts and layer topology were added in [Choose NN1's architecture for the MVP](https://github.com/AdrielAu/PlotLuck/issues/62).

@@ -15,7 +15,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 0 | Repo, workflow and server setup | done | #3, #19 |
 | 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42 |
 | 2 | Labels: review-based success | not started | #36, #47 |
-| 3 | NN1 | not started | |
+| 3 | NN1 | not started | #62 |
 | 4 | Free-text interpretation (after MVP) | not started | #35 |
 | 5 | NN1 spatial-CV evaluation | not started | |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
@@ -29,8 +29,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 
 - **Server operator**: unassigned
 - **Scope**: England MVP; clusters, driver chart and cultural demand gap come later.
-- **Blockers**: none. The [review-count policy](https://github.com/AdrielAu/PlotLuck/issues/47) and [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38) are resolved ([ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)), unblocking [the implementation split](https://github.com/AdrielAu/PlotLuck/issues/39). The [source decision](https://github.com/AdrielAu/PlotLuck/issues/46) is resolved subject to [ADR 0003](../adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md).
+- **Blockers**: none. The [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed: formats ([ADR 0004](../adr/0004-restaurant-district-and-model-file-formats.md)), sources ([ADR 0003](../adr/0003-train-on-tripadvisor-derived-data-publish-only-model-outputs.md)), [cuisine taxonomy](https://github.com/AdrielAu/PlotLuck/issues/53) and [NN1 architecture](https://github.com/AdrielAu/PlotLuck/issues/62) are all decided.
 - **Next**:
-  1. Finalise independent implementation issues against the agreed contracts ([#39](https://github.com/AdrielAu/PlotLuck/issues/39)); agree NN1 architecture (see [PROJECT.md](PROJECT.md#open)).
-  2. Define the canonical cuisine taxonomy mapping ticket.
-  3. Continue [dataset acquisition](https://github.com/AdrielAu/PlotLuck/issues/43) on LinuxONE.
+  1. Write the MVP spec from the map (`/to-spec`), then split it into implementation tickets (`/to-tickets`).
+  2. Continue [dataset acquisition](https://github.com/AdrielAu/PlotLuck/issues/43) on LinuxONE.
