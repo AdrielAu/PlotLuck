@@ -5,6 +5,7 @@ import shutil
 import statistics
 from collections import Counter
 from pathlib import Path
+from zipfile import ZipFile
 
 import numpy as np
 import pytest
@@ -90,6 +91,29 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
     ]
     assert (data / "restaurants.csv").is_file()
     assert read_json(data / "run" / "metrics.json")["restaurants"] == 203
+
+
+def test_cross_border_district_is_absent_from_export_and_training(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    archive = data / "raw" / "onspd.zip"
+    archive.parent.mkdir()
+    with ZipFile(archive, "w") as file:
+        file.writestr("Data/ONSPD_OCT_2026_UK.csv", (
+            "pcds,doterm,ctry24cd\n"
+            "SE17 1AA,,E92000001\nSE17 1AB,,S92000003\n"
+            "SE1 1AA,,E92000001\nSE1 1AB,202001,W92000004\n"
+        ))
+
+    out = tmp_path / "bundle"
+    metrics = build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, folds=3, max_epochs=1)
+
+    districts = {row["postcode_district"] for row in read_csv(out / "districts.csv")}
+    supply = {row["postcode_district"] for row in read_csv(out / "district_cuisine_supply.csv")}
+    private = {row["postcode_district"] for row in read_csv(data / "restaurants.csv")}
+    assert "SE17" not in districts | supply | private
+    assert "SE1" in districts
+    assert metrics["quality"]["cross_border"] == 1
+    assert metrics["excluded"]["cross_border"] > 0
 
 
 @pytest.mark.parametrize(
