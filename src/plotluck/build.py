@@ -611,9 +611,16 @@ def _restaurant_values(r: dict) -> dict:
     }
 
 
-def load_mapping() -> dict[str, dict]:
-    """The committed cuisine mapping: tag -> {kind, cuisine, parent, venue_type}."""
-    return {row["tag"]: row for row in _read_csv(MAPPING)}
+def load_mapping(path: Path = MAPPING) -> dict[str, dict]:
+    """The committed cuisine mapping: tag -> {kind, cuisine, parent, venue_type}.
+
+    Raises ValueError if a tag has more than one row, since the later row would silently win.
+    """
+    rows = _read_csv(path)
+    duplicates = sorted(tag for tag, n in Counter(r["tag"] for r in rows).items() if n > 1)
+    if duplicates:
+        raise ValueError(f"tag(s) listed more than once in {Path(path).name}: {', '.join(duplicates)}")
+    return {row["tag"]: row for row in rows}
 
 
 def classify(cuisines: str, mapping: dict) -> tuple[str, str]:
