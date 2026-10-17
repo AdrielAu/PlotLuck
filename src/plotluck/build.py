@@ -6,8 +6,10 @@ One call, ``build(data, out)``, reads ``<data>/*_england.csv`` and writes:
 - to ``data``, ``restaurants.csv``: the 15-column restaurant table of ADR 0004.
   It holds ratings and review counts, so it is private and stays beside the
   sources, on LinuxONE for full data (ADR 0003);
-- to ``data``, ``run/metrics.json``: row counts, exclusions by reason, inputs
-  left out and loss per epoch.
+- to ``data``, ``label_policy.json``: the fitted label policy (R0, D0, n_ref).
+  It derives from ratings, so it is private like ``restaurants.csv``;
+- to ``data``, ``run/metrics.json``: row counts, label exclusions and fixes by
+  reason, inputs left out and loss per epoch.
 
 This is the tracer of the spec in issue #64: every stage is crude, but the
 file shapes are the contract the site builds against.
@@ -23,7 +25,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from plotluck import nn1
+from plotluck import label, nn1
 from plotluck.data import data_dir
 
 # The site checks this; bump it whenever a bundle file changes shape.
@@ -37,7 +39,6 @@ BUNDLE_FILES = (
 )
 TRACER_EPOCHS = 20
 REFERENCE_TOLERANCE = 1e-6
-PRIOR_REVIEWS = 20
 
 MAPPING = Path(__file__).with_name("cuisine_mapping.csv")
 UNSPECIFIED = "Unspecified"
@@ -79,7 +80,6 @@ DISTRICT_COLUMNS = (
     "deprivation_index",
     "commercial_rent_index",
 )
-_CATEGORIES = ("excellent", "very_good", "average", "poor", "terrible")
 
 # NN1's district inputs, in input-vector order, and which get log1p first.
 DISTRICT_INPUTS = (
@@ -111,6 +111,7 @@ def build(
     restaurants, metrics = restaurant_table(
         _read_csv(data / "tripadvisor_england.csv"), postcodes, mapping
     )
+    policy = label_restaurants(restaurants)
     groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
@@ -120,6 +121,7 @@ def build(
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
     _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
+    _write_json(data / "label_policy.json", {"prior_reviews": label.PRIOR_REVIEWS, **policy})
     _write_csv(out / "districts.csv", DISTRICT_COLUMNS, districts)
     _write_csv(
         out / "district_cuisine_supply.csv",
@@ -336,50 +338,33 @@ def restaurant_table(rows: list[dict], postcodes: list[dict], mapping: dict):
         postcodes, [(float(r["latitude"]), float(r["longitude"])) for r in located]
     )
     excluded = Counter({"no_location": len(rows) - len(located)})
+    fixes = Counter()
     restaurants = []
     for row, code in zip(located, district):
         cuisine, venue = classify(row["cuisines"], mapping)
-        counts = [_int(row[c]) for c in _CATEGORIES]
-        total = _int(row["total_reviews_count"])
-        if None not in counts and total is not None:
-            total = max(total, sum(counts))  # issue #47: n_total = max(total, n_default)
         restaurants.append({
             "postcode_district": code,
             "cuisines": row["cuisines"],
             "price_band": PRICE_BANDS.get(row["price_level"], ""),
             "is_chain": int(names[row["restaurant_name"]] >= CHAIN_MIN_NAMES),
             **{f: {"Y": 1, "N": 0}.get(row[f], "") for f in DIET_FLAGS},
-            "avg_rating": row["avg_rating"],
-            "total_reviews": "" if total is None else total,
-            **{f"count_{c}": "" if n is None else n for c, n in zip(_CATEGORIES, counts)},
+            **label.review_fields(row, fixes),
             "cuisine": cuisine,
             "venue_type": venue,
         })
-    _placeholder_label(restaurants, excluded)
-    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded)}
+    excluded.update(filter(None, map(label.exclusion, restaurants)))
+    return restaurants, {"source_rows": len(rows), "excluded": dict(+excluded), "label_fixes": dict(fixes)}
 
 
-def _placeholder_label(restaurants: list[dict], excluded: Counter) -> None:
-    """Set ``review_success_label``: a rating smoothed by prior reviews, on 0-1.
+def label_restaurants(restaurants: list[dict]) -> dict:
+    """Set ``review_success_label`` under a policy fitted on every row; return it.
 
-    shortcut: placeholder, not the ADR 0002 formula; issue #69 replaces it
-    with the full label and a per-fold label policy.
+    The shipped model trains on every row; CV refits the policy per fold (issue #71).
     """
-    eligible = []
-    for r in restaurants:
-        rating = _float(r["avg_rating"])
-        if rating is None or not 1 <= rating <= 5:
-            excluded["rating"] += 1
-        elif not r["total_reviews"]:
-            excluded["reviews"] += 1
-        else:
-            eligible.append((r, rating, r["total_reviews"]))
-    prior = statistics.fmean(rating for _, rating, _ in eligible) if eligible else 3.0
-    for r in restaurants:
-        r["review_success_label"] = ""
-    for r, rating, n in eligible:
-        smoothed = (n * rating + PRIOR_REVIEWS * prior) / (n + PRIOR_REVIEWS)
-        r["review_success_label"] = round((smoothed - 1) / 4, 6)
+    policy = label.fit_policy(restaurants)
+    for r, value in zip(restaurants, label.labels(restaurants, policy)):
+        r["review_success_label"] = "" if value is None else round(value, 6)
+    return policy
 
 
 def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> dict[str, str]:
@@ -475,11 +460,6 @@ def _float(value: str) -> float | None:
         return float(value)
     except ValueError:
         return None
-
-
-def _int(value: str) -> int | None:
-    number = _float(value)
-    return None if number is None else int(number)  # source counts look like "347.0"
 
 
 def _read_csv(path: Path) -> list[dict]:
