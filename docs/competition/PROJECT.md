@@ -12,13 +12,13 @@ The planning index is [Plan the Plotluck MVP as a vertical slice](https://github
 ## Product (current MVP)
 
 - Scope: **England**, replacing the earlier London and UK scopes. The target is to score every English postcode district; country filtering and cross-border district handling belong to the formats decision.
-- Inputs: **cuisine and supported traits from searchable fixed lists**. A candidate trait ships only if populated on at least 50% of England restaurant rows; see [Which traits does the MVP offer?](https://github.com/AdrielAu/PlotLuck/issues/37).
+- Inputs: current searchable cuisine/trait pickers; required competition scope adds NN2 free text proposing an editable profile and search area, confirmed before comparison. A candidate trait ships only if populated on at least 50% of England restaurant rows; see [Which traits does the MVP offer?](https://github.com/AdrielAu/PlotLuck/issues/37).
 - Output: a 0–1 **score** for expected **review-based success**, covering customer satisfaction and accumulated review activity. It is not survival, profitability or a calibrated probability. The review-count policy is settled in [ADR 0002](../adr/0002-review-based-success-label.md).
 - Display: Leaflet map with one circle per district centroid, a score threshold slider and a ranked list of districts above it. Clusters, driver chart and cultural demand gap are after the MVP.
 - Motivation: a teammate's father's restaurant closed in COVID; help small independents; widen under-represented cuisines.
 - Training unit: one row per **restaurant**, joined to its postcode-district context. NN1 scores the selected cuisine and traits in each district. Its MVP architecture (a 64 → 32 ReLU MLP with a sigmoid output, trained in PyTorch with district-grouped 5-fold CV) is in [Choose NN1's architecture for the MVP](https://github.com/AdrielAu/PlotLuck/issues/62).
-- District context also includes estimated mean age, five broad Census ethnicity shares, female/male Census sex shares and separate mapped attraction/hotel counts. See [ADR 0005](../adr/0005-district-demographics-and-tourism-context.md) for allocation, missingness and limitations. The sample uses synthetic context; the full-data model needs a fresh LinuxONE build.
-- [ADR 0001](../adr/0001-open-source-llm-reads-the-restaurant-profile.md) supersedes the team's initial no-LLM and mandatory two-NN-hybrid choices. Free-text interpretation by an open-source LLM in the browser comes after the MVP.
+- District context also includes estimated mean age, five broad Census ethnicity shares, female/male Census sex shares and separate mapped attraction/hotel counts. See [ADR 0005](../adr/0005-district-demographics-and-tourism-context.md) for allocation, missingness and limitations. The sample uses synthetic context; the full-data LinuxONE bundle is now in `web/models/`, with results in [the training run](../../runs/2026-10-17-train-nn1/).
+- [ADR 0001](../adr/0001-open-source-llm-reads-the-restaurant-profile.md) supersedes the team's initial no-LLM and mandatory two-NN-hybrid choices. The 2026-10-17 interview makes NN2 required for competition, with free text continuing after the VM expires. [Spec #110](https://github.com/AdrielAu/PlotLuck/issues/110) is the implementation contract; the [integration plan](../plans/nn2-integration.md) retains interview context. [ADR 0006](../adr/0006-nn2-proposes-a-profile-and-search-area.md) defines review and scope filtering; model performance, geography tooling and pretrained-model competition eligibility remain unverified.
 
 ## Data (current candidates)
 
@@ -72,4 +72,4 @@ This text predates the England scope and review-based target; it is not the curr
 ## Open
 
 - The [MVP planning map](https://github.com/AdrielAu/PlotLuck/issues/33) is closed. Next: `/to-spec` from its decisions, then `/to-tickets` for the implementation issues.
-- Assign the server operator in person. Later decisions include the LLM-to-NN1 interface and post-MVP map/driver design.
+- Implement NN2 from spec #110, beginning with eligibility and technical feasibility. Post-MVP map/driver design remains later work.

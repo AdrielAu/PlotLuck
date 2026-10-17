@@ -125,10 +125,11 @@ function setUpCuisinePicker(cuisines, onPick) {
     status.classList.remove("shown");
   }
 
-  // Leaving without picking restores the last pick, so the field never shows unscored text.
+  // Escape restores the last selection; unmatched text otherwise stays visible for correction.
   function restore() {
     close();
     input.value = picked?.label ?? "";
+    onPick(picked?.cuisine);
   }
 
   function pick(cuisine) {
@@ -139,9 +140,12 @@ function setUpCuisinePicker(cuisines, onPick) {
   }
 
   // No open on focus: tabbing through should not announce the whole list.
-  input.addEventListener("input", open);
+  input.addEventListener("input", () => {
+    open();
+    onPick(input.value === picked?.label ? picked.cuisine : undefined);
+  });
   input.addEventListener("click", () => { if (list.hidden) open(); });
-  input.addEventListener("blur", restore);
+  input.addEventListener("blur", close);
   input.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
@@ -162,10 +166,11 @@ async function main() {
   const bundle = await loadBundle(readModelFile);
   buildTraitPickers(bundle.vocabulary.traits);
   const traitKinds = new Map(bundle.vocabulary.traits.map((t) => [t.name, t.kind]));
-  let profile = null;
+  let draft = defaultProfile(bundle.vocabulary, undefined);
+  let confirmedQuery = null;
   let rescore = null;
 
-  // The map is built on the first pick, once its container is visible.
+  // The map is built on the first confirmation, once its container is visible.
   function showResults() {
     $("pick-prompt").hidden = true;
     $("results").hidden = false;
@@ -228,8 +233,8 @@ async function main() {
     });
     $("threshold").disabled = false;
 
-    return () => {
-      scores = scoreDistricts(bundle, profile);
+    return (nextScores) => {
+      scores = nextScores;
       for (const { postcode_district, score } of scores) {
         const pale = [224, 237, 215], dark = [40, 76, 41];
         const fill = pale.map((channel, i) => Math.round(channel + (dark[i] - channel) * score));
@@ -250,32 +255,69 @@ async function main() {
     };
   }
 
-  function update() {
+  function updateDraft() {
+    const pending = !confirmedQuery || Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+    let message = "Review your choices, then compare districts across England.";
+    if (confirmedQuery) {
+      message = pending
+        ? "Edits are not applied. Results still show your last confirmed restaurant in England."
+        : "Results match your confirmed restaurant in England.";
+    }
+    $("profile-status").textContent = message;
+    $("profile-error").hidden = true;
+    $("cuisine").removeAttribute("aria-invalid");
+  }
+
+  $("compare").addEventListener("click", () => {
+    let message = "";
+    if (!bundle.vocabulary.cuisines.some((c) => c.cuisine === draft.cuisine)) {
+      message = "Choose a cuisine from the list before comparing districts.";
+      $("cuisine").setAttribute("aria-invalid", "true");
+    } else if (bundle.vocabulary.traits.some((t) => t.kind === "on_off" ? typeof draft[t.name] !== "boolean" : !t.values.includes(draft[t.name]))) {
+      message = "Choose a supported value for every trait before comparing districts.";
+    }
+    if (message) {
+      $("profile-error").textContent = message;
+      $("profile-error").hidden = false;
+      if ($("cuisine").getAttribute("aria-invalid") === "true") $("cuisine").focus();
+      return;
+    }
     try {
+      const query = { profile: { ...draft }, area: "England" };
+      const scores = scoreDistricts(bundle, query.profile);
       rescore ??= showResults();
-      rescore();
+      rescore(scores);
+      confirmedQuery = query;
+      const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === query.profile.cuisine);
+      const traits = bundle.vocabulary.traits.map((t) => {
+        let value = query.profile[t.name];
+        if (typeof value === "boolean") value = value ? "Yes" : "No";
+        else value = VALUE_LABELS[value] ?? value;
+        return `${traitLabel(t.name)}: ${value}`;
+      });
+      $("confirmed-profile").textContent = `${cuisine.label} · ${query.area}. ${traits.join("; ")}.`;
+      updateDraft();
     } catch (error) {
       showError(error);
     }
-  }
+  });
 
   setUpCuisinePicker(bundle.vocabulary.cuisines, (cuisine) => {
-    // The first pick starts from the vocabulary defaults; later picks keep the chosen traits.
-    profile = profile ? { ...profile, cuisine } : defaultProfile(bundle.vocabulary, cuisine);
-    update();
+    draft = { ...draft, cuisine };
+    updateDraft();
   });
   $("trait-pickers").addEventListener("change", (event) => {
     const { name, value, checked } = event.target;
     if (!traitKinds.has(name)) return;
     // Traits set before a cuisine is picked still count once one is.
-    profile ??= defaultProfile(bundle.vocabulary, undefined);
-    profile[name] = traitKinds.get(name) === "on_off" ? checked : value;
-    if (profile.cuisine !== undefined) update();
+    draft[name] = traitKinds.get(name) === "on_off" ? checked : value;
+    updateDraft();
   });
 
   $("loading").hidden = true;
   $("pick-prompt").hidden = false;
   $("profile-controls").disabled = false;
+  updateDraft();
 }
 
 main().catch(showError);

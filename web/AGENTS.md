@@ -2,7 +2,7 @@
 
 The site is static. The England MVP runs NN1 from exported JSON weights in `models/` using a JavaScript forward pass, and deploys to GitHub Pages from `web/` on every push to `main`.
 
-Inputs are searchable fixed-list cuisine and trait pickers. Show district centroid circles on a Leaflet map, a score threshold and a ranked list of districts above it. Scores measure expected review-based success, not calibrated probabilities. Free-text interpretation by a browser-based open-source LLM, clusters, driver chart and cultural demand gap come after the MVP; see [ADR 0001](../docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
+Current inputs are searchable cuisine and trait pickers. Required competition scope adds browser NN2 interpretation into an editable profile and search area, confirmed before NN1 updates the map/list. Read [the plan's status and contracts](../docs/plans/nn2-integration.md) before implementing. See [ADR 0001](../docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md) and [ADR 0006](../docs/adr/0006-nn2-proposes-a-profile-and-search-area.md). Show district centroid circles on a Leaflet map, a score threshold and a ranked list within the confirmed scope. Scores measure expected review-based success, not calibrated probabilities. Clusters, driver chart and cultural demand gap remain after MVP.
 
 Use the agreed [restaurant, district and model-file formats](https://github.com/AdrielAu/PlotLuck/issues/38) once resolved; architecture, preprocessing and JSON layout remain open.
 

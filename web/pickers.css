@@ -18,6 +18,13 @@
 .trait-options label:has(:checked) { border-color: var(--focus); background: #edf3ec; color: var(--focus); }
 .trait-options input { margin: 0; width: 18px; height: 18px; }
 #pick-prompt { color: var(--muted); }
+.profile-confirmation { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 20px; }
+.profile-confirmation p { max-width: 74ch; margin-bottom: 8px; }
+#profile-status, #confirmed-profile { color: var(--muted); }
+#confirmed-profile { max-width: 74ch; }
+#profile-error { color: var(--error-ink); }
+#compare { min-height: 44px; padding: 8px 20px; border: 0; border-radius: 4px; color: var(--surface); background: var(--green); }
+#compare:hover { background: var(--focus); }
 /* Screen-reader-only, except a no-match message, which everyone sees. */
 .visually-hidden:not(.shown) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (max-width: 760px) {

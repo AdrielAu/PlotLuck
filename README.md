@@ -6,7 +6,7 @@ Where in England should your restaurant open? Plotluck is building a tool to sco
 
 ## Planned MVP
 
-Choose a cuisine and supported traits from searchable fixed lists. Explore district centroid circles on a zoomable map, set a score threshold, and compare a ranked list of districts above it. Free-text input, clusters, driver charts and the cultural demand gap come after the MVP.
+Describe a restaurant and its location, review the proposed cuisine, supported traits and search area, then compare districts. Editable pickers support corrections. Explore district centroid circles on a zoomable map, set a score threshold, and compare a ranked list within the confirmed area. NN2 free-text interpretation is required competition scope and is still planned; clusters, driver charts and the cultural demand gap come later.
 
 The build is in progress; see [Progress](docs/competition/PROGRESS.md) for implementation status.
 
@@ -16,7 +16,7 @@ NN1 is trained in Jupyter on IBM LinuxONE (s390x). Exported JSON weights and a J
 
 District context includes population, deprivation, commercial rent, restaurant supply, estimated mean age, ethnicity and Census sex shares, and mapped attraction/hotel counts. The site's bundle was trained on LinuxONE with the real Census and OpenStreetMap extracts ([run results](runs/2026-10-17-train-nn1/)); the committed sample in `data/sample/` still uses synthetic demographic and tourism fixtures. See [the feature definitions and geography limitations](docs/adr/0005-district-demographics-and-tourism-context.md).
 
-A later browser-based open-source LLM will read cuisine and traits from free text; see [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md). The [model/data formats](https://github.com/AdrielAu/PlotLuck/issues/38) remain an open decision.
+NN2 is planned as a browser-based open-source language model, with separate LinuxONE inference/evaluation evidence. Free-text interpretation must continue after the VM expires. See [the integration plan and confirmation status](docs/plans/nn2-integration.md) and [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
 
 ## Dataset attribution and use
 

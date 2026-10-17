@@ -12,6 +12,10 @@ _Avoid_: Postcode, area, neighbourhood, borough, zone
 The letter prefix of a postcode (SE, E, W). It groups postcode districts.
 _Avoid_: Area (on its own), region, borough
 
+**Search area**:
+The geographic scope within which a user wants to compare postcode districts. It limits the districts shown in the map and ranked list.
+_Avoid_: Cuisine group, postcode area
+
 ## Restaurants and scoring
 
 **District context**:
@@ -27,8 +31,16 @@ A real food business in the source data that serves a cuisine. Cafés, takeaways
 _Avoid_: Venue, outlet, business
 
 **Restaurant profile**:
-The user's free-text description of the restaurant they want to open. Plotluck reads a cuisine and traits from it and scores it in every postcode district.
+The user's free-text description of the restaurant they want to open. Plotluck proposes a cuisine, supported traits and a search area for review before comparing postcode districts.
 _Avoid_: Hypothetical restaurant, query, concept
+
+**Restaurant-profile interpreter (NN2)**:
+The part of Plotluck that identifies a cuisine and supported traits from a restaurant profile, for use in district scoring. Its interpretation is editable by the user.
+_Avoid_: District scorer, success predictor
+
+**Inferred profile value**:
+A cuisine or trait suggested from the context of a restaurant profile rather than explicitly stated by its author. It is a proposal for the user to confirm.
+_Avoid_: Confirmed preference, observed fact
 
 **Cuisine**:
 The style of food a restaurant serves, from Plotluck's fixed cuisine list.
@@ -103,7 +115,7 @@ _Avoid_: Explanation panel, breakdown
 ## Workflow
 
 **MVP**:
-What Plotluck would submit if the build stopped now: a cuisine and traits picked from lists, scored by NN1 trained on LinuxONE and run in the browser to colour postcode districts above the score threshold. No free-text restaurant profile, clusters, driver chart or cultural demand gap.
+The required competition product: free-text interpretation by NN2, editable cuisine and trait choices, a confirmed search area, and district scores from NN1 shown on a map and ranked list. Clusters, driver charts and the cultural demand gap are outside this scope.
 _Avoid_: Demo, v1, vertical slice
 
 **Sample data**:
