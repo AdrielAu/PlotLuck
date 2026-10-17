@@ -106,7 +106,7 @@ def test_build_rejects_private_fields_before_writing(tmp_path, monkeypatch, file
 
     monkeypatch.setattr(build, "publish_bundle", leaking_publisher)
     with pytest.raises(ValueError, match="private|unexpected"):
-        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
 
     assert not out.exists()
     assert not (data / "restaurants.csv").exists()
@@ -190,6 +190,12 @@ def test_run_metrics_report_cv_against_the_baseline_and_ship_the_median_best_epo
     # Exactly the median for the odd fold count the spec sets.
     assert shipped["epochs"] == statistics.median(f["best_epoch"] for f in folds)
     assert len(shipped["train_loss"]) == shipped["epochs"]
+
+
+def test_cli_parses_its_options():
+    with pytest.raises(SystemExit) as exit_:
+        build.main(["--help"])
+    assert exit_.value.code == 0
 
 
 def test_two_builds_with_seed_0_write_identical_models(data, built, tmp_path):
