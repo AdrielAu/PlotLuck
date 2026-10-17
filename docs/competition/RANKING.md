@@ -54,7 +54,22 @@ population, deprivation, rent index, age or demographic shares may remain in
 the bundle if comparable nearby districts support an estimate. The raw source
 values remain in the private extracts; the exported values are the prepared
 ones used for scoring. The run metrics count reliable, estimated and excluded
-districts.
+districts (#161).
+
+A required value is repaired when it is missing or invalid: a non-positive
+population, deprivation, rent index or average age, or ethnicity or sex shares
+outside 0–1 or not summing to 1. `quality.estimated_reasons` counts each
+repaired group as `<group>_missing`, `<group>_invalid` or
+`commercial_rent_index_low`; `quality.training_with_labels` counts the reliable
+districts that contributed labelled rows. The build refuses to train if a
+training district still lacks a value, so no training median can stand in for
+it. Each CV fold refits the label policy, cuisine groups, fine-cuisine support
+and input transforms on its own training rows.
+
+`label_anomalies` counts labelled rows, in every district, whose rating is more than a star from
+the star mean of at least 10 default-language reviews, or not a half-star
+value. They are flagged for audit only: the ADR 0002 target and its
+eligibility are unchanged.
 
 The current conservative rule needs at least three peers within 30 km with
 similar mapped restaurant supply and map radius. A clearly anomalous low rent
