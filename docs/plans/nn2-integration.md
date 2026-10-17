@@ -1,13 +1,14 @@
 # NN2 integration plan
 
-## Latest user amendment: six questions and the review card return (2026-10-17)
+## Latest user amendment: one description fills the review card (2026-10-17)
 
-For now, the user restored the six-question journey and the review card before scoring. This supersedes the one-description amendment below. #136 (answers feed NN2's draft and review) and #158's decisions (free-text questions without chips or autocomplete, editable review card, no results pickers, cue-word fallback, offline place resolution) are again the product contract.
+The user confirmed: **"The user can prompt the NN2, it will then fill in the review card."** The single free-text description from the amendment below stays; the six questions do not return. Instead of going straight to results, NN2's validated interpretation fills the review card, and the user confirms it before NN1 scores. This supersedes the amendment below's "directly to NN1 results" and "no routine review card".
 
-- Six questions, one at a time: search area, cuisine, venue type, price band, rent band, other traits. They join into one labelled description and make one NN2 call.
-- The review card shows explicit/inferred/default marks and unused details, and must be confirmed before NN1 scores.
-- Strict validation, offline geography, never widening empty areas, the targeted price choice for rejected NN2 prices, and preserving previous results still apply from the amendment below.
-- The code still implements the one-description flow (`web/free-text.js`, #169) until #136/#158 are rebuilt. The model quality and release gates remain open.
+- One free-text description, up to 1,000 characters, makes one NN2 call.
+- The review card shows the cuisine, venue type, price band, traits, search area and rent band with explicit/inferred/default marks and unused details. The user edits and confirms it (ADR 0006, Q5/Q9); **Compare districts** runs NN1.
+- Unclear or invalid details (ambiguous places, conflicting cuisines, a rent budget without a band, a rejected price) appear on the review card as needing a choice and block comparison.
+- Everything else in the amendment below still applies: download on submission with size, progress and Cancel; strict validation; offline geography; never widening empty areas; retry limits; no silent fallback; preserving previous results. The model quality and release gates remain open.
+- The code still opens results directly (`web/free-text.js`, #169) until the review card is wired in.
 
 ## Superseded user amendment: one description, then results (2026-10-17)
 
