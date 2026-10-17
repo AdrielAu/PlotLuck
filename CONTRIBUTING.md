@@ -1,6 +1,6 @@
 # Contributing
 
-Plotluck currently scores English postcode districts using cuisine-and-trait pickers, district centroid circles, a score threshold and a ranked list. NN1 runs in the browser from exported JSON weights. Required competition scope adds browser NN2 interpretation and confirmed search areas; see [the plan and its confirmation status](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
+Plotluck accepts one free-text restaurant description. Browser NN2 interprets it; a clear valid request opens district results directly, with clarification only for unclear or invalid details. NN1 runs in the browser from exported JSON weights. Model quality and release gates remain open; see [the latest user amendment](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
 
 ## Layout
 
