@@ -1,11 +1,11 @@
 # Contributing
 
-Plotluck currently scores English postcode districts using cuisine-and-trait pickers, district centroid circles, a score threshold and a ranked list. NN1 runs in the browser from exported JSON weights. Required competition scope adds browser NN2 interpretation and confirmed search areas; see [the plan and its confirmation status](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
+Plotluck currently scores English postcode districts using cuisine-and-trait pickers, estimated district outlines (a small circle where a district has none), a score threshold and a ranked list. NN1 runs in the browser from exported JSON weights. Required competition scope adds browser NN2 interpretation and confirmed search areas; see [the plan and its confirmation status](docs/plans/nn2-integration.md). This page is the layout and the workflow. First-time setup is in [docs/setup.md](docs/setup.md). Keep this page and the repo map in root `AGENTS.md` in step: change both together.
 
 ## Layout
 
 - `src/plotluck/`: the installable Python package.
-- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring, picker and results modules (`node --test`, Node 22+, no install).
+- `tests/`: pytest tests; they run on `data/sample/`. `tests/js/`: Node tests of the site's scoring, outline, picker and results modules (`node --test`, Node 22+, no install).
 - `tests/browser/`: real-browser confirmation flows; see [browser test setup](docs/setup.md#browser-flow-tests).
 - `data/`: `sample/` is committed and used locally; `full/` is git-ignored and exists only on the server. See `data/AGENTS.md`.
 - `notebooks/`: ingest, training, benchmark and export notebooks.

@@ -82,6 +82,7 @@ def built(data):
 def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data, built):
     assert sorted(p.name for p in built.iterdir()) == [
         "district_cuisine_supply.csv",
+        "district_outlines.json",
         "districts.csv",
         "model.json",
         "reference_scores.json",
@@ -662,21 +663,51 @@ def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
     assert "commercial_rent_index" not in metrics.get("inputs_left_out", {})
 
 
-def test_district_radius_covers_its_postcodes_with_a_minimum_for_tiny_districts():
+def _disc_postcodes(district, lat, lon, km, n, doterm=""):
+    """``n`` postcodes spread evenly over a disc of radius ``km`` (a sunflower pattern)."""
     km_per_degree = build.EARTH_RADIUS_KM * np.pi / 180
+    r = km * np.sqrt((np.arange(n) + 0.5) / n)
+    t = np.arange(n) * np.pi * (3 - np.sqrt(5))
+    return [
+        {"district": district, "doterm": doterm, "imd25ind": "",
+         "lat": str(lat + y / km_per_degree), "long": str(lon + x / (km_per_degree * np.cos(np.radians(lat))))}
+        for x, y in zip(r * np.cos(t), r * np.sin(t))
+    ]
+
+
+def test_district_radius_covers_its_postcodes_with_a_minimum_for_tiny_districts():
     lat, lon = 51.5, -0.1
-    # RING: 20 postcodes on a 1 km circle. ONE: a single-postcode district (a PO box).
-    postcodes = [
-        {"district": "RING1", "doterm": "", "imd25ind": "",
-         "lat": str(lat + np.sin(t) / km_per_degree),
-         "long": str(lon + np.cos(t) / (km_per_degree * np.cos(np.radians(lat))))}
-        for t in np.linspace(0, 2 * np.pi, 20, endpoint=False)
-    ] + [{"district": "ONE1", "doterm": "", "imd25ind": "", "lat": str(lat), "long": str(lon)}]
+    # DISC: 200 postcodes filling a 1 km disc. ONE: a single-postcode district (a PO box).
+    postcodes = _disc_postcodes("DISC1", lat, lon, 1.0, 200) + [
+        {"district": "ONE1", "doterm": "", "imd25ind": "", "lat": str(lat), "long": str(lon)}
+    ]
 
     rows = {d["postcode_district"]: d for d in build.district_table(postcodes, [], [], [], {}, [])}
 
-    assert rows["RING1"]["radius_km"] == pytest.approx(1.0, abs=0.01)
+    assert rows["DISC1"]["radius_km"] == pytest.approx(1.0, abs=0.02)
     assert rows["ONE1"]["radius_km"] == build.MIN_RADIUS_KM
+
+
+def test_district_circle_ignores_terminated_postcodes_and_a_far_cluster_of_live_ones():
+    # IG8 in the August 2026 ONSPD: half its postcodes are terminated, many at old locations
+    # up to 6 km away, and ~4% of live ones are business postcodes stacked on one point 5.4 km off.
+    lat, lon = 51.6, 0.04
+    postcodes = (
+        _disc_postcodes("IG8", lat, lon, 1.0, 200)
+        + _disc_postcodes("IG8", lat + 0.045, lon, 0.2, 200, doterm="201603")
+        + _disc_postcodes("IG8", lat + 0.045, lon + 0.02, 0.01, 8)
+    )
+
+    row = build.district_table(postcodes, [], [], [], {}, [])[0]
+
+    assert (row["centroid_lat"], row["centroid_lon"]) == pytest.approx((lat, lon), abs=0.003)
+    assert row["radius_km"] == pytest.approx(1.0, abs=0.1)
+
+
+def test_a_district_with_only_terminated_postcodes_keeps_a_circle():
+    row = build.district_table(_disc_postcodes("EC3P", 51.5, -0.08, 0.5, 50, doterm="200001"), [], [], [], {}, [])[0]
+
+    assert row["radius_km"] == pytest.approx(0.5, abs=0.02)
 
 
 def test_every_sample_district_has_a_positive_radius_and_the_build_names_the_tiny_ones(tmp_path, capsys):
@@ -688,6 +719,36 @@ def test_every_sample_district_has_a_positive_radius_and_the_build_names_the_tin
     assert radii["SE1"] > build.MIN_RADIUS_KM  # 1,724 sample postcodes: a real spread, not the floor
     # EC3N has a single sample postcode.
     assert "EC3N" in capsys.readouterr().out.split("km radius")[1].splitlines()[0]
+
+
+def test_the_bundle_outlines_districts_and_draws_the_rest_as_small_circles(built):
+    outlines = read_json(built / "district_outlines.json")
+    rows = {d["postcode_district"]: d for d in read_csv(built / "districts.csv")}
+
+    assert outlines["version"] == build.BUNDLE_VERSION
+    assert set(outlines["districts"]) <= set(rows)
+    assert "SE1" in outlines["districts"]  # many residential postcodes
+    assert "EC3M" not in outlines["districts"]  # no live residential postcode
+    for code, row in rows.items():
+        if code not in outlines["districts"]:
+            assert float(row["radius_km"]) == build.MIN_RADIUS_KM, code
+
+
+@pytest.mark.parametrize("change, message", [
+    (lambda o: o["districts"].update(ZZ9=o["districts"]["SE1"]), "district"),
+    (lambda o: o["districts"]["SE1"][0].append(len(o["arcs"])), "arc reference"),
+    (lambda o: o["arcs"][0].append(1.5), "arc"),
+    (lambda o: o.update(note="private"), "unexpected"),
+])
+def test_publish_rejects_an_invalid_outline_file(built, tmp_path, change, message):
+    bundle = {
+        name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
+        for name in build.BUNDLE_FILES
+    }
+    change(bundle["district_outlines.json"])
+
+    with pytest.raises(ValueError, match=message):
+        build.publish_bundle(tmp_path / "public", bundle)
 
 
 @pytest.mark.parametrize("radius", ["", "0", "-1"])

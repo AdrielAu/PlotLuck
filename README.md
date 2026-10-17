@@ -6,7 +6,7 @@ Where in England should your restaurant open? Plotluck is building a tool to sco
 
 ## Planned MVP
 
-Describe a restaurant and its location, review the proposed cuisine, supported traits and search area, then compare districts. Editable pickers support corrections. Explore district centroid circles on a zoomable map, set a score threshold, and compare a ranked list within the confirmed area. NN2 free-text interpretation is required competition scope and is still planned; clusters, driver charts and the cultural demand gap come later.
+Describe a restaurant and its location, review the proposed cuisine, supported traits and search area, then compare districts. Editable pickers support corrections. Explore estimated district outlines on a zoomable map, set a score threshold, and compare a ranked list within the confirmed area. NN2 free-text interpretation is required competition scope and is still planned; clusters, driver charts and the cultural demand gap come later.
 
 The build is in progress; see [Progress](docs/competition/PROGRESS.md) for implementation status.
 
