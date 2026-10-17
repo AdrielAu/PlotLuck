@@ -622,10 +622,10 @@ def _write_csv(path: Path, rows) -> int:
             for row in rows:
                 writer.writerow(row)
                 count += 1
+        part.replace(path)
     except BaseException:
         part.unlink(missing_ok=True)
         raise
-    part.replace(path)
     return count
 
 
