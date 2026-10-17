@@ -5,7 +5,7 @@ import zipfile
 
 import pytest
 
-from plotluck import sources
+from plotluck import data_dir, sources
 
 
 def write_csv_zip(path, member, rows):
@@ -543,3 +543,32 @@ def test_committed_synthetic_sample_covers_cv_districts_and_edge_cases(tmp_path)
     assert (tmp_path / "regenerated" / "tripadvisor_england.csv").read_bytes() == (
         sample / "tripadvisor_england.csv"
     ).read_bytes()
+
+
+def test_row_counts_reports_every_sample_extract():
+    counts = sources.row_counts(data_dir(choice="sample"))
+    assert list(counts) == list(sources.ORDER)
+    assert counts["tripadvisor"] == 200  # synthetic sample size
+    assert counts["voa"] == 300
+    assert all(n > 0 for n in counts.values())
+
+
+def copy_sample_extracts(dest):
+    for name in sources.ORDER:
+        src = data_dir(choice="sample") / f"{name}_england.csv"
+        (dest / src.name).write_bytes(src.read_bytes())
+
+
+def test_row_counts_names_a_missing_extract(tmp_path):
+    copy_sample_extracts(tmp_path)
+    (tmp_path / "voa_england.csv").unlink()
+    with pytest.raises(FileNotFoundError, match="^voa extract is missing"):
+        sources.row_counts(tmp_path)
+
+
+@pytest.mark.parametrize("content", ["", "osm_type,osm_id,tourism,lat,lon\n"])
+def test_row_counts_names_an_extract_without_data_rows(tmp_path, content):
+    copy_sample_extracts(tmp_path)
+    (tmp_path / "tourism_england.csv").write_text(content, encoding="utf-8")
+    with pytest.raises(ValueError, match="^tourism extract has no data rows"):
+        sources.row_counts(tmp_path)
