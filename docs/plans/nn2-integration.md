@@ -1,6 +1,15 @@
 # NN2 integration plan
 
-## Latest user amendment: one description, then results (2026-10-17)
+## Latest user amendment: six questions and the review card return (2026-10-17)
+
+For now, the user restored the six-question journey and the review card before scoring. This supersedes the one-description amendment below. #136 (answers feed NN2's draft and review) and #158's decisions (free-text questions without chips or autocomplete, editable review card, no results pickers, cue-word fallback, offline place resolution) are again the product contract.
+
+- Six questions, one at a time: search area, cuisine, venue type, price band, rent band, other traits. They join into one labelled description and make one NN2 call.
+- The review card shows explicit/inferred/default marks and unused details, and must be confirmed before NN1 scores.
+- Strict validation, offline geography, never widening empty areas, the targeted price choice for rejected NN2 prices, and preserving previous results still apply from the amendment below.
+- The code still implements the one-description flow (`web/free-text.js`, #169) until #136/#158 are rebuilt. The model quality and release gates remain open.
+
+## Superseded user amendment: one description, then results (2026-10-17)
 
 The user replaced the six-question journey and confirmed: **"Show results immediately; ask only when clarification is needed."** This supersedes #158's six free-text questions, Q5/Q9's routine review-before-scoring, and #127's picker-based editing. The older requirements below remain historical context where they conflict with this amendment.
 

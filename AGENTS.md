@@ -4,7 +4,7 @@ Plotluck's MVP scores English postcode districts (0–1) for the expected review
 
 Current implementation constraints:
 
-- The product accepts one free-text restaurant description. Browser NN2 reads it; clear valid interpretations go directly to NN1 results. Ask only for unclear or invalid details, with offline place resolution and no routine questions, review card or results pickers. Model loading starts on submission with size disclosure, progress and cancellation. Read the latest user amendment in [the NN2 plan](docs/plans/nn2-integration.md) before implementation; it supersedes the six-question/review flow in #136/#158 and [ADR 0006](docs/adr/0006-nn2-proposes-a-profile-and-search-area.md). Model quality and release gates remain open.
+- The product asks six questions; browser NN2 reads the joined answers into a draft, and the user confirms it on a review card before NN1 scores (#136, #158, [ADR 0006](docs/adr/0006-nn2-proposes-a-profile-and-search-area.md)). The code still has the interim one-description flow (`web/free-text.js`, #169) until that is rebuilt. Read the latest user amendment in [the NN2 plan](docs/plans/nn2-integration.md) before implementation. Model quality and release gates remain open.
 - Training and accelerated-inference benchmarks run in Jupyter on IBM LinuxONE (s390x, big-endian).
 - The site is static on GitHub Pages and runs the exported weights in the browser, so it stays live after the event.
 - Export uses raw JSON weights and a JavaScript forward pass. Architecture, preprocessing and exact file formats remain open in the [formats decision](https://github.com/AdrielAu/PlotLuck/issues/38).

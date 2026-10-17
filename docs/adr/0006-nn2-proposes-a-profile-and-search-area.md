@@ -1,6 +1,8 @@
 # NN2 proposes an editable profile and search area before NN1 scores
 
-**User amendment, 2026-10-17:** the product now accepts one free-text description and shows results immediately when its interpretation is clear and valid. Clarify only unclear or invalid details; remove the six-question flow, routine review card and results pickers. Editing the description explicitly re-runs interpretation. This supersedes the review-before-scoring requirement below; offline geography, strict validation, privacy and preservation of previous results remain in force. See the current contract in the NN2 plan.
+**Later user amendment, 2026-10-17:** for now, the six questions and the review-before-scoring requirement below are restored; the amendment that follows is superseded. See the NN2 plan.
+
+**Superseded user amendment, 2026-10-17:** the product now accepts one free-text description and shows results immediately when its interpretation is clear and valid. Clarify only unclear or invalid details; remove the six-question flow, routine review card and results pickers. Editing the description explicitly re-runs interpretation. This supersedes the review-before-scoring requirement below; offline geography, strict validation, privacy and preservation of previous results remain in force. See the current contract in the NN2 plan.
 
 Agreed during the 2026-10-17 product interview. NN2 is required competition scope under ADR 0001. [Spec #110](https://github.com/AdrielAu/PlotLuck/issues/110) records the implementation contract; this decision records the settled product boundary.
 
