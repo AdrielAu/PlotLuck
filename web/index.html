@@ -1,47 +1,37 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Plotluck · Explore postcode districts</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="./style.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-  <script type="module" src="./app.mjs"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plotluck</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+<!-- shortcut: bare tracer layout; issues #75 and #76 add the styled pickers and result view. -->
+<style>
+  body { margin: 0 16px; font-family: system-ui, sans-serif; }
+  #map { height: 60vh; }
+  #error { color: #b00020; }
+</style>
 </head>
 <body>
-  <header class="masthead">
-    <span class="wordmark">Plotluck</span>
-    <span class="eyebrow">England · postcode districts</span>
-  </header>
-  <main>
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">Restaurant location explorer</p>
-      <h1 id="page-title">Find a place for<br><em>your kind of food.</em></h1>
-      <p>Choose a cuisine to compare expected review-based success across postcode districts. Scores run from 0 to 1; they do not predict profit or survival.</p>
-    </section>
-    <section class="workspace" aria-label="District explorer">
-      <div class="controls">
-        <label for="cuisine">Cuisine</label>
-        <select id="cuisine"></select>
-        <label for="threshold">Score threshold <output id="threshold-value" for="threshold">0.00</output></label>
-        <input id="threshold" type="range" min="0" max="1" step="0.01" value="0">
-        <p class="hint">Move the threshold to hide lower scoring districts.</p>
-      </div>
-      <div id="error" class="error" role="alert" hidden></div>
-      <div id="map" role="region" aria-label="Map of scored English postcode districts"></div>
-      <aside class="rankings" aria-labelledby="rankings-title">
-        <div class="rankings-heading">
-          <h2 id="rankings-title">Districts</h2>
-          <span id="result-count" aria-live="polite"></span>
-        </div>
-        <ol id="results"></ol>
-      </aside>
-    </section>
-    <p class="sample-note">Currently showing a small sample of postcode districts while the full model is prepared.</p>
-  </main>
-  <footer>
-    <p>Training source: Kaggle “TripAdvisor European restaurants” (stefanoleone992, 2021). Plotluck is not affiliated with Tripadvisor. This non-commercial research project uses model outputs, not source restaurant records.</p>
-  </footer>
+<h1>Plotluck</h1>
+<p id="error" role="alert" hidden></p>
+<p>
+  <label for="cuisine">Cuisine</label>
+  <select id="cuisine"></select>
+  <label for="threshold">Score threshold</label>
+  <input id="threshold" type="range" min="0" max="1" step="0.01" value="0">
+  <output id="threshold-value" for="threshold">0.00</output>
+</p>
+<div id="map" role="region" aria-label="Map of district scores; the ranked list below has the same districts"></div>
+<h2 id="ranked-heading">Districts above the threshold</h2>
+<p id="count" aria-live="polite"></p>
+<ol id="ranked" aria-labelledby="ranked-heading"></ol>
+<footer>
+  <p>Model trained on a 2021 Tripadvisor-derived dataset published on Kaggle (stefanoleone992). Not affiliated with or endorsed by Tripadvisor. Scores reflect review-based success among restaurants listed in 2021; closed restaurants may be missing. Non-commercial use only.</p>
+</footer>
+<script type="module" src="app.js"></script>
 </body>
 </html>

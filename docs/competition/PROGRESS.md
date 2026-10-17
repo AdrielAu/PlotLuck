@@ -13,13 +13,13 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | # | Phase | Status | Issues |
 |---|---|---|---|
 | 0 | Repo, workflow and server setup | done | #3, #19 |
-| 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42, #65 |
+| 1 | Data ingest: sources → one row per restaurant | in progress | #43, #42, #65, #68, #82 |
 | 2 | Labels: review-based success | in progress | #36, #47, #69 |
 | 3 | NN1 | in progress | #62, #65 |
 | 4 | Free-text interpretation (after MVP) | not started | #35 |
 | 5 | NN1 spatial-CV evaluation | not started | |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
-| 7 | Weight export + x86 load check | in progress | #65 |
+| 7 | Weight export + x86 load check | in progress | #65, #67 |
 | 8 | Site: district circles, pickers, score threshold, ranked list | in progress | #67 |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | not started | |
 | 10 | Video | not started | |
