@@ -117,7 +117,7 @@ python -m plotluck.sources extract osm
 python -m plotluck.sources sample    # re-cuts data/sample/ from the extracts
 ```
 
-Bundle version 2 requires all four new context extracts. Census extraction also reads `raw/onspd.zip` and its `msoa21` column; rerun the ONSPD pull if the raw archive is missing. Tourism uses its own tiled Overpass pull and can take as long as the restaurant pull. The new committed context fixtures remain synthetic even after `sample`; only a full-data build uses the real Census and tourism extracts. Retrain NN1 and rerun the x86 parity check after adding these inputs. [ADR 0005](adr/0005-district-demographics-and-tourism-context.md) records the geography approximations.
+Bundle version 2 requires all four new context extracts. Census extraction also reads `raw/onspd.zip` and its `msoa21cd` column; rerun the ONSPD pull if the raw archive is missing. Tourism uses its own tiled Overpass pull and can take as long as the restaurant pull. The new committed context fixtures remain synthetic even after `sample`; only a full-data build uses the real Census and tourism extracts. Retrain NN1 and rerun the x86 parity check after adding these inputs. [ADR 0005](adr/0005-district-demographics-and-tourism-context.md) records the geography approximations.
 
 When publishing the full-data bundle to `web/models/`, replace the footer's sample-data notice in `web/index.html` with a description of the completed run. Keep the source attribution and geographic limitations.
 

@@ -71,6 +71,7 @@ test("a picked profile needs confirmation before its district results appear", a
   await t.test("an unmatched cuisine cannot replace confirmed results", async () => {
     const confirmed = await page.locator("#confirmed-profile").innerText();
     const ranked = await page.locator("#ranked").innerText();
+    const selected = await cuisine.inputValue();
     await cuisine.fill("Atlantis food");
     await page.getByRole("button", { name: "Compare districts", exact: true }).click();
     assert.match(await page.getByRole("alert").innerText(), /Choose a cuisine from the list/);
@@ -79,7 +80,7 @@ test("a picked profile needs confirmation before its district results appear", a
     assert.equal(await page.locator("#confirmed-profile").innerText(), confirmed);
     assert.equal(await page.locator("#ranked").innerText(), ranked);
     await cuisine.press("Escape");
-    assert.equal(await cuisine.inputValue(), "Vietnamese (scored as Other)");
+    assert.equal(await cuisine.inputValue(), selected);
     await page.getByRole("button", { name: "Compare districts", exact: true }).click();
     assert.equal(await page.locator("#confirmed-profile").innerText(), confirmed);
   });

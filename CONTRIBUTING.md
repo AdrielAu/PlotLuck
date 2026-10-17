@@ -34,5 +34,5 @@ Keep every committed file under 5 MB: samples, run results and evidence screensh
 ## Where results land
 
 - `runs/<yyyy-mm-dd>-<step>/`: metrics, loss curves and benchmark timings ([runs/README.md](runs/README.md)).
-- `web/models/`: the site bundle the site loads (the sample bundle until the full-data build lands).
+- `web/models/`: the bundle the site loads, from the latest full-data run on LinuxONE.
 - `docs/evidence/`: evidence for the datathon submission ([CHECKLIST.md](docs/evidence/CHECKLIST.md)).

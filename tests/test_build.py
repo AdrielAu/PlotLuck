@@ -226,6 +226,22 @@ def test_private_metadata_cannot_enter_run_metrics(data, field, value):
         build.validate_run_metrics(metrics)
 
 
+@pytest.mark.parametrize("value", [
+    {"census_age": "EC3M", "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": -1, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": 0.5, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": True, "census_ethnicity": 0, "census_sex": 0},
+    {"census_age": 0, "census_ethnicity": 0},
+    {"census_age": 0, "census_ethnicity": 0, "census_sex": 0, "SE1": 0},
+    3,
+])
+def test_census_coverage_in_run_metrics_must_be_counts_per_source(data, value):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics["districts_without_census"] = value
+    with pytest.raises(ValueError, match="private|unexpected|counts"):
+        build.validate_run_metrics(metrics)
+
+
 def test_registered_district_extension_can_be_published(built, tmp_path, monkeypatch):
     bundle = {
         name: read_csv(built / name) if name.endswith(".csv") else read_json(built / name)
@@ -370,6 +386,24 @@ def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_pa
     }
     assert model["transforms"]["attractions_count"]["log1p"] is True
     assert model["transforms"]["sex_female_share"]["log1p"] is False
+
+
+def test_run_metrics_count_districts_each_census_source_leaves_blank(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    ages = read_csv(data / "census_age_england.csv")
+    ages[0]["average_age"] = ""  # one district blank in place
+    ethnicities = read_csv(data / "census_ethnicity_england.csv")[2:]  # two districts with no row
+    for name, rows in (("census_age", ages), ("census_ethnicity", ethnicities)):
+        path = data / f"{name}_england.csv"
+        with path.open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, list(rows[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+    run = tmp_path / "run"
+    build.build(data, tmp_path / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, run=run, max_epochs=1)
+    assert read_json(run / "metrics.json")["districts_without_census"] == {
+        "census_age": 1, "census_ethnicity": 2, "census_sex": 0,
+    }
 
 
 @pytest.mark.parametrize("name, field, value", [
@@ -656,6 +690,40 @@ def test_numpy_forward_pass_reproduces_reference_scores(built):
 )
 def test_classify_follows_the_cuisine_rules(cuisines, expected):
     assert build.classify(cuisines, build.load_mapping()) == expected
+
+
+ITALIAN_REGIONS = (
+    "Apulian", "Calabrian", "Campania", "Central-Italian", "Emilian", "Lazio", "Ligurian", "Neapolitan",
+    "Northern-Italian", "Romagna", "Romana", "Sardinian", "Sicilian", "Southern-Italian", "Tuscan",
+)
+
+
+# Tags found only in the full Tripadvisor file (#77); the sample never carried them.
+@pytest.mark.parametrize(
+    "tag, expected",
+    [
+        ("Argentinian", ("Argentinean", "Restaurant")),
+        ("Nepalese", ("Nepali", "Restaurant")),
+        ("Philippine", ("Filipino", "Restaurant")),
+        ("Fast food", ("Unspecified", "Fast food and street food")),
+        *((region, ("Italian", "Restaurant")) for region in ITALIAN_REGIONS),
+        *((tag, ("Japanese", "Restaurant")) for tag in ("Hokkaido cuisine", "Kyoto cuisine", "Kaiseki", "Kappo")),
+        ("Beijing cuisine", ("Chinese", "Restaurant")),
+        ("Costa Rican", ("Central American", "Restaurant")),
+        ("Guatemalan", ("Central American", "Restaurant")),
+        ("Bahamian", ("Caribbean", "Restaurant")),
+        ("Puerto Rican", ("Caribbean", "Restaurant")),
+        ("Catalan", ("Spanish", "Restaurant")),
+        ("Assyrian", ("Assyrian", "Restaurant")),
+        ("Beer restaurants", ("Unspecified", "Pub and bar")),
+        ("Dining bars", ("Unspecified", "Pub and bar")),
+        ("Fruit parlours", ("Unspecified", "Café")),
+        ("Japanese sweets parlour", ("Unspecified", "Café")),
+        ("Medicinal foods", ("Unspecified", "Restaurant")),
+    ],
+)
+def test_classify_maps_full_data_tags(tag, expected):
+    assert build.classify(tag, build.load_mapping()) == expected
 
 
 def test_mapping_rows_are_well_formed_with_one_parent_per_cuisine():

@@ -26,7 +26,7 @@ def read_csv(path):
 def test_census_extract_allocates_counts_before_computing_means_and_shares(tmp_path):
     raw = tmp_path / "raw"
     csv_zip(raw / "onspd.zip", "Data/ONSPD_AUG_2026_UK.csv", [
-        {"pcds": postcode, "ctry26cd": country, "doterm": terminated, "msoa21": area}
+        {"pcds": postcode, "ctry26cd": country, "doterm": terminated, "msoa21cd": area}
         for postcode, area, country, terminated in (
             ("AB1 1AA", "E02000001", "E92000001", ""),
             ("AB2 1AA", "E02000001", "E92000001", ""),

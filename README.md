@@ -14,7 +14,7 @@ The build is in progress; see [Progress](docs/competition/PROGRESS.md) for imple
 
 NN1 is trained in Jupyter on IBM LinuxONE (s390x). Exported JSON weights and a JavaScript forward pass run in the browser on a static GitHub Pages site. Accelerated-inference benchmarks run on LinuxONE as part of the competition evidence. Built for the IBM Z Datathon 2026 (Community Impact).
 
-District context includes population, deprivation, commercial rent, restaurant supply, estimated mean age, ethnicity and Census sex shares, and mapped attraction/hotel counts. The version 2 sample bundle uses synthetic demographic and tourism fixtures; a full-data LinuxONE rerun is needed to evaluate their usefulness. See [the feature definitions and geography limitations](docs/adr/0005-district-demographics-and-tourism-context.md).
+District context includes population, deprivation, commercial rent, restaurant supply, estimated mean age, ethnicity and Census sex shares, and mapped attraction/hotel counts. The site's bundle was trained on LinuxONE with the real Census and OpenStreetMap extracts ([run results](runs/2026-10-17-train-nn1/)); the committed sample in `data/sample/` still uses synthetic demographic and tourism fixtures. See [the feature definitions and geography limitations](docs/adr/0005-district-demographics-and-tourism-context.md).
 
 NN2 is planned as a browser-based open-source language model, with separate LinuxONE inference/evaluation evidence. Free-text interpretation must continue after the VM expires. See [the integration plan and confirmation status](docs/plans/nn2-integration.md) and [ADR 0001](docs/adr/0001-open-source-llm-reads-the-restaurant-profile.md).
 
