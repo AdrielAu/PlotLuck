@@ -3,6 +3,7 @@
 import { makeInterpreter } from './interpret.js';
 import { areaDistricts } from './geography.js';
 import { validateInterpretation } from './interpreter.js';
+import { validateProfileExtraction } from './profile-extraction.js';
 
 const mentions = (text, phrase) => {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -35,7 +36,7 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   const candidates = reader.areaCandidates(placeText);
   const direct = reader.readArea(placeText);
   if (direct && placeText && !candidates.some(p=>p.code === direct.code)) candidates.push(direct);
-  let area = location.text === null && placeText ? null : reader.readArea(placeText);
+  let area = !placeText.trim() || location.text === null ? null : reader.readArea(placeText);
   // A missing model location is unsafe when the description explicitly requests one.
   const restriction = /\b(?:in|near|within|around|outside|except|excluding)\s+\S/i.test(description);
   if ((!placeText && restriction) || extraction.unresolvedFields?.includes('area')) area = null;
@@ -48,8 +49,9 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
     return joined.test(description) && namedPlaces.some(other => other !== name && mentions(description.split(/\bor\b|\band\b|[/+]/i)[0], other));
   });
   if (multiplePlaces || /\b(?:except|excluding|outside)\b/i.test(description) || draft.clarifications.some(c => /location|place|area|exclu/i.test(c))) area = null;
-  if (!area) needs.push({ field: 'area', message: 'Choose one intended search area.', options: candidates });
-  let radius = location.near ? (location.distance === null ? 5 : location.distance * (location.unit === 'miles' ? 1.609344 : 1)) : null;
+  if (!area) needs.push({ field: 'area', message: 'Choose one intended search area.', options: candidates.length ? candidates : reader.cityCandidates() });
+  // "Near York" means York's boundary. Only a stated distance creates a radius.
+  let radius = location.near && location.distance !== null ? location.distance * (location.unit === 'miles' ? 1.609344 : 1) : null;
   if (radius !== null && area?.kind !== 'place') {
     area = null;
     if (!needs.some(n => n.field === 'area')) needs.push({ field: 'area', message: 'Choose a named place for the radius search.', options: candidates });
@@ -86,9 +88,11 @@ export function descriptionQuery(description, extraction, bundle, catalogue) {
   });
 }
 
-// A failed model read still offers the six questions; no fabricated values score.
+// Failed inference uses the same literal-source grounding as a successful read.
+// No model predictions survive this path; missing values still require answers.
 export function unreadDescription(description, bundle, catalogue) {
-  return descriptionQuery(description, {unresolvedFields:/\brent\b[^.;\n]*(?:£|GBP)/i.test(description) ? ['rent'] : [], draft:{fields:{cuisine:{value:null,provenance:'default',evidence:null}},location:{text:null,near:false,distance:null,unit:null},unused:[],clarifications:['Choose a cuisine.']}}, bundle, catalogue);
+  const source = validateProfileExtraction({region:null,cuisine:null,venue_type:null,price_band:'unknown',rent:null,rent_band:null,requirements:null},description,bundle.vocabulary,catalogue,{complete:true});
+  return descriptionQuery(description,source,bundle,catalogue);
 }
 
 // Validate user clarification at the final scoring boundary too.

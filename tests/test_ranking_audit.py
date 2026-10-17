@@ -2,8 +2,10 @@
 
 import json
 
+import pytest
+
 from plotluck.data import data_dir
-from plotluck.ranking_audit import audit
+from plotluck.ranking_audit import audit, compare
 
 
 def test_audit_detects_when_grouped_cuisines_have_identical_rankings():
@@ -17,3 +19,13 @@ def test_audit_detects_when_grouped_cuisines_have_identical_rankings():
     if "cuisine" not in model["features"]["restaurant_inputs"]:
         assert result["distinct_cuisine_score_vectors"] == result["cuisine_groups"]
         assert result["median_within_group_score_change"] == 0
+
+
+def test_compare_reports_stable_rankings_and_absent_districts():
+    bundle = data_dir(choice="sample")
+    result = compare(bundle, bundle, inspect=["ZZ99"])
+
+    assert result["dropped"] == [] and result["added"] == []
+    assert result["min_rank_correlation"] == pytest.approx(1)
+    assert result["min_top20_overlap"] == min(20, result["shared_districts"])
+    assert result["inspect"]["ZZ99"] == {"live": None, "candidate": None}

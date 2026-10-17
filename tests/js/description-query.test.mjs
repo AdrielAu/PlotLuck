@@ -8,8 +8,8 @@ import { descriptionQuery, confirmedDescription } from '../../web/description-qu
 const bundle = await loadBundle(n => readFile(new URL(`../../data/sample/${n}`, import.meta.url), 'utf8'));
 const place = { id: 'leeds', name: 'Leeds', aliases: [], type: 'city', context: 'England', lat: 53.8, lon: -1.55, districts: ['SE1'] };
 const catalogue = { places: [place, { ...place, id: 'city', name: 'City of London', aliases: ['London'] }, { ...place, id: 'greater', name: 'Greater London', aliases: ['London'] }] };
-const full = text => `${text} Mid-range menu prices; any rent; no other requirements.`;
-const extraction = (text, changes = {}) => validateProfileExtraction({ region: null, cuisine: 'Thai', venue_type: 'Restaurant', price_band: '$$', rent: null, requirements:'no other requirements', ...changes }, text, bundle.vocabulary, catalogue, {complete:true});
+const full = text => `${text}${/\b(?:in|near|within|around)\s/i.test(text) ? '' : ' Search area: England.'} Mid-range menu prices; any rent; no other requirements.`;
+const extraction = (text, changes = {}) => validateProfileExtraction({ region: /\bEngland\b/i.test(text) ? 'England' : null, cuisine: 'Thai', venue_type: 'Restaurant', price_band: '$$', rent: null, requirements:'no other requirements', ...changes }, text, bundle.vocabulary, catalogue, {complete:true});
 
 test('a clear description becomes a scoring query without routine questions; explicit dietary traits survive', async () => {
   const text = full('A Thai restaurant with vegan options.');
@@ -48,7 +48,7 @@ test('a model cannot discard a second named location', async () => {
   assert.ok(q.needs.some(n => n.field === 'area'));
 });
 
-test('near searches use a default radius, preserve miles, and reject invalid or empty scopes', async () => {
+test('bare near uses the boundary; explicit distances preserve miles and reject invalid or empty scopes', async () => {
   const text = full('A Thai restaurant within 3 miles of Leeds.');
   const q = await descriptionQuery(text, extraction(text, { region: 'Leeds' }), bundle, catalogue);
   assert.deepEqual(q.needs, []);
@@ -58,11 +58,11 @@ test('near searches use a default radius, preserve miles, and reject invalid or 
   assert.throws(() => confirmedDescription(q, bundle, catalogue), /positive radius/);
   const near = full('A Thai restaurant near Leeds.');
   const d = await descriptionQuery(near, extraction(near, { region: 'Leeds' }), bundle, catalogue);
-  assert.equal(d.radius, 5);
+  assert.equal(d.radius, null);
 });
 
 test('numeric rent requires a band choice and never overwrites district context', async () => {
-  const text = 'A Thai restaurant, rent \u00a32,000 per month. Mid-range menu prices; no other requirements.';
+  const text = 'A Thai restaurant in England, rent \u00a32,000 per month. Mid-range menu prices; no other requirements.';
   const q = await descriptionQuery(text, extraction(text, { rent: { amount: 2000, period: 'month', currency: 'GBP' } }), bundle, catalogue);
   assert.equal(q.rentBudget.annualGBP, 24000);
   assert.deepEqual(q.needs.map(n => n.field), ['rent']);
@@ -74,7 +74,7 @@ test('numeric rent requires a band choice and never overwrites district context'
 
 test('explicit relative rent words filter districts without a numeric budget', async () => {
   for (const phrase of ['low rent', 'rent low']) {
-    const text = `A Thai restaurant with ${phrase}. Mid-range menu prices; no other requirements.`;
+    const text = `A Thai restaurant in England with ${phrase}. Mid-range menu prices; no other requirements.`;
     const q = await descriptionQuery(text, extraction(text), bundle, catalogue);
     assert.equal(q.rentBand, 'low');
     assert.deepEqual(q.needs, []);
@@ -83,7 +83,7 @@ test('explicit relative rent words filter districts without a numeric budget', a
 });
 
 test('a price rejected by NN2 validation blocks scoring until explicitly clarified', async () => {
-  const text = 'A Thai restaurant with uncertain prices. Any rent; no other requirements.';
+  const text = 'A Thai restaurant in England with uncertain prices. Any rent; no other requirements.';
   const partial=extraction(text,{price_band:'$'});
   const q=await descriptionQuery(text,partial,bundle,catalogue);
   assert.deepEqual(q.needs.map(n=>n.field),['price']);

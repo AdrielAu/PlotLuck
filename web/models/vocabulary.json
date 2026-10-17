@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 4,
  "cuisines": [
   {
    "cuisine": "Afghani",
@@ -54,7 +54,7 @@
   {
    "cuisine": "Australian",
    "cuisine_group": "International",
-   "label": "Australian (scored as International)"
+   "label": "Australian"
   },
   {
    "cuisine": "Austrian",
@@ -69,7 +69,7 @@
   {
    "cuisine": "Bangladeshi",
    "cuisine_group": "Asian",
-   "label": "Bangladeshi (scored as Asian)"
+   "label": "Bangladeshi"
   },
   {
    "cuisine": "Barbecue",
@@ -89,7 +89,7 @@
   {
    "cuisine": "Brazilian",
    "cuisine_group": "Latin",
-   "label": "Brazilian (scored as Latin)"
+   "label": "Brazilian"
   },
   {
    "cuisine": "British",
@@ -189,7 +189,7 @@
   {
    "cuisine": "Eastern European",
    "cuisine_group": "European",
-   "label": "Eastern European (scored as European)"
+   "label": "Eastern European"
   },
   {
    "cuisine": "Ecuadorean",
@@ -239,7 +239,7 @@
   {
    "cuisine": "German",
    "cuisine_group": "European",
-   "label": "German (scored as European)"
+   "label": "German"
   },
   {
    "cuisine": "Ghanaian",
@@ -284,7 +284,7 @@
   {
    "cuisine": "Irish",
    "cuisine_group": "European",
-   "label": "Irish (scored as European)"
+   "label": "Irish"
   },
   {
    "cuisine": "Israeli",
@@ -309,7 +309,7 @@
   {
    "cuisine": "Korean",
    "cuisine_group": "Asian",
-   "label": "Korean (scored as Asian)"
+   "label": "Korean"
   },
   {
    "cuisine": "Kurdish",
@@ -339,7 +339,7 @@
   {
    "cuisine": "Malaysian",
    "cuisine_group": "Asian",
-   "label": "Malaysian (scored as Asian)"
+   "label": "Malaysian"
   },
   {
    "cuisine": "Mediterranean",
@@ -364,7 +364,7 @@
   {
    "cuisine": "Moroccan",
    "cuisine_group": "African",
-   "label": "Moroccan (scored as African)"
+   "label": "Moroccan"
   },
   {
    "cuisine": "Native American",
@@ -374,7 +374,7 @@
   {
    "cuisine": "Nepali",
    "cuisine_group": "Asian",
-   "label": "Nepali (scored as Asian)"
+   "label": "Nepali"
   },
   {
    "cuisine": "New Zealand",
@@ -394,7 +394,7 @@
   {
    "cuisine": "Pakistani",
    "cuisine_group": "Asian",
-   "label": "Pakistani (scored as Asian)"
+   "label": "Pakistani"
   },
   {
    "cuisine": "Persian",
@@ -409,7 +409,7 @@
   {
    "cuisine": "Polish",
    "cuisine_group": "European",
-   "label": "Polish (scored as European)"
+   "label": "Polish"
   },
   {
    "cuisine": "Polynesian",
@@ -494,7 +494,7 @@
   {
    "cuisine": "Sri Lankan",
    "cuisine_group": "Asian",
-   "label": "Sri Lankan (scored as Asian)"
+   "label": "Sri Lankan"
   },
   {
    "cuisine": "Steakhouse",
@@ -519,7 +519,7 @@
   {
    "cuisine": "Taiwanese",
    "cuisine_group": "Asian",
-   "label": "Taiwanese (scored as Asian)"
+   "label": "Taiwanese"
   },
   {
    "cuisine": "Thai",
@@ -564,7 +564,7 @@
   {
    "cuisine": "Vietnamese",
    "cuisine_group": "Asian",
-   "label": "Vietnamese (scored as Asian)"
+   "label": "Vietnamese"
   },
   {
    "cuisine": "Welsh",

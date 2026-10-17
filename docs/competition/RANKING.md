@@ -96,3 +96,42 @@ low population is otherwise preserved rather than automatically rewritten.
 The full-data build reads the UK ONSPD archive and removes postcode districts
 with active postcodes in England and another UK country. A district entirely
 in England remains eligible even when it touches the national boundary.
+
+## Release audit of the #176 bundle (#165)
+
+Run `PYTHONPATH=src python -m plotluck.ranking_audit <candidate> --against <live> --inspect TD5 TD12 EC3M …`.
+The result for the #176 run is in
+[`runs/2026-10-17-train-nn1-context/ranking_audit.json`](../../runs/2026-10-17-train-nn1-context/ranking_audit.json);
+the live bundle is `web/models/` on `main` at `fd14f90`.
+
+| Check | Live | Candidate |
+|---|---|---|
+| Districts scored | 2,324 | 2,076 (248 dropped, 0 added) |
+| Held-out MAE / RMSE | 0.0503 / 0.0655 | 0.0503 / 0.0655 |
+| Distinct cuisine score vectors | 26 | 48 |
+| Median p10–p90 score spread | 0.0203 | 0.0136 |
+| Rank correlation with live, per cuisine group (median / min) | — | 0.60 / 0.45 |
+| Top-20 overlap with live (median / min) | — | 10 / 7 |
+
+Representative districts, default Indian profile (rank / districts):
+TD5 1st and TD12 16th in live, both omitted as cross-border; EC3M 2,320th in
+live, omitted. W1D 2,297th → 779th, SW1A 2,313th → 626th, B1 2,025th → 188th,
+LA22 1,086th → 184th, TR18 1,736th → 1,791st, CA1 1,719th → 1,922nd.
+
+**Gate: passed with a known coverage gap; publish the candidate.** Held-out
+error is unchanged, so the gain is in input handling rather than accuracy.
+Fine cuisines now change scores, and removing the cross-border districts
+takes TD5 (the live #1) and TD12 out of the ranking. The live ranking had
+those known flaws, so its reordering by the candidate is not evidence against
+it.
+
+Of the dropped districts, 199 have no mapped restaurants, including
+`W1M W1N W1R W1V W1X W1Y EC3B`, which also have no census values in the live
+bundle. The real loss is the 9 districts that the
+`commercial_core_without_footfall` rule omits: `EC2N EC2R EC2V EC3A EC3M EC3V
+EC4N EC4R` in the City (8 of its 17 districts remain) and `W1C`. Each has 2–50
+residents and 21–73 restaurants. The live bundle, without the rule, ranks
+them near the bottom (EC3M 2,320th, W1C 2,286th) because NN1 reads residential
+population as demand. Omitting them hides a known input weakness instead of
+showing misleading scores. Restoring them needs a worker or visitor demand
+input, not a different threshold.

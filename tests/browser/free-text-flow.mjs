@@ -7,7 +7,7 @@ import { NN2 } from '../../web/nn2-runtime.js';
 import { openSite, newPage } from './site.mjs';
 
 const catalogue = JSON.parse(await readFile(new URL('../../web/models/geography.json', import.meta.url)));
-function fakeRuntime(loads = true) {
+function fakeRuntime(loads = true, malformed = false) {
   return `export async function CreateMLCEngine(id, {initProgressCallback}) {
     initProgressCallback({progress:0.25,text:'Fetching'});
     if (!${loads}) await new Promise(()=>{});
@@ -15,35 +15,116 @@ function fakeRuntime(loads = true) {
     return {chat:{completions:{create:async options=>{
       const text=options.messages.at(-1).content;
       if (text.includes('slow')) await new Promise(resolve=>setTimeout(resolve,700));
-      const data={region:/london/i.test(text)?'London':text.includes('Hugh Town')?'Hugh Town':/greater manchester/i.test(text)?'Greater Manchester':text.includes('SE1')?'SE1':null,
-        cuisine:/thai/i.test(text)?'Thai':null,price_band:/mid(?:[ -]?range| price range)/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
+      const data={region:/hammersmith/i.test(text)?'hammersmith':/york/i.test(text)?'York':/london/i.test(text)?'London':/England/i.test(text)?'England':text.includes('Hugh Town')?'Hugh Town':/greater manchester/i.test(text)?'Greater Manchester':text.includes('SE1')?'SE1':null,
+        cuisine:/thai/i.test(text)?'Thai':/italian/i.test(text)?'Italian':/chinese/i.test(text)?'Chinese':null,price_band:/mid(?:[ -]?range| price range)/i.test(text)?'$$':'unknown',venue_type:/restaurant/i.test(text)?'Restaurant':/pub/i.test(text)?'Pub and bar':null,rent:text.includes('2000')?{amount:2000,period:'month',currency:'GBP'}:null,
         rent_band:/cheap rent/i.test(text)?'low':null,
         requirements:/no other requirements/i.test(text)?'no other requirements':/vegan options/i.test(text)?'vegan options':null};
       if (text.includes('Greater London')) data.region='Greater London';
       if (text.includes('mid Range')) data.price_band='$$';
       if (text.includes('uncertain prices')) data.price_band='$';
       if (text.includes('bad budget')) data.rent.currency='USD';
-      return {choices:[{finish_reason:'stop',message:{content:text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
+      return {choices:[{finish_reason:'stop',message:{content:${malformed}||text.includes('broken')?'not JSON':JSON.stringify(data)}}]};
     }}}};
   }`;
 }
-async function openPage(t, { gpu = true, loads = true } = {}) {
+async function openPage(t, { gpu = true, loads = true, malformed = false } = {}) {
   const { browser, url } = await openSite(t);
   const page = await newPage(browser, { reducedMotion:'reduce' });
   const sent = [];
   page.context().on('request', r => sent.push(r.url() + ' ' + (r.postData() ?? '')));
   await page.addInitScript(gpu => Object.defineProperty(Navigator.prototype, 'gpu', { configurable:true, get:()=>gpu?{requestAdapter:async()=>({})}:undefined }), gpu);
-  await page.context().route(NN2.runtimeUrl, route => route.fulfill({ body:fakeRuntime(loads), contentType:'text/javascript' }));
+  await page.context().route(NN2.runtimeUrl, route => route.fulfill({ body:fakeRuntime(loads,malformed), contentType:'text/javascript' }));
   await page.goto(url);
   await page.locator('#interpret:enabled').waitFor();
   return { page, sent };
 }
-const completeText = (text, omit = []) => text + (omit.includes('price') ? '' : ' Mid-range menu prices;') + (omit.includes('rent') ? '' : ' any rent;') + (omit.includes('other') ? '' : ' no other requirements.');
+const completeText = (text, omit = []) => text + (/\b(?:in|near|within|around)\s/i.test(text) ? '' : ' Search area: England;') + (omit.includes('price') ? '' : ' Mid-range menu prices;') + (omit.includes('rent') ? '' : ' any rent;') + (omit.includes('other') ? '' : ' no other requirements.');
 // Unrelated workflow checks supply all six inputs; missing-field cases opt out.
 async function submit(page, text, {raw = false, omit = []} = {}) {
   await page.getByLabel('Describe your restaurant idea', { exact:true }).fill(raw ? text : completeText(text,omit));
   await page.getByRole('button', { name:'Find districts', exact:true }).click();
 }
+
+test('the exact mid range Chinese prompt keeps menu prices after either a valid or malformed model reply',async t=>{
+  for(const malformed of [false,true]) {
+    const {page}=await openPage(t,{malformed});
+    await submit(page,'A mid range chinese restaurant in hammersmith',{raw:true});
+    await page.locator('#clarification').waitFor();
+    assert.equal(await page.locator('#clarify-price').count(),0);
+    if(malformed) {
+      await page.locator('#clarify-cuisine').selectOption('Chinese');
+      await page.locator('#clarify-venue').selectOption('Restaurant');
+      assert.match(await page.locator('#interpret-status').innerText(),/could not read/);
+    }
+    await page.locator('#clarify-area').selectOption('E09000013');
+    await page.locator('#clarify-rent').selectOption('any');
+    await page.getByRole('button',{name:'No other requirements',exact:true}).click();
+    await page.locator('#clarify-compare').click();
+    await page.locator('#results-screen').waitFor();
+    assert.match(await page.locator('#confirmed-profile').innerText(),/Mid-range/);
+    assert.match(await page.locator('#results-heading').innerText(),/Chinese.*Hammersmith and Fulham/);
+    assert.deepEqual(page.errors,[]);
+  }
+});
+
+test('near a city offers no radius input and uses its complete boundary',async t=>{
+  const {page}=await openPage(t);
+  await submit(page,'A Chinese restaurant near York.');
+  await page.locator('#clarification').waitFor();
+  assert.equal(await page.locator('#clarify-radius').count(),0);
+  await page.locator('#clarify-area').selectOption('E06000014');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Chinese.*York/);
+  assert.doesNotMatch(await page.locator('#results-heading').innerText(),/Within|km/);
+  await page.getByRole('slider',{name:'Score threshold',exact:true}).press('Home');
+  assert.deepEqual((await page.locator('#ranked .district-code').allTextContents()).sort(),catalogue.places.find(p=>p.id==='E06000014').districts);
+  assert.deepEqual(page.errors,[]);
+});
+
+test('high end Italian pub offers Hammersmith borough and keeps stated prices and type',async t=>{
+  const {page}=await openPage(t);
+  await submit(page,'An high end italian pub in hammersmith',{raw:true});
+  await page.locator('#clarification').waitFor();
+  assert.deepEqual(await page.locator('#clarification-fields select').evaluateAll(els=>els.map(e=>e.id)),['clarify-area','clarify-rent']);
+  assert.equal(await page.locator('#clarify-venue').count(),0);
+  assert.equal(await page.locator('#clarify-price').count(),0);
+  await page.getByLabel('Where would you like to open?',{exact:true}).selectOption('E09000013');
+  await page.locator('#clarify-rent').selectOption('any');
+  await page.getByRole('button',{name:'No other requirements',exact:true}).click();
+  if(process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/borough-clarification.png',fullPage:true});
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Italian.*Hammersmith and Fulham.*borough/);
+  assert.match(await page.locator('#confirmed-profile').innerText(),/Pub and bar.*High-end/);
+  assert.deepEqual(page.errors,[]);
+});
+
+test('unresolved places offer cities and clearing or retyping the area never selects England automatically',async t=>{
+  const {page}=await openPage(t);
+  await submit(page,'A Thai restaurant in Atlantis.');
+  await page.locator('#clarification').waitFor();
+  const area=page.locator('#clarify-area');
+  assert.ok((await area.locator('option').allTextContents()).some(s=>s.startsWith('York ')));
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  if(process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/city-choice-mobile.png',fullPage:true});
+  await page.locator('#clarify-area-text').fill('');
+  assert.equal(await area.inputValue(),'');
+  assert.ok((await area.locator('option').allTextContents()).some(s=>s.startsWith('Manchester ')));
+  await page.locator('#clarify-area-text').fill('England');
+  await area.selectOption('england:');
+  await area.selectOption('');
+  await page.locator('#clarify-compare').click();
+  assert.equal(await page.locator('#results-screen').isHidden(),true);
+  await page.locator('#clarify-area-text').fill('Hammersmith and Fulham borough');
+  assert.equal(await area.locator('option').count(),2);
+  await area.selectOption('place:E09000013');
+  await page.locator('#clarify-compare').click();
+  await page.locator('#results-screen').waitFor();
+  assert.match(await page.locator('#results-heading').innerText(),/Hammersmith and Fulham.*borough/);
+  assert.deepEqual(page.errors,[]);
+});
 
 test('Greater Manchester and stated food prices and cheap rent are retained without repeat questions',async t=>{
   const {page}=await openPage(t);
@@ -80,11 +161,12 @@ test('A restaurant in london asks every unanswered Erica question and retains th
   assert.deepEqual(page.errors,[]);
 });
 
-test('absent area means England and a missing restaurant type is explicitly requested', async t => {
+test('an absent area asks for a city and a missing restaurant type is explicitly requested', async t => {
   const {page}=await openPage(t);
   await submit(page,'Thai food',{raw:true});
   await page.locator('#clarification').waitFor();
-  assert.equal(await page.locator('#clarify-area').count(),0);
+  assert.equal(await page.locator('#clarify-area').count(),1);
+  await page.locator('#clarify-area').selectOption('E06000014');
   assert.equal(await page.locator('#clarify-cuisine').count(),0);
   await page.getByLabel('What kind of place is it?',{exact:true}).selectOption('Restaurant');
   await page.locator('#clarify-price').selectOption('unknown');
@@ -92,7 +174,7 @@ test('absent area means England and a missing restaurant type is explicitly requ
   await page.locator('#clarify-other').fill('vegan options, live music');
   await page.locator('#clarify-compare').click();
   await page.locator('#results-screen').waitFor();
-  assert.match(await page.locator('#results-heading').innerText(),/England/);
+  assert.match(await page.locator('#results-heading').innerText(),/York/);
   assert.match(await page.locator('#confirmed-profile').innerText(),/Vegan options: Yes/);
   assert.match(await page.locator('#unused-details').innerText(),/live music/);
 });
