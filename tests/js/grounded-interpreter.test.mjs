@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { groundInterpretation, placeCandidates, retryAdvice } from '../../web/grounded-interpreter.js';
-import { areaDistricts } from '../../web/description-controls.js';
+import { areaDistricts } from '../../web/geography.js';
 const vocabulary = JSON.parse(await readFile(new URL('../../web/models/vocabulary.json', import.meta.url)));
 const catalogue = JSON.parse(await readFile(new URL('../../web/models/geography.json', import.meta.url)));
 const description = 'A Thai restaurant within 3 km of London with vegan options.';

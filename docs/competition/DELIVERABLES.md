@@ -14,7 +14,7 @@ What the team plans to submit, and our own cut-offs before the deadline. `TBD (g
 | GitHub repo | Link to this repo. Other rules: TBD (guidebook). | | in progress | |
 | Title | Contains the team name. | | not started | |
 | Screenshots | LinuxONE + AI/ML evidence; tracked only in [CHECKLIST.md](../evidence/CHECKLIST.md). | | not started | |
-| Live site | Required team scope: browser NN2 proposes an editable profile and area; confirmation scopes NN1 district circles, threshold and ranked list. Interpretation continues after the VM expires. | | not started | |
+| Live site | Required team scope: one free-text description, browser NN2, direct results for clear valid interpretations, and targeted clarification otherwise. Resolved area scopes NN1 district circles, threshold and ranked list. Interpretation continues after the VM expires; quality/release gates remain open. | | in progress | |
 | NN2 evaluation | Team release gates: browser quality, latency and download-size results; LinuxONE synthetic inference/evaluation evidence. Describe pretrained inference accurately. See the NN2 plan. | | not started | |
 
 ## Judging
