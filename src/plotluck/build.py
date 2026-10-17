@@ -82,9 +82,17 @@ DISTRICT_COLUMNS = (
 _CATEGORIES = ("excellent", "very_good", "average", "poor", "terrible")
 
 # NN1's district inputs, in input-vector order, and which get log1p first.
-# shortcut: commercial_rent_index is left out until VOA lands (issue #72).
-DISTRICT_INPUTS = ("population", "deprivation_index", "total_restaurants", "same_cuisine_supply")
-LOG1P = {"population", "total_restaurants", "same_cuisine_supply"}
+DISTRICT_INPUTS = (
+    "population",
+    "deprivation_index",
+    "commercial_rent_index",
+    "total_restaurants",
+    "same_cuisine_supply",
+)
+LOG1P = {"population", "commercial_rent_index", "total_restaurants", "same_cuisine_supply"}
+# VOA measuring standards the rent index divides by, in order of preference:
+# net internal area, then gross internal area where a district has no NIA.
+VOA_AREA_UNITS = ("NIA", "GIA")
 
 
 def build(
@@ -106,7 +114,9 @@ def build(
     groups = cuisine_groups(restaurants, mapping, group_threshold)
     for r in restaurants:
         r["cuisine_group"] = groups[r["cuisine"]]
-    districts = district_table(postcodes, _read_csv(data / "p004_england.csv"), restaurants)
+    districts = district_table(
+        postcodes, _read_csv(data / "p004_england.csv"), restaurants, _read_csv(data / "voa_england.csv")
+    )
     supply = Counter((r["postcode_district"], r["cuisine_group"]) for r in restaurants)
 
     _write_csv(data / "restaurants.csv", RESTAURANT_COLUMNS, restaurants)
@@ -155,7 +165,7 @@ def build(
     metrics.update(
         restaurants=len(restaurants),
         labelled=len(labelled),
-        inputs_left_out={"commercial_rent_index": "no VOA source yet (issue #72)"},
+        districts_without_rent=sum(d["commercial_rent_index"] == "" for d in districts),
         epochs=epochs,
         train_loss=losses,
     )
@@ -276,6 +286,7 @@ def _district_raw(district: dict, same_cuisine: int, exclude_from_total: int = 0
     return [
         number(district["population"]),
         number(district["deprivation_index"]),
+        number(district["commercial_rent_index"]),
         float(district["total_restaurants"] - exclude_from_total),
         float(same_cuisine),
     ]
@@ -389,13 +400,16 @@ def cuisine_groups(restaurants: list[dict], mapping: dict, threshold: int) -> di
     return {c: group if pool[group] >= threshold else OTHER for c, group in root.items()}
 
 
-def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[dict]) -> list[dict]:
+def district_table(
+    postcodes: list[dict], p004: list[dict], restaurants: list[dict], voa: list[dict]
+) -> list[dict]:
     """One row per district with an English postcode that has a grid reference.
 
     Restaurants come from live postcodes with a grid reference, so no
     restaurant lands in a district left out here.
     """
     residents = {r["district"]: int(r["residents"]) for r in p004}
+    rent = rent_index(voa)
     totals = Counter(r["postcode_district"] for r in restaurants)
     points, ranks = {}, {}
     for p in postcodes:
@@ -414,10 +428,28 @@ def district_table(postcodes: list[dict], p004: list[dict], restaurants: list[di
             "total_restaurants": totals[code],
             "population": residents.get(code, ""),
             "deprivation_index": round(statistics.fmean(ranks[code]), 1) if code in ranks else "",
-            # shortcut: no VOA source yet; issue #72 fills commercial_rent_index.
-            "commercial_rent_index": "",
+            "commercial_rent_index": rent.get(code, ""),
         })
     return rows
+
+
+def rent_index(voa: list[dict]) -> dict[str, float]:
+    """Median rateable value per square metre of each district's VOA valuations.
+
+    £/m² only compares within one measuring standard, so a district uses its
+    NIA valuations, or its GIA ones when it has no NIA. Valuations without a
+    positive area have no valid denominator; a district with none is left
+    out, not filled.
+    """
+    per_m2 = {}
+    for v in voa:
+        area, rv = _float(v["total_area"]), _float(v["adopted_rv"])
+        if v["unit"] in VOA_AREA_UNITS and area and area > 0 and rv is not None:
+            per_m2.setdefault(v["district"], {}).setdefault(v["unit"], []).append(rv / area)
+    return {
+        d: round(statistics.median(next(by_unit[u] for u in VOA_AREA_UNITS if u in by_unit)), 1)
+        for d, by_unit in per_m2.items()
+    }
 
 
 def _nearest_district(postcodes: list[dict], points: list[tuple[float, float]]) -> list[str]:

@@ -6,7 +6,7 @@ from collections import Counter
 import numpy as np
 import pytest
 
-from plotluck import build, data_dir
+from plotluck import build, data_dir, sources
 
 
 def read_csv(path):
@@ -18,7 +18,7 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv")
+SOURCES = ("tripadvisor_england.csv", "onspd_england.csv", "p004_england.csv", "voa_england.csv")
 
 
 def copy_sources(dest):
@@ -105,6 +105,38 @@ def test_model_layers_are_inputs_64_32_1(built):
     ]
     assert shapes == [(64, width, 64), (32, 64, 32), (1, 32, 1)]
     assert model["activations"] == ["relu", "relu", "sigmoid"]
+
+
+def test_rent_index_is_median_rateable_value_per_square_metre(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    voa = [
+        ("SE1", "NIA", "100.00", "10000"),
+        ("SE1", "GIA", "100.00", "30000"),  # SE1 has NIA areas, so GIA is not used
+        ("SE1", "NIA", "50.00", "10000"),
+        ("SE1", "NIA", "", "90000"),  # no area: not a valid denominator
+        ("SE1", "NIA", "0.00", "90000"),
+        ("SE1", "OTH", "3.00", "90000"),  # a count of units, not square metres
+        ("SE11", "GIA", "100.00", "40000"),  # no NIA area: GIA stands in
+        ("EC4R", "NIA", "", "5000"),
+    ]
+    with (data / "voa_england.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(sources.VOA_COLUMNS)
+        for i, (district, unit, area, rv) in enumerate(voa):
+            writer.writerow([f"synthetic-{i}", f"{district} 1AA", district, "234",
+                             "Restaurant And Premises", unit, area, rv])
+
+    metrics = build.build(data, data / "bundle", group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+
+    rent = {d["postcode_district"]: d["commercial_rent_index"]
+            for d in read_csv(data / "bundle" / "districts.csv")}
+    assert rent["SE1"] == "150.0"  # median of 100 and 200 £/m², NIA only
+    assert rent["SE11"] == "400.0"
+    assert rent["EC4R"] == ""
+    model = read_json(data / "bundle" / "model.json")
+    assert "commercial_rent_index" in model["features"]["district_inputs"]
+    assert model["transforms"]["commercial_rent_index"]["log1p"] is True
+    assert "commercial_rent_index" not in metrics.get("inputs_left_out", {})
 
 
 def test_unmapped_cuisine_tag_fails_and_names_the_tag(tmp_path):
