@@ -629,6 +629,20 @@ def test_mapping_covers_every_tag_in_the_committed_sample():
     assert sorted(tags - set(build.load_mapping())) == []
 
 
+def test_mapping_rejects_a_tag_listed_twice(tmp_path):
+    path = tmp_path / "cuisine_mapping.csv"
+    path.write_text(
+        "tag,kind,cuisine,parent,venue_type\n"
+        "Mediterranean,umbrella,Mediterranean,,\n"
+        "Italian,cuisine,Italian,European,\n"
+        "Mediterranean,umbrella,Mediterranean,European,\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Mediterranean"):
+        build.load_mapping(path)
+
+
 def encode(model, profile, group, district, supply):
     """The input vector, built only from model.json and the bundle tables."""
     t = model["transforms"]
