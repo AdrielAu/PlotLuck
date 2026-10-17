@@ -14,7 +14,8 @@ function readFrom(dir) {
 
 // A one-layer sigmoid model whose logit is `weights . inputs`, so a test reads
 // an input straight back as logit(score). Inputs: cuisine_group one-hot
-// [African, Thai], then `districtInputs`, all untransformed.
+// [African, Thai], then (with `includeFineCuisine`) cuisine one-hot
+// [Eritrean, Ethiopian, Thai], then `districtInputs`, all untransformed.
 function tinyBundle({
   weights,
   population = "100",
@@ -36,6 +37,8 @@ function tinyBundle({
       version,
       cuisines: [
         { cuisine: "Eritrean", cuisine_group: "African", label: "Eritrean (scored as African)" },
+        { cuisine: "Ethiopian", cuisine_group: "African", label: "Ethiopian (scored as African)" },
+        { cuisine: "Somali", cuisine_group: "African", label: "Somali (scored as African)" },
         { cuisine: "Thai", cuisine_group: "Thai", label: "Thai" },
       ],
       traits: [],
@@ -45,7 +48,7 @@ function tinyBundle({
       features: { restaurant_inputs: includeFineCuisine ? ["cuisine_group", "cuisine"] : ["cuisine_group"], district_inputs: districtInputs },
       transforms: {
         cuisine_group: { kind: "one_hot", values: ["African", "Thai"] },
-        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", "Thai"] } } : {}),
+        ...(includeFineCuisine ? { cuisine: { kind: "one_hot", values: ["Eritrean", "Ethiopian", "Thai"] } } : {}),
         ...Object.fromEntries(districtInputs.map((name) => [name, numeric])),
         population: { ...numeric, median: 7 },
       },
@@ -65,9 +68,11 @@ test("the current site also loads the published version 2 bundle", async () => {
   assert.equal(scoreDistricts(bundle, { cuisine: "Thai" }).length, 1);
 });
 
-test("fine cuisine changes the input even when its group is unchanged", async () => {
-  const bundle = await tinyBundle({ weights: [0, 0, 1, 0, 0, 0], includeFineCuisine: true });
-  assert.ok(logit(bundle, "Eritrean") > logit(bundle, "Thai"));
+test("two supported cuisines in one group get distinct inputs; a rare one keeps only its group", async () => {
+  const bundle = await tinyBundle({ weights: [0.5, 0, 1, 2, 0, 0, 0], includeFineCuisine: true });
+  assert.ok(Math.abs(logit(bundle, "Eritrean") - 1.5) < 1e-9);
+  assert.ok(Math.abs(logit(bundle, "Ethiopian") - 2.5) < 1e-9);
+  assert.ok(Math.abs(logit(bundle, "Somali") - 0.5) < 1e-9);
 });
 
 test("invalid coordinates and supply counts are rejected while loading", async () => {
@@ -154,6 +159,13 @@ for (const dir of ["data/sample", "web/models"]) {
           `${profile.cuisine} in ${code}: ${got[code]} vs ${expected}`,
         );
       }
+    }
+    // A bundle with fine cuisine inputs (version 3) must check both input paths.
+    const fine = bundle.model.transforms.cuisine?.values;
+    if (fine) {
+      const cuisines = reference.cases.map((c) => c.profile.cuisine);
+      assert.ok(cuisines.some((c) => fine.includes(c)), "no supported fine cuisine in the reference cases");
+      assert.ok(cuisines.some((c) => !fine.includes(c)), "no fallback cuisine in the reference cases");
     }
   });
 }

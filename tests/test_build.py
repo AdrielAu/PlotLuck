@@ -634,6 +634,70 @@ def test_rare_fine_cuisine_falls_back_to_its_group_input():
     assert rare[0, 0] == 1 and rare[0, 1] == 0  # broad group on; unsupported fine cuisine off
 
 
+@pytest.fixture(scope="module")
+def two_european(tmp_path_factory):
+    """A bundle built from the sample with its plain European rows split into French and Spanish."""
+    data = copy_sources(tmp_path_factory.mktemp("two_european"))
+    source = data / "tripadvisor_england.csv"
+    rows = read_csv(source)
+    european = [row for row in rows if row["cuisines"] == "European"]
+    for i, row in enumerate(european):
+        row["cuisines"] = "French" if i % 2 else "Spanish"
+    with source.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    out = data / "bundle"
+    build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=5)
+    return out
+
+
+def test_two_supported_cuisines_in_one_group_get_distinct_inputs_and_labels(two_european):
+    model = read_json(two_european / "model.json")
+    vocabulary = read_json(two_european / "vocabulary.json")
+    cuisines = {c["cuisine"]: c for c in vocabulary["cuisines"]}
+    defaults = {t["name"]: t["default"] for t in vocabulary["traits"]}
+
+    assert {"French", "Spanish"} <= set(model["transforms"]["cuisine"]["values"])
+    assert cuisines["French"]["cuisine_group"] == cuisines["Spanish"]["cuisine_group"] == "European"
+    # Each now has its own input, so its label must not claim it is scored as the group.
+    assert cuisines["French"]["label"] == "French"
+    assert cuisines["Greek"]["label"] == "Greek (scored as European)"  # no sample rows: falls back
+    district = np.zeros((1, len(build.DISTRICT_INPUTS)))
+    french, spanish, greek = (
+        build.inputs(model, {**defaults, "cuisine": c, "cuisine_group": "European"}, district)[0]
+        for c in ("French", "Spanish", "Greek")
+    )
+    groups = len(model["transforms"]["cuisine_group"]["values"])
+    assert np.array_equal(french[:groups], spanish[:groups])  # same broad group input
+    assert not np.array_equal(french, spanish)
+    assert not greek[groups:groups + len(model["transforms"]["cuisine"]["values"])].any()
+
+
+@pytest.mark.parametrize("cuisine, label", [
+    ("French", "French (scored as European)"),  # supported: has its own input
+    ("Greek", "Greek"),  # fallback: scored as its group
+])
+def test_publish_rejects_a_label_that_misstates_fine_cuisine_support(two_european, tmp_path, cuisine, label):
+    bundle = {
+        name: read_csv(two_european / name) if name.endswith(".csv") else read_json(two_european / name)
+        for name in build.BUNDLE_FILES
+    }
+    next(c for c in bundle["vocabulary.json"]["cuisines"] if c["cuisine"] == cuisine)["label"] = label
+    with pytest.raises(ValueError, match="label"):
+        build.publish_bundle(tmp_path / "public", bundle)
+
+
+def test_reference_scores_cover_a_supported_and_a_fallback_fine_cuisine(two_european):
+    model = read_json(two_european / "model.json")
+    cuisines = {c["cuisine"]: c["cuisine_group"] for c in read_json(two_european / "vocabulary.json")["cuisines"]}
+    fine = set(model["transforms"]["cuisine"]["values"])
+    profiles = [case["profile"]["cuisine"] for case in read_json(two_european / "reference_scores.json")["cases"]]
+
+    assert any(c in fine and c != cuisines[c] for c in profiles)  # its fine input differs from its group's
+    assert any(c not in fine for c in profiles)
+
+
 def test_build_derives_chain_flags_and_preserves_unknown_traits(tmp_path):
     copy_sources(tmp_path)
     source = tmp_path / "tripadvisor_england.csv"
