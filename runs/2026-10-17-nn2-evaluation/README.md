@@ -31,3 +31,26 @@ run in parallel, using the supplied notebook. LinuxONE is still unmeasured here.
 sanitized transfer URLs; the adjacent scores report counts every failure.
 Response-body bytes come from Playwright request sizes, include redirect bodies,
 and are distinct from advertised shard sizes or GPU memory estimates.
+
+## Approved development tuning
+
+The user approved the agent-authored expected labels and inference rubric on
+2026-10-17 before tuning. The 100 heldout cases remain untouched. The original
+baseline above retains its original pending-review metadata as historical evidence.
+
+The first compact experiment reduced two warm requests to 8.46/8.07 seconds but
+still failed 0/3: it copied a vegan example into unrelated requests and confused
+3 km with 3,000 km. Its report preserves those failures; that intermediate prompt
+was not independently committed and is not the reproducibility reference.
+
+The final compact contract generates only cue-backed fields, with omitted traits
+defaulted deterministically by the validator. Its prompt removes the copied vegan
+example, states distance rules and includes task-grammar compilation in cold
+initialization. The final report records interpreter and benchmark SHA-256 hashes.
+Cold initialization was 26.10 seconds. All three warm requests were below 10
+seconds, but **quality remains 0/3**: the model fabricated the evidence `Thailand`
+for `Thai`, substituted Cambridge for Camden, and invented distance/near values.
+The validator rejected every reply. This is not a 100-case quality/performance
+sign-off and does not make the candidate usable in the product. Native execution
+and the full heldout evaluation remain pending. No further tuning was undertaken
+after the user's request to finish the current work and stop.

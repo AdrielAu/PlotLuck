@@ -1,0 +1,26 @@
+{
+  "label_status": "Agent-authored expected labels and inference rubric reviewed and approved by the user on 2026-10-17; 100 heldout cases reserved.",
+  "evaluated": 3,
+  "correct": 0,
+  "warm_p95_seconds": 5.764099999994039,
+  "results": [
+    {
+      "id": "clear-001",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.764099999994039
+    },
+    {
+      "id": "clear-002",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.576899999991059
+    },
+    {
+      "id": "clear-003",
+      "correct": false,
+      "error": "Evidence must occur in the description.",
+      "seconds": 5.5309000000059605
+    }
+  ]
+}

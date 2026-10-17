@@ -26,6 +26,9 @@ try {
     if (!adapter) return { hardware, error: 'WebGPU adapter unavailable', results: [] };
     const vocabulary = await (await fetch('/web/models/vocabulary.json')).json();
     const benchmark = await (await fetch('/tests/fixtures/nn2-benchmark.json')).json();
+    const hash = async path => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await (await fetch(path)).arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('');
+    const interpreter_sha256=await hash('/web/interpreter.js');
+    const benchmark_sha256=await hash('/tests/fixtures/nn2-benchmark.json');
     const worker = new Worker('/web/nn2-worker.js', {type:'module'});
     let id = 0;
     const call = data => new Promise((resolve,reject) => {
@@ -42,7 +45,7 @@ try {
     });
     const start=performance.now(); const results=[];
     try {
-      await call({action:'load'});
+      await call({action:'load',vocabulary});
       const cold_load_seconds=(performance.now()-start)/1000;
       for (const c of benchmark.cases.filter(c=>c.split==='development').slice(0,3)) {
         try {
@@ -51,7 +54,7 @@ try {
           results.push({id:c.id,description:c.description,reply:JSON.stringify(raw),seconds:r.seconds});
         } catch(error) {results.push({id:c.id,description:c.description,reply:error.reply,error:error.message,seconds:error.seconds});}
       }
-      return {hardware,cold_load_seconds,label_status:benchmark.label_status,results};
+      return {hardware,cold_load_seconds,interpreter_sha256,benchmark_sha256,label_status:benchmark.label_status,results};
     } catch(error) {return {hardware,error:error.message,elapsed_seconds:(performance.now()-start)/1000,results};}
     finally {worker.terminate();}
   });
