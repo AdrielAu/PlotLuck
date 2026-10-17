@@ -17,7 +17,7 @@ test("six questions lead through a review card to scoped results", async (t) => 
   await t.test("the first screen introduces Plotluck and keeps the source attribution", async () => {
     assert.equal(await page.getByRole("heading", { level: 1 }).innerText(), "Plotluck");
     assert.match(await page.locator(".lede").innerText(), /^Tell us about your restaurant idea and we will help you find the ideal location for your restaurant\.$/);
-    assert.match(await page.locator(".model-line").first().innerText(), /on-device model \(≈300 MB\) · Download/);
+    assert.match(await page.locator(".model-line").first().innerText(), /on-device model \(286 MB\) · Download/);
     assert.match(await page.locator("body > footer").innerText(), /Not affiliated with or endorsed by Tripadvisor.*Non-commercial use only/s);
     assert.equal(await page.locator("#results-screen").isVisible(), false);
   });

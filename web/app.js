@@ -1,6 +1,7 @@
 // Questions, then the results screen for the confirmed draft, which keeps the cuisine-and-trait pickers.
 import { setUpCombobox } from "./combobox.js";
 import { makeInterpreter, RENT_BANDS, RENT_LABELS } from "./interpret.js";
+import { makeNN2 } from "./nn2.js";
 import { defaultProfile, matchCuisines, traitLabel, valueLabel } from "./pickers.js";
 import { setUpQuestions } from "./questions.js";
 import { setUpResultsScreen, showScreen } from "./results-screen.js";
@@ -107,9 +108,68 @@ function showQuestions() {
   syncKitchen();
 }
 
+const modelStatus = (text) => { $("model-status").textContent = text; };
+
+// NN2 reads the answers once the user downloads it; the interpreter falls back when it cannot.
+function readWithModel(nn2) {
+  return {
+    ready: nn2.ready,
+    async read(description) {
+      modelStatus("Reading your answers with the on-device model…");
+      try {
+        const draft = await nn2.read(description);
+        modelStatus("The on-device model read your answers.");
+        return draft;
+      } catch (error) {
+        modelStatus(`The on-device model could not read your answers (${error.message}), so Plotluck's built-in reader did.`);
+        throw error;
+      }
+    },
+  };
+}
+
+// The download line: an explicit download with progress and cancel. Until it finishes, the built-in reader reads.
+function setUpModelDownload(nn2) {
+  const download = $("model-download");
+  const cancel = $("model-cancel");
+  const bar = $("model-progress");
+  let cancelled = false;
+  download.addEventListener("click", async () => {
+    if (!(await nn2.supported())) {
+      modelStatus("This browser cannot run the on-device model (it needs WebGPU, in desktop Chrome or Edge), so Plotluck's built-in reader reads your answers.");
+      return;
+    }
+    cancelled = false;
+    download.hidden = true;
+    cancel.hidden = false;
+    bar.value = 0;
+    bar.hidden = false;
+    modelStatus("Downloading the on-device model. You can keep answering meanwhile.");
+    try {
+      await nn2.download(({ progress }) => { bar.value = progress; });
+      modelStatus("The on-device model is ready and will read your answers in this tab.");
+    } catch (error) {
+      download.hidden = false;
+      modelStatus(cancelled
+        ? "Download cancelled. Plotluck's built-in reader reads your answers."
+        : `The on-device model could not load (${error.message}). Plotluck's built-in reader reads your answers; you can try the download again.`);
+    } finally {
+      cancel.hidden = true;
+      bar.hidden = true;
+    }
+  });
+  cancel.addEventListener("click", () => {
+    cancelled = true;
+    nn2.cancel();
+    download.focus();
+  });
+}
+
 async function main() {
   const bundle = await loadBundle(readModelFile);
-  const interpreter = makeInterpreter(bundle);
+  const nn2 = makeNN2(bundle.vocabulary);
+  const interpreter = makeInterpreter(bundle, readWithModel(nn2));
+  setUpModelDownload(nn2);
   buildTraitPickers(bundle.vocabulary.traits);
   if (interpreter.hasRent) {
     $("rent-picker").replaceChildren(groupOf("Rent band", RENT_BANDS.map((b) => choiceInput("radio", "rent_band", b, RENT_LABELS[b], b === "any"))));
@@ -235,10 +295,6 @@ async function main() {
     onCompare: compareDraft,
   });
   $("change-area").addEventListener("click", () => { showQuestions(); questions.open("location"); });
-  $("model-download").addEventListener("click", () => {
-    // shortcut: no on-device model yet; #136 connects NN2's explicit download (size, progress, cancel) here.
-    $("model-status").textContent = "The on-device model is not available yet, so Plotluck's built-in reader reads your answers.";
-  });
 
   $("loading").hidden = true;
   $("profile-controls").disabled = false;

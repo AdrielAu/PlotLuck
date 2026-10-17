@@ -45,3 +45,22 @@ test('cue-only sparse fields receive deterministic vocabulary defaults without i
   delete r.fields.cuisine;
   assert.throws(() => validateInterpretation(r, description, vocabulary));
 });
+test('the rent band is a validated filter: never an NN1 input, any by default, invalid values rejected', () => {
+  const rentDescription = 'Food: Thai\nRent: as cheap as possible';
+  const r = reply();
+  r.fields.cuisine.evidence = 'Thai';
+  r.fields.vegan_options = { value: true, provenance: 'inferred', evidence: 'Thai' };
+  r.location = { text: null, near: false, distance: null, unit: null };
+  const sparse = validateInterpretation(r, rentDescription, vocabulary);
+  assert.equal(sparse.rentBand, 'any');
+  assert.equal(sparse.fields.rent_band.provenance, 'default');
+  assert.equal('rent_band' in sparse.profile, false);
+  r.fields.rent_band = { value: 'low', provenance: 'inferred', evidence: 'as cheap as possible' };
+  assert.equal(validateInterpretation(r, rentDescription, vocabulary).rentBand, 'low');
+  for (const value of ['cheap', 'Low', null, true]) {
+    r.fields.rent_band.value = value;
+    assert.throws(() => validateInterpretation(r, rentDescription, vocabulary), String(value));
+  }
+  assert.deepEqual(interpretationSchema(vocabulary).properties.fields.properties.rent_band.properties.value.enum, ['low', 'mid', 'high', 'any']);
+  assert.match(buildPrompt(rentDescription, vocabulary)[0].content, /rent_band/);
+});

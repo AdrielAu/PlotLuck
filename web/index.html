@@ -29,7 +29,9 @@
   <div class="intro-scrim">
     <h1 id="title">Plotluck</h1>
     <p class="lede">Tell us about your restaurant idea and we will help you find the ideal location for your restaurant.</p>
-    <p class="model-line">Read my answers with the on-device model (≈300 MB) · <button id="model-download" type="button" class="link">Download</button></p>
+    <!-- 286 MB: the browser model transfer measured in runs/2026-10-17-nn2-evaluation. -->
+    <p class="model-line">Read my answers with the on-device model (286 MB) · <button id="model-download" type="button" class="link">Download</button><button id="model-cancel" type="button" class="link" hidden>Cancel</button></p>
+    <progress id="model-progress" class="model-progress" max="1" value="0" aria-label="On-device model download" hidden></progress>
     <p id="model-status" class="model-line" role="status" aria-live="polite"></p>
   </div>
   <form id="prompt" class="prompt" novalidate>
