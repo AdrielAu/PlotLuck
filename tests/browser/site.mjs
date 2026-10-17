@@ -22,14 +22,18 @@ export async function openSite(t) {
     } catch { response.writeHead(404).end(); }
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  t.after(() => new Promise((resolve) => server.close(resolve)));
   // SwiftShader gives headless Chromium WebGL for the kitchen.
   const browser = await chromium.launch({
     headless: true,
     args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
     ...(process.env.PLOTLUCK_BROWSER ? { executablePath: process.env.PLOTLUCK_BROWSER } : {}),
   });
-  t.after(() => browser.close());
+  // Release connections even after a failed assertion or pending browser request.
+  t.after(async () => {
+    server.closeAllConnections();
+    await browser.close();
+    await new Promise(resolve => server.close(resolve));
+  }, { timeout: 15_000 });
   return { browser, url: `http://127.0.0.1:${server.address().port}/` };
 }
 
