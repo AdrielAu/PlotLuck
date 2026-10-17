@@ -1,6 +1,7 @@
-// Restaurant pickers, then district results: score colours, threshold and an accessible shortlist.
+// The questions screen: restaurant pickers whose confirmed answers open the results screen.
 import { defaultProfile, matchCuisines } from "./pickers.js";
-import { loadBundle, rankDistricts, scoreDistricts } from "./scoring.js";
+import { setUpResultsScreen, showScreen } from "./results-screen.js";
+import { loadBundle } from "./scoring.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,11 +19,10 @@ const VALUE_LABELS = { unknown: "Unknown" };
 const traitLabel = (name) => TRAIT_LABELS[name] ?? name.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 
 function showError(error) {
+  showScreen("questions-screen");
   $("loading").hidden = true;
   $("pick-prompt").hidden = true;
-  $("results").hidden = true;
   $("profile-controls").disabled = true;
-  $("threshold").disabled = true;
   $("error-detail").textContent = `${error.message}. Check your connection and try loading again. If this continues, the site's model files may need updating.`;
   $("error").hidden = false;
 }
@@ -167,101 +167,34 @@ async function main() {
   buildTraitPickers(bundle.vocabulary.traits);
   const traitKinds = new Map(bundle.vocabulary.traits.map((t) => [t.name, t.kind]));
   let draft = defaultProfile(bundle.vocabulary, undefined);
-  let confirmedQuery = null;
-  let rescore = null;
+  let confirmed = null;
 
-  // The map is built on the first confirmation, once its container is visible.
-  function showResults() {
-    $("pick-prompt").hidden = true;
-    $("results").hidden = false;
-    const map = L.map("map");
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
-    const circles = new Map(
-      bundle.districts.map((d) => [
-        d.postcode_district,
-        L.circleMarker([Number(d.centroid_lat), Number(d.centroid_lon)], { radius: 8, color: "#284c29", weight: 1, fillOpacity: 0.85 }),
-      ]),
-    );
-    map.fitBounds(L.featureGroup([...circles.values()]).getBounds(), { padding: [20, 20] });
-
-    // Scores change only with the profile; the slider just filters them.
-    let scores = [];
-    let threshold = 0;
-    let thresholdMoved = false;
-
-    function applyThreshold() {
-      $("threshold-value").value = threshold.toFixed(4);
-      $("threshold").setAttribute("aria-valuetext", `${threshold.toFixed(4)} review-based success score`);
-      const ranked = rankDistricts(scores, threshold);
-      const shown = new Set(ranked.map((d) => d.postcode_district));
-      for (const [code, circle] of circles) {
-        if (shown.has(code)) circle.addTo(map);
-        else circle.remove();
-      }
-      $("count").textContent = `${ranked.length} of ${scores.length} districts at or above the threshold`;
-      $("empty").hidden = ranked.length > 0;
-      $("ranked").replaceChildren(
-        ...ranked.map(({ postcode_district, score }) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.setAttribute("aria-label", `${postcode_district}, score ${score.toFixed(4)}. Show on map.`);
-          const code = document.createElement("span");
-          code.className = "district-code";
-          code.textContent = postcode_district;
-          const value = document.createElement("span");
-          value.className = "district-score";
-          value.textContent = score.toFixed(4);
-          button.append(code, value);
-          button.addEventListener("click", () => {
-            map.panTo(circles.get(postcode_district).getLatLng(), { animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches });
-            circles.get(postcode_district).openPopup();
-          });
-          const item = document.createElement("li");
-          item.append(button);
-          return item;
-        }),
-      );
-    }
-
-    $("threshold").addEventListener("input", () => {
-      thresholdMoved = true;
-      threshold = Number($("threshold").value);
-      applyThreshold();
+  function describeProfile(profile, searchAreaName) {
+    const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === profile.cuisine);
+    const traits = bundle.vocabulary.traits.map((t) => {
+      let value = profile[t.name];
+      if (typeof value === "boolean") value = value ? "Yes" : "No";
+      else value = VALUE_LABELS[value] ?? value;
+      return `${traitLabel(t.name)}: ${value}`;
     });
-    $("threshold").disabled = false;
-
-    return (nextScores) => {
-      scores = nextScores;
-      for (const { postcode_district, score } of scores) {
-        const pale = [224, 237, 215], dark = [40, 76, 41];
-        const fill = pale.map((channel, i) => Math.round(channel + (dark[i] - channel) * score));
-        const popup = document.createElement("p");
-        popup.textContent = `${postcode_district}: ${score.toFixed(4)}`;
-        circles.get(postcode_district)
-          .setStyle({ fillColor: `rgb(${fill.join(",")})` })
-          .bindPopup(popup);
-      }
-      if (!thresholdMoved) {
-        const ranked = rankDistricts(scores, 0);
-        threshold = ranked[Math.max(0, Math.ceil(ranked.length * 0.1) - 1)]?.score ?? 0;
-        // Keep the exact initial cutoff even when the range control rounds its
-        // thumb to a 0.01 step. A narrow score spread still gets a useful shortlist.
-        $("threshold").value = String(threshold);
-      }
-      applyThreshold();
-    };
+    return { heading: `${cuisine.label} · ${searchAreaName}`, summary: `${traits.join("; ")}.` };
   }
 
+  const openResults = setUpResultsScreen(bundle, {
+    describeProfile,
+    onChangeAnswers: () => {
+      updateDraft();
+      $("cuisine").focus();
+    },
+  });
+
   function updateDraft() {
-    const pending = !confirmedQuery || Object.keys(draft).some((name) => draft[name] !== confirmedQuery.profile[name]);
+    const pending = !confirmed || Object.keys(draft).some((name) => draft[name] !== confirmed[name]);
     let message = "Review your choices, then compare districts across England.";
-    if (confirmedQuery) {
+    if (confirmed) {
       message = pending
-        ? "Edits are not applied. Results still show your last confirmed restaurant in England."
-        : "Results match your confirmed restaurant in England.";
+        ? "Your results show your last confirmed answers. Select Compare districts to update them."
+        : "These answers match your results. Select Compare districts to see them again.";
     }
     $("profile-status").textContent = message;
     $("profile-error").hidden = true;
@@ -283,19 +216,10 @@ async function main() {
       return;
     }
     try {
-      const query = { profile: { ...draft }, area: "England" };
-      const scores = scoreDistricts(bundle, query.profile);
-      rescore ??= showResults();
-      rescore(scores);
-      confirmedQuery = query;
-      const cuisine = bundle.vocabulary.cuisines.find((c) => c.cuisine === query.profile.cuisine);
-      const traits = bundle.vocabulary.traits.map((t) => {
-        let value = query.profile[t.name];
-        if (typeof value === "boolean") value = value ? "Yes" : "No";
-        else value = VALUE_LABELS[value] ?? value;
-        return `${traitLabel(t.name)}: ${value}`;
-      });
-      $("confirmed-profile").textContent = `${cuisine.label} · ${query.area}. ${traits.join("; ")}.`;
+      // shortcut: the pickers only offer England, upgrade when NN2 proposes a search area (#110).
+      if (!openResults({ profile: { ...draft }, searchArea: [] })) return;
+      confirmed = { ...draft };
+      $("pick-prompt").hidden = true;
       updateDraft();
     } catch (error) {
       showError(error);

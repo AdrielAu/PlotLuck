@@ -27,6 +27,3 @@
 #compare:hover { background: var(--focus); }
 /* Screen-reader-only, except a no-match message, which everyone sees. */
 .visually-hidden:not(.shown) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-@media (max-width: 760px) {
-  #profile-controls { grid-template-columns: minmax(0, 1fr); padding: 20px; }
-}
