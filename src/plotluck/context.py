@@ -46,11 +46,11 @@ def census_rows(data: Path, name: str):
             reader = csv.DictReader(io.TextIOWrapper(raw, encoding="utf-8-sig", newline=""))
             header = reader.fieldnames or []
             (country,) = [c for c in header if re.fullmatch(r"ctry\d\dcd", c)]
-            if "msoa21" not in header:
-                raise ValueError("Census context requires ONSPD's msoa21 column")
+            if "msoa21cd" not in header:
+                raise ValueError("Census context requires ONSPD's msoa21cd column")
             for row in reader:
-                if row[country] == "E92000001" and not row["doterm"] and row["msoa21"]:
-                    weights[row["msoa21"]][row["pcds"].split()[0]] += 1
+                if row[country] == "E92000001" and not row["doterm"] and row["msoa21cd"]:
+                    weights[row["msoa21cd"]][row["pcds"].split()[0]] += 1
     if not weights:
         raise ValueError("Census context has no active English postcode-to-MSOA mappings")
 
