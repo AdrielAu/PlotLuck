@@ -106,7 +106,7 @@ def test_build_rejects_private_fields_before_writing(tmp_path, monkeypatch, file
 
     monkeypatch.setattr(build, "publish_bundle", leaking_publisher)
     with pytest.raises(ValueError, match="private|unexpected"):
-        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, epochs=1)
+        build.build(data, out, group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1)
 
     assert not out.exists()
     assert not (data / "restaurants.csv").exists()
@@ -123,6 +123,56 @@ def test_sample_run_folder_contains_only_metrics_and_no_policy_values(data):
 
 def test_committed_sample_run_metrics_pass_privacy_guard():
     build.validate_run_metrics(read_json(data_dir(choice="sample") / "run" / "metrics.json"))
+
+
+def test_generated_cv_metrics_pass_privacy_guard(data):
+    build.validate_run_metrics(read_json(data / "run" / "metrics.json"))
+
+
+@pytest.mark.parametrize(
+    "path, value",
+    [
+        (("cv", "folds", 0, "restaurant_name"), "Private name"),
+        (("cv", "folds", 0, "rows", "fit"), "Private name"),
+        (("cv", "folds", 0, "mae"), float("nan")),
+        (("cv", "folds", 0, "early_stop_loss"), ["Private name"]),
+        (("cv", "summary", "mae", "R0"), 0.5),
+        (("cv", "summary", "rmse", "std"), float("inf")),
+        (("shipped", "train_loss"), ["Private name"]),
+        (("shipped", "epochs"), True),
+    ],
+)
+def test_nested_cv_metrics_reject_private_or_invalid_values(data, path, value):
+    metrics = read_json(data / "run" / "metrics.json")
+    target = metrics
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+
+    with pytest.raises(ValueError):
+        build.validate_run_metrics(metrics)
+
+
+def test_build_cli_help_lists_current_options(capsys):
+    with pytest.raises(SystemExit) as result:
+        build.main(["--help"])
+    assert result.value.code == 0
+    help_text = capsys.readouterr().out
+    assert "--max-epochs" in help_text and "--run" in help_text
+
+
+def test_build_writes_metrics_to_the_requested_run_folder(tmp_path):
+    data = copy_sources(tmp_path / "data")
+    run = tmp_path / "results"
+
+    metrics = build.build(
+        data, tmp_path / "bundle", run=run,
+        group_threshold=build.SAMPLE_GROUP_THRESHOLD, max_epochs=1,
+    )
+
+    assert read_json(run / "metrics.json") == metrics
+    build.validate_run_metrics(metrics)
+    assert not (data / "run").exists()
 
 
 @pytest.mark.parametrize(
