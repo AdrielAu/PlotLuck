@@ -64,3 +64,13 @@ test('the rent band is a validated filter: never an NN1 input, any by default, i
   assert.deepEqual(interpretationSchema(vocabulary).properties.fields.properties.rent_band.properties.value.enum, ['low', 'mid', 'high', 'any']);
   assert.match(buildPrompt(rentDescription, vocabulary)[0].content, /rent_band/);
 });
+test('in labelled answers, rent band evidence must come from the Rent line', () => {
+  const answers = 'Food: Thai\nRent: whatever works\nOther: cheap and cheerful';
+  const r = reply();
+  r.fields.vegan_options = { value: true, provenance: 'inferred', evidence: 'Thai' };
+  r.location = { text: null, near: false, distance: null, unit: null };
+  r.fields.rent_band = { value: 'low', provenance: 'inferred', evidence: 'cheap' };
+  assert.throws(() => validateInterpretation(r, answers, vocabulary), /rent/i);
+  r.fields.rent_band = { value: 'any', provenance: 'explicit', evidence: 'whatever works' };
+  assert.equal(validateInterpretation(r, answers, vocabulary).rentBand, 'any');
+});

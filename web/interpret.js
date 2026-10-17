@@ -148,16 +148,16 @@ export function makeInterpreter(bundle, nn2) {
 
   // NN2's validated draft in the questions screen's shape. The area is read locally, never from the model.
   // shortcut: NN2's location text, distance and clarifications are unused until the place catalogue (#117/#118).
-  function fromModel(read, answers) {
+  function fromModel(reply, answers) {
     const draft = {
-      profile: { ...read.profile, cuisine: read.profile.cuisine ?? undefined },
+      profile: { ...reply.profile, cuisine: reply.profile.cuisine ?? undefined },
       marks: { area: "explicit" },
       area: readArea(answers.location ?? ""),
-      rentBand: rentCuts ? read.rentBand : "any",
-      unused: [...read.unused],
+      rentBand: rentCuts ? reply.rentBand : "any",
+      unused: [...reply.unused],
     };
     if (!draft.area) draft.marks.area = "unresolved";
-    for (const [name, f] of Object.entries(read.fields)) draft.marks[name] = f.provenance;
+    for (const [name, f] of Object.entries(reply.fields)) draft.marks[name] = f.provenance;
     if (!draft.profile.cuisine) draft.marks.cuisine = "unresolved";
     if (!rentCuts) draft.marks.rent_band = "default";
     return draft;

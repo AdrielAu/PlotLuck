@@ -121,6 +121,8 @@ function readWithModel(nn2) {
         modelStatus("The on-device model read your answers.");
         return draft;
       } catch (error) {
+        // A timeout stops the model, so offer the download again.
+        if (!nn2.ready()) $("model-download").hidden = false;
         modelStatus(`The on-device model could not read your answers (${error.message}), so Plotluck's built-in reader did.`);
         throw error;
       }
@@ -135,12 +137,14 @@ function setUpModelDownload(nn2) {
   const bar = $("model-progress");
   let cancelled = false;
   download.addEventListener("click", async () => {
+    // Hidden before the WebGPU check, so a second click cannot start a second download.
+    download.hidden = true;
     if (!(await nn2.supported())) {
+      download.hidden = false;
       modelStatus("This browser cannot run the on-device model (it needs WebGPU, in desktop Chrome or Edge), so Plotluck's built-in reader reads your answers.");
       return;
     }
     cancelled = false;
-    download.hidden = true;
     cancel.hidden = false;
     bar.value = 0;
     bar.hidden = false;

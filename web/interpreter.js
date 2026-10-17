@@ -57,6 +57,8 @@ export function validateInterpretation(reply, description, vocabulary) {
     if (f.provenance === 'default') {
       if (f.value !== definition.default || f.evidence !== null) throw new Error('Invalid default.');
     } else if (typeof f.evidence !== 'string' || !f.evidence.trim() || !description.includes(f.evidence)) throw new Error('Evidence must occur in the description.');
+    // In the questions screen's labelled answers, only the "Rent:" line speaks to the rent band.
+    else if (definition === RENT_BAND && /^Rent:/m.test(description) && !description.match(/^Rent:.*$/m)[0].includes(f.evidence)) throw new Error('Rent band evidence must come from the Rent line.');
     if (definition !== RENT_BAND) profile[definition.name] = f.value;
   }
   for (const key of ['unused', 'clarifications']) {
