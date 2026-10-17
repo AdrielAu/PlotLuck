@@ -27,8 +27,8 @@ The style of food a restaurant serves, from Plotluck's fixed cuisine list.
 _Avoid_: Food type, category
 
 **Trait**:
-A non-cuisine property of a restaurant or restaurant profile, such as price band.
-_Avoid_: Property, attribute, feature
+A non-cuisine property of a restaurant or restaurant profile, picked from Plotluck's fixed trait list, such as price band, takeaway or vegan options.
+_Avoid_: Tag, property, attribute, feature
 
 **Score**:
 A number from 0 to 1 that rates the expected review-based success of a restaurant profile in one postcode district. It is not a calibrated probability.
@@ -37,6 +37,10 @@ _Avoid_: Probability, likelihood, chance, rating, rank
 **Review-based success**:
 A restaurant's customer satisfaction and accumulated review activity, characterised by its average rating, review distribution and total review count. It does not measure profitability or longevity.
 _Avoid_: Commercial success, survival, profitability, longevity
+
+**Rating**:
+A restaurant's average TripAdvisor star rating in the source data. It describes a real restaurant, never a postcode district.
+_Avoid_: Score, stars, review score
 
 **Score threshold**:
 The cut-off a user sets on the map. Districts scoring below it are hidden.
