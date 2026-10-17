@@ -18,6 +18,8 @@ test("a profile needs confirmation before its district results appear", async (t
   assert.equal(await page.locator("#questions-screen").isVisible(), false);
   assert.equal(await page.evaluate(() => document.activeElement.id), "results-heading");
   const cuisine = page.getByRole("combobox", { name: "Cuisine", exact: true });
+  assert.equal(await cuisine.isVisible(), false);
+  await page.getByText("Edit your restaurant", { exact: true }).click();
   assert.equal(await cuisine.inputValue(), "Thai");
   assert.equal(await page.locator("#results-heading").innerText(), "Thai · England");
   assert.match(await page.locator("#confirmed-profile").innerText(), /Vegan options: Yes/);
@@ -49,9 +51,13 @@ test("a profile needs confirmation before its district results appear", async (t
 
   await t.test("a moved threshold is kept for the same answers and reset for new ones", async () => {
     // Home moves the slider to the search area's lowest score, showing every district.
+    const mapHeight = () => page.locator(".map-panel").evaluate((panel) => panel.offsetHeight);
+    const topTenHeight = await mapHeight();
     await slider.press("Home");
     const all = await page.locator("#ranked li").count();
     assert.ok(all > 10);
+    // The long list scrolls in its panel; it must not stretch the map.
+    assert.equal(await mapHeight(), topTenHeight);
     // End goes just past the best score: nothing is shown and the message says why.
     await slider.press("End");
     assert.equal(await page.locator("#ranked li").count(), 0);

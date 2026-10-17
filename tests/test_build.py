@@ -32,7 +32,8 @@ def copy_sources(dest):
     return dest
 
 
-@pytest.mark.parametrize("filled, ships", [(98, False), (100, True)])
+# 203 rows survive cleaning, and the first of them to be dropped (row 20) is filled: the rule needs 102.
+@pytest.mark.parametrize("filled, ships", [(101, False), (103, True)])
 def test_trait_fill_rule_controls_vocabulary_and_model(tmp_path, capsys, filled, ships):
     copy_sources(tmp_path)
     source = tmp_path / "tripadvisor_england.csv"
@@ -61,7 +62,7 @@ def test_trait_fill_rule_controls_vocabulary_and_model(tmp_path, capsys, filled,
     for case in read_json(out / "reference_scores.json")["cases"]:
         assert set(case["profile"]) == {"cuisine", *traits}
     output = capsys.readouterr().out
-    assert f"vegan_options: {filled / 200:.1%}" in output
+    assert f"vegan_options: {(filled - 1) / 203:.1%}" in output  # row 20 is cleaned out
     for name in ("chain", "price_band", "vegetarian_friendly", "gluten_free"):
         assert f"{name}: " in output
 
@@ -87,7 +88,7 @@ def test_bundle_holds_only_publishable_files_and_private_ones_stay_in_data(data,
         "vocabulary.json",
     ]
     assert (data / "restaurants.csv").is_file()
-    assert read_json(data / "run" / "metrics.json")["restaurants"] == 200
+    assert read_json(data / "run" / "metrics.json")["restaurants"] == 203
 
 
 @pytest.mark.parametrize(
@@ -262,9 +263,39 @@ def test_run_metrics_count_label_exclusions_and_fixes_by_reason(data):
 
     # Sample rows 0-4 carry one of each problem; see tripadvisor_england.csv.
     # Row 4 (zero reviews, zero counts) is excluded, so its counts are no fix.
-    assert metrics["excluded"] == {"rating_missing": 1, "rating_out_of_range": 1, "n_total_zero": 1}
+    # Rows 200-205 are the seeded cleaning defects: a far point, an exact and a
+    # near duplicate (the other row of each pair is kept) and three spellings of a chain.
+    assert metrics["source_rows"] == 206
+    assert metrics["excluded"] == {
+        "far_from_postcode": 1, "duplicate_listing": 2,
+        "rating_missing": 1, "rating_out_of_range": 1, "n_total_zero": 1,
+    }
     assert metrics["label_fixes"] == {"counts_partly_missing": 1, "total_below_counts": 1}
-    assert metrics["labelled"] == 197
+    assert metrics["restaurants"] == 203
+    assert metrics["labelled"] == 200
+
+
+def test_cleaning_the_sample_equals_removing_the_losing_row_of_each_seeded_defect_by_hand(data):
+    rows = read_csv(data / "tripadvisor_england.csv")
+    postcodes = read_csv(data / "onspd_england.csv")
+    by_link = {}
+    for i, r in enumerate(rows):
+        by_link.setdefault(r["restaurant_link"], []).append(i)
+    (original, exact), = (v for v in by_link.values() if len(v) == 2)
+    near, = by_link["synthetic-near-0030"]
+    far, = by_link["synthetic-far-0001"]
+    total = lambda i: float(rows[i]["total_reviews_count"])
+    assert total(exact) > total(original) and total(near) < total(by_link["synthetic-0030"][0])
+
+    cleaned, _ = build.restaurant_table(rows, postcodes, build.load_mapping())
+    by_hand, _ = build.restaurant_table(
+        [r for i, r in enumerate(rows) if i not in (original, near, far)], postcodes, build.load_mapping()
+    )
+
+    assert cleaned == by_hand
+    assert sum(r["is_chain"] for r in cleaned) == sum(r["is_chain"] for r in by_hand)
+    variants = [r for r in rows if r["restaurant_link"].startswith("synthetic-variant-")]
+    assert len(variants) == 3 and len({r["restaurant_name"] for r in variants}) == 3
 
 
 def test_run_metrics_report_cv_against_the_baseline_and_ship_the_median_best_epoch(data):
@@ -830,9 +861,123 @@ def test_cuisine_groups_fold_small_cuisines_into_their_parent_then_other():
 
 
 def test_restaurant_table_keeps_raw_cuisines_and_the_sample_keeps_several_groups(data, built):
-    source = Counter(r["cuisines"] for r in read_csv(data / "tripadvisor_england.csv"))
+    # The far point and the losing row of each duplicate pair are cleaned out; see the sample metrics test.
+    rows = read_csv(data / "tripadvisor_england.csv")
+    first = {}
+    for i, r in enumerate(rows):
+        first.setdefault(r["restaurant_link"], i)
+    cleaned_out = {first["synthetic-0020"], first["synthetic-near-0030"], first["synthetic-far-0001"]}
+    source = Counter(r["cuisines"] for i, r in enumerate(rows) if i not in cleaned_out)
     restaurants = Counter(r["cuisines"] for r in read_csv(data / "restaurants.csv"))
     groups = read_json(built / "model.json")["transforms"]["cuisine_group"]["values"]
 
     assert restaurants == source
     assert len(groups) >= 5
+
+
+# --- cleaning stages in restaurant_table (issue #150) ---------------------------------
+
+POSTCODES = [{"district": "SE1", "lat": "51.5", "long": "-0.1", "doterm": ""}]
+HERE = (51.5, -0.1)
+
+
+def source_row(link, name, total, point=HERE, **overrides):
+    """A valid source row; ``total`` tells survivors apart in the output."""
+    row = {
+        "restaurant_link": link, "restaurant_name": name,
+        "latitude": str(point[0]), "longitude": str(point[1]),
+        "cuisines": "Italian", "avg_rating": "4.0", "total_reviews_count": f"{total}.0",
+        "reviews_count_in_default_language": "5.0",
+        **{c: "1.0" for c in ("excellent", "very_good", "average", "poor", "terrible")},
+        "price_level": "", "vegetarian_friendly": "", "vegan_options": "", "gluten_free": "",
+    }
+    return {**row, **overrides}
+
+
+def metres_north(metres):
+    return (HERE[0] + metres / 111_195, HERE[1])
+
+
+def clean(rows):
+    restaurants, metrics = build.restaurant_table(rows, POSTCODES, build.load_mapping())
+    return [r["total_reviews"] for r in restaurants], metrics
+
+
+def test_a_row_farther_than_the_limit_from_any_postcode_is_excluded_as_far_from_postcode():
+    far = (HERE[0] + 2 * build.FAR_FROM_POSTCODE_KM / 111.195, HERE[1])
+    near = (HERE[0] + build.FAR_FROM_POSTCODE_KM / 2 / 111.195, HERE[1])
+
+    totals, metrics = clean([source_row("a", "A", 10), source_row("b", "B", 20, far), source_row("c", "C", 30, near)])
+
+    assert totals == [10, 30]
+    assert metrics["excluded"] == {"far_from_postcode": 1}
+
+
+def test_exact_duplicate_links_keep_the_row_with_the_most_reviews_and_ties_keep_the_first():
+    rows = [
+        source_row("x", "One", 10), source_row("x", "One", 40), source_row("x", "One", 25),
+        source_row("y", "Two", 10, metres_north(1000)), source_row("y", "Two", 10, metres_north(1000)),
+    ]
+
+    totals, metrics = clean(rows)
+
+    assert totals == [40, 10]
+    assert metrics["excluded"] == {"duplicate_listing": 3}
+
+
+def test_near_duplicates_share_a_normalised_name_within_the_limit_and_keep_the_most_reviews():
+    rows = [
+        source_row("a", "Joe's Café", 10),
+        source_row("b", "JOES CAFE", 30, metres_north(build.NEAR_DUPLICATE_M / 2)),
+        source_row("c", "Joe's Café", 20, metres_north(build.NEAR_DUPLICATE_M * 4)),  # too far: a different branch
+        source_row("d", "Other name", 50),  # same place, different name
+    ]
+
+    totals, metrics = clean(rows)
+
+    assert totals == [30, 20, 50]
+    assert metrics["excluded"] == {"duplicate_listing": 1}
+
+
+def test_near_duplicates_chain_together_and_never_merge_review_counts():
+    step = build.NEAR_DUPLICATE_M * 0.8
+    rows = [source_row(str(i), "Chained", 10 * (i + 1), metres_north(step * i)) for i in range(3)]
+
+    totals, metrics = clean(rows)
+
+    assert totals == [30]
+    assert metrics["excluded"] == {"duplicate_listing": 2}
+
+
+def test_location_is_checked_before_duplicates_and_duplicates_before_chains():
+    far = (HERE[0] + 2 * build.FAR_FROM_POSTCODE_KM / 111.195, HERE[1])
+    rows = [
+        source_row("a", "Far", 10, far), source_row("a", "Far", 20, far),  # counted once, as far
+        *[source_row("d", "Triple", 10 * n) for n in (1, 2, 3)],  # one place, not a chain of three
+        *[source_row(f"c{i}", name, 10, metres_north(4 * build.NEAR_DUPLICATE_M * (i + 1)))
+          for i, name in enumerate(("Nando's", "Nandos", "NANDO’S"))],
+    ]
+
+    restaurants, metrics = build.restaurant_table(rows, POSTCODES, build.load_mapping())
+
+    assert metrics["excluded"] == {"far_from_postcode": 2, "duplicate_listing": 2}
+    assert [(r["total_reviews"], r["is_chain"]) for r in restaurants] == [(30, 0), (10, 1), (10, 1), (10, 1)]
+
+
+def test_branch_suffix_removal_is_off_by_default_and_switchable(monkeypatch):
+    names = ("Pret", "Pret - Soho", "Pret (Kings Cross)")
+    rows = [source_row(str(i), n, 10, metres_north(4 * build.NEAR_DUPLICATE_M * i)) for i, n in enumerate(names)]
+
+    assert build.DROP_BRANCH_SUFFIX is False
+    assert [r["is_chain"] for r in build.restaurant_table(rows, POSTCODES, build.load_mapping())[0]] == [0, 0, 0]
+    monkeypatch.setattr(build, "DROP_BRANCH_SUFFIX", True)
+    assert [r["is_chain"] for r in build.restaurant_table(rows, POSTCODES, build.load_mapping())[0]] == [1, 1, 1]
+
+
+def test_run_metrics_accept_the_cleaning_exclusion_reasons(data):
+    metrics = read_json(data / "run" / "metrics.json")
+    metrics["excluded"] = {"far_from_postcode": 1, "duplicate_listing": 2}
+    build.validate_run_metrics(metrics)
+    metrics["excluded"] = {"duplicate_restaurant": 2}
+    with pytest.raises(ValueError, match="counts"):
+        build.validate_run_metrics(metrics)
