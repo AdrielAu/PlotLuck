@@ -4,3 +4,6 @@
 
 # Agent worktrees: disposable, per clone
 .claude/worktrees/
+
+# Claude hook scripts: per clone, opt-in (see docs/setup.md)
+.claude/hooks/
