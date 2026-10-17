@@ -11,7 +11,7 @@ Screenshots prove the judged steps. Anyone on the team can capture one: take the
 
 ## Shots
 
-Required team scope includes browser NN2 interpretation, a confirmed profile/search area and NN1 district scores. Capture LinuxONE NN2 inference/evaluation separately from NN1 training and accelerated-inference benchmarks. Using pretrained NN2 weights is not training NN2; competition eligibility still needs verification. See [the plan](../plans/nn2-integration.md). Keep step numbers stable.
+Required team scope includes browser NN2 interpretation, a confirmed profile/search area and NN1 district scores. Capture LinuxONE NN2 inference/evaluation separately from NN1 training and accelerated-inference benchmarks. Using pretrained NN2 weights is not training NN2; pretrained-weight competition permission is [team-confirmed](../competition/nn2-eligibility.md), with final artifact licences/notices still requiring review. See [the plan](../plans/nn2-integration.md). Keep step numbers stable.
 
 | Step | Filename | What must be visible | Run folder | Done |
 |---|---|---|---|---|
