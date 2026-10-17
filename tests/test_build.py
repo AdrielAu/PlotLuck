@@ -692,6 +692,40 @@ def test_classify_follows_the_cuisine_rules(cuisines, expected):
     assert build.classify(cuisines, build.load_mapping()) == expected
 
 
+ITALIAN_REGIONS = (
+    "Apulian", "Calabrian", "Campania", "Central-Italian", "Emilian", "Lazio", "Ligurian", "Neapolitan",
+    "Northern-Italian", "Romagna", "Romana", "Sardinian", "Sicilian", "Southern-Italian", "Tuscan",
+)
+
+
+# Tags found only in the full Tripadvisor file (#77); the sample never carried them.
+@pytest.mark.parametrize(
+    "tag, expected",
+    [
+        ("Argentinian", ("Argentinean", "Restaurant")),
+        ("Nepalese", ("Nepali", "Restaurant")),
+        ("Philippine", ("Filipino", "Restaurant")),
+        ("Fast food", ("Unspecified", "Fast food and street food")),
+        *((region, ("Italian", "Restaurant")) for region in ITALIAN_REGIONS),
+        *((tag, ("Japanese", "Restaurant")) for tag in ("Hokkaido cuisine", "Kyoto cuisine", "Kaiseki", "Kappo")),
+        ("Beijing cuisine", ("Chinese", "Restaurant")),
+        ("Costa Rican", ("Central American", "Restaurant")),
+        ("Guatemalan", ("Central American", "Restaurant")),
+        ("Bahamian", ("Caribbean", "Restaurant")),
+        ("Puerto Rican", ("Caribbean", "Restaurant")),
+        ("Catalan", ("Spanish", "Restaurant")),
+        ("Assyrian", ("Assyrian", "Restaurant")),
+        ("Beer restaurants", ("Unspecified", "Pub and bar")),
+        ("Dining bars", ("Unspecified", "Pub and bar")),
+        ("Fruit parlours", ("Unspecified", "Café")),
+        ("Japanese sweets parlour", ("Unspecified", "Café")),
+        ("Medicinal foods", ("Unspecified", "Restaurant")),
+    ],
+)
+def test_classify_maps_full_data_tags(tag, expected):
+    assert build.classify(tag, build.load_mapping()) == expected
+
+
 def test_mapping_rows_are_well_formed_with_one_parent_per_cuisine():
     mapping = build.load_mapping()
     roots = {m["cuisine"] for m in mapping.values() if m["kind"] in ("cuisine", "umbrella") and not m["parent"]}
