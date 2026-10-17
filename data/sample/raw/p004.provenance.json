@@ -1,0 +1,10 @@
+{
+  "source": "p004",
+  "url": "https://www.nomisweb.co.uk/output/census/2021/pcdd_p004.csv",
+  "edition": "Census 2021 P004, usual residents by postcode district (census day 2021-03-21)",
+  "licence": "Open Government Licence v3.0",
+  "attribution": "Source: Office for National Statistics licensed under the Open Government Licence v.3.0",
+  "retrieved_at": "2026-10-17T10:58:14+00:00",
+  "bytes": 23636,
+  "sha256": "0ef20f21fadbe90743389b354844d8002a55f1cc912b0b636729efbfd4cb8bd7"
+}
