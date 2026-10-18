@@ -148,3 +148,39 @@ downloads have no workplace-population table, so footfall still comes from
 residents, restaurants and mapped tourism objects. The City districts above
 therefore stay omitted. Gate the full-data run as above, adding a check that
 low-population rural districts no longer dominate the top 20.
+
+## Release audit of bundle version 5
+
+The run is in [`runs/2026-10-18-train-nn1/`](../../runs/2026-10-18-train-nn1/):
+`metrics.json`, `ranking_audit.json` (against the live version 4 bundle) and
+`top20.txt` (default-trait top 20 for Indian, British and Chinese in both
+bundles).
+
+| Check | Live v4 | Candidate v5 |
+|---|---|---|
+| Districts scored | 2,076 | 2,076 (0 dropped, 0 added) |
+| Held-out MAE / RMSE | — | 0.148 / 0.186 (baseline 0.250 / 0.289; folds within ±0.0013) |
+| Distinct cuisine score vectors | — | 55 |
+| Median p10–p90 score spread | 0.0136 | 0.054 |
+| Rank correlation with live, per cuisine group (median / min) | — | 0.60 / 0.40 |
+| Top-20 overlap with live (median / min) | — | 3.5 / 0 |
+| Top-20 districts under 2,000 residents (Indian / British / Chinese) | 16 / 16 / 16 | 7 / 9 / 8 |
+
+MAE is on the percentile scale, so it is compared only with this run's own
+baseline. Representative districts, default Indian profile: W1D 779th →
+1,266th, LA22 184th → 160th, TR18 1,791st → 483rd; EC3M still omitted as a
+commercial core.
+
+**Gate: passed; publish the candidate.** The version 4 top 20 was led by
+districts with almost no residents (NE99 with 3, the Isles of Scilly with
+81–152, PE35 with 103). In version 5 the top 20 has real restaurant and hotel
+counts, and the matched community moves cuisines apart: S4, WV9 and B35 lead
+for Indian, WC1E appears for British.
+
+Known weaknesses: coastal and holiday towns (Northumberland coast, Isle of
+Wight, Cornwall and Devon) dominate, and city centres stay low (W1D fell),
+because residents, restaurants and mapped tourism objects are the only
+footfall inputs. B35 tops Indian with 8 restaurants, and PL33 and LA17 reach
+the British top 20 with 1–2. Default-trait scores now top out near 0.3, against
+0.7 in version 4, because a score is a percentile; restaurant traits move a
+score by up to about 0.14, more than district differences do.
