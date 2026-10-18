@@ -55,7 +55,8 @@ input { accent-color: var(--green); caret-color: var(--green); }
 #shortlist-help { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
 .drivers-note { padding-inline: 8px; margin: 8px 0 0; font-size: 12px; line-height: 1.4; }
 /* A driver summary in a map tooltip: the heading line, then one driver per line. */
-.driver-summary { max-width: 280px; white-space: normal; line-height: 1.4; }
+/* A set width: Leaflet tooltips shrink to fit and never wrap, so long lines would run off as one thin column or row. */
+.driver-summary { width: min(300px, calc(100vw - 64px)); white-space: normal; font-size: 13px; line-height: 1.4; }
 .driver-summary strong { display: block; margin-bottom: 2px; }
 .driver-summary p { margin: 0; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

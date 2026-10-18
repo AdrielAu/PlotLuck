@@ -95,10 +95,33 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
         const shape = shapeOf(code, { color: "#2f3437", weight: 1, fillOpacity: 0.5 })
           .bindTooltip("", { direction: "top" })
           .on("mouseover", () => highlight(code))
-          .on("mouseout", () => highlight(null));
+          .on("mouseout", () => highlight(null))
+          .on("tooltipopen", (event) => keepInside(event.tooltip));
         return [code, shape];
       }),
     );
+    // Panning or zooming moves an open tooltip with its district, so keep it inside again.
+    map.on("zoomend moveend", () => keepInside(highlighted && shapes.get(highlighted).getTooltip()));
+  }
+
+  // Nudge an open tooltip back inside the map, 8px clear of its edges and the map bar.
+  // Leaflet positions it with a transform, so the nudge goes in its margins.
+  function keepInside(tooltip) {
+    const el = tooltip?.getElement();
+    if (!el || !tooltip.isOpen()) return;
+    el.style.marginLeft = el.style.marginTop = "";
+    const { marginLeft, marginTop } = getComputedStyle(el);
+    const box = el.getBoundingClientRect();
+    const area = $("map").getBoundingClientRect();
+    const bar = document.querySelector(".map-bar").getBoundingClientRect();
+    const pad = 8;
+    const shift = (low, high, min, max) => (low < min ? min - low : high > max ? Math.max(max - high, min - low) : 0);
+    const dx = shift(box.left, box.right, area.left + pad, area.right - pad);
+    // Clear of the map bar too when the tooltip would sit over its columns.
+    const bottom = box.right + dx > bar.left && box.left + dx < bar.right ? bar.top - pad : area.bottom - pad;
+    const dy = shift(box.top, box.bottom, area.top + pad, bottom);
+    el.style.marginLeft = `${parseFloat(marginLeft) + dx}px`;
+    el.style.marginTop = `${parseFloat(marginTop) + dy}px`;
   }
 
   // A district's driver summary lines, worked out once per query on first use.
