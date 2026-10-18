@@ -436,7 +436,7 @@ test('map and list stay scoped; the shortlist size persists for the same query a
   await first.focus();
   const tooltip = page.locator('.leaflet-tooltip');
   assert.equal(await tooltip.isVisible(), true);
-  assert.match(await tooltip.innerText(), /^#1 of \d+ · \S+\n(Compared with a typical district|Close to a typical district)/);
+  assert.match(await tooltip.innerText(), /^#1 of \d+ · \S+\n+(Compared with a typical district|Close to a typical district)/);
   assert.match(await page.locator(`#${await first.getAttribute('aria-describedby')}`).textContent(), /typical district/);
   await page.keyboard.press('Enter');
   assert.equal(await tooltip.isVisible(), true);
@@ -453,12 +453,14 @@ test('district coverage circles and list rows remain linked after free-text inte
   await third.click();
   assert.match(await third.getAttribute('class'), /is-highlighted/);
   const tooltip = page.locator('.leaflet-tooltip');
-  assert.match(await tooltip.innerText(), new RegExp(`^#3 · ${code} · \\d\\.\\d{2,4}$`));
+  // Rank and code, then the driver summary; never a score.
+  assert.match(await tooltip.innerText(), new RegExp(`^#3 of \\d+ · ${code}\\n`));
+  assert.doesNotMatch(await tooltip.innerText(), /0\.\d/);
   await page.locator('#map').scrollIntoViewIfNeeded();
   const box = await page.locator('#map').boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForFunction(() => document.querySelectorAll('.leaflet-tooltip').length === 1);
-  const hovered = (await tooltip.innerText()).split(' · ')[1];
+  const hovered = (await tooltip.innerText()).split('\n')[0].split(' · ')[1];
   assert.equal(await page.locator('#ranked button.is-highlighted .district-code').innerText(), hovered);
   await page.mouse.move(box.x + box.width + 40, box.y + 10);
   await page.locator('#ranked button.is-highlighted').waitFor({state:'detached'});
