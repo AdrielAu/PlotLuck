@@ -11,6 +11,7 @@ What the team plans to submit, and our own cut-offs before the deadline. `TBD (g
 | Deliverable | Requirement | Owner | Status | Due |
 |---|---|---|---|---|
 | Video | ≤ 3 min; shows the LinuxONE instance and the model running. Format and upload rules: TBD (guidebook). | | in progress — [draft](Plotluck_submission_draft.mp4), [script](VIDEO_SCRIPT.md) | |
+| Pitch deck | Judged as "the pitch". Format and upload rules: TBD (guidebook). | | in progress — [PDF](Plotluck_pitch_deck.pdf), [source](pitch-deck/index.html); replaces the [first draft](Plotluck_initial_pitch.pptx) | |
 | GitHub repo | Link to this repo. Other rules: TBD (guidebook). | | in progress | |
 | Title | Contains the team name. | | not started | |
 | Screenshots | LinuxONE + AI/ML evidence; tracked only in [CHECKLIST.md](../evidence/CHECKLIST.md). | | not started | |

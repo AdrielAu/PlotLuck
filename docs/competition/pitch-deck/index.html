@@ -1,0 +1,512 @@
+<!doctype html>
+<!--
+  Plotluck pitch deck (Team Jellyfishes.AI, IBM Z Datathon 2026). 13 slides, 1920×1080 each.
+  Theme tokens, Handjet and the offset green face come from the live site (web/results.css, web/questions.css).
+  Re-render the PDF after any edit, from the repo root in PowerShell (Edge needs absolute paths):
+    & "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" --headless --no-pdf-header-footer
+      --print-to-pdf="$PWD/docs/competition/Plotluck_pitch_deck.pdf" "$PWD/docs/competition/pitch-deck/index.html"
+  Facts match the bundle the live site served on 18 October 2026 (v4, runs/2026-10-17-train-nn1-context);
+  update slides 7–11 when a new bundle ships.
+  Screenshots in img/ were taken from https://adrielau.github.io/PlotLuck/ on 18 October 2026.
+-->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Plotluck pitch deck</title>
+<style>
+@font-face { font-family: Handjet; src: url("../../../web/fonts/handjet-latin-wght.woff2") format("woff2"); font-weight: 100 900; }
+@page { size: 1920px 1080px; margin: 0; }
+:root {
+  --canvas: #f7f6f3; --surface: #fff; --ink: #2f3437; --muted: #62615e; --green: #284c29;
+  --tint: #edf3ec; --leaf: #bacfa9; --face: 10px;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--canvas); color: var(--ink); font-family: var(--sans); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.slide { position: relative; width: 1920px; height: 1080px; overflow: hidden; padding: 88px 120px 96px; break-after: page; display: flex; flex-direction: column; background: var(--canvas); }
+.slide:last-child { break-after: auto; }
+h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); }
+h2 { font-size: 68px; line-height: 1.08; max-width: 1500px; }
+h3 { font-family: var(--serif); font-weight: 400; font-size: 36px; line-height: 1.15; letter-spacing: -0.01em; margin-bottom: 14px; }
+p, li { font-size: 26px; line-height: 1.45; }
+.lede { font-size: 30px; line-height: 1.42; max-width: 1180px; margin-top: 28px; }
+.note { font-size: 21px; line-height: 1.45; color: var(--muted); }
+.source { font-size: 20px; line-height: 1.4; color: var(--muted); }
+strong { font-weight: 700; }
+ul { list-style: none; }
+ul.points li { position: relative; padding-left: 30px; margin-bottom: 14px; }
+ul.points li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 12px; height: 12px; background: var(--green); }
+.folio { position: absolute; left: 120px; right: 120px; bottom: 36px; display: flex; justify-content: space-between; font-size: 18px; color: var(--muted); }
+.folio b { font-family: Handjet, var(--sans); font-weight: 500; font-size: 24px; color: var(--ink); letter-spacing: 0.01em; }
+.num { font-family: Handjet, var(--sans); font-weight: 500; letter-spacing: 0; line-height: 0.9; }
+
+/* The site's motif: a square surface with a flat green block offset down and right behind it. */
+.block { --fill: var(--surface); position: relative; z-index: 0; padding: 36px 40px; }
+.block::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--fill); }
+.block::after { content: ""; position: absolute; inset: var(--face) calc(var(--face) * -1) calc(var(--face) * -1) var(--face); z-index: -2; background: var(--green); }
+.block.tint { --fill: var(--tint); }
+.block.dark { --fill: var(--green); color: #fff; }
+.block.dark::after { background: var(--ink); }
+.shot { position: relative; z-index: 0; }
+.shot::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--surface); }
+.shot::after { content: ""; position: absolute; inset: var(--face) calc(var(--face) * -1) calc(var(--face) * -1) var(--face); z-index: -2; background: var(--green); }
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+figcaption { margin-top: 26px; font-size: 22px; line-height: 1.45; color: var(--ink); }
+figcaption span { color: var(--muted); }
+
+/* 1 Title */
+.title { padding: 0; flex-direction: row; }
+.title .left { width: 1060px; padding: 110px 80px 96px 120px; display: flex; flex-direction: column; }
+.title .right { flex: 1; position: relative; background: #eef0e8; }
+.title .right img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; }
+.wordmark { display: flex; align-items: center; gap: 28px; font: 500 220px/0.9 Handjet, var(--serif); letter-spacing: 0; }
+.wordmark img { width: 190px; height: 190px; }
+.title .tagline { font-family: var(--serif); font-size: 56px; line-height: 1.12; letter-spacing: -0.02em; margin-top: 44px; max-width: 820px; }
+.title .what { margin-top: 30px; font-size: 27px; max-width: 820px; }
+.team { margin-top: auto; }
+.team .event { font-size: 24px; color: var(--muted); }
+.team .name { font-family: Handjet, var(--sans); font-weight: 500; font-size: 64px; line-height: 1; margin: 6px 0 22px; }
+.team ul { display: flex; flex-wrap: wrap; gap: 10px 34px; }
+.team li { font-size: 26px; }
+
+/* 2 Problem */
+.problem { flex-direction: row; gap: 96px; }
+.problem .story { flex: 1.1; display: flex; flex-direction: column; }
+.problem .lede { font-size: 32px; }
+.problem .story h2 { max-width: 900px; }
+.problem .side { width: 640px; display: flex; flex-direction: column; gap: 40px; padding-top: 20px; }
+.asks { position: absolute; left: 120px; right: 120px; bottom: 110px; display: flex; gap: 40px; }
+.asks .block { flex: 1; padding: 28px 32px; }
+.asks p { font-family: var(--serif); font-size: 30px; line-height: 1.25; }
+.quote { font-family: var(--serif); font-size: 38px; line-height: 1.3; letter-spacing: -0.01em; }
+
+/* 3 Market */
+.market .body { display: flex; gap: 88px; margin-top: 44px; flex: 1; }
+.chart { flex: 1.25; display: flex; flex-direction: column; }
+.chart h3 { font-size: 30px; }
+.bars { flex: 1; display: flex; align-items: flex-end; gap: 14px; padding: 0 4px; border-bottom: 2px solid var(--ink); margin-top: 18px; }
+.bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.bar i { display: block; width: 100%; background: var(--leaf); border-radius: 4px 4px 0 0; }
+.bar.hot i { background: var(--green); }
+.bar em { font-style: normal; font-size: 22px; margin-bottom: 8px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.years { display: flex; gap: 14px; padding: 10px 4px 0; }
+.years span { flex: 1; text-align: center; font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.market .facts { width: 600px; display: flex; flex-direction: column; gap: 44px; }
+.stat .num { font-size: 132px; color: var(--green); }
+.stat p { margin-top: 10px; }
+
+/* 4 Solution */
+.flow { display: flex; gap: 40px; margin-top: 64px; align-items: stretch; }
+.flow .block { flex: 1; }
+.flow h3 { font-size: 50px; }
+.flow .block { min-height: 360px; padding: 48px 48px; }
+.flow p { font-size: 28px; }
+.arrow { align-self: center; font-family: var(--serif); font-size: 64px; color: var(--green); }
+.solution .after { display: flex; gap: 72px; margin-top: auto; align-items: flex-end; }
+
+/* 5 Demo */
+.demo1 .row { display: flex; gap: 72px; margin-top: 48px; align-items: flex-start; }
+.demo1 figure:first-child { width: 800px; }
+.demo1 figure:first-child .shot { height: 514px; }
+.demo1 figcaption { font-size: 25px; }
+.demo1 figure:last-child { flex: 1; }
+.demo1 figure:last-child .shot { height: 345px; }
+
+/* 6 Demo */
+.demo2 { padding-bottom: 80px; }
+.demo2 .shot { width: 1520px; height: 590px; margin-top: 36px; }
+.demo2 .read { display: flex; gap: 56px; margin-top: 44px; max-width: 1680px; }
+.demo2 .read p { flex: 1; font-size: 24px; }
+
+/* 7 How it works */
+.how .cols { display: flex; gap: 48px; margin-top: 56px; }
+.how .cols .block { flex: 1; min-height: 400px; padding: 44px 44px; }
+.how .cols p { font-size: 28px; }
+.how .cols h3 { font-size: 42px; }
+.how .who { font-size: 22px; color: var(--muted); margin-top: 18px; }
+.how .band { margin-top: auto; display: flex; gap: 56px; }
+
+/* 8 Two models */
+.models .pipe { display: flex; align-items: stretch; gap: 22px; margin-top: 44px; }
+.pipe .io { width: 250px; display: flex; flex-direction: column; justify-content: center; }
+.pipe .io p { font-size: 23px; }
+.pipe .io .q { font-family: var(--serif); font-size: 26px; line-height: 1.35; }
+.pipe .block { flex: 1; padding: 30px 32px; }
+.pipe .block.small { flex: 0.62; }
+.pipe .block h3 { font-size: 34px; margin-bottom: 6px; }
+.pipe .block .kind { font-size: 21px; color: var(--muted); margin-bottom: 16px; }
+.pipe .block.dark .kind { color: var(--leaf); }
+.pipe li { font-size: 22px; line-height: 1.4; margin-bottom: 9px; padding-left: 22px; position: relative; }
+.pipe li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 9px; height: 9px; background: var(--green); }
+.pipe .dark li::before { background: var(--leaf); }
+.pipe .to { align-self: center; font-family: var(--serif); font-size: 52px; color: var(--green); }
+.models .why { display: flex; gap: 56px; margin-top: auto; }
+.models .why p { flex: 1; font-size: 23px; }
+
+/* 9 Data */
+.data .body { display: flex; gap: 88px; margin-top: 52px; flex: 1; }
+.funnel { flex: 1.15; display: flex; flex-direction: column; gap: 40px; }
+.stage .label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.stage .label .num { font-size: 80px; }
+.stage .label span:last-child { font-size: 25px; color: var(--muted); }
+.stage .fill { height: 44px; background: var(--green); }
+.stage .cut { font-size: 22px; color: var(--ink); margin-top: 12px; }
+.data .method { width: 680px; display: flex; flex-direction: column; gap: 30px; }
+.data .method p { font-size: 25px; }
+
+/* 10 IBM Z */
+.ibmz .body { display: flex; gap: 80px; margin-top: 48px; }
+.ibmz figure { width: 1060px; }
+.ibmz .shot { height: 430px; }
+.ibmz .shot img { object-fit: contain; object-position: left top; background: #0c0c0c; }
+.ibmz .steps { flex: 1; }
+.ibmz .steps li { font-size: 27px; margin-bottom: 26px; }
+
+/* 11 Results */
+.results .body { display: flex; gap: 96px; margin-top: 48px; flex: 1; }
+.results .pair { display: flex; gap: 48px; }
+.results .pair .block { width: 420px; }
+.results .pair .num { font-size: 150px; }
+.results .pair .block.dark .num { color: #fff; }
+.results .pair p { font-size: 24px; margin-top: 12px; }
+.folds { flex: 1; display: flex; flex-direction: column; }
+.folds h3 { font-size: 30px; }
+.fold { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 6px 20px; margin-top: 26px; }
+.fold .k { font-size: 21px; color: var(--muted); grid-row: span 2; }
+.fold .b { height: 30px; display: flex; align-items: center; gap: 12px; font-size: 21px; font-variant-numeric: tabular-nums; }
+.fold .b i { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.fold .m i { background: var(--green); }
+.fold .z i { background: var(--leaf); }
+.key { display: flex; gap: 32px; margin-top: 22px; font-size: 20px; color: var(--muted); }
+.key span::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 10px; vertical-align: -1px; }
+.key .km::before { background: var(--green); }
+.key .kz::before { background: var(--leaf); }
+
+/* 12 Responsible */
+.resp .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px 52px; margin-top: 48px; }
+.resp .grid p { font-size: 26px; }
+.resp .grid .block { padding: 40px 44px; }
+.resp .grid h3 { font-size: 34px; }
+
+/* 13 Close */
+.close .body { display: flex; gap: 80px; margin-top: 44px; flex: 1; }
+table { border-collapse: collapse; flex: 1; font-size: 26px; line-height: 1.35; align-self: flex-start; }
+th, td { text-align: left; padding: 20px 18px; vertical-align: top; }
+thead th { font-family: var(--serif); font-weight: 400; font-size: 25px; border-bottom: 2px solid var(--ink); }
+tbody td { border-bottom: 1px solid #dcdad5; }
+tbody th { font-weight: 700; font-size: 26px; border-bottom: 1px solid #dcdad5; width: 250px; }
+td.us { background: var(--tint); font-weight: 700; }
+.close .next { width: 560px; display: flex; flex-direction: column; gap: 44px; }
+.close .links p { font-size: 26px; margin-bottom: 10px; }
+.close .links b { display: block; font-size: 30px; }
+.close .links b { font-family: var(--serif); font-weight: 400; }
+</style>
+</head>
+<body>
+
+<!-- 1 Title -->
+<section class="slide title">
+  <div class="left">
+    <h1 class="wordmark">Plotluck<img src="../../../web/logo.svg" alt=""></h1>
+    <p class="tagline">Where could your restaurant work?</p>
+    <p class="what">Describe the restaurant you want to open. Plotluck ranks the English postcode districts where a place like it has done well with diners.</p>
+    <div class="team">
+      <p class="event">IBM Z Datathon 2026 · Community Impact</p>
+      <p class="name">Team Jellyfishes.AI</p>
+      <ul>
+        <li>Erica Keung</li><li>Ansh Waddon</li><li>Ahmed Gilani</li><li>Adriel Au</li><li>Xavier Chen</li>
+      </ul>
+    </div>
+  </div>
+  <div class="right"><img src="img/kitchen.jpg" alt="The voxel kitchen from the Plotluck landing page"></div>
+</section>
+
+<!-- 2 Problem -->
+<section class="slide problem">
+  <div class="story">
+    <h2>Choosing where to open is a costly guess</h2>
+    <p class="lede">For a small restaurant, the wrong location can sink the business. It is hard to compare areas before signing a lease, and a first-time owner rarely has more than gut feel and a few site visits.</p>
+    <p class="lede">Plotluck helps founders compare English postcode districts for the restaurant they want to open. It is built for independent founders, including people bringing under-represented cuisines to new areas.</p>
+  </div>
+  <div class="side">
+    <div class="block tint">
+      <p class="quote">One of our teammates watched his father’s restaurant close during COVID. We wanted to make the first location search a little less guesswork.</p>
+    </div>
+    <p class="note">Plotluck is free, runs in the browser and needs no account.</p>
+  </div>
+  <div class="asks">
+    <div class="block"><p>Will people here want this cuisine?</p></div>
+    <div class="block"><p>Is there already too much of it nearby?</p></div>
+    <div class="block"><p>Can the area carry my prices and rent?</p></div>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 2</span></div>
+</section>
+
+<!-- 3 Market need -->
+<section class="slide market">
+  <h2>Restaurant insolvencies nearly tripled in ten years</h2>
+  <div class="body">
+    <div class="chart" role="img" aria-label="Bar chart of registered company insolvencies in restaurants and mobile food service, England and Wales, 2014 to 2023: 830, 764, 873, 964, 1317, 1464, 1041, 1060, 1720, 2420.">
+      <h3>Company insolvencies, restaurants and mobile food service, England and Wales</h3>
+      <div class="bars">
+        <div class="bar"><em>830</em><i style="height:30.2%"></i></div>
+        <div class="bar"><em>764</em><i style="height:27.8%"></i></div>
+        <div class="bar"><em>873</em><i style="height:31.7%"></i></div>
+        <div class="bar"><em>964</em><i style="height:35.1%"></i></div>
+        <div class="bar"><em>1,317</em><i style="height:47.9%"></i></div>
+        <div class="bar"><em>1,464</em><i style="height:53.2%"></i></div>
+        <div class="bar"><em>1,041</em><i style="height:37.9%"></i></div>
+        <div class="bar"><em>1,060</em><i style="height:38.5%"></i></div>
+        <div class="bar"><em>1,720</em><i style="height:62.5%"></i></div>
+        <div class="bar hot"><em>2,420</em><i style="height:88.0%"></i></div>
+      </div>
+      <div class="years"><span>2014</span><span>2015</span><span>2016</span><span>2017</span><span>2018</span><span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span></div>
+    </div>
+    <div class="facts">
+      <div class="stat">
+        <p class="num">2,420</p>
+        <p>restaurant and food-stand companies became insolvent in 2023, about <strong>seven every day</strong>, up from 830 in 2014.</p>
+      </div>
+      <div class="stat">
+        <p class="num">1 in 7</p>
+        <p>company insolvencies in 2023 were food and drink service businesses: 3,474 of 25,163.</p>
+      </div>
+      <p class="note">These count registered companies only. Sole traders and partnerships that close are not included.</p>
+    </div>
+  </div>
+  <p class="source" style="margin-top:28px">Source: Insolvency Service, <em>Company Insolvency Statistics, December 2024</em>, industry tables A1a and A1b (SIC 2007 group 561 and division 56), England and Wales. gov.uk/government/statistics/company-insolvencies-december-2024</p>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 3</span></div>
+</section>
+
+<!-- 4 Solution -->
+<section class="slide solution">
+  <h2>One description in, a ranked district shortlist out</h2>
+  <p class="lede">One description starts the search. Plotluck asks only when a detail is missing or unclear.</p>
+  <div class="flow">
+    <div class="block"><h3>Describe</h3><p>Tell Plotluck what you want to open and where you want to look, in your own words.</p></div>
+    <span class="arrow" aria-hidden="true">→</span>
+    <div class="block"><h3>Clarify</h3><p>If a detail is unclear, answer a focused follow-up question. Details already read are kept.</p></div>
+    <span class="arrow" aria-hidden="true">→</span>
+    <div class="block"><h3>Explore</h3><p>See districts on a map, move the score threshold and narrow down a ranked shortlist.</p></div>
+  </div>
+  <div class="after">
+    <p style="flex:1">Each district gets a <strong>review-based success score</strong> from 0 to 1: how well restaurants like yours have done with diners there, judged by ratings and review activity.</p>
+    <p class="note" style="width:620px">The answer-reading AI is experimental. An editable review card is planned but not yet wired in.</p>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 4</span></div>
+</section>
+
+<!-- 5 Demo: describe and clarify -->
+<section class="slide demo1">
+  <h2>Founders write it the way they would say it</h2>
+  <div class="row">
+    <figure>
+      <div class="shot"><img src="img/describe.jpg" alt="Plotluck description box with a Cantonese dim sum restaurant in Manchester typed in"></div>
+      <figcaption>The description covers cuisine, prices, place, rent and diet in one sentence. <span>The language model reading it runs on the user’s own device, so the text never leaves the browser tab.</span></figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/clarify.jpg" alt="Plotluck asking one question: where would you like to open, with two Manchester options"></div>
+      <figcaption>“Manchester” can mean the council area or the built-up town, so Plotluck asks one question instead of guessing. <span>Everything else it read is kept.</span></figcaption>
+    </figure>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Live site, adrielau.github.io/PlotLuck, 18 October 2026 · 5</span></div>
+</section>
+
+<!-- 6 Demo: results -->
+<section class="slide demo2">
+  <h2>Every district in the area, scored and ranked</h2>
+  <div class="shot"><img src="img/results.jpg" alt="Plotluck results: a map of Manchester postcode districts coloured by score, a score threshold and a shortlist led by M60, M2 and M11"></div>
+  <div class="read">
+      <p><strong>Read for you.</strong> “Cantonese dim sum” became the Chinese cuisine, with mid-range prices, vegetarian options and any rent. Inferred values are labelled as inferred.</p>
+      <p><strong>Scored by the model.</strong> All 19 Manchester districts were scored. The threshold starts at the top 10; lower it to see more.</p>
+      <p><strong>Honest on screen.</strong> The page states that the score is not a chance of survival or profit, and that closed restaurants may be missing from the data.</p>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Live site, adrielau.github.io/PlotLuck, 18 October 2026 · 6</span></div>
+</section>
+
+<!-- 7 How it works -->
+<section class="slide how">
+  <h2>A language model reads, a trained network scores</h2>
+  <div class="cols">
+    <div class="block"><h3>Read</h3><p>A small open language model turns the description into six fields: area, cuisine, menu prices, rent, restaurant type and other requirements.</p><p class="who">NN2 · on the user’s device</p></div>
+    <div class="block"><h3>Check</h3><p>Every field must quote the description as evidence. Places are matched to an offline map of England. Anything missing or unclear becomes a question.</p><p class="who">Validator · rules, not AI</p></div>
+    <div class="block"><h3>Score</h3><p>A neural network trained on 130,337 English restaurants scores the profile in every district of the search area.</p><p class="who">NN1 · trained on IBM LinuxONE</p></div>
+  </div>
+  <div class="band">
+    <p style="flex:1">Everything runs in the browser from a static GitHub Pages site. There is no server to pay for or switch off, so Plotluck stays live after the event.</p>
+    <p style="flex:1">No user data is collected. The description is held only in the open tab.</p>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 7</span></div>
+</section>
+
+<!-- 8 Two models -->
+<section class="slide models">
+  <h2>Two models, one answer</h2>
+  <div class="pipe">
+    <div class="io">
+      <p class="note">In</p>
+      <p class="q">“A mid-range Cantonese dim sum restaurant in Manchester…”</p>
+    </div>
+    <span class="to" aria-hidden="true">→</span>
+    <div class="block">
+      <h3>NN2 reads</h3>
+      <p class="kind">Qwen2.5-0.5B-Instruct, open weights</p>
+      <ul>
+        <li>Runs in the browser with WebLLM on WebGPU; about 288 MB, downloaded once</li>
+        <li>Reads up to 1,000 characters</li>
+        <li>Returns six fields as JSON, each with the quote it came from</li>
+        <li>Marks every value as stated or inferred</li>
+      </ul>
+    </div>
+    <span class="to" aria-hidden="true">→</span>
+    <div class="block small tint">
+      <h3>Validator</h3>
+      <p class="kind">Deterministic rules</p>
+      <ul>
+        <li>Rejects values not grounded in the text</li>
+        <li>Resolves places offline</li>
+        <li>Asks only for what is missing</li>
+      </ul>
+    </div>
+    <span class="to" aria-hidden="true">→</span>
+    <div class="block dark">
+      <h3>NN1 scores</h3>
+      <p class="kind">Neural network, 94 → 64 → 32 → 1</p>
+      <ul>
+        <li>8 restaurant inputs: cuisine, cuisine group, type, price band, chain and three dietary flags</li>
+        <li>15 district inputs: population, age, ethnicity, sex, deprivation, rent, restaurant supply, attractions, hotels</li>
+        <li>ReLU layers, sigmoid output: a 0–1 score per district</li>
+      </ul>
+    </div>
+  </div>
+  <div class="why">
+    <p><strong>Why a small language model?</strong> It is small enough to run on an ordinary laptop, so a founder’s plans never leave their machine.</p>
+    <p><strong>Why a separate scorer?</strong> Scoring needs numbers learned from real outcomes. NN1 is tiny, fast and exported as plain JSON weights with a JavaScript forward pass.</p>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 8</span></div>
+</section>
+
+<!-- 9 Data methodology -->
+<section class="slide data">
+  <h2>130,337 restaurants, tested on districts the model never saw</h2>
+  <div class="body">
+    <div class="funnel">
+      <div class="stage">
+        <div class="label"><span class="num">144,681</span><span>restaurant listings in England</span></div>
+        <div class="fill" style="width:100%"></div>
+      </div>
+      <div class="stage">
+        <div class="label"><span class="num">142,107</span><span>after cleaning</span></div>
+        <div class="fill" style="width:98.2%"></div>
+        <p class="cut">Removed 1,177 without a location, 620 duplicate listings, 70 far from any postcode and 707 in districts that cross the Welsh or Scottish border.</p>
+      </div>
+      <div class="stage">
+        <div class="label"><span class="num">130,337</span><span>with a usable rating label</span></div>
+        <div class="fill" style="width:90.1%"></div>
+        <p class="cut">The label combines average rating, the mix of review grades and review volume, damped by 20 prior reviews so a handful of reviews cannot dominate.</p>
+      </div>
+    </div>
+    <div class="method">
+      <div class="block tint">
+        <h3>How we tested it</h3>
+        <p>Five-fold cross-validation with whole postcode districts held out, so the test always uses districts the model never trained on. Each fold keeps its own early-stopping slice and is compared with a baseline that always predicts the average.</p>
+      </div>
+      <p><strong>District context, all open data:</strong> Census 2021 (population, age, ethnicity, sex), Indices of Deprivation 2025, Valuation Office Agency rent, OpenStreetMap attractions and hotels, and the ONS Postcode Directory.</p>
+    </div>
+  </div>
+  <p class="source" style="margin-top:24px">Run results: runs/2026-10-17-train-nn1-context/metrics.json. Restaurant data: a 2021 Tripadvisor-derived dataset published on Kaggle.</p>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 9</span></div>
+</section>
+
+<!-- 10 IBM Z -->
+<section class="slide ibmz">
+  <h2>We trained the model on IBM LinuxONE</h2>
+  <div class="body">
+    <figure>
+      <div class="shot"><img src="img/lscpu.png" alt="Terminal on the LinuxONE VM: lscpu shows architecture s390x, Big Endian, IBM/S390 vendor, machine type 9175, z/VM 7.3.0"></div>
+      <figcaption>Our LinuxONE virtual machine: <strong>s390x, big-endian</strong>, IBM machine type 9175 on z/VM 7.3. <span>From docs/evidence/01-ssh-lscpu.png.</span></figcaption>
+    </figure>
+    <ul class="points steps">
+      <li><strong>Ingest and clean</strong> the full restaurant and district data in Jupyter on the VM.</li>
+      <li><strong>Train and cross-validate NN1</strong> on LinuxONE. The Tripadvisor-derived rows never leave the server.</li>
+      <li><strong>Export the weights</strong> as JSON so the website can keep scoring after the VM expires.</li>
+      <li><strong>Check byte order:</strong> weights written on a big-endian machine are load-tested on x86 before release.</li>
+    </ul>
+  </div>
+  <p class="source" style="margin-top:auto; padding-bottom:24px">More evidence in the repo: docs/evidence/03-jupyterlab.png, 04-ingest.png, 05-train-nn1.png, 09-weight-export.png.</p>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 10</span></div>
+</section>
+
+<!-- 11 Results -->
+<section class="slide results">
+  <h2>39% lower error than always guessing the average</h2>
+  <div class="body">
+    <div style="display:flex; flex-direction:column; gap:40px">
+      <div class="pair">
+        <div class="block dark"><p class="num">0.0503</p><p>NN1 mean absolute error</p></div>
+        <div class="block"><p class="num">0.0823</p><p>Baseline mean absolute error</p></div>
+      </div>
+      <p style="max-width:900px">Average prediction error on the 0–1 score across five district-grouped test folds; lower is better. About 26,000 restaurants are tested in each fold.</p>
+      <p class="note" style="max-width:900px">The score uses customer ratings and review activity. It does not predict profit or whether a restaurant will survive. We still need to check how well the district ranking works for each cuisine.</p>
+    </div>
+    <div class="folds" role="img" aria-label="Mean absolute error per fold. NN1: 0.0500, 0.0500, 0.0503, 0.0503, 0.0507. Baseline: 0.0816, 0.0819, 0.0827, 0.0830, 0.0822.">
+      <h3>Every fold, same result</h3>
+      <div class="fold"><span class="k">Fold 1</span><span class="b m"><i style="width:60.2%"></i>0.0500</span><span class="b z"><i style="width:98.3%"></i>0.0816</span></div>
+      <div class="fold"><span class="k">Fold 2</span><span class="b m"><i style="width:60.2%"></i>0.0500</span><span class="b z"><i style="width:98.7%"></i>0.0819</span></div>
+      <div class="fold"><span class="k">Fold 3</span><span class="b m"><i style="width:60.6%"></i>0.0503</span><span class="b z"><i style="width:99.6%"></i>0.0827</span></div>
+      <div class="fold"><span class="k">Fold 4</span><span class="b m"><i style="width:60.6%"></i>0.0503</span><span class="b z"><i style="width:100%"></i>0.0830</span></div>
+      <div class="fold"><span class="k">Fold 5</span><span class="b m"><i style="width:61.1%"></i>0.0507</span><span class="b z"><i style="width:99.0%"></i>0.0822</span></div>
+      <div class="key"><span class="km">NN1</span><span class="kz">Baseline</span></div>
+    </div>
+  </div>
+  <p class="source" style="margin-top:20px">Source: runs/2026-10-17-train-nn1-context/metrics.json (the model the live site uses).</p>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 11</span></div>
+</section>
+
+<!-- 12 Responsible AI -->
+<section class="slide resp">
+  <h2>A shortlist, not a promise</h2>
+  <div class="grid">
+    <div class="block"><h3>Data stays where it belongs</h3><p>Tripadvisor-derived training rows stay on LinuxONE. We publish only model outputs, with attribution, for non-commercial use. Restaurant samples in the repo are synthetic.</p></div>
+    <div class="block"><h3>Private by design</h3><p>The description is read on the user’s device and held only in the open tab. Nothing is sent to a server or stored.</p></div>
+    <div class="block"><h3>Asks instead of guessing</h3><p>Each field must be backed by the user’s own words. Inferred values are marked, and missing or unclear details become a question.</p></div>
+    <div class="block tint"><h3>Limits, stated plainly</h3><p>The data may miss restaurants that closed. District averages cannot tell you what one street or lease will be like. Founders should visit sites and check the numbers themselves. The answer-reading AI and LinuxONE acceleration benchmark are still being tested.</p></div>
+  </div>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 12</span></div>
+</section>
+
+<!-- 13 Close -->
+<section class="slide close">
+  <h2>Know where to look first</h2>
+  <div class="body">
+    <table>
+      <thead><tr><th></th><th>Gut feel and site visits</th><th>Paid location research</th><th>Plotluck</th></tr></thead>
+      <tbody>
+        <tr><th>Cost</th><td>Free, but slow</td><td>Paid, per study</td><td class="us">Free</td></tr>
+        <tr><th>Areas compared</th><td>A handful</td><td>The ones in the brief</td><td class="us">Every district in the area</td></tr>
+        <tr><th>Fits your cuisine</th><td>Depends on who you ask</td><td>Usually</td><td class="us">Yes, 115 cuisines</td></tr>
+        <tr><th>Your plans stay private</th><td>Yes</td><td>Shared with a consultant</td><td class="us">Yes, read on your device</td></tr>
+      </tbody>
+    </table>
+    <div class="next">
+      <div class="block tint">
+        <h3>Next</h3>
+        <ul class="points">
+          <li>Validate the district rankings for each cuisine</li>
+          <li>Finish testing the answer-reading AI</li>
+          <li>Wire in the editable review card</li>
+        </ul>
+      </div>
+      <div class="links">
+        <p><b>Live demo</b>adrielau.github.io/PlotLuck</p>
+        <p><b>Code and evidence</b>github.com/AdrielAu/PlotLuck</p>
+      </div>
+    </div>
+  </div>
+  <p class="quote" style="margin-top:24px; margin-bottom:24px; max-width:1500px">Plotluck gives independent founders a clearer starting point: where to start visiting streets and checking costs.</p>
+  <div class="folio"><b>Plotluck</b><span>Team Jellyfishes.AI · 13</span></div>
+</section>
+
+</body>
+</html>

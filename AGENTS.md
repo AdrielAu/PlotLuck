@@ -25,7 +25,7 @@ Keep this map and `CONTRIBUTING.md` in step: change both together.
 - `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`; `tests/js/`: `node --test` for `web/scoring.js`, `web/outlines.js`, `web/pickers.js` and `web/results.js`.
 - `tests/browser/`: real-browser confirmation flows; see [browser test setup](docs/setup.md#browser-flow-tests).
 - `data/`: `sample/` committed, `full/` server-only; see `data/AGENTS.md`.
-- `docs/competition/`: handover (`PROJECT.md`), build status (`PROGRESS.md`), submission list (`DELIVERABLES.md`) and the initial design doc.
+- `docs/competition/`: handover (`PROJECT.md`), build status (`PROGRESS.md`), submission list (`DELIVERABLES.md`), the pitch deck (`pitch-deck/`, rendered to `Plotluck_pitch_deck.pdf`) and the initial design doc.
 - `docs/plans/`: feature plans, including their confirmation status and acceptance gates.
 - `docs/setup.md`: one-time clone setup, per agent tool. `docs/server.md`: operator runbook. `docs/evidence/`: evidence checklist.
 - `CONTRIBUTING.md`: layout and workflow for humans; `README.md`: user-facing.
