@@ -464,6 +464,17 @@ test('district coverage circles and list rows remain linked after free-text inte
   assert.equal(await page.locator('#ranked button.is-highlighted .district-code').innerText(), hovered);
   await page.mouse.move(box.x + box.width + 40, box.y + 10);
   await page.locator('#ranked button.is-highlighted').waitFor({state:'detached'});
+  // Drag the map so the district sits at its left edge: its summary stays wide and inside the map.
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 10, box.y + box.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await page.mouse.move(box.x + box.width + 40, box.y + 10);
+  await third.focus();
+  const tip = await page.locator('.leaflet-tooltip').first().boundingBox();
+  assert.ok(tip.width >= 200, `tooltip width ${tip.width}`);
+  assert.ok(tip.x >= box.x && tip.x + tip.width <= box.x + box.width, JSON.stringify({ tip, box }));
+  assert.ok(tip.y >= box.y, JSON.stringify({ tip, box }));
   assert.deepEqual(page.errors, []);
 });
 
