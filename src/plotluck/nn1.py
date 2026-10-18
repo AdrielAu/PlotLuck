@@ -40,9 +40,12 @@ def group_splits(groups: list[str], folds: int) -> list[dict[str, np.ndarray]]:
     return splits
 
 
-def train(x: np.ndarray, y: np.ndarray, *, epochs: int, seed: int = 0, batch: int = 512):
-    """Train on all rows for ``epochs``; return (layers as JSON-ready lists, mean loss per epoch)."""
-    run = _Run(x, y, seed, batch)
+def train(x: np.ndarray, y: np.ndarray, *, epochs: int, seed: int = 0, batch: int = 512, increasing=()):
+    """Train on all rows for ``epochs``; return (layers as JSON-ready lists, mean loss per epoch).
+
+    The score never falls as an ``increasing`` input column rises (see ``_Run.constrain``).
+    """
+    run = _Run(x, y, seed, batch, increasing)
     losses = [run.epoch() for _ in range(epochs)]
     return run.layers(), losses
 
@@ -57,13 +60,14 @@ def train_early_stopping(
     patience: int,
     seed: int = 0,
     batch: int = 512,
+    increasing=(),
 ):
     """Train on (x, y) until the MSE on (x_stop, y_stop) has not fallen for ``patience`` epochs.
 
     Return (layers at the best epoch, the best epoch counted from 1, mean
     training loss per epoch, early-stop loss per epoch).
     """
-    run = _Run(x, y, seed, batch)
+    run = _Run(x, y, seed, batch, increasing)
     stop_x = torch.tensor(x_stop, dtype=torch.float32)
     stop_y = torch.tensor(y_stop, dtype=torch.float32)
     train_losses, stop_losses = [], []
@@ -81,7 +85,7 @@ def train_early_stopping(
 class _Run:
     """One seeded NN1 and its optimiser, trained an epoch at a time."""
 
-    def __init__(self, x: np.ndarray, y: np.ndarray, seed: int, batch: int):
+    def __init__(self, x: np.ndarray, y: np.ndarray, seed: int, batch: int, increasing=()):
         torch.manual_seed(seed)
         self.net = nn.Sequential(
             nn.Linear(x.shape[1], 64), nn.ReLU(), nn.Dropout(0.1),
@@ -93,6 +97,24 @@ class _Run:
         self.targets = torch.tensor(y, dtype=torch.float32)
         self.order = torch.Generator().manual_seed(seed)
         self.batch = batch
+        self.increasing = list(increasing)
+        self.constrain()
+
+    def constrain(self) -> None:
+        """Project the weights so the score is non-decreasing in every ``increasing`` column.
+
+        Those columns' first-layer weights and all later weights are kept
+        non-negative. ReLU, sigmoid and non-negative sums all preserve order,
+        so a higher value can never lower the score; other columns keep
+        weights of either sign. Without increasing columns nothing is changed.
+        """
+        if not self.increasing:
+            return
+        first, *later = [m for m in self.net if isinstance(m, nn.Linear)]
+        with torch.no_grad():
+            first.weight[:, self.increasing] = first.weight[:, self.increasing].clamp(min=0)
+            for layer in later:
+                layer.weight.clamp_(min=0)
 
     def epoch(self) -> float:
         """One pass over the rows in a seeded order; return the mean training loss."""
@@ -103,6 +125,7 @@ class _Run:
             loss = nn.functional.mse_loss(self.net(self.inputs[idx]).squeeze(1), self.targets[idx])
             loss.backward()
             self.optimiser.step()
+            self.constrain()
             total += loss.item() * len(idx)
         return total / len(self.inputs)
 

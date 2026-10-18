@@ -1,7 +1,9 @@
-"""The review-based success label: ADR 0002 as amended by issue #47.
+"""The review-based success label: ADR 0002 as amended by issue #47 and ADR 0007.
 
-``Label = 0.50·R_s + 0.30·D_s + 0.20·V`` on restaurant rows with the ADR 0004
-review columns (``avg_rating``, ``total_reviews`` = n_total, ``count_*``).
+``Composite = 0.50·R_s + 0.30·D_s + 0.20·V`` on restaurant rows with the ADR 0004
+review columns (``avg_rating``, ``total_reviews`` = n_total, ``count_*``). The
+label is the composite's percentile among the training rows (ADR 0007), so
+labels spread over 0-1 instead of bunching around the mean composite.
 """
 
 import math
@@ -11,6 +13,8 @@ from collections import Counter
 import numpy as np
 
 PRIOR_REVIEWS = 20
+# Points of the training composites' distribution kept in the policy, from minimum to maximum.
+QUANTILES = 1001
 # Category utility for the distribution term D, in source column order.
 UTILITY = {"excellent": 1.0, "very_good": 0.8, "average": 0.4, "poor": 0.1, "terrible": 0.0}
 CATEGORIES = tuple(UTILITY)
@@ -86,7 +90,7 @@ def anomalies(r: dict) -> list[str]:
 
 
 def fit_policy(restaurants: list[dict]) -> dict:
-    """R0, D0 and n_ref fitted on the eligible rows among ``restaurants``.
+    """R0, D0, n_ref and the composite quantiles fitted on the eligible rows among ``restaurants``.
 
     Fit on the training rows only (a CV fold's training side, or every row
     for the shipped model). D0 averages D over rows with a full set of counts.
@@ -98,15 +102,33 @@ def fit_policy(restaurants: list[dict]) -> dict:
     distributions = [d[0] for d in map(_distribution, eligible) if d is not None]
     if not distributions:
         raise ValueError("no eligible rows with category counts to fit D0 on")
-    return {
+    policy = {
         "R0": statistics.fmean(_rating(r) for r in eligible),
         "D0": statistics.fmean(distributions),
         "n_ref": float(np.percentile([_number(r["total_reviews"]) for r in eligible], 95)),
     }
+    quantiles = np.quantile(composites(eligible, policy), np.linspace(0, 1, QUANTILES))
+    return {**policy, "quantiles": quantiles.tolist()}
 
 
 def labels(restaurants: list[dict], policy: dict) -> list[float | None]:
-    """The label of each restaurant under a fitted ``policy`` (R0, D0, n_ref).
+    """The label of each restaurant: its composite's percentile under a fitted ``policy``.
+
+    Between two kept quantiles the percentile is interpolated linearly; tied
+    quantiles share their mean position; values outside the training range
+    clip to its ends. None for a restaurant that ``exclusion`` rules out.
+    """
+    values, positions = np.unique(policy["quantiles"], return_inverse=True)
+    steps = np.linspace(0, 1, len(policy["quantiles"]))
+    level = np.bincount(positions, steps) / np.bincount(positions)
+    return [
+        None if c is None else float(np.interp(c, values, level)) if len(values) > 1 else 0.5
+        for c in composites(restaurants, policy)
+    ]
+
+
+def composites(restaurants: list[dict], policy: dict) -> list[float | None]:
+    """The ADR 0002 composite of each restaurant under ``policy`` (R0, D0, n_ref).
 
     None for a restaurant that ``exclusion`` rules out.
     """

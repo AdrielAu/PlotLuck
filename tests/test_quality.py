@@ -4,6 +4,7 @@ from zipfile import ZipFile
 
 import pytest
 
+from plotluck.context import ETHNICITY_INPUTS
 from plotluck.quality import cross_border_districts, prepare_districts
 
 
@@ -12,9 +13,9 @@ def district(code, lon, *, rent=100, population=10000, restaurants=20):
         "postcode_district": code, "centroid_lat": 51.5, "centroid_lon": lon,
         "radius_km": 1, "total_restaurants": restaurants, "population": population,
         "deprivation_index": 10000, "commercial_rent_index": rent,
-        "average_age": 40, "ethnicity_asian_share": .1, "ethnicity_black_share": .1,
-        "ethnicity_mixed_share": .1, "ethnicity_white_share": .6,
-        "ethnicity_other_share": .1, "sex_female_share": .5, "sex_male_share": .5,
+        "average_age": 40, **dict.fromkeys(ETHNICITY_INPUTS, 0), "ethnicity_indian_share": .1,
+        "ethnicity_african_share": .1, "ethnicity_other_mixed_share": .1, "ethnicity_white_british_share": .6,
+        "ethnicity_any_other_share": .1, "sex_female_share": .5, "sex_male_share": .5,
     }
 
 
@@ -37,7 +38,7 @@ def test_invalid_recorded_context_is_estimated_not_treated_as_reliable():
     bad_age = district("G1", .025)
     bad_age["average_age"] = -3
     bad_shares = district("S1", .035)
-    bad_shares["ethnicity_white_share"] = 3.6
+    bad_shares["ethnicity_white_british_share"] = 3.6
     bad_deprivation = district("D1", .045)
     bad_deprivation["deprivation_index"] = 0
 
@@ -46,7 +47,7 @@ def test_invalid_recorded_context_is_estimated_not_treated_as_reliable():
 
     assert reliable == {"A1", "A2", "A3", "A4"}
     assert by_code["G1"]["average_age"] == 40
-    assert by_code["S1"]["ethnicity_white_share"] == .6
+    assert by_code["S1"]["ethnicity_white_british_share"] == .6
     assert by_code["D1"]["deprivation_index"] == 10000
     assert estimated == {"average_age_invalid": 1, "ethnicity_invalid": 1, "deprivation_index_invalid": 1}
     assert not excluded
@@ -80,17 +81,18 @@ def test_donors_outlying_for_the_estimated_field_do_not_contribute():
              district("M1", .025, rent="", population="")]
     # A second cluster about 70 km east, for the ethnicity mix.
     rows += [district("B1", 1.01), district("B2", 1.02), district("B3", 1.03)]
-    rows[-1].update(ethnicity_asian_share=.2, ethnicity_white_share=.5)
+    rows[-1].update(ethnicity_indian_share=.2, ethnicity_white_british_share=.5)
     rows += [district("E1", 1.04), district("E2", 1.025)]
-    rows[-2].update(ethnicity_asian_share=.9, ethnicity_black_share=0, ethnicity_white_share=0, ethnicity_other_share=0)
-    rows[-1]["ethnicity_white_share"] = ""
+    rows[-2].update(ethnicity_indian_share=.9, ethnicity_african_share=0, ethnicity_white_british_share=0,
+                    ethnicity_any_other_share=0)
+    rows[-1]["ethnicity_white_british_share"] = ""
 
     prepared, reliable, excluded, _, _ = prepare_districts(rows)
     by_code = {row["postcode_district"]: row for row in prepared}
 
     assert by_code["M1"]["commercial_rent_index"] == 100.5
     assert by_code["M1"]["population"] == 10750
-    assert by_code["E2"]["ethnicity_white_share"] == .6
+    assert by_code["E2"]["ethnicity_white_british_share"] == .6
     assert by_code["H1"]["commercial_rent_index"] == 2000 and "H1" in reliable  # valid high rent stays recorded
     assert not excluded
 

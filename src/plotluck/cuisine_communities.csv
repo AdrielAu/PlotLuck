@@ -1,0 +1,101 @@
+cuisine,communities
+Asian,bangladeshi chinese indian pakistani other_asian white_and_asian
+Bangladeshi,bangladeshi
+Indian,indian pakistani bangladeshi
+Pakistani,pakistani
+Nepali,other_asian
+Sri Lankan,other_asian
+Tibetan,other_asian
+Afghani,other_asian any_other
+Chinese,chinese
+Taiwanese,chinese
+Malaysian,chinese other_asian
+Singaporean,chinese other_asian
+Japanese,other_asian
+Korean,other_asian
+Thai,other_asian
+Vietnamese,other_asian
+Filipino,other_asian
+Indonesian,other_asian
+Burmese,other_asian
+Cambodian,other_asian
+Mongolian,other_asian
+Central Asian,other_asian
+Uzbek,other_asian
+African,african other_black white_and_black_african
+Eritrean,african
+Ethiopian,african
+Ghanaian,african
+Nigerian,african
+Somali,african
+South African,african
+Caribbean,caribbean white_and_black_caribbean
+Jamaican,caribbean white_and_black_caribbean
+Middle Eastern,arab any_other
+Arabic,arab
+Lebanese,arab
+Syrian,arab
+Yemeni,arab
+Egyptian,arab
+Algerian,arab
+Moroccan,arab
+Tunisian,arab
+Iranian,any_other
+Persian,any_other
+Kurdish,any_other
+Assyrian,any_other
+Israeli,any_other other_white
+Turkish,other_white any_other
+British,white_british
+Scottish,white_british
+Welsh,white_british
+Irish,irish
+European,other_white
+Eastern European,other_white
+Central European,other_white
+Albanian,other_white
+Armenian,other_white
+Austrian,other_white
+Azerbaijani,other_white
+Basque,other_white
+Belgian,other_white
+Bulgarian,other_white
+Caucasian,other_white
+Croatian,other_white
+Czech,other_white
+Danish,other_white
+Dutch,other_white
+Finnish,other_white
+French,other_white
+Georgian,other_white
+German,other_white
+Greek,other_white
+Hungarian,other_white
+Italian,other_white
+Latvian,other_white
+Lithuanian,other_white
+Norwegian,other_white
+Polish,other_white
+Portuguese,other_white
+Romanian,other_white
+Russian,other_white
+Scandinavian,other_white
+Serbian,other_white
+Slovenian,other_white
+Spanish,other_white
+Swedish,other_white
+Swiss,other_white
+Ukrainian,other_white
+Latin,any_other other_mixed
+Argentinean,any_other other_mixed
+Brazilian,any_other other_mixed
+Central American,any_other other_mixed
+Chilean,any_other other_mixed
+Colombian,any_other other_mixed
+Cuban,any_other other_mixed
+Ecuadorean,any_other other_mixed
+Mexican,any_other other_mixed
+Peruvian,any_other other_mixed
+Salvadoran,any_other other_mixed
+South American,any_other other_mixed
+Venezuelan,any_other other_mixed

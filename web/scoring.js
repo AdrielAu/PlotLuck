@@ -3,8 +3,8 @@
 import { decodeOutlines } from "./outlines.js";
 
 // Must match BUNDLE_VERSION in src/plotluck/build.py.
-export const BUNDLE_VERSION = 4;
-const SUPPORTED_BUNDLE_VERSIONS = [2, 3, BUNDLE_VERSION];
+export const BUNDLE_VERSION = 5;
+const SUPPORTED_BUNDLE_VERSIONS = [2, 3, 4, BUNDLE_VERSION];
 // The first bundle version with district_outlines.json.
 const OUTLINES_VERSION = 4;
 
@@ -51,6 +51,8 @@ export async function loadBundle(read) {
     outlines,
     supply: new Map(supply.map((r) => [supplyKey(r.postcode_district, r.cuisine_group), Number(r.restaurants)])),
     groups: new Map(vocabulary.cuisines.map((c) => [c.cuisine, c.cuisine_group])),
+    // Cuisine -> its matched Census ethnic groups; bundles before version 5 have none.
+    communities: new Map(vocabulary.cuisines.map((c) => [c.cuisine, c.communities ?? []])),
     vocabulary,
     model,
   };
@@ -61,10 +63,14 @@ export function scoreDistricts(bundle, profile) {
   const { model } = bundle;
   const group = bundle.groups.get(profile.cuisine);
   const head = restaurantInputs(model, { ...profile, cuisine_group: group });
+  const communities = bundle.communities.get(profile.cuisine) ?? [];
   return bundle.districts.map((d) => {
     const tail = model.features.district_inputs.map((name) => {
-      // Every district input is a districts.csv column, except supply of the profile's own group.
-      const raw = name === "same_cuisine_supply" ? (bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0) : d[name];
+      // Every district input is a districts.csv column, except supply of the profile's own
+      // group and the share of residents in the cuisine's matched ethnic groups.
+      const raw = name === "same_cuisine_supply" ? (bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0)
+        : name === "matched_community_share" ? communityShare(d, communities)
+        : d[name];
       if (raw === undefined) throw new Error(`model.json input ${name} is not a districts.csv column`);
       return numericInput(model.transforms[name], raw);
     });
@@ -118,6 +124,13 @@ function forward(model, x) {
     });
   });
   return x[0];
+}
+
+// Sum of the matched groups' shares: 0 for an unmatched cuisine, "" (the training median) if one is unknown.
+function communityShare(district, communities) {
+  const shares = communities.map((name) => district[`ethnicity_${name}_share`]);
+  if (shares.some((s) => s === undefined)) throw new Error("districts.csv lacks a matched ethnicity share column");
+  return shares.includes("") ? "" : shares.reduce((total, s) => total + Number(s), 0);
 }
 
 function supplyKey(district, group) {

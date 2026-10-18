@@ -524,7 +524,7 @@ def test_build_uses_demographics_and_separate_deduplicated_tourism_counts(tmp_pa
     assert districts["SE11"]["average_age"] == ""
     assert districts["SE1"]["most_common_sex"] == "tie"
     assert districts["SE11"]["most_common_sex"] == "unknown"
-    assert districts["SE1"]["most_common_ethnicity"] in {"asian", "black", "mixed", "white", "other", "tie"}
+    assert districts["SE1"]["most_common_ethnicity"] in {*context.ETHNICITY, "tie"}
     model = read_json(out / "model.json")
     assert set(context.INPUTS) <= set(model["features"]["district_inputs"])
     assert model["transforms"]["average_age"] == {
@@ -555,7 +555,7 @@ def test_run_metrics_count_districts_each_census_source_leaves_blank(tmp_path):
 @pytest.mark.parametrize("name, field, value", [
     ("census_age", "average_age", "NaN"),
     ("census_sex", "sex_female_share", "1.5"),
-    ("census_ethnicity", "ethnicity_white_share", "0"),
+    ("census_ethnicity", "ethnicity_white_british_share", "0"),
 ])
 def test_build_rejects_invalid_demographic_sources_before_writing(tmp_path, name, field, value):
     data = copy_sources(tmp_path / "data")
@@ -575,10 +575,10 @@ def test_build_rejects_invalid_demographic_sources_before_writing(tmp_path, name
 def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
     districts = [{
         "postcode_district": "AB1", "population": 1000, "deprivation_index": 12.5,
-        "commercial_rent_index": "", "total_restaurants": 3,
+        "commercial_rent_index": "", "total_restaurants": 3, "ethnicity_other_asian_share": 0.2,
     }]
     supply = Counter({("AB1", "Thai"): 2, ("AB1", "Italian"): 1})
-    rows = [{"postcode_district": "AB1", "cuisine_group": g} for g in ("Thai", "Italian")]
+    rows = [{"postcode_district": "AB1", "cuisine_group": g, "cuisine": g} for g in ("Thai", "Italian")]
 
     raw = build.training_district_inputs(rows, districts, supply)
 
@@ -587,6 +587,21 @@ def test_training_rows_leave_their_own_restaurant_out_of_both_supply_counts():
     assert (italian["total_restaurants"], italian["same_cuisine_supply"]) == (2, 0)
     assert thai["population"] == 1000 and thai["deprivation_index"] == 12.5
     assert np.isnan(thai["commercial_rent_index"])  # missing stays missing until the median fill
+    # Thai is matched to Other Asian residents; Italian's Other White share is missing here.
+    assert thai["matched_community_share"] == 0.2 and np.isnan(italian["matched_community_share"])
+
+
+def test_matched_community_share_sums_the_cuisines_groups_and_is_zero_when_unmatched():
+    district = {f"ethnicity_{name}_share": 0.1 for name in context.ETHNICITY}
+    assert build.community_share(district, "Indian") == pytest.approx(0.3)  # Indian, Pakistani, Bangladeshi
+    assert build.community_share(district, "Seafood") == 0
+    assert build.community_share({**district, "ethnicity_chinese_share": ""}, "Chinese") == ""
+
+
+def test_every_matched_community_is_a_census_group_and_a_mapped_cuisine():
+    communities = build.load_communities()
+    assert {"Indian", "Chinese", "Caribbean", "Polish", "Lebanese"} <= set(communities)
+    assert set().union(*communities.values()) <= set(context.ETHNICITY)
 
 
 def test_cv_folds_never_share_a_district_across_fit_early_stop_and_test(data):
@@ -607,6 +622,33 @@ def test_cv_folds_never_share_a_district_across_fit_early_stop_and_test(data):
     assert sorted(tested) == list(range(len(codes)))  # each row is tested exactly once
 
 
+def test_an_increasing_column_never_lowers_the_score_even_when_the_data_say_otherwise():
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(600, 4))
+    y = 1 / (1 + np.exp(2 * x[:, 0] - x[:, 1]))  # column 0 truly lowers the target
+    layers, _ = nn1.train(x, y, epochs=30, increasing=[0])
+
+    assert all(w >= 0 for row in layers[0]["weights"] for w in (row[0],))
+    assert all(w >= 0 for layer in layers[1:] for row in layer["weights"] for w in row)
+    grid = np.repeat(x[:50], 21, axis=0)
+    grid[:, 0] = np.tile(np.linspace(-3, 3, 21), 50)
+    scores = nn1.forward(layers, grid).reshape(50, 21)
+    assert (np.diff(scores, axis=1) >= -1e-12).all()
+    # Column 1 is unconstrained and keeps its learned (positive) direction; a free column may also fall.
+    assert nn1.forward(layers, np.array([[0, 2, 0, 0]]))[0] > nn1.forward(layers, np.array([[0, -2, 0, 0]]))[0]
+
+
+def test_shipped_model_rises_with_footfall_and_the_matched_community(built):
+    model = read_json(built / "model.json")
+    columns = build.increasing_columns(model)
+    district_inputs = model["features"]["district_inputs"]
+    head = len(model["layers"][0]["weights"][0]) - len(district_inputs)
+    assert sorted(district_inputs[c - head] for c in columns) == sorted(build.INCREASING)
+    first, *later = model["layers"]
+    assert all(row[c] >= 0 for row in first["weights"] for c in columns)
+    assert all(w >= 0 for layer in later for row in layer["weights"] for w in row)
+
+
 def test_transforms_fitted_on_a_subset_use_only_that_subset():
     vocab = {"cuisines": [{"cuisine": "Thai", "cuisine_group": "Thai"}], "traits": []}
     nan = np.nan
@@ -617,8 +659,9 @@ def test_transforms_fitted_on_a_subset_use_only_that_subset():
         [99, 30, nan, 0, 0],
     ])
     held_out = np.array([[999999, 1000, 5, 7, 7]])
-    train = np.pad(train, ((0, 0), (0, 10)), constant_values=nan)
-    held_out = np.pad(held_out.astype(float), ((0, 0), (0, 10)), constant_values=nan)
+    rest = len(build.DISTRICT_INPUTS) - 5
+    train = np.pad(train, ((0, 0), (0, rest)), constant_values=nan)
+    held_out = np.pad(held_out.astype(float), ((0, 0), (0, rest)), constant_values=nan)
 
     t = build.model_spec(vocab, train)["transforms"]
 
@@ -971,7 +1014,7 @@ def test_mapping_rejects_a_tag_listed_twice(tmp_path):
         build.load_mapping(path)
 
 
-def encode(model, profile, group, district, supply):
+def encode(model, profile, group, district, supply, communities):
     """The input vector, built only from model.json and the bundle tables."""
     t = model["transforms"]
     values = {**profile, "cuisine_group": group}
@@ -984,6 +1027,7 @@ def encode(model, profile, group, district, supply):
     raw = {
         **district,
         "same_cuisine_supply": supply.get((district["postcode_district"], group), 0),
+        "matched_community_share": sum(float(district[f"ethnicity_{c}_share"]) for c in communities),
     }
     for name in model["features"]["district_inputs"]:
         x = float(raw[name]) if raw[name] != "" else t[name]["median"]
@@ -1003,13 +1047,14 @@ def test_numpy_forward_pass_reproduces_reference_scores(built):
         for r in read_csv(built / "district_cuisine_supply.csv")
     }
     group_of = {c["cuisine"]: c["cuisine_group"] for c in vocabulary["cuisines"]}
+    communities_of = {c["cuisine"]: c["communities"] for c in vocabulary["cuisines"]}
 
     assert len(reference["cases"]) >= 3
     for case in reference["cases"]:
         profile = case["profile"]
         assert set(case["scores"]) == {d["postcode_district"] for d in districts}
         for district in districts:
-            x = encode(model, profile, group_of[profile["cuisine"]], district, supply)
+            x = encode(model, profile, group_of[profile["cuisine"]], district, supply, communities_of[profile["cuisine"]])
             for layer, activation in zip(model["layers"], model["activations"]):
                 x = np.array(layer["weights"]) @ x + np.array(layer["biases"])
                 x = np.maximum(x, 0) if activation == "relu" else 1 / (1 + np.exp(-x))

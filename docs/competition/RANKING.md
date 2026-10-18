@@ -135,3 +135,16 @@ them near the bottom (EC3M 2,320th, W1C 2,286th) because NN1 reads residential
 population as demand. Omitting them hides a known input weakness instead of
 showing misleading scores. Restoring them needs a worker or visitor demand
 input, not a different threshold.
+
+## Bundle version 5 (ADR 0007)
+
+On the live version 4 bundle, moving `population` from its 10th to its 90th
+percentile lowered every district's score for all five probe profiles (by
+0.016 to 0.025, the largest effect of any input), so sparse districts ranked
+best. Version 5 trains labels as composite percentiles (0–1) and constrains
+`population`, `total_restaurants`, `attractions_count`, `hotels_count` and the
+new `matched_community_share` never to lower a score. Nomis's Census 2021 bulk
+downloads have no workplace-population table, so footfall still comes from
+residents, restaurants and mapped tourism objects. The City districts above
+therefore stay omitted. Gate the full-data run as above, adding a check that
+low-population rural districts no longer dominate the top 20.

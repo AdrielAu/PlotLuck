@@ -121,6 +121,8 @@ Bundle version 2 requires all four new context extracts. Census extraction also 
 
 Bundle version 4 adds `district_outlines.json` and needs the ONSPD extract's new `usrtypind` column: rerun `python -m plotluck.sources extract onspd` before the build (no new pull; the build takes about half a minute more). The build also changes centroids and `radius_km`, so regenerate `web/models/geography.json` with the command in [the geography proof](plans/nn2-geography-proof.md) in the same PR as the bundle.
 
+Bundle version 5 ([ADR 0007](adr/0007-percentile-label-detailed-ethnicity-and-footfall-constraints.md)) reads TS021's 19 detailed ethnic groups. The raw archive already holds them, so rerun only `python -m plotluck.sources extract census_ethnicity` (no new pull), then build. Labels are now percentiles, so held-out MAE is on a new scale: compare it with that run's own baseline, not with earlier runs. Run `python -m plotluck.ranking_audit <new-bundle> --against web/models --inspect EC3M W1D LA22 TR18` and check that sparsely populated districts no longer top the list. Then do the x86 parity check before replacing `web/models/`.
+
 When publishing the full-data bundle to `web/models/`, replace the footer's sample-data notice in `web/index.html` with a description of the completed run. Keep the source attribution and geographic limitations.
 
 Restaurant-data audit (issue #149, read-only, counts only): `python -m plotluck.audit` with the full data folder selected writes `runs/<yyyy-mm-dd>-data-audit/audit.json`. Commit that folder on a follow-up `run/` branch.

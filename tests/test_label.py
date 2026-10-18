@@ -5,7 +5,7 @@ import pytest
 from plotluck import label
 
 # A fixed policy so known answers can be worked by hand.
-POLICY = {"R0": 0.5, "D0": 0.6, "n_ref": 99}
+POLICY = {"R0": 0.5, "D0": 0.6, "n_ref": 99, "quantiles": [0.5, 0.75]}
 
 
 def restaurant(rating="4.0", total=20, counts=(10, 5, 3, 1, 1)):
@@ -17,16 +17,34 @@ def restaurant(rating="4.0", total=20, counts=(10, 5, 3, 1, 1)):
     }
 
 
-def test_label_matches_a_worked_example():
+def test_composite_matches_a_worked_example():
     # R = 0.75, D = 15.3 / 20 = 0.765, R_s = 0.625, D_s = 0.6825,
     # V = ln 21 / ln 100 = 0.661110; 0.5 R_s + 0.3 D_s + 0.2 V = 0.649472.
-    assert label.labels([restaurant()], POLICY) == [pytest.approx(0.649472, abs=1e-6)]
+    assert label.composites([restaurant()], POLICY) == [pytest.approx(0.649472, abs=1e-6)]
 
 
 @pytest.mark.parametrize("counts", [(10, "", 3, 1, 1), (10, -5, 3, 1, 1), (0, 0, 0, 0, 0), ("",) * 5])
 def test_distribution_term_falls_back_to_d0_without_a_full_set_of_counts(counts):
     # D_s = D0 = 0.6, so 0.5 * 0.625 + 0.3 * 0.6 + 0.2 * 0.661110 = 0.624722.
-    assert label.labels([restaurant(counts=counts)], POLICY) == [pytest.approx(0.624722, abs=1e-6)]
+    assert label.composites([restaurant(counts=counts)], POLICY) == [pytest.approx(0.624722, abs=1e-6)]
+
+
+def test_label_is_the_composite_percentile_and_spans_zero_to_one():
+    # Composite quantiles 0.6, 0.62, 0.62, 0.7: the tied pair sits at its mean position, 0.5.
+    policy = {**POLICY, "quantiles": [0.6, 0.62, 0.62, 0.7]}
+    rows = [restaurant(counts=c) for c in ((10, 5, 3, 1, 1), ("",) * 5)]  # composites 0.649472, 0.624722
+    assert label.labels(rows, policy) == [
+        pytest.approx(0.5 + 0.5 * 0.029472 / 0.08, abs=1e-6), pytest.approx(0.5 + 0.5 * 0.004722 / 0.08, abs=1e-6),
+    ]
+    assert label.labels([restaurant(rating="5.0", total=1000, counts=(1000, 0, 0, 0, 0))], policy) == [1.0]
+    assert label.labels([restaurant(rating="1.0", total=1000, counts=(0, 0, 0, 0, 1000))], policy) == [0.0]
+
+
+def test_fitted_labels_spread_evenly_over_the_training_rows():
+    rows = [restaurant(rating=f"{1 + i * 0.04:.2f}", total=5 + i) for i in range(101)]
+    values = label.labels(rows, label.fit_policy(rows))
+    assert min(values) == 0 and max(values) == 1
+    assert sorted(values) == pytest.approx([i / 100 for i in range(101)], abs=0.02)
 
 
 @pytest.mark.parametrize(
@@ -59,8 +77,11 @@ FIT_ROWS = [
 def test_policy_is_fitted_on_the_eligible_rows_passed_in():
     # R0 = mean(1, 0.5, 0, 0.5); D0 = mean(1, 0.4, 0.1). n_ref is numpy's linear
     # 95th percentile: of (10, 30, 40, 100), 40 + 0.85 * 60 = 91; of (10, 30), 29.
-    assert label.fit_policy(FIT_ROWS) == pytest.approx({"R0": 0.5, "D0": 0.5, "n_ref": 91.0})
-    assert label.fit_policy(FIT_ROWS[:2]) == pytest.approx({"R0": 0.75, "D0": 0.7, "n_ref": 29.0})
+    for rows, expected in ((FIT_ROWS, {"R0": 0.5, "D0": 0.5, "n_ref": 91.0}),
+                           (FIT_ROWS[:2], {"R0": 0.75, "D0": 0.7, "n_ref": 29.0})):
+        policy = label.fit_policy(rows)
+        assert {k: policy[k] for k in expected} == pytest.approx(expected)
+        assert len(policy["quantiles"]) == label.QUANTILES and policy["quantiles"] == sorted(policy["quantiles"])
 
 
 def test_policy_needs_eligible_rows_with_counts():
