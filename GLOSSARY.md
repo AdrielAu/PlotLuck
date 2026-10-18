@@ -110,9 +110,13 @@ _Avoid_: Commercial success, survival, profitability, longevity
 A restaurant's average TripAdvisor star rating in the source data. It describes a real restaurant, never a postcode district.
 _Avoid_: Score, stars, review score
 
-**Score threshold**:
-The cut-off a user sets on the map. Districts scoring below it are hidden.
-_Avoid_: Cutoff, filter
+**Rank**:
+A postcode district's position among the districts in the confirmed search area, best first (1 = best). Ties are broken by district code.
+_Avoid_: Score, position, place
+
+**Shortlist size**:
+How many of the best-ranked postcode districts the map and ranked list show, such as the top 25 of 120.
+_Avoid_: Score threshold, cutoff, filter
 
 **Survival**:
 A restaurant that is still trading at the survival horizon after it opened.
@@ -144,10 +148,14 @@ _Avoid_: Leaf, marker, pin
 The display of a postcode district's drivers.
 _Avoid_: Explanation panel, breakdown
 
+**Driver summary**:
+A short sentence, shown when a user points at a ranked postcode district, naming the drivers that most raise or lower its rank. It is shown instead of the score.
+_Avoid_: Reason, explanation, tooltip
+
 ## Workflow
 
 **MVP**:
-The required competition product: NN2 interpretation of one free-text description, a review card to confirm the cuisine, traits and search area, and district scores from NN1 shown on a map and ranked list within the confirmed area. Clusters, driver charts and the cultural demand gap are outside this scope.
+The required competition product: NN2 interpretation of one free-text description, a review card to confirm the cuisine, traits and search area, and NN1's district ranks shown on a map and ranked list within the confirmed area, each with a driver summary. Scores rank the districts but are not displayed. Clusters, driver charts and the cultural demand gap are outside this scope.
 _Avoid_: Demo, v1, vertical slice
 
 **Sample data**:

@@ -1,6 +1,6 @@
 # Plotluck
 
-Plotluck's MVP scores English postcode districts (0–1) for the expected review-based success of a restaurant of a given cuisine and traits. It shows estimated district outlines (a small circle where a district has none), a score threshold and a ranked list. Built for the IBM Z Datathon 2026 (Community Impact), Oct 17–18, by a team of 5.
+Plotluck's MVP scores English postcode districts (0–1) for the expected review-based success of a restaurant of a given cuisine and traits. It shows estimated district outlines (a small circle where a district has none), a shortlist size and a ranked list; each district shows its rank and a driver summary, never its score. Built for the IBM Z Datathon 2026 (Community Impact), Oct 17–18, by a team of 5.
 
 Current implementation constraints:
 
@@ -22,7 +22,7 @@ Before writing or changing code (including notebooks), read [`docs/agents/coding
 
 Keep this map and `CONTRIBUTING.md` in step: change both together.
 
-- `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`; `tests/js/`: `node --test` for `web/scoring.js`, `web/outlines.js`, `web/pickers.js` and `web/results.js`.
+- `src/plotluck/`: the installable package. `tests/`: pytest, run on `data/sample/`; `tests/js/`: `node --test` for `web/scoring.js`, `web/drivers.js`, `web/outlines.js`, `web/pickers.js` and `web/results.js`.
 - `tests/browser/`: real-browser confirmation flows; see [browser test setup](docs/setup.md#browser-flow-tests).
 - `data/`: `sample/` committed, `full/` server-only; see `data/AGENTS.md`.
 - `docs/competition/`: handover (`PROJECT.md`), build status (`PROGRESS.md`), submission list (`DELIVERABLES.md`), the pitch deck (`pitch-deck/`, rendered to `Plotluck_pitch_deck.pdf`) and the initial design doc.

@@ -25,21 +25,9 @@ export function inSearchArea(scores, query) {
   return scores.filter((d) => wanted.has(d.postcode_district));
 }
 
-// The 10th-best score in the search area, so the user first sees the top 10 districts.
-export function defaultThreshold(scores) {
-  const ranked = rankDistricts(scores, -Infinity);
-  return ranked[Math.min(9, ranked.length - 1)].score;
-}
-
-// The score threshold slider's ends: the lowest score shows every district, and
-// the top sits just past the best score so the slider can show none.
-export function thresholdRange(scores) {
-  const values = scores.map((d) => d.score);
-  // Keep the range's low endpoint below every score despite browser rounding.
-  const min = Math.min(...values) - 0.000001;
-  const best = Math.max(...values);
-  return { min, max: best + Math.max((best - min) / 50, 0.0001) };
-}
+// The shortlist sizes a user can pick, and the first one shown. Infinity shows every district.
+export const SHORTLIST_SIZES = [10, 25, 50, Infinity];
+export const DEFAULT_SHORTLIST = 25;
 
 // ColorBrewer RdYlBu ends and middle: blue, pale yellow, red, readable with common colour blindness.
 const SCALE = [[69, 117, 180], [255, 255, 191], [215, 48, 39]];
@@ -51,28 +39,20 @@ function colourAt(t) {
   return `rgb(${from.map((channel, i) => Math.round(channel + (to[i] - channel) * u)).join(",")})`;
 }
 
-// The fewest decimals from 2 to 4 at which the scores are pairwise distinct, else 4.
-function decimalsFor(values) {
-  return [2, 3].find((d) => new Set(values.map((v) => v.toFixed(d))).size === values.length) ?? 4;
-}
-
-// The search area's districts at or above `threshold`, best first, each with its rank from 1
-// and its colour stretched across the shown scores. `legend` gives the lowest and highest
-// shown scores (null when none is shown); `decimals` is how many to print every score with.
-export function resultsAt(scores, threshold) {
-  const ranked = rankDistricts(scores, threshold);
-  const values = ranked.map((d) => d.score);
-  const legend = ranked.length ? { low: Math.min(...values), high: Math.max(...values) } : null;
-  const shown = ranked.map((d, i) => ({
-    rank: i + 1,
+// The search area's `size` best districts. `ranked` is the whole area best first, each with
+// its rank from 1; `shown` is its first `size`, each coloured by rank from red (#1) to blue
+// (the last shown). Scores order the districts but are never displayed (glossary: MVP).
+export function shortlist(scores, size) {
+  const ranked = rankDistricts(scores, -Infinity).map((d, i) => ({ rank: i + 1, ...d }));
+  const shown = ranked.slice(0, size).map((d, i, all) => ({
     ...d,
-    colour: colourAt(legend.high === legend.low ? 1 : (d.score - legend.low) / (legend.high - legend.low)),
+    colour: colourAt(all.length === 1 ? 1 : 1 - i / (all.length - 1)),
   }));
   const countLine = `${shown.length} of ${scores.length} ${scores.length === 1 ? "district" : "districts"} in your search area`;
-  return { shown, countLine, legend, decimals: decimalsFor(values) };
+  return { ranked, shown, countLine };
 }
 
-// A shown district's hover text on the map, such as "#3 · M14 · 0.62".
-export function circleLabel({ rank, postcode_district, score }, decimals) {
-  return `#${rank} · ${postcode_district} · ${score.toFixed(decimals)}`;
+// A shown district's heading on the map, such as "#3 of 120 · M14".
+export function circleLabel({ rank, postcode_district }, total) {
+  return `#${rank} of ${total} · ${postcode_district}`;
 }

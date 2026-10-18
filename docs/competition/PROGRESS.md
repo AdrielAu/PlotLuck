@@ -20,7 +20,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 5 | NN1 spatial-CV evaluation | in progress | #74, #77, #161; [ranking revamp](RANKING.md) |
 | 6 | Accelerated-inference benchmark on LinuxONE | not started | |
 | 7 | Weight export + x86 load check | done | #65, #67, #101, #77; bundle v5 full-data export; x86 check is the `node` CI job scoring `web/models` against the s390x reference scores |
-| 8 | Site: district outlines, pickers, score threshold, ranked list | done | #67, #75, #76; redesign in [spec #127](https://github.com/AdrielAu/PlotLuck/issues/127): #128; outlines from the v4 full-data build (#176) |
+| 8 | Site: district outlines, pickers, shortlist size, ranked list, driver summaries | done | #67, #75, #76; redesign in [spec #127](https://github.com/AdrielAu/PlotLuck/issues/127): #128; outlines from the v4 full-data build (#176); scores hidden, ranks with driver summaries (`web/drivers.js`) |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | in progress | |
 | 10 | Video and pitch deck | in progress | #192; deck: [source](pitch-deck/index.html), [PDF](Plotluck_pitch_deck.pdf) |
 | 11 | Submission | not started | |

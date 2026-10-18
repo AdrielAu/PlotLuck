@@ -65,36 +65,38 @@
   </header>
   <div id="interpretation-details" class="results-summary">
     <p id="query-notes"></p>
-    <p>Areas include districts whose centres lie within the chosen boundary or straight-line radius. Scores describe whole districts, including parts outside the search area.</p>
+    <p>Areas include districts whose centres lie within the chosen boundary or straight-line radius. Ranks describe whole districts, including parts outside the search area.</p>
     <p id="unused-details" hidden></p>
   </div>
   <div class="results-body">
     <section class="map-panel" aria-label="District map">
-      <div id="map" role="region" aria-label="Map of district scores; the ranked list has the same districts"></div>
+      <div id="map" role="region" aria-label="Map of district ranks; the ranked list has the same districts"></div>
       <div class="map-bar">
-        <div class="threshold-heading">
-          <label for="threshold">Score threshold</label>
-          <output id="threshold-value" for="threshold">0.0000</output>
-        </div>
-        <input id="threshold" type="range" min="0" max="1" step="any" value="0" aria-describedby="threshold-help">
-        <p id="threshold-help">Starts at your top 10 districts. Lower it to show more; districts tied at the threshold stay together.</p>
+        <fieldset id="shortlist-size" class="shortlist-size" aria-describedby="shortlist-help">
+          <legend>Shortlist size</legend>
+          <label><input type="radio" name="shortlist-size" value="10">Top 10</label>
+          <label><input type="radio" name="shortlist-size" value="25" checked>Top 25</label>
+          <label><input type="radio" name="shortlist-size" value="50">Top 50</label>
+          <label><input type="radio" name="shortlist-size" value="Infinity">All</label>
+        </fieldset>
+        <p id="shortlist-help">Districts are ranked best first. Point at one, or select it in the list, to see what drives its rank.</p>
         <div id="legend" class="legend" role="img">
           <span id="legend-low"></span>
           <span class="legend-scale" aria-hidden="true"></span>
-          <span id="legend-high"></span>
+          <span id="legend-high">#1</span>
         </div>
       </div>
     </section>
     <section class="list-panel" aria-labelledby="ranked-heading">
       <h2 id="ranked-heading">District shortlist</h2>
       <p id="count" role="status" aria-live="polite" aria-atomic="true"></p>
-      <p id="empty" hidden>No district reaches this score threshold. Lower it to see more districts.</p>
       <ol id="ranked" aria-labelledby="ranked-heading"></ol>
+      <p class="drivers-note">Drivers show what most moved a district's rank in our model, compared with a typical district in your area. They are patterns in reviews, not guarantees.</p>
     </section>
   </div>
   <footer class="results-notes">
-    <p>A score from 0 to 1 is the expected share of England's rated restaurants that this one would out-review: 0.3 means better than about 30%. It is not a chance of survival or profit.</p>
-    <p>Closed restaurants may be missing from the source data, so treat the score as one input among several.</p>
+    <p>Districts are ranked by how well this kind of restaurant is expected to out-review England's rated restaurants there. A rank is not a chance of survival or profit.</p>
+    <p>Closed restaurants may be missing from the source data, so treat the ranking as one input among several.</p>
     <p>Model trained on a 2021 Tripadvisor-derived dataset published on Kaggle (stefanoleone992). Not affiliated with or endorsed by Tripadvisor. Non-commercial use only. Data credits are below.</p>
   </footer>
 </main>
