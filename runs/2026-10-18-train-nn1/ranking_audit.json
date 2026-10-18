@@ -1,0 +1,132 @@
+{
+  "audit": {
+    "districts": 2076,
+    "cuisines": 115,
+    "cuisine_groups": 26,
+    "distinct_cuisine_score_vectors": 55,
+    "median_within_group_score_change": 0.007483994774132488,
+    "median_within_group_top20_overlap": 17,
+    "trait_change_profile": "Indian",
+    "median_score_change_by_trait": {
+      "venue_type": 0.05810643412153288,
+      "price_band": 0.05344417453467687,
+      "chain": 0.005278407008767014,
+      "vegetarian_friendly": 0.13155552140452165,
+      "vegan_options": 0.1339043317394999,
+      "gluten_free": 0.14029666161175514
+    },
+    "median_district_p10_p90_spread": 0.054386917784745276,
+    "min_district_p10_p90_spread": 0.027929446032263938,
+    "max_district_p10_p90_spread": 0.08213163062129675
+  },
+  "comparison": {
+    "live_districts": 2076,
+    "candidate_districts": 2076,
+    "shared_districts": 2076,
+    "dropped": [],
+    "added": [],
+    "cuisine_groups_compared": 26,
+    "median_rank_correlation": 0.6007113376457733,
+    "min_rank_correlation": 0.39718301536426387,
+    "median_top20_overlap": 3.5,
+    "min_top20_overlap": 0,
+    "rank_correlation_by_group": {
+      "African": 0.6064794860909515,
+      "American": 0.5713598529859469,
+      "Asian": 0.5610178340721153,
+      "Barbecue": 0.6099945992513389,
+      "British": 0.7066547584411469,
+      "Caribbean": 0.5610265882005093,
+      "Chinese": 0.39718301536426387,
+      "European": 0.5949431892005951,
+      "French": 0.5745585755569834,
+      "Greek": 0.6651949193463723,
+      "Indian": 0.49428930999475823,
+      "International": 0.6641358186858661,
+      "Italian": 0.6602754643272207,
+      "Japanese": 0.6159705600016738,
+      "Latin": 0.664159477767354,
+      "Lebanese": 0.545940022149541,
+      "Mediterranean": 0.5409474959179199,
+      "Mexican": 0.5732411912253643,
+      "Middle Eastern": 0.6370708192825405,
+      "Portuguese": 0.5912252302644583,
+      "Seafood": 0.668651602354548,
+      "Spanish": 0.588705724515278,
+      "Steakhouse": 0.688130530532437,
+      "Thai": 0.6502945733356587,
+      "Turkish": 0.515653777105634,
+      "Unspecified": 0.8584542556283568
+    },
+    "top20_overlap_by_group": {
+      "African": 5,
+      "American": 4,
+      "Asian": 3,
+      "Barbecue": 2,
+      "British": 6,
+      "Caribbean": 2,
+      "Chinese": 6,
+      "European": 5,
+      "French": 3,
+      "Greek": 3,
+      "Indian": 4,
+      "International": 6,
+      "Italian": 8,
+      "Japanese": 6,
+      "Latin": 3,
+      "Lebanese": 3,
+      "Mediterranean": 3,
+      "Mexican": 4,
+      "Middle Eastern": 4,
+      "Portuguese": 0,
+      "Seafood": 1,
+      "Spanish": 2,
+      "Steakhouse": 6,
+      "Thai": 1,
+      "Turkish": 3,
+      "Unspecified": 6
+    },
+    "inspect": {
+      "EC3M": {
+        "live": null,
+        "candidate": null
+      },
+      "W1D": {
+        "live": {
+          "score": 0.6317,
+          "rank": 779,
+          "of": 2076
+        },
+        "candidate": {
+          "score": 0.2341,
+          "rank": 1266,
+          "of": 2076
+        }
+      },
+      "LA22": {
+        "live": {
+          "score": 0.6379,
+          "rank": 184,
+          "of": 2076
+        },
+        "candidate": {
+          "score": 0.2607,
+          "rank": 160,
+          "of": 2076
+        }
+      },
+      "TR18": {
+        "live": {
+          "score": 0.6275,
+          "rank": 1791,
+          "of": 2076
+        },
+        "candidate": {
+          "score": 0.2464,
+          "rank": 483,
+          "of": 2076
+        }
+      }
+    }
+  }
+}
