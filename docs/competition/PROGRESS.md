@@ -22,7 +22,7 @@ Where the build stands right now. Tasks live in [GitHub Issues](https://github.c
 | 7 | Weight export + x86 load check | in progress | #65, #67, #101, #77; bundle v3 pending full-data export |
 | 8 | Site: district outlines, pickers, score threshold, ranked list | done | #67, #75, #76; redesign in [spec #127](https://github.com/AdrielAu/PlotLuck/issues/127): #128; outlines from the v4 full-data build (#176) |
 | 9 | Evidence screenshots (see [CHECKLIST.md](../evidence/CHECKLIST.md)) | in progress | |
-| 10 | Video | in progress | #192 |
+| 10 | Video and pitch deck | in progress | #192; deck: [source](pitch-deck/index.html), [PDF](Plotluck_pitch_deck.pdf) |
 | 11 | Submission | not started | |
 
 ## Now
