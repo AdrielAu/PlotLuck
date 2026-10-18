@@ -1,6 +1,8 @@
-// The results screen: a Leaflet map, the score threshold and the ranked list for one confirmed query.
+// The results screen: a Leaflet map, the shortlist size and the ranked list for one confirmed query.
+// Districts show their rank and driver summary, never their score.
+import { driverExplainer, summaryLines } from "./drivers.js";
 import { scoreDistricts } from "./scoring.js";
-import { circleLabel, defaultThreshold, inSearchArea, readAnswers, resultsAt, thresholdRange } from "./results.js";
+import { circleLabel, DEFAULT_SHORTLIST, inSearchArea, readAnswers, shortlist } from "./results.js";
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -28,8 +30,10 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
   // Each district's shape: its estimated outline, or a circle when it has none
   // (a business-only or retired district, or a bundle from before outlines).
   let shapes = null;
-  // The query on screen. A re-confirmed identical query keeps a moved threshold; a new one resets it.
+  // The query on screen. A re-confirmed identical query keeps a chosen shortlist size; a new one resets it.
   let onScreen = null;
+  // The shown districts' tooltip content by code, worked out when a tooltip first opens.
+  let tooltips = new Map();
   // The shown districts' list buttons by code, and the district highlighted on both map and list.
   let rows = new Map();
   let highlighted = null;
@@ -97,11 +101,34 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     );
   }
 
+  // A district's driver summary lines, worked out once per query on first use.
+  function linesOf(rank) {
+    return summaryLines(onScreen.explain(rank));
+  }
+
+  // The tooltip for a shown district: its rank heading, then its driver summary.
+  function tooltipOf(district, total) {
+    const code = district.postcode_district;
+    if (!tooltips.has(code)) {
+      const box = document.createElement("div");
+      box.className = "driver-summary";
+      const heading = document.createElement("strong");
+      heading.textContent = circleLabel(district, total);
+      box.append(heading, ...linesOf(district.rank).map((line) => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        return p;
+      }));
+      tooltips.set(code, box);
+    }
+    return tooltips.get(code);
+  }
+
   function render() {
-    const { scores, threshold } = onScreen;
-    $("threshold-value").value = threshold.toFixed(4);
-    $("threshold").setAttribute("aria-valuetext", `${threshold.toFixed(4)} review-based success score`);
-    const { shown, countLine, legend, decimals } = resultsAt(scores, threshold);
+    const { scores, size } = onScreen;
+    for (const input of document.querySelectorAll('input[name="shortlist-size"]')) input.checked = Number(input.value) === size;
+    const { shown, countLine } = shortlist(scores, size);
+    const total = scores.length;
     const shownByCode = new Map(shown.map((d) => [d.postcode_district, d]));
     for (const [code, shape] of shapes) {
       if (!shownByCode.has(code)) shape.remove();
@@ -110,32 +137,41 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     for (const district of shown.toReversed()) {
       shapes.get(district.postcode_district)
         .setStyle({ fillColor: district.colour })
-        .setTooltipContent(circleLabel(district, decimals))
+        // A function, so a summary is only worked out when its tooltip opens.
+        .setTooltipContent(() => tooltipOf(district, total))
         .addTo(map)
         .bringToFront();
     }
-    $("legend").hidden = !legend;
-    if (legend) {
-      const [low, high] = [legend.low.toFixed(decimals), legend.high.toFixed(decimals)];
-      $("legend-low").textContent = low;
-      $("legend-high").textContent = high;
-      $("legend").setAttribute("aria-label", `Score colours: blue is the lowest shown score, ${low}; red is the highest, ${high}`);
-    }
+    const last = shown.length;
+    $("legend").hidden = last < 2;
+    $("legend-low").textContent = `#${last}`;
+    $("legend").setAttribute("aria-label", `Rank colours: red is rank 1, blue is rank ${last}`);
     $("count").textContent = countLine;
-    $("empty").hidden = shown.length > 0;
     rows = new Map();
     $("ranked").replaceChildren(
-      ...shown.map(({ rank, postcode_district, score }) => {
+      ...shown.map((district) => {
+        const { rank, postcode_district } = district;
         const button = document.createElement("button");
         button.type = "button";
-        button.setAttribute("aria-label", `Rank ${rank}: ${postcode_district}, score ${score.toFixed(decimals)}. Show on map.`);
-        const parts = [["district-rank", String(rank)], ["district-code", postcode_district], ["district-score", score.toFixed(decimals)]];
+        button.setAttribute("aria-label", `Rank ${rank}: ${postcode_district}. Show on map.`);
+        const parts = [["district-rank", String(rank)], ["district-code", postcode_district]];
         button.append(...parts.map(([className, text]) => {
           const span = document.createElement("span");
           span.className = className;
           span.textContent = text;
           return span;
         }));
+        // Read out after the label; filled on focus, so summaries are worked out only when needed.
+        const description = document.createElement("span");
+        description.className = "visually-hidden";
+        description.id = `drivers-${postcode_district}`;
+        button.append(description);
+        button.setAttribute("aria-describedby", description.id);
+        button.addEventListener("focus", () => {
+          description.textContent = linesOf(rank).join(" ");
+          highlight(postcode_district);
+          shapes.get(postcode_district).openTooltip();
+        });
         button.addEventListener("click", () => {
           // Zoom in until the district fills about a third of the view (a small one is under a
           // pixel at England's zoom), never out, and no closer than street level. Centre on the
@@ -151,12 +187,12 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
         return item;
       }),
     );
-    // Keep a highlight across slider moves while its district is still shown.
+    // Keep a highlight across shortlist changes while its district is still shown.
     highlight(shownByCode.has(highlighted) ? highlighted : null);
   }
 
-  $("threshold").addEventListener("input", () => {
-    onScreen.threshold = Number($("threshold").value);
+  $("shortlist-size").addEventListener("change", (event) => {
+    onScreen.size = Number(event.target.value);
     render();
   });
 
@@ -176,18 +212,17 @@ export function setUpResultsScreen(bundle, { describeProfile, onChangeAnswers })
     const key = JSON.stringify(query);
     const isNewQuery = onScreen?.key !== key;
     if (isNewQuery) {
-      // Scores change only with the query; the slider just filters them.
+      // Scores and ranks change only with the query; the shortlist size just trims them.
       const scores = inSearchArea(scoreDistricts(bundle, query.profile), query);
-      onScreen = { key, scores, threshold: defaultThreshold(scores) };
-      const { min, max } = thresholdRange(scores);
-      Object.assign($("threshold"), { min: String(min), max: String(max) });
-      $("threshold").value = String(onScreen.threshold);
+      const { ranked } = shortlist(scores, Infinity);
+      onScreen = { key, scores, size: DEFAULT_SHORTLIST, explain: driverExplainer(bundle, query.profile, ranked) };
+      tooltips = new Map();
     }
-    // Before framing, so the threshold bar has its legend and final height.
+    // Before framing, so the map bar has its legend and final height.
     render();
     if (isNewQuery) {
-      // Glide to the whole search area's shapes, not just the shown ones, so shapes the
-      // slider reveals land inside the view; clear of the threshold bar.
+      // Glide to the whole search area's shapes, not just the shown ones, so shapes a
+      // larger shortlist reveals land inside the view; clear of the map bar.
       const bounds = L.latLngBounds([]);
       for (const code of query.searchArea) bounds.extend(boundsOf(code));
       const framing = { paddingTopLeft: [32, 32], paddingBottomRight: [32, document.querySelector(".map-bar").offsetHeight + 24], maxZoom: 13 };

@@ -118,7 +118,7 @@ test('near a city offers no radius input and uses its complete boundary',async t
   await page.locator('#results-screen').waitFor();
   assert.match(await page.locator('#results-heading').innerText(),/Chinese.*York/);
   assert.doesNotMatch(await page.locator('#results-heading').innerText(),/Within|km/);
-  await page.getByRole('slider',{name:'Score threshold',exact:true}).press('Home');
+  await page.getByRole('radio',{name:'All',exact:true}).check();
   assert.deepEqual((await page.locator('#ranked .district-code').allTextContents()).sort(),catalogue.places.find(p=>p.id==='E06000014').districts);
   assert.deepEqual(page.errors,[]);
 });
@@ -407,33 +407,39 @@ test('description and clarification render without overflow and keep keyboard fo
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), true);
 });
 
-test('map and list stay scoped; the keyboard threshold persists for the same query and resets for a new one', async t => {
+test('map and list stay scoped; the shortlist size persists for the same query and resets for a new one', async t => {
   const { page } = await openPage(t);
   await submit(page, 'A Thai restaurant.');
   await page.locator('#results-screen').waitFor();
-  assert.equal(await page.locator('#ranked li').count(), 10);
+  assert.equal(await page.locator('#ranked li').count(), 25);
   assert.equal(await page.evaluate(()=>document.activeElement.id), 'results-heading');
-  const slider = page.getByRole('slider', { name:'Score threshold', exact:true });
+  // Ranks only: no score appears in the list or the map bar.
+  assert.doesNotMatch(await page.locator('#ranked').innerText(), /0\.\d/);
   const height = await page.locator('.map-panel').evaluate(e=>e.offsetHeight);
-  await slider.press('Home');
+  await page.getByRole('radio', { name:'All', exact:true }).check();
   const total = await page.locator('#ranked li').count();
-  assert.ok(total > 10);
+  assert.ok(total > 25);
   assert.equal(await page.locator('.map-panel').evaluate(e=>e.offsetHeight), height);
-  await slider.press('End');
-  assert.equal(await page.locator('#ranked li').count(), 0);
-  assert.equal(await page.locator('#empty').isVisible(), true);
+  await page.getByRole('radio', { name:'Top 10', exact:true }).check();
+  assert.equal(await page.locator('#ranked li').count(), 10);
   await page.getByRole('button', { name:'Edit description', exact:true }).click();
   await page.locator('#interpret').click();
   await page.locator('#results-screen').waitFor();
-  assert.equal(await page.locator('#ranked li').count(), 0);
+  assert.equal(await page.locator('#ranked li').count(), 10);
   await page.getByRole('button', { name:'Edit description', exact:true }).click();
   await submit(page, 'A Thai restaurant with gluten free options.');
   await page.locator('#results-screen').waitFor();
-  assert.equal(await page.locator('#ranked li').count(), 10);
+  assert.equal(await page.locator('#ranked li').count(), 25);
   assert.match(await page.locator('#confirmed-profile').innerText(), /Gluten free: Yes/);
-  await page.locator('#ranked button').first().focus();
+  // Focusing a row shows its driver summary on the map and in its description.
+  const first = page.locator('#ranked button').first();
+  await first.focus();
+  const tooltip = page.locator('.leaflet-tooltip');
+  assert.equal(await tooltip.isVisible(), true);
+  assert.match(await tooltip.innerText(), /^#1 of \d+ · \S+\n+(Compared with a typical district|Close to a typical district)/);
+  assert.match(await page.locator(`#${await first.getAttribute('aria-describedby')}`).textContent(), /typical district/);
   await page.keyboard.press('Enter');
-  assert.equal(await page.locator('.leaflet-tooltip').isVisible(), true);
+  assert.equal(await tooltip.isVisible(), true);
   if (process.env.PLOTLUCK_SCREENSHOTS) await page.screenshot({path:process.env.PLOTLUCK_SCREENSHOTS+'/free-text-results.png'});
   assert.deepEqual(page.errors, []);
 });
@@ -447,12 +453,14 @@ test('district coverage circles and list rows remain linked after free-text inte
   await third.click();
   assert.match(await third.getAttribute('class'), /is-highlighted/);
   const tooltip = page.locator('.leaflet-tooltip');
-  assert.match(await tooltip.innerText(), new RegExp(`^#3 · ${code} · \\d\\.\\d{2,4}$`));
+  // Rank and code, then the driver summary; never a score.
+  assert.match(await tooltip.innerText(), new RegExp(`^#3 of \\d+ · ${code}\\n`));
+  assert.doesNotMatch(await tooltip.innerText(), /0\.\d/);
   await page.locator('#map').scrollIntoViewIfNeeded();
   const box = await page.locator('#map').boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForFunction(() => document.querySelectorAll('.leaflet-tooltip').length === 1);
-  const hovered = (await tooltip.innerText()).split(' · ')[1];
+  const hovered = (await tooltip.innerText()).split('\n')[0].split(' · ')[1];
   assert.equal(await page.locator('#ranked button.is-highlighted .district-code').innerText(), hovered);
   await page.mouse.move(box.x + box.width + 40, box.y + 10);
   await page.locator('#ranked button.is-highlighted').waitFor({state:'detached'});

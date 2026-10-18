@@ -60,24 +60,34 @@ export async function loadBundle(read) {
 
 // [{postcode_district, score}] for every district, in the bundle's district order.
 export function scoreDistricts(bundle, profile) {
+  const { rawInputs, score } = profileScorer(bundle, profile);
+  return bundle.districts.map((d) => ({ postcode_district: d.postcode_district, score: score(rawInputs(d)) }));
+}
+
+// One profile's NN1 scorer. `inputs` names the district inputs in model order;
+// `rawInputs(district)` gives that district's raw values ("" when missing), and
+// `score(raw)` scores any such row, so a caller can swap values in before scoring.
+export function profileScorer(bundle, profile) {
   const { model } = bundle;
   const group = bundle.groups.get(profile.cuisine);
   const head = restaurantInputs(model, { ...profile, cuisine_group: group });
   const communities = bundle.communities.get(profile.cuisine) ?? [];
-  return bundle.districts.map((d) => {
-    const tail = model.features.district_inputs.map((name) => {
-      // Every district input is a districts.csv column, except supply of the profile's own
-      // group and the share of residents in the cuisine's matched ethnic groups.
-      const raw = name === "same_cuisine_supply" ? (bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0)
-        : name === "matched_community_share" ? communityShare(d, communities)
-        : d[name];
-      if (raw === undefined) throw new Error(`model.json input ${name} is not a districts.csv column`);
-      return numericInput(model.transforms[name], raw);
-    });
-    const score = forward(model, [...head, ...tail]);
-    if (!Number.isFinite(score) || score < 0 || score > 1) throw new Error("model.json produced an invalid score");
-    return { postcode_district: d.postcode_district, score };
+  const inputs = model.features.district_inputs;
+  const rawInputs = (d) => inputs.map((name) => {
+    // Every district input is a districts.csv column, except supply of the profile's own
+    // group and the share of residents in the cuisine's matched ethnic groups.
+    const raw = name === "same_cuisine_supply" ? (bundle.supply.get(supplyKey(d.postcode_district, group)) ?? 0)
+      : name === "matched_community_share" ? communityShare(d, communities)
+      : d[name];
+    if (raw === undefined) throw new Error(`model.json input ${name} is not a districts.csv column`);
+    return raw;
   });
+  const score = (raw) => {
+    const value = forward(model, [...head, ...raw.map((v, i) => numericInput(model.transforms[inputs[i]], v))]);
+    if (!Number.isFinite(value) || value < 0 || value > 1) throw new Error("model.json produced an invalid score");
+    return value;
+  };
+  return { inputs, rawInputs, score };
 }
 
 // Districts with score >= threshold, best first, ties broken by district code.
