@@ -87,7 +87,7 @@ Tests run on the committed data sample: `pytest` for the Python package and `nod
 
 We are final-year (fourth-year) Aeronautical Engineering students at Imperial College London.
 
-Adriel Au · Xavier Chen · Ahmed Gilani · Erica Keung · Ansh Waddon
+Adriel Au · Ahmed Gilani · Ansh Waddon · Erica Keung · Xavier Chen
 
 ## Dataset attribution and use
 
