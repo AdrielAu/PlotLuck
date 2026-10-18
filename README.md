@@ -85,6 +85,8 @@ Tests run on the committed data sample: `pytest` for the Python package and `nod
 
 ## Team Jellyfishes.AI
 
+We are final-year (fourth-year) Aeronautical Engineering students at Imperial College London.
+
 Adriel Au · Xavier Chen · Ahmed Gilani · Erica Keung · Ansh Waddon
 
 ## Dataset attribution and use
