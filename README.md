@@ -6,7 +6,7 @@ Plotluck is a free map tool for people planning a restaurant, especially small i
 
 **Try it:** https://adrielau.github.io/PlotLuck/ (desktop Chrome or Edge with WebGPU)
 
-Built in 48 hours for the **IBM Z Datathon 2026** (Wildcard → Community Impact), with models trained on **IBM LinuxONE**.
+Created by **Team Jellyfishes.AI** in 48 hours for the **IBM Z Datathon 2026** (Wildcard → Community Impact), with models trained on **IBM LinuxONE**.
 
 ![The results map for a Chinese restaurant in Manchester, showing why M20 ranks first](docs/images/results.png)
 
@@ -83,15 +83,9 @@ python -m http.server --directory web 8000
 
 Tests run on the committed data sample: `pytest` for the Python package and `node --test` for the site. Full setup is in [docs/setup.md](docs/setup.md).
 
-## Team
+## Team Jellyfishes.AI
 
-| Contributor |
-|---|
-| Erica Keung |
-| Ansh Waddon |
-| Ahmed Gilani |
-| Adriel Au |
-| Xavier Chen |
+Adriel Au · Xavier Chen · Ahmed Gilani · Erica Keung · Ansh Waddon
 
 ## Dataset attribution and use
 
