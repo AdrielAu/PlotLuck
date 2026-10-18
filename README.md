@@ -34,17 +34,17 @@ Plotluck shows ranks, not raw scores. A rank describes expected **review-based s
  "A mid-range dim sum place in Manchester..."
         │
         ▼
- ┌──────────────┐   cuisine, prices, venue type,    ┌──────────────┐
- │     NN2      │   requirements, rent, area        │     NN1      │
- │ small LLM in │ ─────────────────────────────────▶│ district     │──▶ ranked map
- │ your browser │   (asks only for what's missing)  │ scoring MLP  │    + driver summaries
- └──────────────┘                                   └──────────────┘
+ ┌─────────────────────────┐  cuisine, prices, venue type,     ┌──────────────────┐
+ │ NN2                     │  requirements, rent, area         │ NN1              │
+ │ integrated restaurant-  │ ─────────────────────────────────▶│ district-scoring │──▶ ranked map
+ │ description interpreter │  (asks only for what is missing)  │ network          │    + driver summaries
+ └─────────────────────────┘                                   └──────────────────┘
 ```
 
 Plotluck uses two models, and both run on your own device. Your description never leaves the browser tab.
 
-- **NN2 reads your description.** It is a small open-source language model that runs in the browser through WebGPU (first use downloads about 288 MB). It turns free text into a structured profile and search area. Rule-based checks validate its output against an offline catalogue of English places and the cuisines NN1 knows. Anything invalid or unclear becomes a clarification question instead of a silent guess.
-- **NN1 scores every district.** It is a small neural network (a 64 → 32 MLP) that takes the restaurant profile together with each district's context and predicts review-based success. That context covers population, deprivation, commercial rent, existing restaurant supply, age, detailed Census ethnicity (including the share of the community that matches the cuisine) and nearby attractions and hotels. It scores about 2,000 English postcode districts.
+- **NN2, the integrated restaurant-description interpreter, reads your description.** It is a small open-source language model that runs in the browser through WebGPU (first use downloads about 288 MB). It turns free text into a structured profile and search area. Rule-based checks validate its output against an offline catalogue of English places and the cuisines NN1 knows. Anything invalid or unclear becomes a clarification question instead of a silent guess.
+- **NN1, the district-scoring network, scores every district.** It is a small neural network (a 64 → 32 MLP) that takes the restaurant profile together with each district's context and predicts review-based success. That context covers population, deprivation, commercial rent, existing restaurant supply, age, detailed Census ethnicity (including the share of the community that matches the cuisine) and nearby attractions and hotels. It scores about 2,000 English postcode districts.
 - **Driver summaries explain each rank.** For each district, the site swaps one group of factors at a time for those of the area's median district, re-scores it, and reports the factors that moved the rank most.
 
 ### Where IBM LinuxONE comes in
